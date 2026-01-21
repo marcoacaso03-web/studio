@@ -29,7 +29,7 @@ export default function Home() {
                   {new Date(nextMatch.date).toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                 </p>
                 <Button asChild className="mt-4" size="sm">
-                  <Link href={`/partita/${nextMatch.id}`}>Vedi Dettagli</Link>
+                  <Link href={`/calendario/${nextMatch.id}`}>Vedi Dettagli</Link>
                 </Button>
               </>
             ) : (
@@ -46,7 +46,7 @@ export default function Home() {
             <div className="text-2xl font-bold">{players.length}</div>
             <p className="text-xs text-muted-foreground">Giocatori registrati</p>
             <Button asChild className="mt-4" size="sm" variant="outline">
-              <Link href="/squadra">Gestisci Squadra</Link>
+              <Link href="/membri">Gestisci Squadra</Link>
             </Button>
           </CardContent>
         </Card>
@@ -71,7 +71,7 @@ export default function Home() {
                 <CardDescription>La tua dashboard per la gestione completa della squadra. Da qui puoi vedere la prossima partita, gestire i membri del team e tenere traccia delle statistiche.</CardDescription>
             </CardHeader>
             <CardContent>
-                <p>Usa il menu a sinistra per navigare tra le sezioni.</p>
+                <p>Usa la barra di navigazione in basso per navigare tra le sezioni.</p>
             </CardContent>
         </Card>
       </div>
