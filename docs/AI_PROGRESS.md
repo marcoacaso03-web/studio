@@ -7,15 +7,15 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: B0
-- Titolo: Setup Dexie + schema
+- ID: B1
+- Titolo: Repos + stores
 - Stato: NOT STARTED
 
 ## LAST KNOWN GOOD
 - Build status: OK
-- Comandi OK: `npm run build`
+- Comandi OK: `npm install`, `npm run build`
 - Browser testato: Chrome
-- Descrizione: Implementate le funzionalità mock per la pagina di dettaglio partita. L'utente può ora gestire le presenze dei giocatori (presente/assente/in dubbio) e modificare le statistiche individuali (gol, assist, etc.) per ogni giocatore presente alla partita. I dati sono salvati in memoria.
+- Descrizione: Introdotto Dexie.js e definito lo schema del database in `src/lib/db.ts`. L'app compila correttamente ed è pronta per l'implementazione dei repository per interagire con IndexedDB.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -27,7 +27,7 @@
 - [x] A5 Match detail mock (presenze/stats/formazione)
 
 ### STEP B (IndexedDB Dexie)
-- [ ] B0 Setup Dexie + schema
+- [x] B0 Setup Dexie + schema
 - [ ] B1 Repos + stores
 - [ ] B2 UI su DB (Calendario/Membri)
 - [ ] B3 Match detail su DB
@@ -43,6 +43,7 @@
 - [ ] D2 Test (2 unit + 1 component)
 
 ## DECISION LOG (perché abbiamo scelto X)
+- **B0**: Aggiunto Dexie.js per la gestione del database IndexedDB. La versione 4 è stabile e offre un'ottima API basata su Promise e type-safety con TypeScript. Lo schema è stato definito in un file dedicato `src/lib/db.ts` per centralizzare la configurazione del DB.
 - **A5**: Le schede "Convocati" e "Statistiche" sono state estratte in componenti client dedicati (`MatchAttendanceTab`, `MatchStatsTab`) per incapsulare la logica di stato e l'interattività, mantenendo pulita la pagina principale del dettaglio partita.
 - **A5**: Per la gestione delle presenze, è stato usato un `RadioGroup` per permettere i tre stati ('presente', 'assente', 'in dubbio'), offrendo più granularità rispetto a un semplice `Switch`.
 - **A5**: La scheda statistiche ora permette l'input numerico e mostra solo i giocatori contrassegnati come "presente", rendendo l'interfaccia più contestuale e utile.
@@ -73,6 +74,6 @@
 - Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. B0 - Setup Dexie: introdurre Dexie e definire lo schema del database.
-2. B1 - Repository e Stores: Creare repository Dexie e store Zustand.
-3. B2 - Migrazione UI: Calendario e Membri su DB.
+1. B1 - Repository e Stores: Creare repository Dexie e store Zustand.
+2. B2 - Migrazione UI: Calendario e Membri su DB.
+3. B3 - Match detail su DB.
