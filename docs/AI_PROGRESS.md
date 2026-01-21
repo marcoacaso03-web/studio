@@ -7,15 +7,15 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: B1
-- Titolo: Repos + stores
+- ID: B2
+- Titolo: UI su DB (Calendario/Membri)
 - Stato: NOT STARTED
 
 ## LAST KNOWN GOOD
 - Build status: OK
 - Comandi OK: `npm install`, `npm run build`
 - Browser testato: Chrome
-- Descrizione: Introdotto Dexie.js e definito lo schema del database in `src/lib/db.ts`. L'app compila correttamente ed è pronta per l'implementazione dei repository per interagire con IndexedDB.
+- Descrizione: Creati i repository per l'interazione con Dexie (player, match, attendance, stats) e gli store Zustand per la gestione dello stato globale (players, matches, match-detail). L'app compila ed è pronta per collegare l'UI al nuovo data layer.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -28,7 +28,7 @@
 
 ### STEP B (IndexedDB Dexie)
 - [x] B0 Setup Dexie + schema
-- [ ] B1 Repos + stores
+- [x] B1 Repos + stores
 - [ ] B2 UI su DB (Calendario/Membri)
 - [ ] B3 Match detail su DB
 
@@ -43,6 +43,8 @@
 - [ ] D2 Test (2 unit + 1 component)
 
 ## DECISION LOG (perché abbiamo scelto X)
+- **B1**: Creati repository dedicati (`playerRepository`, `matchRepository`, etc.) per incapsulare le query Dexie.js, mantenendo il codice di accesso ai dati pulito e centralizzato.
+- **B1**: Introdotti store Zustand (`usePlayersStore`, `useMatchesStore`, `useMatchDetailStore`) per gestire lo stato dell'applicazione in modo centralizzato e reattivo. Questo semplificherà la sincronizzazione dell'UI con il database IndexedDB.
 - **B0**: Aggiunto Dexie.js per la gestione del database IndexedDB. La versione 4 è stabile e offre un'ottima API basata su Promise e type-safety con TypeScript. Lo schema è stato definito in un file dedicato `src/lib/db.ts` per centralizzare la configurazione del DB.
 - **A5**: Le schede "Convocati" e "Statistiche" sono state estratte in componenti client dedicati (`MatchAttendanceTab`, `MatchStatsTab`) per incapsulare la logica di stato e l'interattività, mantenendo pulita la pagina principale del dettaglio partita.
 - **A5**: Per la gestione delle presenze, è stato usato un `RadioGroup` per permettere i tre stati ('presente', 'assente', 'in dubbio'), offrendo più granularità rispetto a un semplice `Switch`.
@@ -74,6 +76,6 @@
 - Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. B1 - Repository e Stores: Creare repository Dexie e store Zustand.
-2. B2 - Migrazione UI: Calendario e Membri su DB.
-3. B3 - Match detail su DB.
+1. B2 - Migrazione UI: Calendario e Membri su DB.
+2. B3 - Match detail su DB.
+3. C0 - Query aggregazioni (repo).
