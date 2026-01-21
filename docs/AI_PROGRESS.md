@@ -7,15 +7,15 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: C0
-- Titolo: Query aggregazioni (repo)
+- ID: C1
+- Titolo: 2 schermate stats reali
 - Stato: NOT STARTED
 
 ## LAST KNOWN GOOD
 - Build status: OK
 - Comandi OK: `npm install`, `npm run build`
 - Browser testato: Chrome
-- Descrizione: La pagina di dettaglio partita è stata migrata per usare lo store e il database IndexedDB. Presenze e statistiche sono ora persistenti.
+- Descrizione: Creato un repository di aggregazione per calcolare statistiche complesse (record squadra, stats giocatori).
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -33,7 +33,7 @@
 - [x] B3 Match detail su DB
 
 ### STEP C (Stats + Charts)
-- [ ] C0 Aggregazioni
+- [x] C0 Aggregazioni
 - [ ] C1 2 schermate stats reali
 - [ ] C2 Recharts grafico
 
@@ -43,6 +43,7 @@
 - [ ] D2 Test (2 unit + 1 component)
 
 ## DECISION LOG (perché abbiamo scelto X)
+- **C0**: Creato un `aggregationRepository` dedicato per contenere tutte le query di aggregazione (es. record squadra, statistiche totali giocatori). Questo mantiene i repository focalizzati su singole tabelle/entità, migliorando la manutenibilità e centralizzando la logica di calcolo. Include un metodo `syncAllPlayersStats` per persistere le statistiche aggregate nella tabella `players`.
 - **B3**: Migrata la pagina di dettaglio della partita (`/calendario/[id]`) per usare lo store `useMatchDetailStore`. Ora le presenze e le statistiche vengono caricate e salvate in modo persistente su IndexedDB. I componenti delle schede (`MatchAttendanceTab`, `MatchStatsTab`) sono stati refattorizzati per leggere e scrivere direttamente dallo store, semplificando il flusso dei dati.
 - **B2**: Convertita la Dashboard (pagina home) a Client Component per poter utilizzare gli store Zustand e mostrare dati dinamici e aggiornati dal database locale (es. numero giocatori, prossima partita).
 - **B2**: Le pagine `Calendario` e `Membri` ora utilizzano i rispettivi store (`useMatchesStore`, `usePlayersStore`) per tutte le operazioni CRUD. Questo centralizza la logica di gestione dei dati e li rende persistenti grazie a Dexie.
@@ -80,6 +81,6 @@
 - Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. C0 - Query aggregazioni (repo).
-2. C1 - 2 schermate stats reali.
-3. C2 - Recharts grafico.
+1. C1 - 2 schermate stats reali.
+2. C2 - Recharts grafico.
+3. D0 - Export CSV.
