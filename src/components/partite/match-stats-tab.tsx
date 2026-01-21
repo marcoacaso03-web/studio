@@ -1,39 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Player, PlayerMatchStats } from "@/lib/types";
+import type { PlayerMatchStats } from "@/lib/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getStatsForMatch, getPlayers, updatePlayerStatsForMatch } from "@/lib/mock-data";
 import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useMatchDetailStore } from "@/store/useMatchDetailStore";
 
-interface MatchStatsTabProps {
-    matchId: string;
-}
-
-export function MatchStatsTab({ matchId }: MatchStatsTabProps) {
-    const [stats, setStats] = useState<PlayerMatchStats[]>([]);
-    const [players, setPlayers] = useState<Player[]>([]);
+export function MatchStatsTab() {
+    const { stats: storeStats, allPlayers, saveAllStats } = useMatchDetailStore();
+    const [localStats, setLocalStats] = useState<PlayerMatchStats[]>([]);
     const { toast } = useToast();
 
     useEffect(() => {
-        const allPlayers = getPlayers();
-        const matchStats = getStatsForMatch(matchId);
-        
-        const attendedPlayerIds = new Set(matchStats.map(s => s.playerId));
-        const attendedPlayers = allPlayers.filter(p => attendedPlayerIds.has(p.id));
-
-        setPlayers(attendedPlayers);
-        setStats(matchStats);
-    }, [matchId]);
+        setLocalStats(storeStats);
+    }, [storeStats]);
 
     const handleStatChange = (playerId: string, field: keyof Omit<PlayerMatchStats, 'matchId' | 'playerId'>, value: string) => {
         const numericValue = parseInt(value, 10);
         if (isNaN(numericValue) || numericValue < 0) return;
 
-        setStats(prevStats => 
+        setLocalStats(prevStats => 
             prevStats.map(stat => 
                 stat.playerId === playerId ? { ...stat, [field]: numericValue } : stat
             )
@@ -41,25 +30,20 @@ export function MatchStatsTab({ matchId }: MatchStatsTabProps) {
     }
     
     const handleSaveStats = () => {
-        stats.forEach(stat => {
-            updatePlayerStatsForMatch(matchId, stat.playerId, {
-                goals: stat.goals,
-                assists: stat.assists,
-                yellowCards: stat.yellowCards,
-                redCards: stat.redCards,
-            });
-        });
+        saveAllStats(localStats);
         toast({ title: "Statistiche salvate", description: "Le statistiche della partita sono state aggiornate." });
     };
+    
+    const statPlayers = allPlayers.filter(p => localStats.some(s => s.playerId === p.id));
 
-    if (players.length === 0) {
+    if (statPlayers.length === 0) {
         return (
              <Card>
                 <CardHeader>
                 <CardTitle>Statistiche Partita</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-muted-foreground">Nessun giocatore presente per inserire le statistiche. Seleziona i convocati nella scheda 'Convocati'.</p>
+                    <p className="text-muted-foreground">Nessun giocatore contrassegnato come 'presente'. Seleziona i convocati nella scheda 'Convocati' per inserire le statistiche.</p>
                 </CardContent>
             </Card>
         )
@@ -86,8 +70,8 @@ export function MatchStatsTab({ matchId }: MatchStatsTabProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {stats.map(stat => {
-                    const player = players.find(p => p.id === stat.playerId);
+                  {localStats.map(stat => {
+                    const player = allPlayers.find(p => p.id === stat.playerId);
                     if (!player) return null;
                     
                     return (

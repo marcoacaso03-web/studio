@@ -1,34 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { getAttendanceForMatch, updateAttendance } from "@/lib/mock-data";
-import type { AttendanceStatus, MatchAttendance, Player } from "@/lib/types";
+import type { AttendanceStatus } from "@/lib/types";
 import { ATTENDANCE_STATUSES } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useMatchDetailStore } from "@/store/useMatchDetailStore";
 
-interface MatchAttendanceTabProps {
-  matchId: string;
-  players: Player[];
-}
+export function MatchAttendanceTab() {
+  const { allPlayers, attendance, updateAttendance } = useMatchDetailStore();
 
-export function MatchAttendanceTab({ matchId, players }: MatchAttendanceTabProps) {
-  const [attendance, setAttendance] = useState<MatchAttendance[]>([]);
-
-  useEffect(() => {
-    setAttendance(getAttendanceForMatch(matchId));
-  }, [matchId]);
-
-  const handleStatusChange = (playerId: string, status: AttendanceStatus) => {
-    const updatedAttendance = updateAttendance(matchId, playerId, status);
-    setAttendance(prev => 
-      prev.map(a => a.playerId === playerId ? updatedAttendance : a)
-    );
-  };
-  
   const getStatusColor = (status: AttendanceStatus) => {
     switch (status) {
         case 'presente': return 'border-green-500';
@@ -45,7 +28,7 @@ export function MatchAttendanceTab({ matchId, players }: MatchAttendanceTabProps
         <CardDescription>Gestisci le presenze dei giocatori per la partita.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {players.map(player => {
+        {allPlayers.map(player => {
             const playerAttendance = attendance.find(a => a.playerId === player.id);
             const status = playerAttendance?.status || 'in dubbio';
 
@@ -63,8 +46,8 @@ export function MatchAttendanceTab({ matchId, players }: MatchAttendanceTabProps
                     </div>
 
                     <RadioGroup 
-                        defaultValue={status}
-                        onValueChange={(value) => handleStatusChange(player.id, value as AttendanceStatus)}
+                        value={status}
+                        onValueChange={(value) => updateAttendance(player.id, value as AttendanceStatus)}
                         className="flex items-center space-x-4"
                     >
                         {ATTENDANCE_STATUSES.map(s => (

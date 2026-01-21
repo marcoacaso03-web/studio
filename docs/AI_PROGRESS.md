@@ -7,15 +7,15 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: B3
-- Titolo: Match detail su DB
+- ID: C0
+- Titolo: Query aggregazioni (repo)
 - Stato: NOT STARTED
 
 ## LAST KNOWN GOOD
 - Build status: OK
 - Comandi OK: `npm install`, `npm run build`
 - Browser testato: Chrome
-- Descrizione: Le pagine Calendario e Membri sono state migrate per usare gli store Zustand e il database IndexedDB (Dexie). I dati ora sono persistenti. Anche la dashboard legge dallo store.
+- Descrizione: La pagina di dettaglio partita è stata migrata per usare lo store e il database IndexedDB. Presenze e statistiche sono ora persistenti.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -30,7 +30,7 @@
 - [x] B0 Setup Dexie + schema
 - [x] B1 Repos + stores
 - [x] B2 UI su DB (Calendario/Membri)
-- [ ] B3 Match detail su DB
+- [x] B3 Match detail su DB
 
 ### STEP C (Stats + Charts)
 - [ ] C0 Aggregazioni
@@ -43,6 +43,7 @@
 - [ ] D2 Test (2 unit + 1 component)
 
 ## DECISION LOG (perché abbiamo scelto X)
+- **B3**: Migrata la pagina di dettaglio della partita (`/calendario/[id]`) per usare lo store `useMatchDetailStore`. Ora le presenze e le statistiche vengono caricate e salvate in modo persistente su IndexedDB. I componenti delle schede (`MatchAttendanceTab`, `MatchStatsTab`) sono stati refattorizzati per leggere e scrivere direttamente dallo store, semplificando il flusso dei dati.
 - **B2**: Convertita la Dashboard (pagina home) a Client Component per poter utilizzare gli store Zustand e mostrare dati dinamici e aggiornati dal database locale (es. numero giocatori, prossima partita).
 - **B2**: Le pagine `Calendario` e `Membri` ora utilizzano i rispettivi store (`useMatchesStore`, `usePlayersStore`) per tutte le operazioni CRUD. Questo centralizza la logica di gestione dei dati e li rende persistenti grazie a Dexie.
 - **B2**: Aggiunti scheletri di caricamento (Skeleton components) per migliorare la UX durante il fetch iniziale dei dati da IndexedDB, evitando schermate vuote.
@@ -79,6 +80,6 @@
 - Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. B3 - Match detail su DB.
-2. C0 - Query aggregazioni (repo).
-3. C1 - 2 schermate stats reali.
+1. C0 - Query aggregazioni (repo).
+2. C1 - 2 schermate stats reali.
+3. C2 - Recharts grafico.

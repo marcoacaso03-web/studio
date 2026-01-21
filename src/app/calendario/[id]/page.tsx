@@ -1,36 +1,40 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { PageHeader } from "@/components/layout/page-header";
-import { getMatchById, getPlayers } from "@/lib/mock-data";
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MatchLineup } from "@/components/partite/match-lineup";
 import { MatchStatsTab } from "@/components/partite/match-stats-tab";
 import { MatchAttendanceTab } from "@/components/partite/match-attendance-tab";
-import type { Player, Match } from '@/lib/types';
+import { useMatchDetailStore } from '@/store/useMatchDetailStore';
+import { Skeleton } from '@/components/ui/skeleton';
 
+export default function MatchDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
 
-export default function MatchDetailPage({ params }: { params: { id: string } }) {
-  const [match, setMatch] = useState<Match | undefined>(undefined);
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [loading, setLoading] = useState(true);
-
+  const { match, loading, load } = useMatchDetailStore();
+  
   useEffect(() => {
-    const foundMatch = getMatchById(params.id);
-    const allPlayers = getPlayers();
-    setMatch(foundMatch);
-    setPlayers(allPlayers);
-    setLoading(false);
-  }, [params.id]);
+    if (id) {
+        load(id);
+    }
+  }, [id, load]);
 
   if (loading) {
-    return <div>Caricamento...</div>;
+    return (
+        <div>
+            <PageHeader title="Caricamento..." />
+            <Skeleton className="h-10 w-full mb-4" />
+            <Skeleton className="h-64 w-full" />
+        </div>
+    );
   }
 
   if (!match) {
-    notFound();
+    return notFound();
   }
 
   const matchDate = new Date(match.date);
@@ -81,7 +85,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
         </TabsContent>
 
         <TabsContent value="convocati">
-            {players.length > 0 && <MatchAttendanceTab matchId={match.id} players={players} />}
+            <MatchAttendanceTab />
         </TabsContent>
 
         <TabsContent value="formazione">
@@ -89,7 +93,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
         </TabsContent>
 
         <TabsContent value="statistiche">
-          <MatchStatsTab matchId={match.id} />
+          <MatchStatsTab />
         </TabsContent>
       </Tabs>
     </div>
