@@ -7,21 +7,21 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: A2
-- Titolo: Design system minimo (UI kit)
+- ID: A3
+- Titolo: Calendario CRUD mock
 - Stato: NOT STARTED
 
 ## LAST KNOWN GOOD
 - Build status: OK
 - Comandi OK: `npm run build`
 - Browser testato: Chrome
-- Descrizione: Impostato il routing principale dell'app tramite App Router. Create le pagine per `/calendario`, `/membri`, `/statistiche`, `/altro`. Rinominati i percorsi esistenti da `/partita` a `/calendario` e da `/squadra` a `/membri`. Aggiornati tutti i link interni per riflettere la nuova struttura.
+- Descrizione: Applicato il design system di base. Aggiornata la palette colori in `globals.css` per usare il blu primario (#1A237E), il grigio di sfondo (#F5F5F5) e l'arancione come accento (#FF8F00). Rimosso un override del font per applicare correttamente 'PT Sans' su tutto il corpo dell'applicazione, come da specifiche. L'interfaccia ora ha un aspetto più coerente.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
 - [x] A0 Bootstrap
 - [x] A1 Routing + Shell
-- [ ] A2 Design system
+- [x] A2 Design system
 - [ ] A3 Calendario CRUD mock
 - [ ] A4 Membri CRUD mock
 - [ ] A5 Match detail mock (presenze/stats/formazione)
@@ -43,6 +43,8 @@
 - [ ] D2 Test (2 unit + 1 component)
 
 ## DECISION LOG (perché abbiamo scelto X)
+- **A2**: I colori primario, di sfondo e d'accento sono stati impostati in `globals.css` per riflettere le specifiche del design system. Questo garantisce coerenza in tutta l'app.
+- **A2**: Il font di default (Arial) è stato rimosso da `globals.css` per permettere a Tailwind di applicare correttamente "PT Sans" come definito nel layout e nella configurazione, garantendo la tipografia richiesta.
 - **A1**: La navigazione è stata implementata creando le nuove pagine e aggiornando i link. I vecchi file (`/partita`, `/squadra`) non sono stati eliminati ma sono ora orfani; verranno rimossi in un futuro task di pulizia per mantenere l'incrementalità.
 - **A1**: Migliorato il componente Dropdown nella lista partite per essere funzionale, con un link corretto ai dettagli e voci placeholder per future azioni CRUD.
 - **A1**: Risolto un potenziale errore di idratazione (hydration mismatch) nella tabella delle statistiche della partita estraendola in un componente client (`"use client"`) che gestisce i dati randomici con `useEffect`.
@@ -62,6 +64,6 @@
 - Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. A2 - Design System: applicare uno stile coerente (header, card, FAB).
-2. A3 - Calendario: implementare il CRUD in memoria per le partite.
-3. A4 - Membri: implementare il CRUD in memoria per i giocatori.
+1. A3 - Calendario: implementare il CRUD in memoria per le partite.
+2. A4 - Membri: implementare il CRUD in memoria per i giocatori.
+3. A5 - Dettaglio Partita: implementare la gestione delle presenze, statistiche e formazione (mock).
