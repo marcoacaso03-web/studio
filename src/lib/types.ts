@@ -1,8 +1,11 @@
+export const ROLES = ['Portiere', 'Difensore', 'Centrocampista', 'Attaccante'] as const;
+export type Role = typeof ROLES[number];
+
 export type Player = {
   id: string;
   name: string;
   number: number;
-  role: 'Portiere' | 'Difensore' | 'Centrocampista' | 'Attaccante';
+  role: Role;
   avatarUrl: string;
   imageHint: string;
   stats: {

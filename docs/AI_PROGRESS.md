@@ -7,15 +7,15 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: A4
-- Titolo: Membri CRUD mock
+- ID: A5
+- Titolo: Match detail mock (presenze/stats/formazione)
 - Stato: NOT STARTED
 
 ## LAST KNOWN GOOD
 - Build status: OK
 - Comandi OK: `npm run build`
 - Browser testato: Chrome
-- Descrizione: Implementato il CRUD in memoria per le partite. L'utente può ora aggiungere, modificare ed eliminare partite tramite una dialog form. Le modifiche sono persistite in memoria e riflesse nell'interfaccia utente. Aggiunto feedback tramite toasts.
+- Descrizione: Implementato il CRUD in memoria per i giocatori. L'utente può ora aggiungere, modificare ed eliminare giocatori tramite una dialog form. Le modifiche sono persistite in memoria e riflesse nell'interfaccia utente.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -23,7 +23,7 @@
 - [x] A1 Routing + Shell
 - [x] A2 Design system
 - [x] A3 Calendario CRUD mock
-- [ ] A4 Membri CRUD mock
+- [x] A4 Membri CRUD mock
 - [ ] A5 Match detail mock (presenze/stats/formazione)
 
 ### STEP B (IndexedDB Dexie)
@@ -43,6 +43,8 @@
 - [ ] D2 Test (2 unit + 1 component)
 
 ## DECISION LOG (perché abbiamo scelto X)
+- **A4**: Utilizzato `useState` e un dialog form per il CRUD dei giocatori, mantenendo coerenza con l'implementazione del calendario (A3).
+- **A4**: Aggiunto un `DropdownMenu` alla `PlayerCard` per le azioni di modifica ed eliminazione, rendendo l'interfaccia pulita e funzionale.
 - **A3**: Utilizzato `useState` per la gestione dello stato locale della pagina `calendario`, rimandando l'introduzione di Zustand per mantenere l'incrementalità.
 - **A3**: Creato un componente `MatchFormDialog` riutilizzabile per l'inserimento e la modifica, usando `react-hook-form` e `zod` per la validazione.
 - **A3**: Le funzioni CRUD (`addMatch`, `updateMatch`, `deleteMatch`) sono state aggiunte in `mock-data.ts` per simulare un data layer modificabile.
@@ -68,6 +70,6 @@
 - Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. A4 - Membri: implementare il CRUD in memoria per i giocatori.
-2. A5 - Dettaglio Partita: implementare la gestione delle presenze, statistiche e formazione (mock).
-3. B0 - Setup Dexie: introdurre Dexie e definire lo schema del database.
+1. A5 - Dettaglio Partita: implementare la gestione delle presenze, statistiche e formazione (mock).
+2. B0 - Setup Dexie: introdurre Dexie e definire lo schema del database.
+3. B1 - Repository e Stores: Creare repository Dexie e store Zustand.

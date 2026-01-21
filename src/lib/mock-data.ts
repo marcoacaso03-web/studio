@@ -1,6 +1,6 @@
-import type { Player, Match } from './types';
+import type { Player, Match, Role } from './types';
 
-const players: Player[] = [
+let players: Player[] = [
   { id: '1', name: 'Marco Rossi', number: 1, role: 'Portiere', avatarUrl: 'https://picsum.photos/seed/p1/200/200', imageHint: 'player portrait', stats: { appearances: 10, goals: 0, assists: 0 } },
   { id: '2', name: 'Luca Bianchi', number: 5, role: 'Difensore', avatarUrl: 'https://picsum.photos/seed/p2/200/200', imageHint: 'player action', stats: { appearances: 10, goals: 1, assists: 1 } },
   { id: '3', name: 'Andrea Verdi', number: 8, role: 'Centrocampista', avatarUrl: 'https://picsum.photos/seed/p3/200/200', imageHint: 'soccer game', stats: { appearances: 10, goals: 3, assists: 5 } },
@@ -56,9 +56,39 @@ let matches: Match[] = [
   }
 ];
 
+// Player Functions
 export const getPlayers = () => players;
 export const getPlayerById = (id: string) => players.find(p => p.id === id);
 
+export const addPlayer = (playerData: {name: string, number: number, role: Role}): Player => {
+    const newPlayer: Player = {
+        ...playerData,
+        id: `p_${new Date().getTime()}`,
+        avatarUrl: `https://picsum.photos/seed/p${new Date().getTime()}/200/200`,
+        imageHint: 'player portrait',
+        stats: { appearances: 0, goals: 0, assists: 0 }
+    };
+    players.push(newPlayer);
+    return newPlayer;
+}
+
+export const updatePlayer = (id: string, updates: Partial<Omit<Player, 'id' | 'stats'>>): Player | undefined => {
+    const playerIndex = players.findIndex(p => p.id === id);
+    if(playerIndex === -1) return undefined;
+
+    const updatedPlayer = { ...players[playerIndex], ...updates };
+    players[playerIndex] = updatedPlayer;
+    return updatedPlayer;
+}
+
+export const deletePlayer = (id: string): boolean => {
+    const initialLength = players.length;
+    players = players.filter(p => p.id !== id);
+    return players.length < initialLength;
+}
+
+
+// Match Functions
 export const getMatches = () => matches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 export const getMatchById = (id: string) => matches.find(m => m.id === id);
 
