@@ -7,22 +7,22 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: A3
-- Titolo: Calendario CRUD mock
+- ID: A4
+- Titolo: Membri CRUD mock
 - Stato: NOT STARTED
 
 ## LAST KNOWN GOOD
 - Build status: OK
 - Comandi OK: `npm run build`
 - Browser testato: Chrome
-- Descrizione: Applicato il design system di base. Aggiornata la palette colori in `globals.css` per usare il blu primario (#1A237E), il grigio di sfondo (#F5F5F5) e l'arancione come accento (#FF8F00). Rimosso un override del font per applicare correttamente 'PT Sans' su tutto il corpo dell'applicazione, come da specifiche. L'interfaccia ora ha un aspetto più coerente.
+- Descrizione: Implementato il CRUD in memoria per le partite. L'utente può ora aggiungere, modificare ed eliminare partite tramite una dialog form. Le modifiche sono persistite in memoria e riflesse nell'interfaccia utente. Aggiunto feedback tramite toasts.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
 - [x] A0 Bootstrap
 - [x] A1 Routing + Shell
 - [x] A2 Design system
-- [ ] A3 Calendario CRUD mock
+- [x] A3 Calendario CRUD mock
 - [ ] A4 Membri CRUD mock
 - [ ] A5 Match detail mock (presenze/stats/formazione)
 
@@ -43,6 +43,10 @@
 - [ ] D2 Test (2 unit + 1 component)
 
 ## DECISION LOG (perché abbiamo scelto X)
+- **A3**: Utilizzato `useState` per la gestione dello stato locale della pagina `calendario`, rimandando l'introduzione di Zustand per mantenere l'incrementalità.
+- **A3**: Creato un componente `MatchFormDialog` riutilizzabile per l'inserimento e la modifica, usando `react-hook-form` e `zod` per la validazione.
+- **A3**: Le funzioni CRUD (`addMatch`, `updateMatch`, `deleteMatch`) sono state aggiunte in `mock-data.ts` per simulare un data layer modificabile.
+- **A3**: Aggiunto `AlertDialog` per la conferma dell'eliminazione per migliorare la UX.
 - **A2**: I colori primario, di sfondo e d'accento sono stati impostati in `globals.css` per riflettere le specifiche del design system. Questo garantisce coerenza in tutta l'app.
 - **A2**: Il font di default (Arial) è stato rimosso da `globals.css` per permettere a Tailwind di applicare correttamente "PT Sans" come definito nel layout e nella configurazione, garantendo la tipografia richiesta.
 - **A1**: La navigazione è stata implementata creando le nuove pagine e aggiornando i link. I vecchi file (`/partita`, `/squadra`) non sono stati eliminati ma sono ora orfani; verranno rimossi in un futuro task di pulizia per mantenere l'incrementalità.
@@ -64,6 +68,6 @@
 - Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. A3 - Calendario: implementare il CRUD in memoria per le partite.
-2. A4 - Membri: implementare il CRUD in memoria per i giocatori.
-3. A5 - Dettaglio Partita: implementare la gestione delle presenze, statistiche e formazione (mock).
+1. A4 - Membri: implementare il CRUD in memoria per i giocatori.
+2. A5 - Dettaglio Partita: implementare la gestione delle presenze, statistiche e formazione (mock).
+3. B0 - Setup Dexie: introdurre Dexie e definire lo schema del database.

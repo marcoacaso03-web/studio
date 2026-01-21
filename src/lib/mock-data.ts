@@ -11,7 +11,7 @@ const players: Player[] = [
   { id: '8', name: 'Paolo Colombo', number: 12, role: 'Portiere', avatarUrl: 'https://picsum.photos/seed/p8/200/200', imageHint: 'goalkeeper save', stats: { appearances: 0, goals: 0, assists: 0 } },
 ];
 
-const matches: Match[] = [
+let matches: Match[] = [
   {
     id: '1',
     opponent: 'Old Boys FC',
@@ -61,3 +61,29 @@ export const getPlayerById = (id: string) => players.find(p => p.id === id);
 
 export const getMatches = () => matches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 export const getMatchById = (id: string) => matches.find(m => m.id === id);
+
+
+export const addMatch = (matchData: Omit<Match, 'id' | 'status' | 'result'>): Match => {
+  const newMatch: Match = {
+    ...matchData,
+    id: `m_${new Date().getTime()}`,
+    status: 'scheduled',
+  };
+  matches.push(newMatch);
+  return newMatch;
+};
+
+export const updateMatch = (id: string, updates: Partial<Omit<Match, 'id'>>): Match | undefined => {
+  const matchIndex = matches.findIndex(m => m.id === id);
+  if (matchIndex === -1) return undefined;
+  
+  const updatedMatch = { ...matches[matchIndex], ...updates };
+  matches[matchIndex] = updatedMatch;
+  return updatedMatch;
+};
+
+export const deleteMatch = (id: string): boolean => {
+  const initialLength = matches.length;
+  matches = matches.filter(m => m.id !== id);
+  return matches.length < initialLength;
+};
