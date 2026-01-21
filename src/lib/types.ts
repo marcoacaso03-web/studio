@@ -28,10 +28,14 @@ export type Match = {
   status: 'scheduled' | 'completed' | 'canceled';
 };
 
+export const ATTENDANCE_STATUSES = ['presente', 'assente', 'in dubbio'] as const;
+export type AttendanceStatus = typeof ATTENDANCE_STATUSES[number];
+
+
 export type MatchAttendance = {
   matchId: string;
   playerId: string;
-  status: 'present' | 'absent' | 'maybe';
+  status: AttendanceStatus;
 };
 
 export type MatchLineup = {
@@ -39,3 +43,12 @@ export type MatchLineup = {
     starters: string[]; // array of player ids
     substitutes: string[]; // array of player ids
 }
+
+export type PlayerMatchStats = {
+  matchId: string;
+  playerId: string;
+  goals: number;
+  assists: number;
+  yellowCards: number;
+  redCards: number;
+};

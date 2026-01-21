@@ -7,15 +7,15 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: A5
-- Titolo: Match detail mock (presenze/stats/formazione)
+- ID: B0
+- Titolo: Setup Dexie + schema
 - Stato: NOT STARTED
 
 ## LAST KNOWN GOOD
 - Build status: OK
 - Comandi OK: `npm run build`
 - Browser testato: Chrome
-- Descrizione: Implementato il CRUD in memoria per i giocatori. L'utente può ora aggiungere, modificare ed eliminare giocatori tramite una dialog form. Le modifiche sono persistite in memoria e riflesse nell'interfaccia utente.
+- Descrizione: Implementate le funzionalità mock per la pagina di dettaglio partita. L'utente può ora gestire le presenze dei giocatori (presente/assente/in dubbio) e modificare le statistiche individuali (gol, assist, etc.) per ogni giocatore presente alla partita. I dati sono salvati in memoria.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -24,7 +24,7 @@
 - [x] A2 Design system
 - [x] A3 Calendario CRUD mock
 - [x] A4 Membri CRUD mock
-- [ ] A5 Match detail mock (presenze/stats/formazione)
+- [x] A5 Match detail mock (presenze/stats/formazione)
 
 ### STEP B (IndexedDB Dexie)
 - [ ] B0 Setup Dexie + schema
@@ -43,6 +43,9 @@
 - [ ] D2 Test (2 unit + 1 component)
 
 ## DECISION LOG (perché abbiamo scelto X)
+- **A5**: Le schede "Convocati" e "Statistiche" sono state estratte in componenti client dedicati (`MatchAttendanceTab`, `MatchStatsTab`) per incapsulare la logica di stato e l'interattività, mantenendo pulita la pagina principale del dettaglio partita.
+- **A5**: Per la gestione delle presenze, è stato usato un `RadioGroup` per permettere i tre stati ('presente', 'assente', 'in dubbio'), offrendo più granularità rispetto a un semplice `Switch`.
+- **A5**: La scheda statistiche ora permette l'input numerico e mostra solo i giocatori contrassegnati come "presente", rendendo l'interfaccia più contestuale e utile.
 - **A4**: Utilizzato `useState` e un dialog form per il CRUD dei giocatori, mantenendo coerenza con l'implementazione del calendario (A3).
 - **A4**: Aggiunto un `DropdownMenu` alla `PlayerCard` per le azioni di modifica ed eliminazione, rendendo l'interfaccia pulita e funzionale.
 - **A3**: Utilizzato `useState` per la gestione dello stato locale della pagina `calendario`, rimandando l'introduzione di Zustand per mantenere l'incrementalità.
@@ -70,6 +73,6 @@
 - Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. A5 - Dettaglio Partita: implementare la gestione delle presenze, statistiche e formazione (mock).
-2. B0 - Setup Dexie: introdurre Dexie e definire lo schema del database.
-3. B1 - Repository e Stores: Creare repository Dexie e store Zustand.
+1. B0 - Setup Dexie: introdurre Dexie e definire lo schema del database.
+2. B1 - Repository e Stores: Creare repository Dexie e store Zustand.
+3. B2 - Migrazione UI: Calendario e Membri su DB.

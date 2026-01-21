@@ -1,4 +1,4 @@
-import type { Player, Match, Role } from './types';
+import type { Player, Match, Role, MatchAttendance, AttendanceStatus, PlayerMatchStats } from './types';
 
 let players: Player[] = [
   { id: '1', name: 'Marco Rossi', number: 1, role: 'Portiere', avatarUrl: 'https://picsum.photos/seed/p1/200/200', imageHint: 'player portrait', stats: { appearances: 10, goals: 0, assists: 0 } },
@@ -54,6 +54,19 @@ let matches: Match[] = [
     isHome: true,
     status: 'scheduled'
   }
+];
+
+let matchAttendances: MatchAttendance[] = [
+  { matchId: '1', playerId: '1', status: 'presente' },
+  { matchId: '1', playerId: '2', status: 'presente' },
+  { matchId: '1', playerId: '3', status: 'presente' },
+  { matchId: '1', playerId: '4', status: 'assente' },
+];
+
+let playerMatchStats: PlayerMatchStats[] = [
+  { matchId: '1', playerId: '1', goals: 0, assists: 0, yellowCards: 0, redCards: 0 },
+  { matchId: '1', playerId: '2', goals: 1, assists: 0, yellowCards: 1, redCards: 0 },
+  { matchId: '1', playerId: '3', goals: 2, assists: 1, yellowCards: 0, redCards: 0 },
 ];
 
 // Player Functions
@@ -117,3 +130,60 @@ export const deleteMatch = (id: string): boolean => {
   matches = matches.filter(m => m.id !== id);
   return matches.length < initialLength;
 };
+
+
+// Attendance Functions
+export const getAttendanceForMatch = (matchId: string): MatchAttendance[] => {
+  const allPlayers = getPlayers();
+  
+  const fullAttendance: MatchAttendance[] = allPlayers.map(p => {
+    const existing = matchAttendances.find(a => a.matchId === matchId && a.playerId === p.id);
+    return existing || { matchId, playerId: p.id, status: 'in dubbio' };
+  });
+
+  return fullAttendance;
+};
+
+export const updateAttendance = (matchId: string, playerId: string, status: AttendanceStatus): MatchAttendance => {
+  let attendance = matchAttendances.find(a => a.matchId === matchId && a.playerId === playerId);
+  if (attendance) {
+    attendance.status = status;
+  } else {
+    attendance = { matchId, playerId, status };
+    matchAttendances.push(attendance);
+  }
+  return attendance;
+};
+
+// Player Match Stats Functions
+export const getStatsForMatch = (matchId: string): PlayerMatchStats[] => {
+  const attendedPlayerIds = getAttendanceForMatch(matchId)
+    .filter(a => a.status === 'presente')
+    .map(a => a.playerId);
+
+  const stats: PlayerMatchStats[] = attendedPlayerIds.map(playerId => {
+    const existing = playerMatchStats.find(s => s.matchId === matchId && s.playerId === playerId);
+    return existing || { matchId, playerId, goals: 0, assists: 0, yellowCards: 0, redCards: 0 };
+  });
+  
+  return stats;
+}
+
+export const updatePlayerStatsForMatch = (matchId: string, playerId: string, newStats: Partial<Omit<PlayerMatchStats, 'matchId' | 'playerId'>>): PlayerMatchStats => {
+  let stats = playerMatchStats.find(s => s.matchId === matchId && s.playerId === playerId);
+  if (stats) {
+    Object.assign(stats, newStats);
+  } else {
+    stats = {
+      matchId,
+      playerId,
+      goals: 0,
+      assists: 0,
+      yellowCards: 0,
+      redCards: 0,
+      ...newStats,
+    };
+    playerMatchStats.push(stats);
+  }
+  return stats;
+}

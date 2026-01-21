@@ -1,17 +1,33 @@
+"use client";
+
+import { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/layout/page-header";
 import { getMatchById, getPlayers } from "@/lib/mock-data";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { MatchLineup } from "@/components/partite/match-lineup";
 import { MatchStatsTab } from "@/components/partite/match-stats-tab";
+import { MatchAttendanceTab } from "@/components/partite/match-attendance-tab";
+import type { Player, Match } from '@/lib/types';
+
 
 export default function MatchDetailPage({ params }: { params: { id: string } }) {
-  const match = getMatchById(params.id);
-  const players = getPlayers();
+  const [match, setMatch] = useState<Match | undefined>(undefined);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const foundMatch = getMatchById(params.id);
+    const allPlayers = getPlayers();
+    setMatch(foundMatch);
+    setPlayers(allPlayers);
+    setLoading(false);
+  }, [params.id]);
+
+  if (loading) {
+    return <div>Caricamento...</div>;
+  }
 
   if (!match) {
     notFound();
@@ -65,32 +81,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
         </TabsContent>
 
         <TabsContent value="convocati">
-          <Card>
-            <CardHeader>
-              <CardTitle>Convocazioni</CardTitle>
-              <CardDescription>Gestisci le presenze dei giocatori per la partita.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {players.map(player => (
-                <div key={player.id} className="flex items-center justify-between p-2 rounded-lg border">
-                  <div className="flex items-center gap-4">
-                    <Avatar>
-                      <AvatarImage src={player.avatarUrl} alt={player.name} data-ai-hint={player.imageHint}/>
-                      <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{player.name}</p>
-                      <p className="text-sm text-muted-foreground">{player.role}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch id={`attendance-${player.id}`} />
-                    <Label htmlFor={`attendance-${player.id}`}>Presente</Label>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+            {players.length > 0 && <MatchAttendanceTab matchId={match.id} players={players} />}
         </TabsContent>
 
         <TabsContent value="formazione">
@@ -98,7 +89,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
         </TabsContent>
 
         <TabsContent value="statistiche">
-          <MatchStatsTab players={players} />
+          <MatchStatsTab matchId={match.id} />
         </TabsContent>
       </Tabs>
     </div>
