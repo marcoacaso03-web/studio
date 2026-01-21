@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster";
+import { AppHeader } from '@/components/layout/app-header';
+import { BottomNav } from '@/components/layout/bottom-nav';
 
 export const metadata: Metadata = {
   title: 'Squadra+',
@@ -21,13 +22,12 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-          <Sidebar />
-          <div className="flex flex-col">
-            <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+        <div className="relative flex min-h-screen w-full flex-col">
+          <AppHeader />
+          <main className="flex-1 p-4 pb-20 md:pb-4 lg:p-6">
               {children}
-            </main>
-          </div>
+          </main>
+          <BottomNav />
         </div>
         <Toaster />
       </body>
