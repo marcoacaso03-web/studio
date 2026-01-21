@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getMatches, addMatch, updateMatch, deleteMatch } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
 import Link from "next/link";
@@ -29,17 +28,19 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useMatchesStore } from "@/store/useMatchesStore";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 export default function CalendarioPage() {
-  const [matches, setMatches] = useState<Match[]>([]);
+  const { matches, loading, fetchAll, add, update, remove } = useMatchesStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    setMatches(getMatches());
-  }, []);
+    fetchAll();
+  }, [fetchAll]);
 
   const getStatusBadge = (status: 'scheduled' | 'completed' | 'canceled') => {
     switch (status) {
@@ -59,27 +60,23 @@ export default function CalendarioPage() {
     setIsFormOpen(true);
   };
   
-  const handleSaveMatch = (data: {opponent: string, location: string, date: Date, isHome: boolean}, matchId?: string) => {
+  const handleSaveMatch = async (data: {opponent: string, location: string, date: Date, isHome: boolean}, matchId?: string) => {
     const matchData = { ...data, date: data.date.toISOString() };
 
     if (matchId) {
-      const updated = updateMatch(matchId, matchData);
-      if(updated) {
-        toast({ title: "Partita aggiornata", description: `La partita contro ${updated.opponent} è stata modificata.` });
-      }
+      const updated = await update(matchId, matchData);
+      toast({ title: "Partita aggiornata", description: `La partita contro ${data.opponent} è stata modificata.` });
     } else {
-      const newMatch = addMatch(matchData);
-      toast({ title: "Partita aggiunta", description: `La partita contro ${newMatch.opponent} è stata creata.` });
+      const newMatch = await add(matchData);
+      if (newMatch) {
+        toast({ title: "Partita aggiunta", description: `La partita contro ${newMatch.opponent} è stata creata.` });
+      }
     }
-    setMatches(getMatches());
   };
 
-  const handleDeleteMatch = (matchId: string) => {
-    const success = deleteMatch(matchId);
-    if(success) {
-        setMatches(matches.filter(m => m.id !== matchId));
-        toast({ title: "Partita eliminata", variant: "destructive" });
-    }
+  const handleDeleteMatch = async (matchId: string) => {
+    await remove(matchId);
+    toast({ title: "Partita eliminata", variant: "destructive" });
   };
 
 
@@ -99,6 +96,13 @@ export default function CalendarioPage() {
         </div>
       </CardHeader>
       <CardContent>
+        {loading ? (
+           <div className="space-y-4">
+             <Skeleton className="h-10 w-full" />
+             <Skeleton className="h-10 w-full" />
+             <Skeleton className="h-10 w-full" />
+           </div>
+        ) : (
         <Table>
           <TableHeader>
             <TableRow>
@@ -170,6 +174,7 @@ export default function CalendarioPage() {
             ))}
           </TableBody>
         </Table>
+        )}
       </CardContent>
     </Card>
       <MatchFormDialog 

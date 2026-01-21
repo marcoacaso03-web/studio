@@ -7,15 +7,15 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: B2
-- Titolo: UI su DB (Calendario/Membri)
+- ID: B3
+- Titolo: Match detail su DB
 - Stato: NOT STARTED
 
 ## LAST KNOWN GOOD
 - Build status: OK
 - Comandi OK: `npm install`, `npm run build`
 - Browser testato: Chrome
-- Descrizione: Creati i repository per l'interazione con Dexie (player, match, attendance, stats) e gli store Zustand per la gestione dello stato globale (players, matches, match-detail). L'app compila ed è pronta per collegare l'UI al nuovo data layer.
+- Descrizione: Le pagine Calendario e Membri sono state migrate per usare gli store Zustand e il database IndexedDB (Dexie). I dati ora sono persistenti. Anche la dashboard legge dallo store.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -29,7 +29,7 @@
 ### STEP B (IndexedDB Dexie)
 - [x] B0 Setup Dexie + schema
 - [x] B1 Repos + stores
-- [ ] B2 UI su DB (Calendario/Membri)
+- [x] B2 UI su DB (Calendario/Membri)
 - [ ] B3 Match detail su DB
 
 ### STEP C (Stats + Charts)
@@ -43,6 +43,9 @@
 - [ ] D2 Test (2 unit + 1 component)
 
 ## DECISION LOG (perché abbiamo scelto X)
+- **B2**: Convertita la Dashboard (pagina home) a Client Component per poter utilizzare gli store Zustand e mostrare dati dinamici e aggiornati dal database locale (es. numero giocatori, prossima partita).
+- **B2**: Le pagine `Calendario` e `Membri` ora utilizzano i rispettivi store (`useMatchesStore`, `usePlayersStore`) per tutte le operazioni CRUD. Questo centralizza la logica di gestione dei dati e li rende persistenti grazie a Dexie.
+- **B2**: Aggiunti scheletri di caricamento (Skeleton components) per migliorare la UX durante il fetch iniziale dei dati da IndexedDB, evitando schermate vuote.
 - **B1**: Creati repository dedicati (`playerRepository`, `matchRepository`, etc.) per incapsulare le query Dexie.js, mantenendo il codice di accesso ai dati pulito e centralizzato.
 - **B1**: Introdotti store Zustand (`usePlayersStore`, `useMatchesStore`, `useMatchDetailStore`) per gestire lo stato dell'applicazione in modo centralizzato e reattivo. Questo semplificherà la sincronizzazione dell'UI con il database IndexedDB.
 - **B0**: Aggiunto Dexie.js per la gestione del database IndexedDB. La versione 4 è stabile e offre un'ottima API basata su Promise e type-safety con TypeScript. Lo schema è stato definito in un file dedicato `src/lib/db.ts` per centralizzare la configurazione del DB.
@@ -76,6 +79,6 @@
 - Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. B2 - Migrazione UI: Calendario e Membri su DB.
-2. B3 - Match detail su DB.
-3. C0 - Query aggregazioni (repo).
+1. B3 - Match detail su DB.
+2. C0 - Query aggregazioni (repo).
+3. C1 - 2 schermate stats reali.

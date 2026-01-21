@@ -1,13 +1,27 @@
+"use client";
+
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getMatches, getPlayers } from "@/lib/mock-data";
 import { Calendar, Users, Target } from "lucide-react";
 import Link from "next/link";
+import { useMatchesStore } from "@/store/useMatchesStore";
+import { usePlayersStore } from "@/store/usePlayersStore";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
-  const players = getPlayers();
-  const matches = getMatches();
+  const { players, loading: playersLoading, fetchAll: fetchPlayers } = usePlayersStore();
+  const { matches, loading: matchesLoading, fetchAll: fetchMatches } = useMatchesStore();
+
+  useEffect(() => {
+    fetchPlayers();
+    fetchMatches();
+  }, [fetchPlayers, fetchMatches]);
+  
   const nextMatch = matches.find(m => new Date(m.date) > new Date() && m.status === 'scheduled');
+  const totalGoals = players.reduce((acc, p) => acc + p.stats.goals, 0);
+
+  const loading = playersLoading || matchesLoading;
   
   return (
     <div className="flex flex-1 flex-col gap-4 md:gap-8">
@@ -22,18 +36,20 @@ export default function Home() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {nextMatch ? (
-              <>
-                <div className="text-2xl font-bold">vs {nextMatch.opponent}</div>
-                <p className="text-xs text-muted-foreground">
-                  {new Date(nextMatch.date).toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                </p>
-                <Button asChild className="mt-4" size="sm">
-                  <Link href={`/calendario/${nextMatch.id}`}>Vedi Dettagli</Link>
-                </Button>
-              </>
-            ) : (
-              <p className="text-muted-foreground">Nessuna partita in programma.</p>
+            {loading ? <Skeleton className="h-10 w-full" /> : (
+              nextMatch ? (
+                <>
+                  <div className="text-2xl font-bold">vs {nextMatch.opponent}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(nextMatch.date).toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                  </p>
+                  <Button asChild className="mt-4" size="sm">
+                    <Link href={`/calendario/${nextMatch.id}`}>Vedi Dettagli</Link>
+                  </Button>
+                </>
+              ) : (
+                <p className="text-muted-foreground">Nessuna partita in programma.</p>
+              )
             )}
           </CardContent>
         </Card>
@@ -43,7 +59,9 @@ export default function Home() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{players.length}</div>
+            {loading ? <Skeleton className="h-8 w-1/4 mb-1" /> : (
+              <div className="text-2xl font-bold">{players.length}</div>
+            )}
             <p className="text-xs text-muted-foreground">Giocatori registrati</p>
             <Button asChild className="mt-4" size="sm" variant="outline">
               <Link href="/membri">Gestisci Squadra</Link>
@@ -56,9 +74,9 @@ export default function Home() {
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {players.reduce((acc, p) => acc + p.stats.goals, 0)}
-            </div>
+             {loading ? <Skeleton className="h-8 w-1/4 mb-1" /> : (
+                <div className="text-2xl font-bold">{totalGoals}</div>
+             )}
             <p className="text-xs text-muted-foreground">Totale gol segnati in stagione</p>
           </CardContent>
         </Card>
