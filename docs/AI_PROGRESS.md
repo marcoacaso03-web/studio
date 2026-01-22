@@ -7,15 +7,15 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: R2
-- Titolo: Ripara Table statistiche
+- ID: R3
+- Titolo: Ripara 3 pallini in sezione Membri
 - Stato: NOT STARTED
 
 ## LAST KNOWN GOOD
 - Build status: OK
 - Comandi OK: `npm install`, `npm run build`, `npm run test`
 - Browser testato: Chrome
-- Descrizione: Unificata la gestione della data nel form partita, usando un input `datetime-local` e salvando il valore come stringa ISO per risolvere i bug di selezione mese/anno.
+- Descrizione: Risolto bug di sincronizzazione dati: dopo la creazione di un nuovo giocatore, la tabella delle statistiche (`Leaderboard`) viene ora aggiornata correttamente per includere il nuovo membro con le statistiche a zero.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -51,8 +51,10 @@
 ### STEP R (Repairs)
 - [x] R1 Ripara data partita
 - [x] R2.1 Unificata gestione data su datetime-local
+- [x] R2 Ripara Table statistiche
 
 ## DECISION LOG (perché abbiamo scelto X)
+- **R2**: Per garantire che la tabella delle statistiche si aggiorni dopo l'aggiunta o la rimozione di un giocatore, è stato inserito un trigger. Ora, le azioni nel `usePlayersStore` (aggiunta, modifica, rimozione) invocano `loadStats()` nel `useStatsStore`, forzando il ricalcolo e l'aggiornamento della leaderboard. Questo risolve il problema di dati non sincronizzati tra le diverse sezioni dell'app.
 - **R2.1**: Unificata la gestione della data della partita. Rimosso il `Popover` con `Calendar` e l'input di testo manuale, sostituiti da un unico input HTML `type="datetime-local"`. Questo risolve il bug che reimpostava il mese/anno a quello corrente e semplifica notevolmente il codice. Il valore viene salvato come stringa ISO nel database per garantire coerenza, e il form gestisce le conversioni necessarie per il display.
 - **R1**: La selezione della data nel form di creazione/modifica partita è stata migliorata. Oltre al selettore a calendario, è ora possibile inserire manualmente la data e l'ora in un campo di testo (formato `gg/mm/aaaa oo:mm`). Questo offre maggiore flessibilità. L'intervallo di selezione è rimasto di due anni (uno nel passato e uno nel futuro).
 - **F0**: Rimosse le vecchie pagine mock (`/partita`, `/squadra`), il file di dati mock (`mock-data.ts`) e il componente sidebar non più utilizzato. Questo alleggerisce il codebase e rimuove il codice obsoleto che non è più necessario dopo la migrazione a IndexedDB.
@@ -100,6 +102,7 @@
 - ~~Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.~~ Rimossi nel task F0.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. R2 **Ripara Table statistiche**: Una volta creato un membro aggiorna la tabella con le statistiche con valori default 0 se nessun valore è stato aggiunto
-2. R3 **Ripara 3 pallini in sezione Membri**: Premendo sui 3 pallini di una scheda di un giocatore si deve aprire una schermata per modificare il nome, il cognome, il numero e il ruolo di un giocatore.
-3. R4 **Miglioramento UX Panchina**: Nella scheda "Formazione", visualizza i giocatori in panchina in una lista più compatta e chiara.
+1. R3 **Ripara 3 pallini in sezione Membri**: Premendo sui 3 pallini di una scheda di un giocatore si deve aprire una schermata per modificare il nome, il cognome, il numero e il ruolo di un giocatore.
+2. R4 **Rimpiazzare scheda dashboard con calendario**: Quando si apre l'app l'utente si deve trovare nella schermata calendario. la scheda dashboard va eliminata.
+3. R5 **Fix Risultato Partita**: Aggiungere un modo per inserire/modificare il risultato di una partita (es. 2-1) dalla pagina di dettaglio. Questo dovrebbe aggiornare lo stato della partita a "completata".
+
