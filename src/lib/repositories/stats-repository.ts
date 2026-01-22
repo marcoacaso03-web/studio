@@ -4,6 +4,10 @@ import type { PlayerMatchStats } from '@/lib/types';
 export type PlayerStatsUpdateData = Omit<PlayerMatchStats, 'matchId' | 'playerId'>;
 
 export const statsRepository = {
+    async getAll() {
+        return await db.playerMatchStats.toArray();
+    },
+
     async getForMatch(matchId: string) {
         return await db.playerMatchStats.where({ matchId }).toArray();
     },
