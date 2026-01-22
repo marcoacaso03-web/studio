@@ -4,13 +4,8 @@ import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { format, addYears, subYears, parse as dateParse } from "date-fns";
-import { it } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Form,
   FormControl,
@@ -21,11 +16,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { Match } from "@/lib/types";
 import {
@@ -37,19 +27,36 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+// Helper to convert a date object or ISO string to a 'YYYY-MM-DDTHH:mm' string for the input
+const toDatetimeLocal = (dateSource?: Date | string): string => {
+  if (!dateSource) return '';
+  const date = new Date(dateSource);
+  // Adjust for timezone offset to display correctly in the user's local time
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+  return date.toISOString().slice(0, 16);
+};
+
 const formSchema = z.object({
   opponent: z.string().min(2, { message: "Il nome dell'avversario è richiesto." }),
   location: z.string().min(2, { message: "Il luogo è richiesto." }),
-  date: z.date({ required_error: "La data e l'ora sono richieste." }),
+  date: z.string().min(1, { message: "La data e l'ora sono richieste." }),
   isHome: z.boolean(),
 });
 
 type MatchFormValues = z.infer<typeof formSchema>;
 
+// This is the data structure the parent component expects
+type MatchSaveData = {
+    opponent: string;
+    location: string;
+    date: Date;
+    isHome: boolean;
+};
+
 interface MatchFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (data: MatchFormValues, matchId?: string) => void;
+  onSave: (data: MatchSaveData, matchId?: string) => void;
   match?: Match | null;
 }
 
@@ -59,36 +66,47 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
     defaultValues: {
       opponent: "",
       location: "",
-      date: new Date(),
+      date: "",
       isHome: true,
     },
   });
 
-  const [dateInputValue, setDateInputValue] = React.useState('');
-
   React.useEffect(() => {
     if (open) {
-      const initialValues = match ? {
-        opponent: match.opponent,
-        location: match.location,
-        date: new Date(match.date),
-        isHome: match.isHome,
-      } : {
-        opponent: "",
-        location: "",
-        date: new Date(),
-        isHome: true,
-      };
-      form.reset(initialValues);
-      setDateInputValue(format(initialValues.date, "dd/MM/yyyy HH:mm"));
+      const initialDate = match ? toDatetimeLocal(match.date) : toDatetimeLocal(new Date());
+      form.reset({
+        opponent: match?.opponent || "",
+        location: match?.location || "",
+        date: initialDate,
+        isHome: match?.isHome ?? true,
+      });
     }
   }, [open, match, form]);
 
 
   function onSubmit(data: MatchFormValues) {
-    onSave(data, match?.id);
+    const saveData: MatchSaveData = {
+        ...data,
+        date: new Date(data.date), // Convert form string to Date object for the parent
+    };
+    onSave(saveData, match?.id);
     onOpenChange(false);
   }
+
+  const { min, max } = React.useMemo(() => {
+    const now = new Date();
+    
+    const twoYearsAgo = new Date(now);
+    twoYearsAgo.setFullYear(now.getFullYear() - 2);
+
+    const twoYearsLater = new Date(now);
+    twoYearsLater.setFullYear(now.getFullYear() + 2);
+
+    return {
+      min: toDatetimeLocal(twoYearsAgo),
+      max: toDatetimeLocal(twoYearsLater),
+    };
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -121,60 +139,16 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
               control={form.control}
               name="date"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem>
                   <FormLabel>Data e Ora</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                       <FormControl>
-                         <div className="relative">
-                            <Input
-                                placeholder="gg/mm/aaaa hh:mm"
-                                value={dateInputValue}
-                                onChange={(e) => {
-                                    setDateInputValue(e.target.value);
-                                    const parsedDate = dateParse(e.target.value, "dd/MM/yyyy HH:mm", new Date());
-                                    if (!isNaN(parsedDate.getTime())) {
-                                        field.onChange(parsedDate);
-                                    }
-                                }}
-                            />
-                            <CalendarIcon className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50" />
-                        </div>
-                       </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={(day) => {
-                          if (!day) return;
-                          const newDate = new Date(field.value); // keep time
-                          newDate.setFullYear(day.getFullYear(), day.getMonth(), day.getDate());
-                          field.onChange(newDate);
-                          setDateInputValue(format(newDate, "dd/MM/yyyy HH:mm"));
-                        }}
-                        disabled={{
-                          before: subYears(new Date(), 1),
-                          after: addYears(new Date(), 1),
-                        }}
-                        initialFocus
-                      />
-                      <div className="p-3 border-t border-border">
-                        <Input 
-                            type="time" 
-                            value={field.value ? format(field.value, 'HH:mm') : ''}
-                            onChange={(e) => {
-                                const [hours, minutes] = e.target.value.split(':').map(Number);
-                                if (isNaN(hours) || isNaN(minutes)) return;
-                                const newDate = new Date(field.value); // keep date
-                                newDate.setHours(hours, minutes);
-                                field.onChange(newDate);
-                                setDateInputValue(format(newDate, "dd/MM/yyyy HH:mm"));
-                            }}
-                        />
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+                  <FormControl>
+                    <Input
+                      type="datetime-local"
+                      min={min}
+                      max={max}
+                      {...field}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

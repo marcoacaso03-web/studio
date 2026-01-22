@@ -15,7 +15,7 @@
 - Build status: OK
 - Comandi OK: `npm install`, `npm run build`, `npm run test`
 - Browser testato: Chrome
-- Descrizione: La selezione della data per una partita è stata migliorata con l'inserimento manuale di data e ora.
+- Descrizione: Unificata la gestione della data nel form partita, usando un input `datetime-local` e salvando il valore come stringa ISO per risolvere i bug di selezione mese/anno.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -50,9 +50,10 @@
 
 ### STEP R (Repairs)
 - [x] R1 Ripara data partita
-- Usa Rindex per numerare le riparazioni del codice eseguite come per navbar e calendario
+- [x] R2.1 Unificata gestione data su datetime-local
 
 ## DECISION LOG (perché abbiamo scelto X)
+- **R2.1**: Unificata la gestione della data della partita. Rimosso il `Popover` con `Calendar` e l'input di testo manuale, sostituiti da un unico input HTML `type="datetime-local"`. Questo risolve il bug che reimpostava il mese/anno a quello corrente e semplifica notevolmente il codice. Il valore viene salvato come stringa ISO nel database per garantire coerenza, e il form gestisce le conversioni necessarie per il display.
 - **R1**: La selezione della data nel form di creazione/modifica partita è stata migliorata. Oltre al selettore a calendario, è ora possibile inserire manualmente la data e l'ora in un campo di testo (formato `gg/mm/aaaa oo:mm`). Questo offre maggiore flessibilità. L'intervallo di selezione è rimasto di due anni (uno nel passato e uno nel futuro).
 - **F0**: Rimosse le vecchie pagine mock (`/partita`, `/squadra`), il file di dati mock (`mock-data.ts`) e il componente sidebar non più utilizzato. Questo alleggerisce il codebase e rimuove il codice obsoleto che non è più necessario dopo la migrazione a IndexedDB.
 - **E0**: Iniziata la configurazione della PWA per rendere l'app installabile e migliorare le capacità offline. Aggiunto `next-pwa` e creato il `manifest.json`. Modificato `next.config.ts` per utilizzare la sintassi CommonJS (`require`/`module.exports`) per garantire la compatibilità con il plugin. Aggiunto il link al manifest e il `theme-color` nel layout principale.
@@ -101,3 +102,4 @@
 ## NEXT 3 TASKS (auto-pianificazione)
 1. R2 **Ripara Table statistiche**: Una volta creato un membro aggiorna la tabella con le statistiche con valori default 0 se nessun valore è stato aggiunto
 2. R3 **Ripara 3 pallini in sezione Membri**: Premendo sui 3 pallini di una scheda di un giocatore si deve aprire una schermata per modificare il nome, il cognome, il numero e il ruolo di un giocatore.
+3. R4 **Miglioramento UX Panchina**: Nella scheda "Formazione", visualizza i giocatori in panchina in una lista più compatta e chiara.

@@ -64,7 +64,7 @@ export default function CalendarioPage() {
     const matchData = { ...data, date: data.date.toISOString() };
 
     if (matchId) {
-      const updated = await update(matchId, matchData);
+      await update(matchId, matchData);
       toast({ title: "Partita aggiornata", description: `La partita contro ${data.opponent} è stata modificata.` });
     } else {
       const newMatch = await add(matchData);
