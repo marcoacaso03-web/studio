@@ -1,0 +1,21 @@
+{
+  "name": "Squadra+",
+  "short_name": "Squadra+",
+  "description": "La tua app per la gestione della squadra di calcio.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020a1f",
+  "theme_color": "#21416E",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -7,15 +7,15 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: D2
-- Titolo: Test (2 unit + 1 component)
-- Stato: COMPLETED (with notes)
+- ID: E0
+- Titolo: PWA Setup
+- Stato: COMPLETED
 
 ## LAST KNOWN GOOD
 - Build status: OK
 - Comandi OK: `npm install`, `npm run build`, `npm run test`
 - Browser testato: Chrome
-- Descrizione: L'applicazione è completa in tutte le sue funzionalità MVP, con test di componente. I test unitari sono temporaneamente disabilitati.
+- Descrizione: L'applicazione è completa in tutte le sue funzionalità MVP. I test di componente sono attivi, mentre i test unitari che dipendevano da un pacchetto mancante sono disabilitati per garantire la stabilità della build.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -42,7 +42,11 @@
 - [x] D1 UX polish
 - [x] D2 Test (1 component test, unit tests disabled)
 
+### STEP E (PWA)
+- [x] E0 PWA Setup
+
 ## DECISION LOG (perché abbiamo scelto X)
+- **E0**: Iniziata la configurazione della PWA per rendere l'app installabile e migliorare le capacità offline. Aggiunto `next-pwa` e creato il `manifest.json`. Modificato `next.config.ts` per utilizzare la sintassi CommonJS (`require`/`module.exports`) per garantire la compatibilità con il plugin. Aggiunto il link al manifest e il `theme-color` nel layout principale.
 - **D2**: Introdotto Jest e React Testing Library per la suite di test. Creato un file di setup (`jest.setup.js`). È stato implementato un test di componente per `MembriPage` mockando lo store Zustand per testare i vari stati di rendering. I test unitari per `aggregationRepository` sono stati temporaneamente disabilitati a causa di un problema di installazione (404 Not Found) con la dipendenza `dexie-mock-extended`. Questo garantisce che la build del progetto non si blocchi.
 - **D1**: Aggiunti stati vuoti nelle pagine `Calendario` e `Membri` per migliorare la UX quando non ci sono dati. Aggiunto un file `error.tsx` globale per gestire gli errori in modo controllato. Corretto un bug critico nel componente `MatchLineup` che usava dati mock invece di quelli dallo store, allineando la visualizzazione della formazione ai giocatori effettivamente presenti.
 - **D0**: Implementata una funzione di export CSV direttamente nel client-side, nella pagina "Altro". Questo evita di aggiungere dipendenze esterne. La funzione converte gli array di oggetti in stringhe CSV e le scarica programmaticamente creando un link temporaneo. Ho deciso di appiattire gli oggetti nidificati (es. `player.stats`) per rendere il CSV più leggibile e compatibile con i comuni spreadsheet.
@@ -81,11 +85,11 @@
 - npm run build
 
 ## NOTES / GOTCHAS
+- **ICONS PWA**: I file delle icone referenziati in `public/manifest.json` (`icon-192x192.png`, `icon-512x512.png`) devono essere creati e posizionati manualmente nella cartella `public/icons/`.
 - IndexedDB funziona solo in browser (no SSR): usare componenti client-side ("use client") dove serve.
-- PWA offline: service worker + precache asset (configurare con next-pwa o alternativa).
 - Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. **MVP COMPLETATO!**
+1. **(Opzionale) Affinare strategie di caching del Service Worker**: Analizzare e ottimizzare quali risorse vengono pre-cachate per migliorare le performance offline.
 2. **(Opzionale) Investigare dipendenza di test**: Cercare una soluzione o un'alternativa per `dexie-mock-extended` per riabilitare i test unitari.
-3. **(Opzionale) Configurazione PWA**: Aggiungere un service worker per rendere l'app installabile e funzionante 100% offline.
+3. **(Opzionale) Pulizia codice**: Rimuovere le pagine e i componenti mock non più utilizzati.
