@@ -4,7 +4,7 @@ import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { format, addYears, subYears } from "date-fns";
+import { format, addYears, subYears, parse as dateParse } from "date-fns";
 import { it } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 
@@ -64,23 +64,25 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
     },
   });
 
+  const [dateInputValue, setDateInputValue] = React.useState('');
+
   React.useEffect(() => {
-    if (open && match) {
-        form.reset({
-            opponent: match.opponent,
-            location: match.location,
-            date: new Date(match.date),
-            isHome: match.isHome,
-        });
-    } else if (open && !match) {
-        form.reset({
-            opponent: "",
-            location: "",
-            date: new Date(),
-            isHome: true,
-        });
+    if (open) {
+      const initialValues = match ? {
+        opponent: match.opponent,
+        location: match.location,
+        date: new Date(match.date),
+        isHome: match.isHome,
+      } : {
+        opponent: "",
+        location: "",
+        date: new Date(),
+        isHome: true,
+      };
+      form.reset(initialValues);
+      setDateInputValue(format(initialValues.date, "dd/MM/yyyy HH:mm"));
     }
-  }, [match, open, form]);
+  }, [open, match, form]);
 
 
   function onSubmit(data: MatchFormValues) {
@@ -123,28 +125,34 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
                   <FormLabel>Data e Ora</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP HH:mm", { locale: it })
-                          ) : (
-                            <span>Scegli una data</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
+                       <FormControl>
+                         <div className="relative">
+                            <Input
+                                placeholder="gg/mm/aaaa hh:mm"
+                                value={dateInputValue}
+                                onChange={(e) => {
+                                    setDateInputValue(e.target.value);
+                                    const parsedDate = dateParse(e.target.value, "dd/MM/yyyy HH:mm", new Date());
+                                    if (!isNaN(parsedDate.getTime())) {
+                                        field.onChange(parsedDate);
+                                    }
+                                }}
+                            />
+                            <CalendarIcon className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50" />
+                        </div>
+                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
                         selected={field.value}
-                        onSelect={field.onChange}
+                        onSelect={(day) => {
+                          if (!day) return;
+                          const newDate = new Date(field.value); // keep time
+                          newDate.setFullYear(day.getFullYear(), day.getMonth(), day.getDate());
+                          field.onChange(newDate);
+                          setDateInputValue(format(newDate, "dd/MM/yyyy HH:mm"));
+                        }}
                         disabled={{
                           before: subYears(new Date(), 1),
                           after: addYears(new Date(), 1),
@@ -154,12 +162,14 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
                       <div className="p-3 border-t border-border">
                         <Input 
                             type="time" 
-                            defaultValue={field.value ? format(field.value, 'HH:mm') : ""}
+                            value={field.value ? format(field.value, 'HH:mm') : ''}
                             onChange={(e) => {
                                 const [hours, minutes] = e.target.value.split(':').map(Number);
-                                const newDate = field.value ? new Date(field.value) : new Date();
+                                if (isNaN(hours) || isNaN(minutes)) return;
+                                const newDate = new Date(field.value); // keep date
                                 newDate.setHours(hours, minutes);
                                 field.onChange(newDate);
+                                setDateInputValue(format(newDate, "dd/MM/yyyy HH:mm"));
                             }}
                         />
                       </div>

@@ -15,7 +15,7 @@
 - Build status: OK
 - Comandi OK: `npm install`, `npm run build`, `npm run test`
 - Browser testato: Chrome
-- Descrizione: La selezione della data per una partita è stata limitata a un intervallo di due anni (un anno nel passato e un anno nel futuro).
+- Descrizione: La selezione della data per una partita è stata migliorata con l'inserimento manuale di data e ora.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -53,7 +53,7 @@
 - Usa Rindex per numerare le riparazioni del codice eseguite come per navbar e calendario
 
 ## DECISION LOG (perché abbiamo scelto X)
-- **R1**: La selezione della data nel form di creazione/modifica partita è stata limitata a un intervallo di due anni (un anno nel passato e un anno nel futuro) per prevenire l'inserimento di date errate e migliorare la UX. Utilizzato `subYears` e `addYears` da `date-fns` e la prop `disabled` del calendario.
+- **R1**: La selezione della data nel form di creazione/modifica partita è stata migliorata. Oltre al selettore a calendario, è ora possibile inserire manualmente la data e l'ora in un campo di testo (formato `gg/mm/aaaa oo:mm`). Questo offre maggiore flessibilità. L'intervallo di selezione è rimasto di due anni (uno nel passato e uno nel futuro).
 - **F0**: Rimosse le vecchie pagine mock (`/partita`, `/squadra`), il file di dati mock (`mock-data.ts`) e il componente sidebar non più utilizzato. Questo alleggerisce il codebase e rimuove il codice obsoleto che non è più necessario dopo la migrazione a IndexedDB.
 - **E0**: Iniziata la configurazione della PWA per rendere l'app installabile e migliorare le capacità offline. Aggiunto `next-pwa` e creato il `manifest.json`. Modificato `next.config.ts` per utilizzare la sintassi CommonJS (`require`/`module.exports`) per garantire la compatibilità con il plugin. Aggiunto il link al manifest e il `theme-color` nel layout principale.
 - **D2**: Introdotto Jest e React Testing Library per la suite di test. Creato un file di setup (`jest.setup.js`). È stato implementato un test di componente per `MembriPage` mockando lo store Zustand per testare i vari stati di rendering. I test unitari per `aggregationRepository` sono stati temporaneamente disabilitati a causa di un problema di installazione (404 Not Found) con la dipendenza `dexie-mock-extended`. Questo garantisce che la build del progetto non si blocchi.
