@@ -102,6 +102,11 @@ export default function CalendarioPage() {
              <Skeleton className="h-10 w-full" />
              <Skeleton className="h-10 w-full" />
            </div>
+        ) : matches.length === 0 ? (
+            <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg mt-4">
+                <p className="font-semibold text-lg text-foreground">Nessuna partita in programma</p>
+                <p className="text-sm mt-1">Usa il pulsante "Aggiungi Partita" per iniziare a pianificare la stagione.</p>
+            </div>
         ) : (
         <Table>
           <TableHeader>

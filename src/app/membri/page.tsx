@@ -73,6 +73,11 @@ export default function MembriPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
             </div>
+          ) : players.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg mt-6">
+                <h3 className="text-lg font-semibold text-foreground">Nessun giocatore in squadra</h3>
+                <p className="mt-2">Usa il pulsante "Aggiungi Giocatore" per iniziare a costruire il tuo team.</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {players.map((player) => (

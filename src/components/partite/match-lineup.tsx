@@ -1,22 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { getPlayers } from "@/lib/mock-data";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMatchDetailStore } from "@/store/useMatchDetailStore";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { Player } from "@/lib/types";
 
 export function MatchLineup() {
-  // Mock lineup data for demonstration
-  const allPlayers = getPlayers();
-  const [starters, setStarters] = useState(allPlayers.slice(0, 11));
-  const [substitutes, setSubstitutes] = useState(allPlayers.slice(11));
+  const { allPlayers, attendance } = useMatchDetailStore();
+
+  const presentPlayers = allPlayers.filter(p => {
+    const att = attendance.find(a => a.playerId === p.id);
+    return att && att.status === 'presente';
+  });
+
+  // A real implementation would involve state for starters/substitutes and formation
+  const [starters] = useState(presentPlayers.slice(0, 11));
 
   const formations: { [key: string]: number[] } = {
     "4-4-2": [1, 4, 4, 2],
     "4-3-3": [1, 4, 3, 3],
     "3-5-2": [1, 3, 5, 2],
   };
-  const [formation, setFormation] = useState("4-4-2");
+  const [formation] = useState("4-4-2");
   const formationLayout = formations[formation];
 
   const getPlayersForLine = (lineIndex: number) => {
@@ -27,22 +33,40 @@ export function MatchLineup() {
     return starters.slice(startIndex, startIndex + formationLayout[lineIndex]);
   };
   
-  const PlayerAvatar = ({ player }: { player: any }) => (
+  const PlayerAvatar = ({ player }: { player: Player }) => (
     <div className="flex flex-col items-center gap-1 group cursor-pointer">
       <Avatar className="w-12 h-12 border-2 border-primary group-hover:border-accent">
         <AvatarImage src={player.avatarUrl} alt={player.name} data-ai-hint={player.imageHint} />
         <AvatarFallback>{player.name.slice(0,1)}</AvatarFallback>
       </Avatar>
-      <span className="text-xs font-semibold bg-background/80 px-1 rounded">{player.name.split(' ')[1]}</span>
+      <span className="text-xs font-semibold bg-background/80 px-1 rounded">{player.name.split(' ')[0]}</span>
     </div>
   );
+
+  if (presentPlayers.length === 0) {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Formazione</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="text-muted-foreground">Nessun giocatore contrassegnato come 'presente'. Seleziona i convocati nella scheda 'Convocati' per definire la formazione.</p>
+            </CardContent>
+        </Card>
+    )
+  }
+
+  const onTheBench = presentPlayers.filter(p => !starters.find(s => s.id === p.id));
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2">
         <Card>
           <CardHeader>
-            <CardTitle>Formazione Titolare (4-4-2)</CardTitle>
+            <CardTitle>Formazione Titolare ({formation})</CardTitle>
+            <CardDescription>
+                Questa è una visualizzazione base. La selezione e il salvataggio della formazione verranno implementati in futuro.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="bg-green-600/20 border-2 border-green-600/50 rounded-lg p-4 relative aspect-[7/5]">
@@ -54,7 +78,7 @@ export function MatchLineup() {
               <div className="absolute inset-y-0 right-0 w-24 border-l-2 border-green-600/50"></div>
 
               <div className="h-full w-full flex flex-col justify-around text-white z-10">
-                {formationLayout.slice().reverse().map((numPlayers, lineIndex) => (
+                {formationLayout.slice().reverse().map((_, lineIndex) => (
                   <div key={lineIndex} className="flex justify-around items-center">
                     {getPlayersForLine(formationLayout.length - 1 - lineIndex).map((player) => (
                       <PlayerAvatar key={player.id} player={player} />
@@ -73,7 +97,7 @@ export function MatchLineup() {
             <CardTitle>Panchina</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {allPlayers.slice(7).map(player => (
+            {onTheBench.length > 0 ? onTheBench.map(player => (
               <div key={player.id} className="flex items-center gap-3 p-2 border rounded-md">
                  <Avatar className="w-8 h-8">
                     <AvatarImage src={player.avatarUrl} alt={player.name} data-ai-hint={player.imageHint} />
@@ -84,7 +108,7 @@ export function MatchLineup() {
                     <p className="text-xs text-muted-foreground">{player.role}</p>
                 </div>
               </div>
-            ))}
+            )) : <p className="text-sm text-muted-foreground">Nessun giocatore in panchina.</p>}
           </CardContent>
         </Card>
       </div>

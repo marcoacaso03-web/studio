@@ -7,15 +7,15 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: D1
-- Titolo: UX polish
+- ID: D2
+- Titolo: Test (2 unit + 1 component)
 - Stato: NOT STARTED
 
 ## LAST KNOWN GOOD
 - Build status: OK
 - Comandi OK: `npm install`, `npm run build`
 - Browser testato: Chrome
-- Descrizione: Implementata la funzione di esportazione CSV per giocatori, partite e statistiche partita nella pagina "Altro".
+- Descrizione: Aggiunti stati vuoti, corretto il componente `MatchLineup` per usare dati reali dallo store e aggiunta una pagina di errore globale.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -39,10 +39,11 @@
 
 ### STEP D (Export + Test)
 - [x] D0 Export CSV
-- [ ] D1 UX polish
+- [x] D1 UX polish
 - [ ] D2 Test (2 unit + 1 component)
 
 ## DECISION LOG (perché abbiamo scelto X)
+- **D1**: Aggiunti stati vuoti nelle pagine `Calendario` e `Membri` per migliorare la UX quando non ci sono dati. Aggiunto un file `error.tsx` globale per gestire gli errori in modo controllato. Corretto un bug critico nel componente `MatchLineup` che usava dati mock invece di quelli dallo store, allineando la visualizzazione della formazione ai giocatori effettivamente presenti.
 - **D0**: Implementata una funzione di export CSV direttamente nel client-side, nella pagina "Altro". Questo evita di aggiungere dipendenze esterne. La funzione converte gli array di oggetti in stringhe CSV e le scarica programmaticamente creando un link temporaneo. Ho deciso di appiattire gli oggetti nidificati (es. `player.stats`) per rendere il CSV più leggibile e compatibile con i comuni spreadsheet.
 - **C2**: Creato un componente `TeamPerformanceChart` per visualizzare i risultati della squadra (V/P/S) con un grafico a barre verticale. Questa visualizzazione è stata scelta per la sua chiarezza immediata. Aggiunta una nuova scheda "Grafici" alla pagina statistiche per ospitare questo e futuri grafici, mantenendo l'interfaccia ordinata.
 - **C1**: Creato uno store dedicato `useStatsStore` per caricare e memorizzare i dati aggregati, mantenendo l'architettura coerente. La pagina statistiche è stata suddivisa in due tab ("Record Squadra" e "Leaderboard Giocatori") per una migliore organizzazione dei dati.
@@ -84,6 +85,6 @@
 - Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. D1 - UX polish.
-2. D2 - Test (2 unit + 1 component).
-3. Pulizia finale e refactoring.
+1. D2 - Test (2 unit + 1 component).
+2. Pulizia finale e refactoring.
+3. Configurazione PWA per l'utilizzo offline.
