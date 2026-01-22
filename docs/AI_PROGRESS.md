@@ -7,15 +7,15 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: R4
-- Titolo: Rimpiazzare scheda dashboard con calendario
+- ID: R5
+- Titolo: Fix Risultato Partita
 - Stato: NOT STARTED
 
 ## LAST KNOWN GOOD
 - Build status: OK
 - Comandi OK: `npm install`, `npm run build`, `npm run test`
 - Browser testato: Chrome
-- Descrizione: "Riparata" la funzionalità di modifica giocatore. Il form ora presenta campi separati per "Nome" e "Cognome" come richiesto, migliorando l'esperienza di inserimento dati.
+- Descrizione: La pagina principale ora reindirizza automaticamente alla schermata del calendario, che diventa di fatto la nuova home page dell'applicazione. La vecchia dashboard è stata rimossa.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -53,8 +53,10 @@
 - [x] R2.1 Unificata gestione data su datetime-local
 - [x] R2 Ripara Table statistiche
 - [x] R3 Ripara 3 pallini in sezione Membri
+- [x] R4 Redirect home a calendario
 
 ## DECISION LOG (perché abbiamo scelto X)
+- **R4**: Per rendere il calendario la schermata principale, la pagina radice (`/`) ora esegue un reindirizzamento server-side a `/calendario`. Questa scelta è stata preferita rispetto alla sostituzione del contenuto per mantenere una struttura di URL coerente (`/calendario` e `/calendario/[id]`) e per evitare di complicare la logica di navigazione attiva nella barra inferiore, risultando in una soluzione più pulita e manutenibile.
 - **R3**: Per allineare il form di modifica del giocatore alle aspettative dell'utente ("nome" e "cognome" separati), il componente `PlayerFormDialog` è stato modificato. Ora presenta due input distinti per nome e cognome. Internamente, i valori vengono concatenati prima del salvataggio per non alterare lo schema del database (che prevede un unico campo `name`). Questa scelta evita un refactoring esteso e una migrazione del DB, mantenendo il task focalizzato sulla UI.
 - **R2**: Per garantire che la tabella delle statistiche si aggiorni dopo l'aggiunta o la rimozione di un giocatore, è stato inserito un trigger. Ora, le azioni nel `usePlayersStore` (aggiunta, modifica, rimozione) invocano `loadStats()` nel `useStatsStore`, forzando il ricalcolo e l'aggiornamento della leaderboard. Questo risolve il problema di dati non sincronizzati tra le diverse sezioni dell'app.
 - **R2.1**: Unificata la gestione della data della partita. Rimosso il `Popover` con `Calendar` e l'input di testo manuale, sostituiti da un unico input HTML `type="datetime-local"`. Questo risolve il bug che reimpostava il mese/anno a quello corrente e semplifica notevolmente il codice. Il valore viene salvato come stringa ISO nel database per garantire coerenza, e il form gestisce le conversioni necessarie per il display.
@@ -104,6 +106,6 @@
 - ~~Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.~~ Rimossi nel task F0.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. R4 **Rimpiazzare scheda dashboard con calendario**: Quando si apre l'app l'utente si deve trovare nella schermata calendario. la scheda dashboard va eliminata.
-2. R5 **Fix Risultato Partita**: Aggiungere un modo per inserire/modificare il risultato di una partita (es. 2-1) dalla pagina di dettaglio. Questo dovrebbe aggiornare lo stato della partita a "completata".
-3. R6 **Pulisci codice Formazione**: Il componente `MatchLineup` ha logica di formazione statica. Refactoring per permettere di selezionare e salvare la formazione.
+1. R5 **Fix Risultato Partita**: Aggiungere un modo per inserire/modificare il risultato di una partita (es. 2-1) dalla pagina di dettaglio. Questo dovrebbe aggiornare lo stato della partita a "completata".
+2. R6 **Pulisci codice Formazione**: Il componente `MatchLineup` ha logica di formazione statica. Refactoring per permettere di selezionare e salvare la formazione.
+3. R7 **Migliora UX presenze**: Quando si cambia lo stato di presenza di un giocatore, mostrare un feedback visivo immediato senza ricaricare tutta la lista.
