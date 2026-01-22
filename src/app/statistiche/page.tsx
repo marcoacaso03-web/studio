@@ -8,6 +8,7 @@ import { useStatsStore } from "@/store/useStatsStore";
 import { TeamRecord } from "@/components/statistiche/team-record";
 import { PlayerLeaderboard } from "@/components/statistiche/player-leaderboard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TeamPerformanceChart } from "@/components/statistiche/team-performance-chart";
 
 export default function StatistichePage() {
   const { loading, loadStats } = useStatsStore();
@@ -20,9 +21,10 @@ export default function StatistichePage() {
     <div>
       <PageHeader title="Statistiche" />
       <Tabs defaultValue="record" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="record">Record Squadra</TabsTrigger>
           <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+          <TabsTrigger value="grafici">Grafici</TabsTrigger>
         </TabsList>
         <TabsContent value="record">
           {loading ? (
@@ -40,6 +42,13 @@ export default function StatistichePage() {
              <Skeleton className="h-96 w-full" />
            ) : (
             <PlayerLeaderboard />
+           )}
+        </TabsContent>
+        <TabsContent value="grafici">
+           {loading ? (
+             <Skeleton className="h-80 w-full" />
+           ) : (
+            <TeamPerformanceChart />
            )}
         </TabsContent>
       </Tabs>
