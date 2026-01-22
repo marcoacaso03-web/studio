@@ -7,15 +7,15 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: R5
-- Titolo: Fix Risultato Partita
+- ID: R6
+- Titolo: Verifica funzionalità di modifica nella schermata calendario
 - Stato: NOT STARTED
 
 ## LAST KNOWN GOOD
 - Build status: OK
 - Comandi OK: `npm install`, `npm run build`, `npm run test`
 - Browser testato: Chrome
-- Descrizione: La pagina principale ora reindirizza automaticamente alla schermata del calendario, che diventa di fatto la nuova home page dell'applicazione. La vecchia dashboard è stata rimossa.
+- Descrizione: Aggiunta la possibilità di inserire/modificare il risultato di una partita, che aggiorna lo stato a "completata" e ricalcola le statistiche.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -54,8 +54,10 @@
 - [x] R2 Ripara Table statistiche
 - [x] R3 Ripara 3 pallini in sezione Membri
 - [x] R4 Redirect home a calendario
+- [x] R5 Fix Risultato Partita
 
 ## DECISION LOG (perché abbiamo scelto X)
+- **R5**: Per inserire e modificare il risultato di una partita, è stato creato un componente dialog (`MatchResultDialog`). Questo mantiene pulita l'interfaccia principale. Al salvataggio del risultato, la partita viene automaticamente contrassegnata come "completata" e viene triggerato un ricalcolo delle statistiche globali (record di squadra e performance dei giocatori), garantendo che tutti i dati dell'app rimangano sincronizzati.
 - **R4**: Per rendere il calendario la schermata principale, la pagina radice (`/`) ora esegue un reindirizzamento server-side a `/calendario`. Questa scelta è stata preferita rispetto alla sostituzione del contenuto per mantenere una struttura di URL coerente (`/calendario` e `/calendario/[id]`) e per evitare di complicare la logica di navigazione attiva nella barra inferiore, risultando in una soluzione più pulita e manutenibile.
 - **R3**: Per allineare il form di modifica del giocatore alle aspettative dell'utente ("nome" e "cognome" separati), il componente `PlayerFormDialog` è stato modificato. Ora presenta due input distinti per nome e cognome. Internamente, i valori vengono concatenati prima del salvataggio per non alterare lo schema del database (che prevede un unico campo `name`). Questa scelta evita un refactoring esteso e una migrazione del DB, mantenendo il task focalizzato sulla UI.
 - **R2**: Per garantire che la tabella delle statistiche si aggiorni dopo l'aggiunta o la rimozione di un giocatore, è stato inserito un trigger. Ora, le azioni nel `usePlayersStore` (aggiunta, modifica, rimozione) invocano `loadStats()` nel `useStatsStore`, forzando il ricalcolo e l'aggiornamento della leaderboard. Questo risolve il problema di dati non sincronizzati tra le diverse sezioni dell'app.
@@ -106,6 +108,6 @@
 - ~~Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.~~ Rimossi nel task F0.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. R5 **Fix Risultato Partita**: Aggiungere un modo per inserire/modificare il risultato di una partita (es. 2-1) dalla pagina di dettaglio. Questo dovrebbe aggiornare lo stato della partita a "completata".
-2. R6 **Pulisci codice Formazione**: Il componente `MatchLineup` ha logica di formazione statica. Refactoring per permettere di selezionare e salvare la formazione.
-3. R7 **Migliora UX presenze**: Quando si cambia lo stato di presenza di un giocatore, mostrare un feedback visivo immediato senza ricaricare tutta la lista.
+1. R6 **Verifica funzionalità di modifica nella schermata calendario**: Risultato attuale: Dopo che si elimina o si modifica una partita in calendario non si riesce più ad usare l'app, la schermata si freeza e non percepisce i tocchi dell'utente. Risultato atteso: Dopo aver applicato modifiche alle partite nella sezione calendario, si deve poter continuare ad usare l'app.
+2. R7 **Migliora UX presenze**: Quando si cambia lo stato di presenza di un giocatore, mostrare un feedback visivo immediato senza ricaricare tutta la lista.
+3. F1 **Pulizia finale e ottimizzazione**: Revisione generale del codice, rimozione di console.log e miglioramento delle performance dove possibile.

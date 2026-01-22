@@ -5,6 +5,8 @@ import { matchRepository } from '@/lib/repositories/match-repository';
 import { attendanceRepository } from '@/lib/repositories/attendance-repository';
 import { statsRepository } from '@/lib/repositories/stats-repository';
 import { playerRepository } from '@/lib/repositories/player-repository';
+import { aggregationRepository } from '@/lib/repositories/aggregation-repository';
+import { useStatsStore } from './useStatsStore';
 import type { Match, Player, MatchAttendance, PlayerMatchStats, AttendanceStatus } from '@/lib/types';
 
 interface MatchDetailState {
@@ -18,6 +20,7 @@ interface MatchDetailState {
     load: (matchId: string) => Promise<void>;
     updateAttendance: (playerId: string, status: AttendanceStatus) => Promise<void>;
     saveAllStats: (allStats: PlayerMatchStats[]) => Promise<void>;
+    updateResult: (home: number, away: number) => Promise<void>;
 }
 
 export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
@@ -101,6 +104,33 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             )
         );
 
+        // After saving individual stats, we need to sync the global player stats
+        await aggregationRepository.syncAllPlayersStats();
+        // and reload the main stats page data.
+        useStatsStore.getState().loadStats();
+
         set({ stats: allStatsToSave });
+    },
+    
+    updateResult: async (home, away) => {
+        const { matchId, match } = get();
+        if (!matchId || !match) return;
+
+        const updatedData = {
+            result: { home, away },
+            status: 'completed' as const
+        };
+        
+        const updatedMatch = await matchRepository.update(matchId, updatedData);
+
+        if (updatedMatch) {
+            // After saving the result, we need to sync the global player stats
+            // because a completed match may change appearance counts etc.
+            await aggregationRepository.syncAllPlayersStats();
+            // and reload the main stats page data
+            useStatsStore.getState().loadStats();
+
+            set({ match: updatedMatch });
+        }
     },
 }));
