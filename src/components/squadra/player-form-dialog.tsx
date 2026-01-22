@@ -34,49 +34,69 @@ import {
 
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: "Il nome del giocatore è richiesto." }),
+  firstName: z.string().min(2, { message: "Il nome è richiesto." }),
+  lastName: z.string().min(2, { message: "Il cognome è richiesto." }),
   number: z.coerce.number().int().min(1, { message: "Il numero di maglia deve essere positivo." }).max(99, { message: "Numero di maglia non valido." }),
   role: z.enum(ROLES, { required_error: "Il ruolo è richiesto."}),
 });
 
-type PlayerFormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<typeof formSchema>;
+
+// The parent component expects this shape
+type PlayerSaveData = {
+  name: string;
+  number: number;
+  role: Role;
+};
 
 interface PlayerFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (data: PlayerFormValues, playerId?: string) => void;
+  onSave: (data: PlayerSaveData, playerId?: string) => void;
   player?: Player | null;
 }
 
 export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerFormDialogProps) {
-  const form = useForm<PlayerFormValues>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      number: 1,
+      firstName: "",
+      lastName: "",
       role: "Centrocampista",
     },
   });
 
   React.useEffect(() => {
-    if (open && player) {
-        form.reset({
-            name: player.name,
-            number: player.number,
-            role: player.role,
-        });
-    } else if (open && !player) {
-        form.reset({
-            name: "",
-            number: undefined,
-            role: undefined
-        });
+    if (open) {
+      if (player) {
+          const nameParts = player.name.split(' ');
+          const firstName = nameParts.shift() || '';
+          const lastName = nameParts.join(' ');
+          form.reset({
+              firstName,
+              lastName,
+              number: player.number,
+              role: player.role,
+          });
+      } else {
+          form.reset({
+              firstName: "",
+              lastName: "",
+              number: undefined,
+              role: undefined
+          });
+      }
     }
   }, [player, open, form]);
 
 
-  function onSubmit(data: PlayerFormValues) {
-    onSave(data, player?.id);
+  function onSubmit(data: FormValues) {
+    const saveData: PlayerSaveData = {
+      name: `${data.firstName} ${data.lastName}`.trim(),
+      number: data.number,
+      role: data.role
+    };
+    onSave(saveData, player?.id);
     onOpenChange(false);
   }
 
@@ -93,19 +113,34 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome e Cognome</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Es: Mario Rossi" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Es: Mario" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cognome</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Es: Rossi" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             
             <div className="grid grid-cols-2 gap-4">
                 <FormField
