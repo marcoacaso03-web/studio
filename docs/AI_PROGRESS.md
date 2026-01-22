@@ -7,15 +7,15 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: F0
-- Titolo: Pulizia Codice
-- Stato: COMPLETED
+- ID: R2
+- Titolo: Ripara Table statistiche
+- Stato: NOT STARTED
 
 ## LAST KNOWN GOOD
 - Build status: OK
 - Comandi OK: `npm install`, `npm run build`, `npm run test`
 - Browser testato: Chrome
-- Descrizione: L'applicazione è stata ripulita da file e componenti non più utilizzati.
+- Descrizione: La selezione della data per una partita è stata limitata a un intervallo di due anni (un anno nel passato e un anno nel futuro).
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -48,7 +48,12 @@
 ### STEP F (Refactoring)
 - [x] F0 Pulizia codice
 
+### STEP R (Repairs)
+- [x] R1 Ripara data partita
+- Usa Rindex per numerare le riparazioni del codice eseguite come per navbar e calendario
+
 ## DECISION LOG (perché abbiamo scelto X)
+- **R1**: La selezione della data nel form di creazione/modifica partita è stata limitata a un intervallo di due anni (un anno nel passato e un anno nel futuro) per prevenire l'inserimento di date errate e migliorare la UX. Utilizzato `subYears` e `addYears` da `date-fns` e la prop `disabled` del calendario.
 - **F0**: Rimosse le vecchie pagine mock (`/partita`, `/squadra`), il file di dati mock (`mock-data.ts`) e il componente sidebar non più utilizzato. Questo alleggerisce il codebase e rimuove il codice obsoleto che non è più necessario dopo la migrazione a IndexedDB.
 - **E0**: Iniziata la configurazione della PWA per rendere l'app installabile e migliorare le capacità offline. Aggiunto `next-pwa` e creato il `manifest.json`. Modificato `next.config.ts` per utilizzare la sintassi CommonJS (`require`/`module.exports`) per garantire la compatibilità con il plugin. Aggiunto il link al manifest e il `theme-color` nel layout principale.
 - **D2**: Introdotto Jest e React Testing Library per la suite di test. Creato un file di setup (`jest.setup.js`). È stato implementato un test di componente per `MembriPage` mockando lo store Zustand per testare i vari stati di rendering. I test unitari per `aggregationRepository` sono stati temporaneamente disabilitati a causa di un problema di installazione (404 Not Found) con la dipendenza `dexie-mock-extended`. Questo garantisce che la build del progetto non si blocchi.
@@ -94,6 +99,5 @@
 - ~~Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.~~ Rimossi nel task F0.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. F1 **Investigazione sulla navbar**: Ottimizza il funzionamento della navbar, rendi possibile lo spostamento da Calendario a Membri a Statistiche a Altro e viceversa.
-2. F2 **Data partita**: La data selezionabile col calendario deve spaziare dal passato al futuro in una finestra di due anni (da un anno fa a oggi e da oggi a un anno) dal giorno corrente
-3. F3 **Miglioramento PWA**: Aggiungere le icone PWA mancanti e ottimizzare il caching del service worker.
+1. R2 **Ripara Table statistiche**: Una volta creato un membro aggiorna la tabella con le statistiche con valori default 0 se nessun valore è stato aggiunto
+2. R3 **Ripara 3 pallini in sezione Membri**: Premendo sui 3 pallini di una scheda di un giocatore si deve aprire una schermata per modificare il nome, il cognome, il numero e il ruolo di un giocatore.

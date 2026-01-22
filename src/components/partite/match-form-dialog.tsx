@@ -4,7 +4,7 @@ import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { format } from "date-fns";
+import { format, addYears, subYears } from "date-fns";
 import { it } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 
@@ -145,7 +145,10 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                        disabled={(date) => date < new Date("1900-01-01")}
+                        disabled={{
+                          before: subYears(new Date(), 1),
+                          after: addYears(new Date(), 1),
+                        }}
                         initialFocus
                       />
                       <div className="p-3 border-t border-border">
