@@ -7,14 +7,14 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: R7
-- Titolo: Riparare Schermata membri
+- ID: F1
+- Titolo: Pulizia finale e ottimizzazione
 - Stato: NOT STARTED
 
 ## LAST KNOWN GOOD
 - Build status: OK
 - Comandi OK: `npm install`, `npm run build`, `npm run test`
-- Descrizione: Corretto il bug di freeze nella pagina Calendario dopo la modifica/eliminazione di una partita.
+- Descrizione: Risolto il crash che si verificava all'apertura del menu azioni nella scheda di un giocatore.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -55,8 +55,10 @@
 - [x] R4 Redirect home a calendario
 - [x] R5 Fix Risultato Partita
 - [x] R6 Verifica funzionalità di modifica nella schermata calendario
+- [x] R7 Riparare Schermata membri
 
 ## DECISION LOG (perché abbiamo scelto X)
+- **R7**: L'errore che causava il crash nella schermata membri era dovuto a un uso non valido del componente `AlertDialogTrigger` all'interno di `PlayerCard`. Questo trigger era "orfano", poiché il suo `AlertDialog` di riferimento si trovava nel componente genitore (`MembriPage`), generando un errore di contesto in React. La soluzione è stata rimuovere il `AlertDialogTrigger` dal menu "Elimina". L'apertura del dialogo è già gestita correttamente tramite lo stato nel componente genitore, rendendo il trigger non solo superfluo ma dannoso.
 - **R6**: Per risolvere il blocco dell'interfaccia dopo la modifica o l'eliminazione di una partita, lo store `useMatchesStore` è stato refattorizzato. Invece di manipolare manualmente lo stato in memoria (aggiornamento ottimistico), ora le funzioni `add`, `update` e `remove` eseguono l'operazione sul database e poi richiamano `fetchAll()` per ricaricare l'intera lista di partite. Questo approccio, sebbene leggermente meno performante, garantisce la coerenza tra UI e database ed elimina il bug di rendering che causava il "freeze", probabilmente dovuto a una gestione complessa dello stato mentre i dialoghi di Radix UI erano aperti.
 - **R5**: Per inserire e modificare il risultato di una partita, è stato creato un componente dialog (`MatchResultDialog`). Questo mantiene pulita l'interfaccia principale. Al salvataggio del risultato, la partita viene automaticamente contrassegnata come "completata" e viene triggerato un ricalcolo delle statistiche globali (record di squadra e performance dei giocatori), garantendo che tutti i dati dell'app rimangano sincronizzati.
 - **R4**: Per rendere il calendario la schermata principale, la pagina radice (`/`) ora esegue un reindirizzamento server-side a `/calendario`. Questa scelta è stata preferita rispetto alla sostituzione del contenuto per mantenere una struttura di URL coerente (`/calendario` e `/calendario/[id]`) e per evitare di complicare la logica di navigazione attiva nella barra inferiore, risultando in una soluzione più pulita e manutenibile.
@@ -109,7 +111,6 @@
 - ~~Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.~~ Rimossi nel task F0.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. R7 **Riparare Schermata membri**: Risultato attuale: quando si clicca sui 3 pallini viene restituito il messaggio 'Oops! Si è verificato un errore.'. Risultato atteso: quando si clicca sui 3 pallini si deve poter accedere al form del membro selezionato e modificare i dati inseriti nel form di aggiunta.
-2. F1 **Pulizia finale e ottimizzazione**: Revisione generale del codice, rimozione di console.log e miglioramento delle performance dove possibile.
-3. **Completamento PWA**: Migliorare il caching del service worker per un'esperienza offline più robusta.
-
+1. F1 **Pulizia finale e ottimizzazione**: Revisione generale del codice, rimozione di console.log e miglioramento delle performance dove possibile.
+2. **Completamento PWA**: Migliorare il caching del service worker per un'esperienza offline più robusta.
+3. **Nuove Funzionalità**: Pianificazione di un nuovo ciclo di sviluppo (es. gestione schemi di gioco, note sulla partita).

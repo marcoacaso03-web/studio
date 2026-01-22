@@ -11,7 +11,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 type PlayerCardProps = {
   player: Player;
@@ -34,11 +33,9 @@ export function PlayerCard({ player, onEdit, onDelete }: PlayerCardProps) {
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Azioni</DropdownMenuLabel>
                     <DropdownMenuItem onClick={onEdit}>Modifica</DropdownMenuItem>
-                    <AlertDialogTrigger asChild>
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={onDelete} className="text-destructive focus:bg-destructive/90 focus:text-destructive-foreground">
-                        Elimina
-                      </DropdownMenuItem>
-                    </AlertDialogTrigger>
+                    <DropdownMenuItem onClick={onDelete} className="text-destructive focus:bg-destructive/90 focus:text-destructive-foreground">
+                      Elimina
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>
