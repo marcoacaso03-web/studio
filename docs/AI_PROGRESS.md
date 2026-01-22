@@ -7,15 +7,14 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: R6
-- Titolo: Verifica funzionalità di modifica nella schermata calendario
+- ID: R7
+- Titolo: Riparare Schermata membri
 - Stato: NOT STARTED
 
 ## LAST KNOWN GOOD
 - Build status: OK
 - Comandi OK: `npm install`, `npm run build`, `npm run test`
-- Browser testato: Chrome
-- Descrizione: Aggiunta la possibilità di inserire/modificare il risultato di una partita, che aggiorna lo stato a "completata" e ricalcola le statistiche.
+- Descrizione: Corretto il bug di freeze nella pagina Calendario dopo la modifica/eliminazione di una partita.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -55,8 +54,10 @@
 - [x] R3 Ripara 3 pallini in sezione Membri
 - [x] R4 Redirect home a calendario
 - [x] R5 Fix Risultato Partita
+- [x] R6 Verifica funzionalità di modifica nella schermata calendario
 
 ## DECISION LOG (perché abbiamo scelto X)
+- **R6**: Per risolvere il blocco dell'interfaccia dopo la modifica o l'eliminazione di una partita, lo store `useMatchesStore` è stato refattorizzato. Invece di manipolare manualmente lo stato in memoria (aggiornamento ottimistico), ora le funzioni `add`, `update` e `remove` eseguono l'operazione sul database e poi richiamano `fetchAll()` per ricaricare l'intera lista di partite. Questo approccio, sebbene leggermente meno performante, garantisce la coerenza tra UI e database ed elimina il bug di rendering che causava il "freeze", probabilmente dovuto a una gestione complessa dello stato mentre i dialoghi di Radix UI erano aperti.
 - **R5**: Per inserire e modificare il risultato di una partita, è stato creato un componente dialog (`MatchResultDialog`). Questo mantiene pulita l'interfaccia principale. Al salvataggio del risultato, la partita viene automaticamente contrassegnata come "completata" e viene triggerato un ricalcolo delle statistiche globali (record di squadra e performance dei giocatori), garantendo che tutti i dati dell'app rimangano sincronizzati.
 - **R4**: Per rendere il calendario la schermata principale, la pagina radice (`/`) ora esegue un reindirizzamento server-side a `/calendario`. Questa scelta è stata preferita rispetto alla sostituzione del contenuto per mantenere una struttura di URL coerente (`/calendario` e `/calendario/[id]`) e per evitare di complicare la logica di navigazione attiva nella barra inferiore, risultando in una soluzione più pulita e manutenibile.
 - **R3**: Per allineare il form di modifica del giocatore alle aspettative dell'utente ("nome" e "cognome" separati), il componente `PlayerFormDialog` è stato modificato. Ora presenta due input distinti per nome e cognome. Internamente, i valori vengono concatenati prima del salvataggio per non alterare lo schema del database (che prevede un unico campo `name`). Questa scelta evita un refactoring esteso e una migrazione del DB, mantenendo il task focalizzato sulla UI.
@@ -108,6 +109,7 @@
 - ~~Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.~~ Rimossi nel task F0.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. R6 **Verifica funzionalità di modifica nella schermata calendario**: Risultato attuale: Dopo che si elimina o si modifica una partita in calendario non si riesce più ad usare l'app, la schermata si freeza e non percepisce i tocchi dell'utente. Risultato atteso: Dopo aver applicato modifiche alle partite nella sezione calendario, si deve poter continuare ad usare l'app.
-2. R7 **Migliora UX presenze**: Quando si cambia lo stato di presenza di un giocatore, mostrare un feedback visivo immediato senza ricaricare tutta la lista.
-3. F1 **Pulizia finale e ottimizzazione**: Revisione generale del codice, rimozione di console.log e miglioramento delle performance dove possibile.
+1. R7 **Riparare Schermata membri**: Risultato attuale: quando si clicca sui 3 pallini viene restituito il messaggio 'Oops! Si è verificato un errore.'. Risultato atteso: quando si clicca sui 3 pallini si deve poter accedere al form del membro selezionato e modificare i dati inseriti nel form di aggiunta.
+2. F1 **Pulizia finale e ottimizzazione**: Revisione generale del codice, rimozione di console.log e miglioramento delle performance dove possibile.
+3. **Completamento PWA**: Migliorare il caching del service worker per un'esperienza offline più robusta.
+

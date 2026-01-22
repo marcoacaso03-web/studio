@@ -14,7 +14,7 @@ interface MatchState {
     remove: (id: string) => Promise<void>;
 }
 
-export const useMatchesStore = create<MatchState>((set) => ({
+export const useMatchesStore = create<MatchState>((set, get) => ({
     matches: [],
     loading: true,
     fetchAll: async () => {
@@ -24,22 +24,15 @@ export const useMatchesStore = create<MatchState>((set) => ({
     },
     add: async (data) => {
         const newMatch = await matchRepository.add(data);
-        set(state => ({ 
-            matches: [...state.matches, newMatch].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()) 
-        }));
+        await get().fetchAll(); // Refetch the entire list to ensure consistency
         return newMatch;
     },
     update: async (id, updates) => {
-        const updatedMatch = await matchRepository.update(id, updates);
-        if (updatedMatch) {
-            set(state => ({
-                matches: state.matches.map(m => m.id === id ? updatedMatch : m)
-                                     .sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-            }));
-        }
+        await matchRepository.update(id, updates);
+        await get().fetchAll(); // Refetch the entire list
     },
     remove: async (id) => {
         await matchRepository.delete(id);
-        set(state => ({ matches: state.matches.filter(m => m.id !== id) }));
+        await get().fetchAll(); // Refetch the entire list
     },
 }));
