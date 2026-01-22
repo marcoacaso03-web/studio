@@ -7,15 +7,15 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: C1
-- Titolo: 2 schermate stats reali
+- ID: C2
+- Titolo: Recharts grafico
 - Stato: NOT STARTED
 
 ## LAST KNOWN GOOD
 - Build status: OK
 - Comandi OK: `npm install`, `npm run build`
 - Browser testato: Chrome
-- Descrizione: Creato un repository di aggregazione per calcolare statistiche complesse (record squadra, stats giocatori).
+- Descrizione: Create due schermate per le statistiche reali ("Record Squadra" e "Leaderboard Giocatori") che caricano e visualizzano dati aggregati da IndexedDB tramite un nuovo store Zustand.
 
 ## TASK BOARD STATUS
 ### STEP A (UI + Mock)
@@ -34,7 +34,7 @@
 
 ### STEP C (Stats + Charts)
 - [x] C0 Aggregazioni
-- [ ] C1 2 schermate stats reali
+- [x] C1 2 schermate stats reali
 - [ ] C2 Recharts grafico
 
 ### STEP D (Export + Test)
@@ -43,6 +43,7 @@
 - [ ] D2 Test (2 unit + 1 component)
 
 ## DECISION LOG (perché abbiamo scelto X)
+- **C1**: Creato uno store dedicato `useStatsStore` per caricare e memorizzare i dati aggregati, mantenendo l'architettura coerente. La pagina statistiche è stata suddivisa in due tab ("Record Squadra" e "Leaderboard Giocatori") per una migliore organizzazione dei dati.
 - **C0**: Creato un `aggregationRepository` dedicato per contenere tutte le query di aggregazione (es. record squadra, statistiche totali giocatori). Questo mantiene i repository focalizzati su singole tabelle/entità, migliorando la manutenibilità e centralizzando la logica di calcolo. Include un metodo `syncAllPlayersStats` per persistere le statistiche aggregate nella tabella `players`.
 - **B3**: Migrata la pagina di dettaglio della partita (`/calendario/[id]`) per usare lo store `useMatchDetailStore`. Ora le presenze e le statistiche vengono caricate e salvate in modo persistente su IndexedDB. I componenti delle schede (`MatchAttendanceTab`, `MatchStatsTab`) sono stati refattorizzati per leggere e scrivere direttamente dallo store, semplificando il flusso dei dati.
 - **B2**: Convertita la Dashboard (pagina home) a Client Component per poter utilizzare gli store Zustand e mostrare dati dinamici e aggiornati dal database locale (es. numero giocatori, prossima partita).
@@ -81,6 +82,6 @@
 - Le vecchie pagine (`/partita`, `/squadra`) esistono ancora nel filesystem ma non sono più linkate da nessuna parte.
 
 ## NEXT 3 TASKS (auto-pianificazione)
-1. C1 - 2 schermate stats reali.
-2. C2 - Recharts grafico.
-3. D0 - Export CSV.
+1. C2 - Recharts grafico.
+2. D0 - Export CSV.
+3. D1 - UX polish.
