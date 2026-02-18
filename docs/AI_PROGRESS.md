@@ -8,13 +8,13 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: R15
-- Titolo: Ordinamento Cronologico Decrescente Eventi
+- ID: R16
+- Titolo: Fix UI Freeze dopo Modifica Partita
 - Stato: COMPLETED
 
 ## LAST KNOWN GOOD
 - Build status: OK
-- Descrizione: Ordinata la cronaca eventi in modo decrescente (eventi più recenti in alto).
+- Descrizione: Applicata patch minimale per evitare il blocco dell'interfaccia dopo la chiusura del dialogo di modifica nel calendario.
 
 ## TASK BOARD STATUS
 ### STEP R (Repairs & UX)
@@ -34,11 +34,10 @@
 - [x] R13 Cronaca Eventi e Inserimento Rapido
 - [x] R14 Perfezionamento Inserimento Eventi (Tempi e Minuti)
 - [x] R15 Ordinamento Cronologico Decrescente Eventi
+- [x] R16 Fix UI Freeze dopo Modifica Partita
 
 ## DECISION LOG
-- **R13**: Eliminata la tabella statistiche manuale in favore di una Timeline eventi (Goal, Assist, Cartellini).
-- **R14**: Modificati i tempi di gioco per supportare i supplementari (1TS, 2TS) e rimosso il tempo di recupero generico.
-- **R15**: Implementato ordinamento decrescente nel repository eventi per migliorare la leggibilità della cronaca.
+- **R16**: Aggiunto `e.preventDefault()` su `onSelect` del menu item "Modifica" per evitare conflitti di focus/overlay tra Radix Dropdown e Dialog.
 
 ## NEXT 3 TASKS
 1. F1 **Pulizia finale e ottimizzazione**: Revisione generale del codice.

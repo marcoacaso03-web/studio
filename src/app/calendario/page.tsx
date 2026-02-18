@@ -183,7 +183,10 @@ export default function CalendarioPage() {
                             <DropdownMenuItem asChild>
                                 <Link href={`/calendario/${match.id}`}>Vedi Dettagli</Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleOpenForm(match)}>
+                            <DropdownMenuItem onSelect={(e) => {
+                              e.preventDefault();
+                              handleOpenForm(match);
+                            }}>
                               Modifica
                             </DropdownMenuItem>
                             <AlertDialog>
