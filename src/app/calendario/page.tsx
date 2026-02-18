@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal, PlusCircle } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Rocket } from "lucide-react";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -30,6 +30,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useMatchesStore } from "@/store/useMatchesStore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { playerRepository } from "@/lib/repositories/player-repository";
+import { matchRepository } from "@/lib/repositories/match-repository";
 
 
 export default function CalendarioPage() {
@@ -41,6 +43,32 @@ export default function CalendarioPage() {
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
+
+  // Seed data if empty
+  const handleSeedData = async () => {
+    try {
+        // Create sample players
+        const p1 = await playerRepository.add({ name: "Marco Rossi", number: 10, role: "Attaccante" });
+        const p2 = await playerRepository.add({ name: "Luca Bianchi", number: 5, role: "Difensore" });
+        const p3 = await playerRepository.add({ name: "Davide Neri", number: 1, role: "Portiere" });
+        
+        // Create sample match
+        const matchDate = new Date();
+        matchDate.setDate(matchDate.getDate() - 2); // 2 days ago
+        
+        await add({
+            opponent: "Real Isola",
+            location: "Stadio Comunale",
+            date: matchDate,
+            isHome: true
+        });
+
+        toast({ title: "Dati di esempio creati", description: "Abbiamo aggiunto giocatori e una partita per farti esplorare l'app." });
+        fetchAll();
+    } catch (e) {
+        console.error(e);
+    }
+  };
 
   const getStatusBadge = (status: 'scheduled' | 'completed' | 'canceled') => {
     switch (status) {
@@ -89,10 +117,17 @@ export default function CalendarioPage() {
             <CardTitle>Calendario Partite</CardTitle>
             <CardDescription>Visualizza e gestisci tutte le partite della stagione.</CardDescription>
           </div>
-          <Button className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => handleOpenForm(null)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Aggiungi Partita
-          </Button>
+          <div className="flex gap-2">
+            {matches.length === 0 && !loading && (
+                <Button variant="outline" onClick={handleSeedData}>
+                    <Rocket className="mr-2 h-4 w-4" /> Esempio
+                </Button>
+            )}
+            <Button className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => handleOpenForm(null)}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Aggiungi Partita
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -105,7 +140,7 @@ export default function CalendarioPage() {
         ) : matches.length === 0 ? (
             <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg mt-4">
                 <p className="font-semibold text-lg text-foreground">Nessuna partita in programma</p>
-                <p className="text-sm mt-1">Usa il pulsante "Aggiungi Partita" per iniziare a pianificare la stagione.</p>
+                <p className="text-sm mt-1">Usa il pulsante "Aggiungi Partita" o "Esempio" per iniziare.</p>
             </div>
         ) : (
         <Table>

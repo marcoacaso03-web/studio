@@ -6,13 +6,15 @@ import { notFound, useParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MatchLineup } from "@/components/partite/match-lineup";
-import { MatchStatsTab } from "@/components/partite/match-stats-tab";
 import { MatchAttendanceTab } from "@/components/partite/match-attendance-tab";
+import { MatchEventsTab } from "@/components/partite/match-events-tab";
 import { useMatchDetailStore } from '@/store/useMatchDetailStore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { MatchResultDialog } from '@/components/partite/match-result-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { CalendarDays, MapPin, Trophy, Users, Zap } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 export default function MatchDetailPage() {
   const params = useParams();
@@ -39,9 +41,10 @@ export default function MatchDetailPage() {
 
   if (loading) {
     return (
-        <div>
-            <PageHeader title="Caricamento..." />
-            <Skeleton className="h-10 w-full mb-4" />
+        <div className="space-y-4">
+            <Skeleton className="h-12 w-3/4" />
+            <Skeleton className="h-40 w-full" />
+            <Skeleton className="h-10 w-full" />
             <Skeleton className="h-64 w-full" />
         </div>
     );
@@ -52,71 +55,81 @@ export default function MatchDetailPage() {
   }
 
   const matchDate = new Date(match.date);
+  const isCompleted = match.status === 'completed';
 
   return (
     <>
-      <div>
-        <PageHeader title={`Partita vs ${match.opponent}`} />
-        
-        <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="info">Info Partita</TabsTrigger>
-            <TabsTrigger value="convocati">Convocati</TabsTrigger>
-            <TabsTrigger value="formazione">Formazione</TabsTrigger>
-            <TabsTrigger value="statistiche">Statistiche</TabsTrigger>
-          </TabsList>
+      <div className="space-y-6">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+             <PageHeader title={`Vs ${match.opponent}`} />
+             <Badge variant={isCompleted ? "default" : "secondary"}>
+                {isCompleted ? "Completata" : "In Programma"}
+             </Badge>
+          </div>
 
-          <TabsContent value="info">
-            <Card>
-              <CardHeader>
-                <CardTitle>Dettagli Partita</CardTitle>
-                <CardDescription>Informazioni generali sulla partita.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="font-semibold">Data</p>
-                    <p>{matchDate.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          {/* Risultato e Info Rapide */}
+          <Card className="bg-primary text-primary-foreground">
+            <CardContent className="p-6">
+              <div className="flex flex-col items-center justify-center space-y-6">
+                <div className="flex items-center justify-center gap-8 md:gap-16">
+                  <div className="text-center">
+                    <p className="text-sm opacity-80 mb-1">{match.isHome ? "SQUADRA+" : match.opponent.toUpperCase()}</p>
+                    <p className="text-5xl font-black">{match.result?.home ?? "-"}</p>
                   </div>
-                  <div>
-                    <p className="font-semibold">Orario</p>
-                    <p>{matchDate.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</p>
-                  </div>
-                  <div>
-                    <p className="font-semibold">Luogo</p>
-                    <p>{match.location}</p>
-                  </div>
-                  <div>
-                    <p className="font-semibold">Casa/Trasferta</p>
-                    <p>{match.isHome ? "Partita in casa" : "Partita in trasferta"}</p>
-                  </div>
-                   <div>
-                    <p className="font-semibold">Risultato Finale</p>
-                    <div className="flex items-center gap-4">
-                      <p className="text-2xl font-bold">{match.result ? `${match.result.home} - ${match.result.away}` : "Da giocare"}</p>
-                      <Button variant="outline" size="sm" onClick={() => setIsResultDialogOpen(true)}>
-                        {match.result ? "Modifica" : "Inserisci"} Risultato
-                      </Button>
-                    </div>
+                  <div className="text-3xl font-light opacity-50">-</div>
+                  <div className="text-center">
+                    <p className="text-sm opacity-80 mb-1">{!match.isHome ? "SQUADRA+" : match.opponent.toUpperCase()}</p>
+                    <p className="text-5xl font-black">{match.result?.away ?? "-"}</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+
+                <div className="grid grid-cols-2 gap-4 w-full pt-4 border-t border-primary-foreground/20">
+                  <div className="flex items-center gap-2 text-sm">
+                    <CalendarDays className="h-4 w-4 opacity-70" />
+                    <span>{matchDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin className="h-4 w-4 opacity-70" />
+                    <span className="truncate">{match.location}</span>
+                  </div>
+                </div>
+                
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  className="w-full mt-2"
+                  onClick={() => setIsResultDialogOpen(true)}
+                >
+                  <Trophy className="mr-2 h-4 w-4" />
+                  {match.result ? "Modifica Risultato" : "Inserisci Risultato"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <Tabs defaultValue="eventi" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="eventi" className="flex items-center gap-2">
+              <Zap className="h-4 w-4" /> Cronaca & Eventi
+            </TabsTrigger>
+            <TabsTrigger value="squadra" className="flex items-center gap-2">
+              <Users className="h-4 w-4" /> Formazione & Convocati
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="eventi" className="space-y-4">
+             <MatchEventsTab />
           </TabsContent>
 
-          <TabsContent value="convocati">
-              <MatchAttendanceTab />
-          </TabsContent>
-
-          <TabsContent value="formazione">
+          <TabsContent value="squadra" className="space-y-6">
               <MatchLineup />
-          </TabsContent>
-
-          <TabsContent value="statistiche">
-            <MatchStatsTab />
+              <MatchAttendanceTab />
           </TabsContent>
         </Tabs>
       </div>
+
       <MatchResultDialog
         open={isResultDialogOpen}
         onOpenChange={setIsResultDialogOpen}
