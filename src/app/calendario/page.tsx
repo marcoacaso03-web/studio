@@ -6,15 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal, PlusCircle, Rocket } from "lucide-react";
+import { Eye, PlusCircle, Rocket, Trash2 } from "lucide-react";
 import Link from "next/link";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Match } from "@/lib/types";
 import { MatchFormDialog } from "@/components/partite/match-form-dialog";
 import {
@@ -31,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMatchesStore } from "@/store/useMatchesStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { playerRepository } from "@/lib/repositories/player-repository";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 export default function CalendarioPage() {
@@ -100,99 +94,100 @@ export default function CalendarioPage() {
 
 
   return (
-    <>
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Calendario Partite</CardTitle>
-            <CardDescription>Visualizza e gestisci tutte le partite della stagione.</CardDescription>
-          </div>
-          <div className="flex gap-2">
-            {matches.length === 0 && !loading && (
-                <Button variant="outline" onClick={handleSeedData}>
-                    <Rocket className="mr-2 h-4 w-4" /> Esempio
-                </Button>
-            )}
-            <Button className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => setIsFormOpen(true)}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Aggiungi Partita
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-           <div className="space-y-4">
-             <Skeleton className="h-10 w-full" />
-             <Skeleton className="h-10 w-full" />
-             <Skeleton className="h-10 w-full" />
-           </div>
-        ) : matches.length === 0 ? (
-            <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg mt-4">
-                <p className="font-semibold text-lg text-foreground">Nessuna partita in programma</p>
-                <p className="text-sm mt-1">Usa il pulsante "Aggiungi Partita" o "Esempio" per iniziare.</p>
+    <TooltipProvider>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Calendario Partite</CardTitle>
+              <CardDescription>Visualizza e gestisci tutte le partite della stagione.</CardDescription>
             </div>
-        ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Data</TableHead>
-              <TableHead>Avversario</TableHead>
-              <TableHead>Luogo</TableHead>
-              <TableHead>Risultato</TableHead>
-              <TableHead>Stato</TableHead>
-              <TableHead>
-                <span className="sr-only">Azioni</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {matches.map((match) => (
-              <TableRow key={match.id}>
-                <TableCell className="font-medium">
-                  {new Date(match.date).toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' })}
-                </TableCell>
-                <TableCell>{match.opponent}</TableCell>
-                <TableCell>{match.location} {match.isHome ? '(C)' : '(T)'}</TableCell>
-                <TableCell>
-                  {match.result ? `${match.result.home} - ${match.result.away}` : '-'}
-                </TableCell>
-                <TableCell>
-                  {getStatusBadge(match.status)}
-                </TableCell>
-                <TableCell>
-                   <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Apri menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Azioni</DropdownMenuLabel>
-                            <DropdownMenuItem asChild>
-                                <Link href={`/calendario/${match.id}`}>Vedi Dettagli</Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onSelect={(e) => {
-                                e.preventDefault();
-                                setTimeout(() => setMatchToDelete(match), 0);
-                              }} 
-                              className="text-destructive focus:bg-destructive/90 focus:text-destructive-foreground"
-                            >
-                              Elimina
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </TableCell>
+            <div className="flex gap-2">
+              {matches.length === 0 && !loading && (
+                  <Button variant="outline" onClick={handleSeedData}>
+                      <Rocket className="mr-2 h-4 w-4" /> Esempio
+                  </Button>
+              )}
+              <Button className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => setIsFormOpen(true)}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Aggiungi Partita
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+             <div className="space-y-4">
+               <Skeleton className="h-10 w-full" />
+               <Skeleton className="h-10 w-full" />
+               <Skeleton className="h-10 w-full" />
+             </div>
+          ) : matches.length === 0 ? (
+              <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg mt-4">
+                  <p className="font-semibold text-lg text-foreground">Nessuna partita in programma</p>
+                  <p className="text-sm mt-1">Usa il pulsante "Aggiungi Partita" o "Esempio" per iniziare.</p>
+              </div>
+          ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Data</TableHead>
+                <TableHead>Avversario</TableHead>
+                <TableHead>Luogo</TableHead>
+                <TableHead>Risultato</TableHead>
+                <TableHead>Stato</TableHead>
+                <TableHead className="w-24 text-right pr-6">Azioni</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        )}
-      </CardContent>
-    </Card>
+            </TableHeader>
+            <TableBody>
+              {matches.map((match) => (
+                <TableRow key={match.id}>
+                  <TableCell className="font-medium">
+                    {new Date(match.date).toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </TableCell>
+                  <TableCell>{match.opponent}</TableCell>
+                  <TableCell>{match.location} {match.isHome ? '(C)' : '(T)'}</TableCell>
+                  <TableCell>
+                    {match.result ? `${match.result.home} - ${match.result.away}` : '-'}
+                  </TableCell>
+                  <TableCell>
+                    {getStatusBadge(match.status)}
+                  </TableCell>
+                  <TableCell className="text-right pr-4">
+                    <div className="flex items-center justify-end gap-1">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" asChild>
+                            <Link href={`/calendario/${match.id}`}>
+                              <Eye className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Vedi Dettagli</TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            onClick={() => setMatchToDelete(match)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Elimina</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          )}
+        </CardContent>
+      </Card>
 
       <MatchFormDialog 
         open={isFormOpen} 
@@ -217,6 +212,6 @@ export default function CalendarioPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </TooltipProvider>
   );
 }

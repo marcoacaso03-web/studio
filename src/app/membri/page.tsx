@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, MoreHorizontal, Edit, Trash2, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react";
+import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react";
 import type { Player, Role } from "@/lib/types";
 import { PlayerFormDialog } from "@/components/squadra/player-form-dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -26,17 +26,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { usePlayersStore } from "@/store/usePlayersStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type SortConfig = {
   key: string | null;
@@ -70,10 +64,6 @@ export default function RosaPage() {
         toast({ title: "Giocatore aggiunto", description: `${newPlayer.name} è stato aggiunto alla rosa.` });
       }
     }
-  };
-
-  const handleDeleteConfirm = (player: Player) => {
-    setPlayerToDelete(player);
   };
 
   const handleDeletePlayer = async () => {
@@ -157,7 +147,7 @@ export default function RosaPage() {
   };
 
   return (
-    <>
+    <TooltipProvider>
       <div className="space-y-6">
         <PageHeader 
           title={
@@ -249,7 +239,7 @@ export default function RosaPage() {
                           Assist <SortIndicator columnKey="assists" />
                         </div>
                       </TableHead>
-                      <TableHead className="w-12"></TableHead>
+                      <TableHead className="w-24 text-right pr-6">Azioni</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -267,32 +257,36 @@ export default function RosaPage() {
                           <TableCell className="text-center text-muted-foreground">0'</TableCell>
                           <TableCell className="text-center font-bold text-green-600">{player.stats.goals}</TableCell>
                           <TableCell className="text-center font-bold text-blue-600">{player.stats.assists}</TableCell>
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Azioni</DropdownMenuLabel>
-                                <DropdownMenuItem onSelect={(e) => { 
-                                    e.preventDefault(); 
-                                    setTimeout(() => handleOpenForm(player), 0); 
-                                }}>
-                                  <Edit className="mr-2 h-4 w-4" /> Modifica
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onSelect={(e) => { 
-                                      e.preventDefault(); 
-                                      setTimeout(() => handleDeleteConfirm(player), 0); 
-                                  }}
-                                  className="text-destructive focus:bg-destructive/90 focus:text-destructive-foreground"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" /> Elimina
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                          <TableCell className="text-right pr-4">
+                            <div className="flex items-center justify-end gap-1">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                    onClick={() => handleOpenForm(player)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Modifica</TooltipContent>
+                              </Tooltip>
+                              
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                    onClick={() => setPlayerToDelete(player)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Elimina</TooltipContent>
+                              </Tooltip>
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
@@ -327,6 +321,6 @@ export default function RosaPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </TooltipProvider>
   );
 }
