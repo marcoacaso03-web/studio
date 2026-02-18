@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -277,11 +276,11 @@ export default function RosaPage() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Azioni</DropdownMenuLabel>
-                                <DropdownMenuItem onClick={() => handleOpenForm(player)}>
+                                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleOpenForm(player); }}>
                                   <Edit className="mr-2 h-4 w-4" /> Modifica
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
-                                  onClick={() => handleDeleteConfirm(player)}
+                                  onSelect={(e) => { e.preventDefault(); handleDeleteConfirm(player); }}
                                   className="text-destructive focus:bg-destructive/90 focus:text-destructive-foreground"
                                 >
                                   <Trash2 className="mr-2 h-4 w-4" /> Elimina
