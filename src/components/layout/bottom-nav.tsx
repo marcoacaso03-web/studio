@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/calendario", label: "Calendario", icon: CalendarDays },
-  { href: "/membri", label: "Membri", icon: Users },
+  { href: "/membri", label: "Rosa", icon: Users },
   { href: "/statistiche", label: "Statistiche", icon: BarChart3 },
   { href: "/altro", label: "Altro", icon: Settings },
 ];

@@ -8,13 +8,13 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: R17
-- Titolo: Automazione Risultato da Cronaca
+- ID: R18
+- Titolo: Tabella Rosa e Ridenominazione
 - Stato: COMPLETED
 
 ## LAST KNOWN GOOD
 - Build status: OK
-- Descrizione: Rimosso input manuale del risultato dal form di modifica. Il punteggio ora si aggiorna automaticamente aggiungendo/rimuovendo gol nella cronaca.
+- Descrizione: La sezione 'Membri' è stata rinominata in 'Rosa'. I giocatori sono ora visualizzati in una tabella dettagliata con colonne per Nome, Cognome, Ruolo e statistiche (Presenze, Min/Gara, Gol, Assist).
 
 ## TASK BOARD STATUS
 ### STEP R (Repairs & UX)
@@ -36,9 +36,10 @@
 - [x] R15 Ordinamento Cronologico Decrescente Eventi
 - [x] R16 Fix UI Freeze dopo Modifica Partita
 - [x] R17 Automazione Risultato da Cronaca
+- [x] R18 Tabella Rosa e Ridenominazione
 
 ## DECISION LOG
-- **R17**: Il risultato della partita non è più editabile manualmente. Lo store ricalcola `match.result` ogni volta che un evento di tipo `goal` viene aggiunto o rimosso dalla cronaca.
+- **R18**: La visualizzazione a schede della rosa è stata sostituita da una tabella per una gestione più efficiente dei dati statistici. La colonna 'Minuti per partita' è stata aggiunta come segnaposto per sviluppi futuri.
 
 ## NEXT 3 TASKS
 1. F1 **Pulizia finale e ottimizzazione**: Revisione generale del codice.
