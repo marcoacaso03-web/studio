@@ -8,13 +8,13 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: R14
-- Titolo: Perfezionamento Inserimento Eventi (Tempi e Minuti)
+- ID: R15
+- Titolo: Ordinamento Cronologico Decrescente Eventi
 - Stato: COMPLETED
 
 ## LAST KNOWN GOOD
 - Build status: OK
-- Descrizione: Aggiornato MatchEventDialog per supportare 1T, 2T, 1TS, 2TS con limiti di minutaggio dinamici (60' per i tempi regolamentari, 20' per i supplementari).
+- Descrizione: Ordinata la cronaca eventi in modo decrescente (eventi più recenti in alto).
 
 ## TASK BOARD STATUS
 ### STEP R (Repairs & UX)
@@ -33,10 +33,12 @@
 - [x] R12 Selezione esclusiva in Formazione
 - [x] R13 Cronaca Eventi e Inserimento Rapido
 - [x] R14 Perfezionamento Inserimento Eventi (Tempi e Minuti)
+- [x] R15 Ordinamento Cronologico Decrescente Eventi
 
 ## DECISION LOG
 - **R13**: Eliminata la tabella statistiche manuale in favore di una Timeline eventi (Goal, Assist, Cartellini).
-- **R14**: Modificati i tempi di gioco per supportare i supplementari (1TS, 2TS) e rimosso il tempo di recupero generico, con limiti di minuti specifici per periodo.
+- **R14**: Modificati i tempi di gioco per supportare i supplementari (1TS, 2TS) e rimosso il tempo di recupero generico.
+- **R15**: Implementato ordinamento decrescente nel repository eventi per migliorare la leggibilità della cronaca.
 
 ## NEXT 3 TASKS
 1. F1 **Pulizia finale e ottimizzazione**: Revisione generale del codice.
