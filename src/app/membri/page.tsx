@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { usePlayersStore } from "@/store/usePlayersStore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
 export default function MembriPage() {
   const { players, loading, fetchAll, add, update, remove } = usePlayersStore();
@@ -63,7 +64,18 @@ export default function MembriPage() {
   return (
     <>
       <div>
-        <PageHeader title="Membri">
+        <PageHeader 
+          title={
+            <div className="flex items-center gap-3">
+              <span>Membri</span>
+              {!loading && (
+                <Badge variant="secondary" className="text-lg px-3 py-0">
+                  {players.length}
+                </Badge>
+              )}
+            </div>
+          }
+        >
           <Button className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => handleOpenForm(null)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Aggiungi Giocatore
