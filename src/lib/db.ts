@@ -9,10 +9,13 @@ class SquadraPlusDB extends Dexie {
 
     constructor() {
         super('SquadraPlusDB');
-        this.version(1).stores({
+        // Incrementato alla versione 2 per aggiungere gli indici sui campi status
+        // status in matches serve per getTeamRecord()
+        // status in matchAttendances serve per getAllPlayersAggregatedStats()
+        this.version(2).stores({
             players: 'id, name',
-            matches: 'id, date',
-            matchAttendances: '[matchId+playerId]',
+            matches: 'id, date, status',
+            matchAttendances: '[matchId+playerId], status',
             playerMatchStats: '[matchId+playerId]',
         });
     }

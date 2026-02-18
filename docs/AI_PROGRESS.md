@@ -7,13 +7,13 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: R8
-- Titolo: Refactoring Scheda Partita
-- Stato: COMPLETED
+- ID: F1
+- Titolo: Pulizia finale e ottimizzazione
+- Stato: IN PROGRESS
 
 ## LAST KNOWN GOOD
 - Build status: OK
-- Descrizione: Riorganizzata la pagina dettaglio partita con risultato in evidenza e nuovi tab Eventi/Squadra. Aggiunta funzione di seeding dati di esempio.
+- Descrizione: Corretto errore di runtime "SchemaError" aggiungendo indici mancanti per il campo 'status' nel database Dexie.
 
 ## TASK BOARD STATUS
 ### STEP R (Repairs & UX)
@@ -26,9 +26,11 @@
 - [x] R6 Verifica funzionalità di modifica nella schermata calendario
 - [x] R7 Riparare Schermata membri
 - [x] R8 Refactoring Scheda Partita (Risultato + Tab Eventi/Squadra)
+- [x] R9 Fix SchemaError (Status non indicizzato)
 
 ## DECISION LOG
-- **R8**: Per migliorare la leggibilità, il risultato della partita è stato spostato in un componente Hero colorato (`primary`) in cima alla pagina. I tab sono stati ridotti a due ("Cronaca & Eventi" e "Formazione & Squadra") per semplificare la navigazione. La cronaca viene generata dinamicamente dalle statistiche inserite (gol/cartellini). Aggiunto pulsante "Esempio" nella pagina calendario per caricare dati di test se il DB è vuoto.
+- **R8**: Riorganizzata la pagina dettaglio partita con risultato Hero e tab Eventi/Squadra. Aggiunto seeding dati.
+- **R9**: Aggiornato schema Dexie alla v2 aggiungendo indici per 'status' in matches e matchAttendances per permettere query filtrate.
 
 ## NEXT 3 TASKS
 1. F1 **Pulizia finale e ottimizzazione**: Revisione generale del codice.
