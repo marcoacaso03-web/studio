@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -17,7 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ChevronLeft, ArrowDown, ArrowUp } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface LineupFormDialogProps {
   open: boolean;
@@ -27,13 +27,21 @@ interface LineupFormDialogProps {
 export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) {
   const { allPlayers, lineup, saveLineup, match } = useMatchDetailStore();
   const [starters, setStarters] = React.useState<string[]>(Array(11).fill(""));
-  const [substitutes, setSubstitutes] = React.useState<string[]>(Array(4).fill(""));
+  const [substitutes, setSubstitutes] = React.useState<string[]>(Array(9).fill(""));
   const [modulo, setModulo] = React.useState("4-4-2");
 
   React.useEffect(() => {
-    if (open && lineup) {
-      setStarters(lineup.starters);
-      setSubstitutes(lineup.substitutes);
+    if (open) {
+      if (lineup) {
+        // Normalize arrays to fixed lengths (11 starters, 9 substitutes for total 20)
+        const s = [...Array(11)].map((_, i) => lineup.starters[i] || "");
+        const subs = [...Array(9)].map((_, i) => lineup.substitutes[i] || "");
+        setStarters(s);
+        setSubstitutes(subs);
+      } else {
+        setStarters(Array(11).fill(""));
+        setSubstitutes(Array(9).fill(""));
+      }
     }
   }, [open, lineup]);
 
@@ -62,7 +70,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
         {num}
       </div>
       <div className="flex-1">
-        <Select value={value} onValueChange={onValueChange}>
+        <Select value={value || "none"} onValueChange={onValueChange}>
           <SelectTrigger className="border-none shadow-none h-8 italic text-muted-foreground focus:ring-0">
             <SelectValue placeholder="-- giocatore --" />
           </SelectTrigger>

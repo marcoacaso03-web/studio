@@ -1,3 +1,4 @@
+
 # AI_PROGRESS — Allenatore Calcio Offline (Next.js)
 
 ## PROJECT SNAPSHOT
@@ -7,13 +8,13 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: F1
-- Titolo: Pulizia finale e ottimizzazione
-- Stato: IN PROGRESS
+- ID: R10
+- Titolo: Estensione riserve a 20
+- Stato: COMPLETED
 
 ## LAST KNOWN GOOD
 - Build status: OK
-- Descrizione: Corretto errore di runtime "SchemaError" aggiungendo indici mancanti per il campo 'status' nel database Dexie.
+- Descrizione: Esteso il numero di riserve nel form della formazione fino al numero 20 (9 slot totali).
 
 ## TASK BOARD STATUS
 ### STEP R (Repairs & UX)
@@ -27,10 +28,12 @@
 - [x] R7 Riparare Schermata membri
 - [x] R8 Refactoring Scheda Partita (Risultato + Tab Eventi/Squadra)
 - [x] R9 Fix SchemaError (Status non indicizzato)
+- [x] R10 Estensione riserve a 20
 
 ## DECISION LOG
 - **R8**: Riorganizzata la pagina dettaglio partita con risultato Hero e tab Eventi/Squadra. Aggiunto seeding dati.
-- **R9**: Aggiornato schema Dexie alla v2 aggiungendo indici per 'status' in matches e matchAttendances per permettere query filtrate.
+- **R9**: Aggiornato schema Dexie alla v2 aggiungendo indici per 'status' in matches e matchAttendances.
+- **R10**: Portato il numero di riserve a 9 (totale 20 giocatori in distinta) per coprire standard dilettantistici/giovanili.
 
 ## NEXT 3 TASKS
 1. F1 **Pulizia finale e ottimizzazione**: Revisione generale del codice.
