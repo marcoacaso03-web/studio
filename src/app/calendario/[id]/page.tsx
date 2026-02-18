@@ -3,10 +3,9 @@
 import { useEffect, useState } from 'react';
 import { PageHeader } from "@/components/layout/page-header";
 import { notFound, useParams } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MatchLineup } from "@/components/partite/match-lineup";
-import { MatchAttendanceTab } from "@/components/partite/match-attendance-tab";
+import { MatchLineupTab } from "@/components/partite/match-lineup-tab";
 import { MatchEventsTab } from "@/components/partite/match-events-tab";
 import { useMatchDetailStore } from '@/store/useMatchDetailStore';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -68,7 +67,6 @@ export default function MatchDetailPage() {
              </Badge>
           </div>
 
-          {/* Risultato e Info Rapide */}
           <Card className="bg-primary text-primary-foreground">
             <CardContent className="p-6">
               <div className="flex flex-col items-center justify-center space-y-6">
@@ -123,9 +121,8 @@ export default function MatchDetailPage() {
              <MatchEventsTab />
           </TabsContent>
 
-          <TabsContent value="squadra" className="space-y-6">
-              <MatchLineup />
-              <MatchAttendanceTab />
+          <TabsContent value="squadra">
+              <MatchLineupTab />
           </TabsContent>
         </Tabs>
       </div>
