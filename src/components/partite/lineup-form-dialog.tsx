@@ -54,6 +54,11 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
     onOpenChange(false);
   };
 
+  // Get all currently selected player IDs to filter them out of other dropdowns
+  const allSelectedIds = React.useMemo(() => {
+    return [...starters, ...substitutes].filter(id => id !== "" && id !== "none");
+  }, [starters, substitutes]);
+
   const PlayerRow = ({ 
     num, 
     value, 
@@ -64,37 +69,45 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
     value: string, 
     onValueChange: (val: string) => void,
     isStarter: boolean 
-  }) => (
-    <div className="flex items-center gap-2 border-b py-1 last:border-0">
-      <div className="bg-gray-600 text-white w-8 h-8 flex items-center justify-center font-bold text-sm rounded">
-        {num}
-      </div>
-      <div className="flex-1">
-        <Select value={value || "none"} onValueChange={onValueChange}>
-          <SelectTrigger className="border-none shadow-none h-8 italic text-muted-foreground focus:ring-0">
-            <SelectValue placeholder="-- giocatore --" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">-- nessuno --</SelectItem>
-            {allPlayers.map(p => (
-              <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="flex items-center gap-1">
-        <div className="w-5 h-7 bg-yellow-100/50 border border-yellow-200 rounded-sm" />
-        <div className="w-5 h-7 bg-red-100/50 border border-red-200 rounded-sm" />
-        <div className="w-6 h-6 flex items-center justify-center">
-          {isStarter ? (
-            <ArrowDown className="h-4 w-4 text-red-600" />
-          ) : (
-            <ArrowUp className="h-4 w-4 text-green-600" />
-          )}
+  }) => {
+    // Filter players: show all players NOT selected in other slots, 
+    // but keep the one currently selected in THIS slot.
+    const availablePlayers = allPlayers.filter(p => 
+      !allSelectedIds.includes(p.id) || p.id === value
+    );
+
+    return (
+      <div className="flex items-center gap-2 border-b py-1 last:border-0">
+        <div className="bg-gray-600 text-white w-8 h-8 flex items-center justify-center font-bold text-sm rounded">
+          {num}
+        </div>
+        <div className="flex-1">
+          <Select value={value || "none"} onValueChange={onValueChange}>
+            <SelectTrigger className="border-none shadow-none h-8 italic text-muted-foreground focus:ring-0">
+              <SelectValue placeholder="-- giocatore --" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">-- nessuno --</SelectItem>
+              {availablePlayers.map(p => (
+                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-5 h-7 bg-yellow-100/50 border border-yellow-200 rounded-sm" />
+          <div className="w-5 h-7 bg-red-100/50 border border-red-200 rounded-sm" />
+          <div className="w-6 h-6 flex items-center justify-center">
+            {isStarter ? (
+              <ArrowDown className="h-4 w-4 text-red-600" />
+            ) : (
+              <ArrowUp className="h-4 w-4 text-green-600" />
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

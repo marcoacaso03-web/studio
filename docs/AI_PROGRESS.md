@@ -8,13 +8,13 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: R11
-- Titolo: Rimozione ridondanza Convocazioni
+- ID: R12
+- Titolo: Selezione esclusiva in Formazione
 - Stato: COMPLETED
 
 ## LAST KNOWN GOOD
 - Build status: OK
-- Descrizione: Rimossa la tab Convocazioni (presente/assente) e unificata la logica delle presenze con la Formazione (Lineup). Le statistiche ora si basano sui giocatori inseriti in distinta.
+- Descrizione: Implementata la logica di esclusività nella scelta dei giocatori in formazione. Un giocatore già selezionato non appare più nelle altre liste a meno che non venga rimosso.
 
 ## TASK BOARD STATUS
 ### STEP R (Repairs & UX)
@@ -30,9 +30,11 @@
 - [x] R9 Fix SchemaError (Status non indicizzato)
 - [x] R10 Estensione riserve a 20
 - [x] R11 Rimozione ridondanza Convocazioni
+- [x] R12 Selezione esclusiva in Formazione
 
 ## DECISION LOG
-- **R11**: Rimossa la gestione manuale "Convocati" (presente/assente) in quanto ridondante rispetto alla formazione. La presenza è ora implicitamente determinata dall'inclusione nella distinta (11+9).
+- **R11**: Rimossa la gestione manuale "Convocati" (presente/assente) in quanto ridondante rispetto alla formazione.
+- **R12**: I giocatori selezionati in uno slot della formazione vengono filtrati dagli altri dropdown per evitare duplicati.
 
 ## NEXT 3 TASKS
 1. F1 **Pulizia finale e ottimizzazione**: Revisione generale del codice.
