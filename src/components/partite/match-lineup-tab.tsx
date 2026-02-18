@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, ClipboardList } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { LineupFormDialog } from "./lineup-form-dialog";
-import { MatchAttendanceTab } from "./match-attendance-tab";
 
 export function MatchLineupTab() {
   const { lineup, allPlayers } = useMatchDetailStore();
@@ -68,8 +67,6 @@ export function MatchLineupTab() {
           </Card>
         </div>
       )}
-
-      <MatchAttendanceTab />
 
       <LineupFormDialog 
         open={isFormOpen} 

@@ -8,13 +8,13 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: R10
-- Titolo: Estensione riserve a 20
+- ID: R11
+- Titolo: Rimozione ridondanza Convocazioni
 - Stato: COMPLETED
 
 ## LAST KNOWN GOOD
 - Build status: OK
-- Descrizione: Esteso il numero di riserve nel form della formazione fino al numero 20 (9 slot totali).
+- Descrizione: Rimossa la tab Convocazioni (presente/assente) e unificata la logica delle presenze con la Formazione (Lineup). Le statistiche ora si basano sui giocatori inseriti in distinta.
 
 ## TASK BOARD STATUS
 ### STEP R (Repairs & UX)
@@ -29,11 +29,10 @@
 - [x] R8 Refactoring Scheda Partita (Risultato + Tab Eventi/Squadra)
 - [x] R9 Fix SchemaError (Status non indicizzato)
 - [x] R10 Estensione riserve a 20
+- [x] R11 Rimozione ridondanza Convocazioni
 
 ## DECISION LOG
-- **R8**: Riorganizzata la pagina dettaglio partita con risultato Hero e tab Eventi/Squadra. Aggiunto seeding dati.
-- **R9**: Aggiornato schema Dexie alla v2 aggiungendo indici per 'status' in matches e matchAttendances.
-- **R10**: Portato il numero di riserve a 9 (totale 20 giocatori in distinta) per coprire standard dilettantistici/giovanili.
+- **R11**: Rimossa la gestione manuale "Convocati" (presente/assente) in quanto ridondante rispetto alla formazione. La presenza è ora implicitamente determinata dall'inclusione nella distinta (11+9).
 
 ## NEXT 3 TASKS
 1. F1 **Pulizia finale e ottimizzazione**: Revisione generale del codice.
