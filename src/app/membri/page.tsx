@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -36,7 +37,6 @@ import { usePlayersStore } from "@/store/usePlayersStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 
 type SortConfig = {
   key: string | null;
@@ -276,11 +276,17 @@ export default function RosaPage() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Azioni</DropdownMenuLabel>
-                                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleOpenForm(player); }}>
+                                <DropdownMenuItem onSelect={(e) => { 
+                                    e.preventDefault(); 
+                                    setTimeout(() => handleOpenForm(player), 0); 
+                                }}>
                                   <Edit className="mr-2 h-4 w-4" /> Modifica
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
-                                  onSelect={(e) => { e.preventDefault(); handleDeleteConfirm(player); }}
+                                  onSelect={(e) => { 
+                                      e.preventDefault(); 
+                                      setTimeout(() => handleDeleteConfirm(player), 0); 
+                                  }}
                                   className="text-destructive focus:bg-destructive/90 focus:text-destructive-foreground"
                                 >
                                   <Trash2 className="mr-2 h-4 w-4" /> Elimina
@@ -305,7 +311,7 @@ export default function RosaPage() {
         player={selectedPlayer}
       />
       
-      <AlertDialog open={!!playerToDelete} onOpenChange={() => setPlayerToDelete(null)}>
+      <AlertDialog open={!!playerToDelete} onOpenChange={(open) => !open && setPlayerToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Sei sicuro?</AlertDialogTitle>
@@ -314,7 +320,7 @@ export default function RosaPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setPlayerToDelete(null)}>Annulla</AlertDialogCancel>
+            <AlertDialogCancel>Annulla</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeletePlayer} className="bg-destructive hover:bg-destructive/90">
               Elimina
             </AlertDialogAction>

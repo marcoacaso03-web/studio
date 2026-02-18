@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -25,7 +26,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useMatchesStore } from "@/store/useMatchesStore";
@@ -36,23 +36,21 @@ import { playerRepository } from "@/lib/repositories/player-repository";
 export default function CalendarioPage() {
   const { matches, loading, fetchAll, add, remove } = useMatchesStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [matchToDelete, setMatchToDelete] = useState<Match | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
 
-  // Seed data if empty
   const handleSeedData = async () => {
     try {
-        // Create sample players
         const p1 = await playerRepository.add({ name: "Marco Rossi", number: 10, role: "Attaccante" });
         const p2 = await playerRepository.add({ name: "Luca Bianchi", number: 5, role: "Difensore" });
         const p3 = await playerRepository.add({ name: "Davide Neri", number: 1, role: "Portiere" });
         
-        // Create sample match
         const matchDate = new Date();
-        matchDate.setDate(matchDate.getDate() - 2); // 2 days ago
+        matchDate.setDate(matchDate.getDate() - 2);
         
         await add({
             opponent: "Real Isola",
@@ -93,9 +91,11 @@ export default function CalendarioPage() {
     }
   };
 
-  const handleDeleteMatch = async (matchId: string) => {
-    await remove(matchId);
+  const handleDeleteMatch = async () => {
+    if (!matchToDelete) return;
+    await remove(matchToDelete.id);
     toast({ title: "Partita eliminata", variant: "destructive" });
+    setMatchToDelete(null);
   };
 
 
@@ -174,27 +174,15 @@ export default function CalendarioPage() {
                             <DropdownMenuItem asChild>
                                 <Link href={`/calendario/${match.id}`}>Vedi Dettagli</Link>
                             </DropdownMenuItem>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:bg-destructive/90 focus:text-destructive-foreground">
-                                  Elimina
-                                </DropdownMenuItem>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Sei sicuro?</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Questa azione non può essere annullata. La partita verrà eliminata definitivamente.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Annulla</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDeleteMatch(match.id)} className="bg-destructive hover:bg-destructive/90">
-                                    Elimina
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                            <DropdownMenuItem 
+                              onSelect={(e) => {
+                                e.preventDefault();
+                                setTimeout(() => setMatchToDelete(match), 0);
+                              }} 
+                              className="text-destructive focus:bg-destructive/90 focus:text-destructive-foreground"
+                            >
+                              Elimina
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </TableCell>
@@ -205,12 +193,30 @@ export default function CalendarioPage() {
         )}
       </CardContent>
     </Card>
+
       <MatchFormDialog 
         open={isFormOpen} 
         onOpenChange={setIsFormOpen} 
         onSave={handleSaveMatch} 
         match={null} 
       />
+
+      <AlertDialog open={!!matchToDelete} onOpenChange={(open) => !open && setMatchToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sei sicuro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Questa azione non può essere annullata. La partita verrà eliminata definitivamente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteMatch} className="bg-destructive hover:bg-destructive/90">
+              Elimina
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
