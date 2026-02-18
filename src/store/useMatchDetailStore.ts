@@ -1,3 +1,4 @@
+
 "use client";
 
 import { create } from 'zustand';
@@ -21,6 +22,7 @@ interface MatchDetailState {
     updateMatch: (data: Partial<Omit<Match, 'id'>>) => Promise<void>;
     saveLineup: (lineup: MatchLineup) => Promise<void>;
     addEvent: (event: Omit<MatchEvent, 'id'>) => Promise<void>;
+    addEvents: (events: Omit<MatchEvent, 'id'>[]) => Promise<void>;
     deleteEvent: (eventId: string) => Promise<void>;
 }
 
@@ -71,6 +73,29 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         });
 
         // Sincronizza statistiche globali
+        await aggregationRepository.syncAllPlayersStats();
+        useStatsStore.getState().loadStats();
+
+        set({ events: updatedEvents, match: updatedMatch || get().match });
+    },
+
+    addEvents: async (eventsData) => {
+        const matchId = get().matchId;
+        if (!matchId) return;
+
+        for (const data of eventsData) {
+            await eventRepository.add({ ...data, matchId });
+        }
+        
+        const updatedEvents = await eventRepository.getForMatch(matchId);
+        
+        const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
+        const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
+        
+        const updatedMatch = await matchRepository.update(matchId, {
+            result: { home: homeGoals, away: awayGoals }
+        });
+
         await aggregationRepository.syncAllPlayersStats();
         useStatsStore.getState().loadStats();
 
