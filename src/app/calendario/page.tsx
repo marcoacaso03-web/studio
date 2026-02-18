@@ -31,13 +31,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useMatchesStore } from "@/store/useMatchesStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { playerRepository } from "@/lib/repositories/player-repository";
-import { matchRepository } from "@/lib/repositories/match-repository";
 
 
 export default function CalendarioPage() {
-  const { matches, loading, fetchAll, add, update, remove } = useMatchesStore();
+  const { matches, loading, fetchAll, add, remove } = useMatchesStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -83,22 +81,15 @@ export default function CalendarioPage() {
     }
   }
 
-  const handleOpenForm = (match: Match | null) => {
-    setSelectedMatch(match);
-    setIsFormOpen(true);
-  };
-  
-  const handleSaveMatch = async (data: {opponent: string, location: string, date: Date, isHome: boolean}, matchId?: string) => {
-    const matchData = { ...data, date: data.date.toISOString() };
+  const handleSaveMatch = async (data: any) => {
+    const matchData = { 
+        ...data, 
+        date: data.date.toISOString(),
+    };
 
-    if (matchId) {
-      await update(matchId, matchData);
-      toast({ title: "Partita aggiornata", description: `La partita contro ${data.opponent} è stata modificata.` });
-    } else {
-      const newMatch = await add(matchData);
-      if (newMatch) {
-        toast({ title: "Partita aggiunta", description: `La partita contro ${newMatch.opponent} è stata creata.` });
-      }
+    const newMatch = await add(matchData);
+    if (newMatch) {
+      toast({ title: "Partita aggiunta", description: `La partita contro ${newMatch.opponent} è stata creata.` });
     }
   };
 
@@ -123,7 +114,7 @@ export default function CalendarioPage() {
                     <Rocket className="mr-2 h-4 w-4" /> Esempio
                 </Button>
             )}
-            <Button className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => handleOpenForm(null)}>
+            <Button className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => setIsFormOpen(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Aggiungi Partita
             </Button>
@@ -183,12 +174,6 @@ export default function CalendarioPage() {
                             <DropdownMenuItem asChild>
                                 <Link href={`/calendario/${match.id}`}>Vedi Dettagli</Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={(e) => {
-                              e.preventDefault();
-                              handleOpenForm(match);
-                            }}>
-                              Modifica
-                            </DropdownMenuItem>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:bg-destructive/90 focus:text-destructive-foreground">
@@ -224,7 +209,7 @@ export default function CalendarioPage() {
         open={isFormOpen} 
         onOpenChange={setIsFormOpen} 
         onSave={handleSaveMatch} 
-        match={selectedMatch} 
+        match={null} 
       />
     </>
   );

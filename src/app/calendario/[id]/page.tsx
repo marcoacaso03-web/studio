@@ -10,17 +10,17 @@ import { MatchEventsTab } from "@/components/partite/match-events-tab";
 import { useMatchDetailStore } from '@/store/useMatchDetailStore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { MatchResultDialog } from '@/components/partite/match-result-dialog';
+import { MatchFormDialog } from '@/components/partite/match-form-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarDays, MapPin, Trophy, Users, Zap } from 'lucide-react';
+import { CalendarDays, MapPin, Settings2, Users, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export default function MatchDetailPage() {
   const params = useParams();
   const id = params.id as string;
 
-  const { match, loading, load, updateResult } = useMatchDetailStore();
-  const [isResultDialogOpen, setIsResultDialogOpen] = useState(false);
+  const { match, loading, load, updateMatch } = useMatchDetailStore();
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const { toast } = useToast();
   
   useEffect(() => {
@@ -29,12 +29,15 @@ export default function MatchDetailPage() {
     }
   }, [id, load]);
   
-  const handleSaveResult = async (data: { home: number, away: number }) => {
-    const { home, away } = data;
-    await updateResult(home, away);
+  const handleSaveMatch = async (data: any) => {
+    const updateData = {
+        ...data,
+        date: data.date.toISOString()
+    };
+    await updateMatch(updateData);
     toast({
-      title: "Risultato salvato",
-      description: `La partita è stata aggiornata e contrassegnata come completata.`,
+      title: "Partita aggiornata",
+      description: `I dettagli della partita contro ${data.opponent} sono stati salvati.`,
     });
   };
 
@@ -56,15 +59,22 @@ export default function MatchDetailPage() {
   const matchDate = new Date(match.date);
   const isCompleted = match.status === 'completed';
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'completed': return <Badge variant="default">Completata</Badge>;
+      case 'scheduled': return <Badge variant="secondary">In Programma</Badge>;
+      case 'canceled': return <Badge variant="destructive">Annullata</Badge>;
+      default: return null;
+    }
+  }
+
   return (
     <>
       <div className="space-y-6">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
              <PageHeader title={`Vs ${match.opponent}`} />
-             <Badge variant={isCompleted ? "default" : "secondary"}>
-                {isCompleted ? "Completata" : "In Programma"}
-             </Badge>
+             {getStatusBadge(match.status)}
           </div>
 
           <Card className="bg-primary text-primary-foreground">
@@ -97,10 +107,10 @@ export default function MatchDetailPage() {
                   variant="secondary" 
                   size="sm" 
                   className="w-full mt-2"
-                  onClick={() => setIsResultDialogOpen(true)}
+                  onClick={() => setIsFormOpen(true)}
                 >
-                  <Trophy className="mr-2 h-4 w-4" />
-                  {match.result ? "Modifica Risultato" : "Inserisci Risultato"}
+                  <Settings2 className="mr-2 h-4 w-4" />
+                  Modifica Dettagli
                 </Button>
               </div>
             </CardContent>
@@ -127,10 +137,10 @@ export default function MatchDetailPage() {
         </Tabs>
       </div>
 
-      <MatchResultDialog
-        open={isResultDialogOpen}
-        onOpenChange={setIsResultDialogOpen}
-        onSave={handleSaveResult}
+      <MatchFormDialog
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        onSave={handleSaveMatch}
         match={match}
       />
     </>

@@ -19,6 +19,7 @@ interface MatchDetailState {
     
     load: (matchId: string) => Promise<void>;
     updateResult: (home: number, away: number) => Promise<void>;
+    updateMatch: (data: Partial<Omit<Match, 'id'>>) => Promise<void>;
     saveLineup: (lineup: MatchLineup) => Promise<void>;
     addEvent: (event: Omit<MatchEvent, 'id'>) => Promise<void>;
     deleteEvent: (eventId: string) => Promise<void>;
@@ -92,6 +93,18 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         
         const updatedMatch = await matchRepository.update(matchId, updatedData);
 
+        if (updatedMatch) {
+            await aggregationRepository.syncAllPlayersStats();
+            useStatsStore.getState().loadStats();
+            set({ match: updatedMatch });
+        }
+    },
+
+    updateMatch: async (data) => {
+        const { matchId } = get();
+        if (!matchId) return;
+
+        const updatedMatch = await matchRepository.update(matchId, data);
         if (updatedMatch) {
             await aggregationRepository.syncAllPlayersStats();
             useStatsStore.getState().loadStats();

@@ -17,6 +17,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Match } from "@/lib/types";
 import {
   Dialog,
@@ -26,6 +33,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 
 // Helper to convert a date object or ISO string to a 'YYYY-MM-DDTHH:mm' string for the input
 const toDatetimeLocal = (dateSource?: Date | string): string => {
@@ -41,6 +49,9 @@ const formSchema = z.object({
   location: z.string().min(2, { message: "Il luogo è richiesto." }),
   date: z.string().min(1, { message: "La data e l'ora sono richieste." }),
   isHome: z.boolean(),
+  status: z.enum(['scheduled', 'completed', 'canceled']),
+  homeScore: z.coerce.number().int().min(0).optional(),
+  awayScore: z.coerce.number().int().min(0).optional(),
 });
 
 type MatchFormValues = z.infer<typeof formSchema>;
@@ -51,6 +62,8 @@ type MatchSaveData = {
     location: string;
     date: Date;
     isHome: boolean;
+    status: 'scheduled' | 'completed' | 'canceled';
+    result?: { home: number, away: number };
 };
 
 interface MatchFormDialogProps {
@@ -68,6 +81,9 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
       location: "",
       date: "",
       isHome: true,
+      status: 'scheduled',
+      homeScore: 0,
+      awayScore: 0,
     },
   });
 
@@ -79,6 +95,9 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
         location: match?.location || "",
         date: initialDate,
         isHome: match?.isHome ?? true,
+        status: match?.status || 'scheduled',
+        homeScore: match?.result?.home ?? 0,
+        awayScore: match?.result?.away ?? 0,
       });
     }
   }, [open, match, form]);
@@ -86,8 +105,12 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
 
   function onSubmit(data: MatchFormValues) {
     const saveData: MatchSaveData = {
-        ...data,
-        date: new Date(data.date), // Convert form string to Date object for the parent
+        opponent: data.opponent,
+        location: data.location,
+        isHome: data.isHome,
+        status: data.status,
+        date: new Date(data.date),
+        result: data.status === 'completed' ? { home: data.homeScore || 0, away: data.awayScore || 0 } : match?.result,
     };
     onSave(saveData, match?.id);
     onOpenChange(false);
@@ -108,14 +131,16 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
     };
   }, []);
 
+  const currentStatus = form.watch("status");
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{match ? "Modifica Partita" : "Aggiungi Partita"}</DialogTitle>
+          <DialogTitle>{match ? "Modifica Dettagli Partita" : "Aggiungi Partita"}</DialogTitle>
           <DialogDescription>
             {match
-              ? "Modifica i dettagli della partita e salva."
+              ? "Modifica i dettagli della partita, il risultato e lo stato."
               : "Inserisci i dettagli per creare una nuova partita."}
           </DialogDescription>
         </DialogHeader>
@@ -168,30 +193,92 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="isHome"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                  <div className="space-y-0.5">
-                    <FormLabel>Partita in Casa</FormLabel>
-                    <FormDescription>
-                      Indica se si gioca in casa.
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+                <FormField
+                    control={form.control}
+                    name="isHome"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                            <FormLabel className="text-xs">In Casa</FormLabel>
+                        </div>
+                        <FormControl>
+                            <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                            />
+                        </FormControl>
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                        <FormItem>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                            <FormControl>
+                            <SelectTrigger className="h-full py-3">
+                                <SelectValue placeholder="Stato" />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                <SelectItem value="scheduled">In Programma</SelectItem>
+                                <SelectItem value="completed">Completata</SelectItem>
+                                <SelectItem value="canceled">Annullata</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
+
+            {currentStatus === 'completed' && (
+                <>
+                    <Separator className="my-4" />
+                    <div className="space-y-4">
+                        <h4 className="text-sm font-bold uppercase text-muted-foreground">Risultato Finale</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="homeScore"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-[10px] uppercase text-muted-foreground">
+                                            {form.getValues("isHome") ? "Squadra+" : form.getValues("opponent")}
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input type="number" className="text-center text-xl font-bold" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="awayScore"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-[10px] uppercase text-muted-foreground">
+                                            {!form.getValues("isHome") ? "Squadra+" : form.getValues("opponent")}
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input type="number" className="text-center text-xl font-bold" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    </div>
+                </>
+            )}
 
             <DialogFooter className="pt-4">
               <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Annulla</Button>
-              <Button type="submit">Salva</Button>
+              <Button type="submit">Salva Modifiche</Button>
             </DialogFooter>
           </form>
         </Form>
