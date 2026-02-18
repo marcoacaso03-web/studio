@@ -33,7 +33,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 
 // Helper to convert a date object or ISO string to a 'YYYY-MM-DDTHH:mm' string for the input
 const toDatetimeLocal = (dateSource?: Date | string): string => {
@@ -50,8 +49,6 @@ const formSchema = z.object({
   date: z.string().min(1, { message: "La data e l'ora sono richieste." }),
   isHome: z.boolean(),
   status: z.enum(['scheduled', 'completed', 'canceled']),
-  homeScore: z.coerce.number().int().min(0).optional(),
-  awayScore: z.coerce.number().int().min(0).optional(),
 });
 
 type MatchFormValues = z.infer<typeof formSchema>;
@@ -63,7 +60,6 @@ type MatchSaveData = {
     date: Date;
     isHome: boolean;
     status: 'scheduled' | 'completed' | 'canceled';
-    result?: { home: number, away: number };
 };
 
 interface MatchFormDialogProps {
@@ -82,8 +78,6 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
       date: "",
       isHome: true,
       status: 'scheduled',
-      homeScore: 0,
-      awayScore: 0,
     },
   });
 
@@ -96,8 +90,6 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
         date: initialDate,
         isHome: match?.isHome ?? true,
         status: match?.status || 'scheduled',
-        homeScore: match?.result?.home ?? 0,
-        awayScore: match?.result?.away ?? 0,
       });
     }
   }, [open, match, form]);
@@ -110,7 +102,6 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
         isHome: data.isHome,
         status: data.status,
         date: new Date(data.date),
-        result: data.status === 'completed' ? { home: data.homeScore || 0, away: data.awayScore || 0 } : match?.result,
     };
     onSave(saveData, match?.id);
     onOpenChange(false);
@@ -131,8 +122,6 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
     };
   }, []);
 
-  const currentStatus = form.watch("status");
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
@@ -140,7 +129,7 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
           <DialogTitle>{match ? "Modifica Dettagli Partita" : "Aggiungi Partita"}</DialogTitle>
           <DialogDescription>
             {match
-              ? "Modifica i dettagli della partita, il risultato e lo stato."
+              ? "Modifica i dettagli della partita e lo stato. Il risultato viene aggiornato automaticamente dalla cronaca."
               : "Inserisci i dettagli per creare una nuova partita."}
           </DialogDescription>
         </DialogHeader>
@@ -234,47 +223,6 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
                     )}
                 />
             </div>
-
-            {currentStatus === 'completed' && (
-                <>
-                    <Separator className="my-4" />
-                    <div className="space-y-4">
-                        <h4 className="text-sm font-bold uppercase text-muted-foreground">Risultato Finale</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="homeScore"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-[10px] uppercase text-muted-foreground">
-                                            {form.getValues("isHome") ? "Squadra+" : form.getValues("opponent")}
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input type="number" className="text-center text-xl font-bold" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="awayScore"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-[10px] uppercase text-muted-foreground">
-                                            {!form.getValues("isHome") ? "Squadra+" : form.getValues("opponent")}
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input type="number" className="text-center text-xl font-bold" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                    </div>
-                </>
-            )}
 
             <DialogFooter className="pt-4">
               <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Annulla</Button>

@@ -8,13 +8,13 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: R16
-- Titolo: Fix UI Freeze dopo Modifica Partita
+- ID: R17
+- Titolo: Automazione Risultato da Cronaca
 - Stato: COMPLETED
 
 ## LAST KNOWN GOOD
 - Build status: OK
-- Descrizione: Applicata patch minimale per evitare il blocco dell'interfaccia dopo la chiusura del dialogo di modifica nel calendario.
+- Descrizione: Rimosso input manuale del risultato dal form di modifica. Il punteggio ora si aggiorna automaticamente aggiungendo/rimuovendo gol nella cronaca.
 
 ## TASK BOARD STATUS
 ### STEP R (Repairs & UX)
@@ -35,9 +35,10 @@
 - [x] R14 Perfezionamento Inserimento Eventi (Tempi e Minuti)
 - [x] R15 Ordinamento Cronologico Decrescente Eventi
 - [x] R16 Fix UI Freeze dopo Modifica Partita
+- [x] R17 Automazione Risultato da Cronaca
 
 ## DECISION LOG
-- **R16**: Aggiunto `e.preventDefault()` su `onSelect` del menu item "Modifica" per evitare conflitti di focus/overlay tra Radix Dropdown e Dialog.
+- **R17**: Il risultato della partita non è più editabile manualmente. Lo store ricalcola `match.result` ogni volta che un evento di tipo `goal` viene aggiunto o rimosso dalla cronaca.
 
 ## NEXT 3 TASKS
 1. F1 **Pulizia finale e ottimizzazione**: Revisione generale del codice.

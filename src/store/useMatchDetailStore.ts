@@ -18,7 +18,6 @@ interface MatchDetailState {
     loading: boolean;
     
     load: (matchId: string) => Promise<void>;
-    updateResult: (home: number, away: number) => Promise<void>;
     updateMatch: (data: Partial<Omit<Match, 'id'>>) => Promise<void>;
     saveLineup: (lineup: MatchLineup) => Promise<void>;
     addEvent: (event: Omit<MatchEvent, 'id'>) => Promise<void>;
@@ -62,11 +61,20 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         await eventRepository.add({ ...eventData, matchId });
         const updatedEvents = await eventRepository.getForMatch(matchId);
         
+        // Calcola il nuovo punteggio basato sui gol
+        const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
+        const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
+        
+        // Aggiorna la partita con il nuovo risultato
+        const updatedMatch = await matchRepository.update(matchId, {
+            result: { home: homeGoals, away: awayGoals }
+        });
+
         // Sincronizza statistiche globali
         await aggregationRepository.syncAllPlayersStats();
         useStatsStore.getState().loadStats();
 
-        set({ events: updatedEvents });
+        set({ events: updatedEvents, match: updatedMatch || get().match });
     },
 
     deleteEvent: async (eventId) => {
@@ -76,30 +84,21 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         await eventRepository.delete(eventId);
         const updatedEvents = await eventRepository.getForMatch(matchId);
 
+        // Calcola il nuovo punteggio basato sui gol
+        const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
+        const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
+        
+        // Aggiorna la partita con il nuovo risultato
+        const updatedMatch = await matchRepository.update(matchId, {
+            result: { home: homeGoals, away: awayGoals }
+        });
+
         await aggregationRepository.syncAllPlayersStats();
         useStatsStore.getState().loadStats();
 
-        set({ events: updatedEvents });
+        set({ events: updatedEvents, match: updatedMatch || get().match });
     },
     
-    updateResult: async (home, away) => {
-        const { matchId, match } = get();
-        if (!matchId || !match) return;
-
-        const updatedData = {
-            result: { home, away },
-            status: 'completed' as const
-        };
-        
-        const updatedMatch = await matchRepository.update(matchId, updatedData);
-
-        if (updatedMatch) {
-            await aggregationRepository.syncAllPlayersStats();
-            useStatsStore.getState().loadStats();
-            set({ match: updatedMatch });
-        }
-    },
-
     updateMatch: async (data) => {
         const { matchId } = get();
         if (!matchId) return;
