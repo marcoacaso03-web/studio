@@ -40,38 +40,30 @@ export const aggregationRepository = {
 
     /**
      * Calculates and returns aggregated stats (appearances, goals, assists) for all players.
-     * Appearances are based on match lineups (if present) or existing match stats.
+     * Based on match lineups and chronological events.
      * @returns An array of objects, each containing a player's ID, name, and their aggregated stats.
      */
     async getAllPlayersAggregatedStats() {
         const players = await db.players.toArray();
-        const allMatchStats = await db.playerMatchStats.toArray();
+        const allEvents = await db.matchEvents.toArray();
         const allLineups = await db.matchLineups.toArray();
         const completedMatches = await db.matches.where('status').equals('completed').toArray();
         const completedMatchIds = new Set(completedMatches.map(m => m.id));
 
         return players.map(player => {
-            // Un giocatore ha una presenza se è in una formazione di una partita completata
-            // o se ha registrato statistiche in una partita completata.
-            const appearancesInLineups = allLineups.filter(lineup => {
+            // Presenze: giocatore in formazione (starters o subs) in partite completate
+            const appearances = allLineups.filter(lineup => {
                 if (!completedMatchIds.has(lineup.matchId)) return false;
                 return lineup.starters.includes(player.id) || lineup.substitutes.includes(player.id);
             }).length;
 
-            const playerMatchStats = allMatchStats.filter(s => {
-                if (!completedMatchIds.has(s.matchId)) return false;
-                return s.playerId === player.id;
+            const playerEvents = allEvents.filter(e => {
+                if (!completedMatchIds.has(e.matchId)) return false;
+                return e.playerId === player.id;
             });
             
-            // Per evitare doppi conteggi tra lineup e stats manuali, usiamo un Set degli ID partita
-            const matchIdsWithActivity = new Set([
-                ...allLineups.filter(l => completedMatchIds.has(l.matchId) && (l.starters.includes(player.id) || l.substitutes.includes(player.id))).map(l => l.matchId),
-                ...playerMatchStats.map(s => s.matchId)
-            ]);
-
-            const appearances = matchIdsWithActivity.size;
-            const goals = playerMatchStats.reduce((sum, stat) => sum + stat.goals, 0);
-            const assists = playerMatchStats.reduce((sum, stat) => sum + stat.assists, 0);
+            const goals = playerEvents.filter(e => e.type === 'goal').length;
+            const assists = playerEvents.filter(e => e.type === 'assist').length;
 
             return {
                 playerId: player.id,
@@ -87,7 +79,6 @@ export const aggregationRepository = {
 
     /**
      * Re-calculates and updates the aggregated `stats` property for all players in the database.
-     * This is the method to call to keep player summary stats in sync.
      */
     async syncAllPlayersStats() {
         const allPlayerAggregatedStats = await this.getAllPlayersAggregatedStats();

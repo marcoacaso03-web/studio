@@ -8,13 +8,13 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: R12
-- Titolo: Selezione esclusiva in Formazione
+- ID: R13
+- Titolo: Cronaca Eventi e Inserimento Rapido
 - Stato: COMPLETED
 
 ## LAST KNOWN GOOD
 - Build status: OK
-- Descrizione: Implementata la logica di esclusività nella scelta dei giocatori in formazione. Un giocatore già selezionato non appare più nelle altre liste a meno che non venga rimosso.
+- Descrizione: Implementato il sistema di cronaca eventi (Timeline) che sostituisce la tabella statistica manuale. Aggiunto dialog di inserimento evento fedele alle specifiche grafiche.
 
 ## TASK BOARD STATUS
 ### STEP R (Repairs & UX)
@@ -31,10 +31,12 @@
 - [x] R10 Estensione riserve a 20
 - [x] R11 Rimozione ridondanza Convocazioni
 - [x] R12 Selezione esclusiva in Formazione
+- [x] R13 Cronaca Eventi e Inserimento Rapido
 
 ## DECISION LOG
 - **R11**: Rimossa la gestione manuale "Convocati" (presente/assente) in quanto ridondante rispetto alla formazione.
 - **R12**: I giocatori selezionati in uno slot della formazione vengono filtrati dagli altri dropdown per evitare duplicati.
+- **R13**: Eliminata la tabella statistiche manuale in favore di una Timeline eventi (Goal, Assist, Cartellini). Le statistiche globali dei giocatori sono ora calcolate automaticamente dagli eventi delle partite completate.
 
 ## NEXT 3 TASKS
 1. F1 **Pulizia finale e ottimizzazione**: Revisione generale del codice.

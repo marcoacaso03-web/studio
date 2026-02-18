@@ -52,3 +52,17 @@ export type PlayerMatchStats = {
   yellowCards: number;
   redCards: number;
 };
+
+export const EVENT_TYPES = ['goal', 'assist', 'yellow_card', 'red_card', 'sub_in', 'sub_out'] as const;
+export type MatchEventType = typeof EVENT_TYPES[number];
+
+export type MatchEvent = {
+  id: string;
+  matchId: string;
+  type: MatchEventType;
+  team: 'home' | 'away';
+  playerId?: string;
+  playerName?: string; // fallback per avversari o nomi testuali
+  minute: number;
+  period: '1T' | '2T' | 'Rec';
+};

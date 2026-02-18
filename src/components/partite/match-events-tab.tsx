@@ -1,63 +1,100 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMatchDetailStore } from "@/store/useMatchDetailStore";
 import { Badge } from "@/components/ui/badge";
-import { Goal, Info, ShieldAlert, Zap } from "lucide-react";
-import { MatchStatsTab } from "./match-stats-tab";
+import { Goal, Info, Zap, Plus, Trash2, ArrowRightLeft, CreditCard } from "lucide-react";
+import { MatchEventDialog } from "./match-event-dialog";
+import { Button } from "@/components/ui/button";
+import { MatchEventType } from "@/lib/types";
 
 export function MatchEventsTab() {
-  const { stats, allPlayers, match } = useMatchDetailStore();
+  const { events, deleteEvent } = useMatchDetailStore();
+  const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
 
-  // Aggregate events from stats
-  const events = stats.flatMap(stat => {
-    const player = allPlayers.find(p => p.id === stat.playerId);
-    if (!player) return [];
-    
-    const playerEvents = [];
-    for (let i = 0; i < stat.goals; i++) {
-        playerEvents.push({ type: 'goal', player: player.name, time: 'N/D' });
+  const getEventIcon = (type: MatchEventType) => {
+    switch(type) {
+      case 'goal': return <Goal className="h-5 w-5 text-green-500" />;
+      case 'assist': return <Zap className="h-5 w-5 text-blue-400" />;
+      case 'yellow_card': return <div className="h-5 w-4 bg-yellow-400 rounded-sm border" />;
+      case 'red_card': return <div className="h-5 w-4 bg-red-600 rounded-sm border" />;
+      case 'sub_in':
+      case 'sub_out': return <ArrowRightLeft className="h-5 w-5 text-orange-400" />;
+      default: return <Info className="h-5 w-5 text-muted-foreground" />;
     }
-    for (let i = 0; i < stat.yellowCards; i++) {
-        playerEvents.push({ type: 'yellow', player: player.name, time: 'N/D' });
+  };
+
+  const getEventLabel = (type: MatchEventType) => {
+    switch(type) {
+      case 'goal': return 'GOAL';
+      case 'assist': return 'ASSIST';
+      case 'yellow_card': return 'AMMONIZIONE';
+      case 'red_card': return 'ESPULSIONE';
+      case 'sub_in': return 'ENTRATA';
+      case 'sub_out': return 'USCITA';
+      default: return type.toUpperCase();
     }
-    for (let i = 0; i < stat.redCards; i++) {
-        playerEvents.push({ type: 'red', player: player.name, time: 'N/D' });
-    }
-    return playerEvents;
-  });
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-accent" />
-            <CardTitle>Cronaca Partita</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <div>
+            <div className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-accent" />
+              <CardTitle>Cronaca Partita</CardTitle>
+            </div>
+            <CardDescription>Riepilogo degli eventi principali della gara.</CardDescription>
           </div>
-          <CardDescription>Riepilogo degli eventi principali della gara.</CardDescription>
+          <Button 
+            size="icon" 
+            className="rounded-full bg-accent text-accent-foreground hover:bg-accent/90"
+            onClick={() => setIsEventDialogOpen(true)}
+          >
+            <Plus className="h-6 w-6" />
+          </Button>
         </CardHeader>
         <CardContent>
           {events.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center border-2 border-dashed rounded-lg">
-                <Info className="h-8 w-8 text-muted-foreground mb-2" />
+            <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-lg">
+                <Info className="h-10 w-10 text-muted-foreground mb-3 opacity-20" />
                 <p className="text-sm text-muted-foreground">Nessun evento registrato per questa partita.</p>
-                <p className="text-xs text-muted-foreground mt-1">Inserisci le statistiche per generare gli eventi.</p>
+                <p className="text-xs text-muted-foreground mt-2">Usa il tasto + per aggiungere gol, cartellini o sostituzioni.</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {events.map((event, i) => (
-                <div key={i} className="flex items-center justify-between border-b pb-2 last:border-0">
-                  <div className="flex items-center gap-3">
-                    {event.type === 'goal' && <Goal className="h-5 w-5 text-green-500" />}
-                    {event.type === 'yellow' && <div className="h-5 w-4 bg-yellow-400 rounded-sm border" />}
-                    {event.type === 'red' && <div className="h-5 w-4 bg-red-600 rounded-sm border" />}
+              {events.map((event) => (
+                <div key={event.id} className="flex items-center justify-between border-b border-muted pb-3 last:border-0">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-center w-8">
+                        {getEventIcon(event.type)}
+                    </div>
                     <div>
-                        <p className="font-semibold">{event.player}</p>
-                        <p className="text-xs text-muted-foreground uppercase">{event.type}</p>
+                        <div className="flex items-center gap-2">
+                            <p className="font-bold leading-none">{event.playerName || (event.team === 'home' ? 'Giocatore' : 'Avversario')}</p>
+                            <Badge variant="outline" className="text-[10px] py-0 px-1 font-normal opacity-70">
+                                {event.team === 'home' ? 'SQUADRA+' : 'AVVERSARIO'}
+                            </Badge>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground mt-1 font-bold tracking-wider">{getEventLabel(event.type)}</p>
                     </div>
                   </div>
-                  <Badge variant="outline">{event.time}</Badge>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                        <span className="text-sm font-bold">{event.minute}&apos;</span>
+                        <span className="text-[10px] text-muted-foreground block leading-none">{event.period}</span>
+                    </div>
+                    <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-destructive opacity-20 hover:opacity-100 transition-opacity"
+                        onClick={() => deleteEvent(event.id)}
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -65,7 +102,10 @@ export function MatchEventsTab() {
         </CardContent>
       </Card>
 
-      <MatchStatsTab />
+      <MatchEventDialog 
+        open={isEventDialogOpen} 
+        onOpenChange={setIsEventDialogOpen} 
+      />
     </div>
   );
 }
