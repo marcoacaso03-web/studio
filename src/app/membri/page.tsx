@@ -1,9 +1,10 @@
+
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { PlusCircle, MoreHorizontal, Edit, Trash2, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react";
 import type { Player, Role } from "@/lib/types";
 import { PlayerFormDialog } from "@/components/squadra/player-form-dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -36,12 +37,19 @@ import { usePlayersStore } from "@/store/usePlayersStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+
+type SortConfig = {
+  key: string | null;
+  direction: 'asc' | 'desc' | null;
+};
 
 export default function RosaPage() {
   const { players, loading, fetchAll, add, update, remove } = usePlayersStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: null });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -83,6 +91,72 @@ export default function RosaPage() {
     return { firstName, lastName };
   };
 
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' | null = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    } else if (sortConfig.key === key && sortConfig.direction === 'desc') {
+      direction = null;
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedPlayers = useMemo(() => {
+    if (!sortConfig.key || !sortConfig.direction) return players;
+
+    return [...players].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      const aName = splitName(a.name);
+      const bName = splitName(b.name);
+
+      switch (sortConfig.key) {
+        case 'number':
+          aValue = a.number;
+          bValue = b.number;
+          break;
+        case 'firstName':
+          aValue = aName.firstName.toLowerCase();
+          bValue = bName.firstName.toLowerCase();
+          break;
+        case 'lastName':
+          aValue = aName.lastName.toLowerCase();
+          bValue = bName.lastName.toLowerCase();
+          break;
+        case 'role':
+          aValue = a.role;
+          bValue = b.role;
+          break;
+        case 'appearances':
+          aValue = a.stats.appearances;
+          bValue = b.stats.appearances;
+          break;
+        case 'goals':
+          aValue = a.stats.goals;
+          bValue = b.stats.goals;
+          break;
+        case 'assists':
+          aValue = a.stats.assists;
+          bValue = b.stats.assists;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [players, sortConfig]);
+
+  const SortIndicator = ({ columnKey }: { columnKey: string }) => {
+    if (sortConfig.key !== columnKey) return <ArrowUpDown className="ml-1 h-3 w-3 opacity-30" />;
+    if (sortConfig.direction === 'asc') return <ChevronUp className="ml-1 h-4 w-4 text-primary" />;
+    if (sortConfig.direction === 'desc') return <ChevronDown className="ml-1 h-4 w-4 text-primary" />;
+    return <ArrowUpDown className="ml-1 h-3 w-3 opacity-30" />;
+  };
+
   return (
     <>
       <div className="space-y-6">
@@ -119,19 +193,68 @@ export default function RosaPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-12 text-center">#</TableHead>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Cognome</TableHead>
-                      <TableHead>Ruolo</TableHead>
-                      <TableHead className="text-center">Presenze</TableHead>
-                      <TableHead className="text-center">Min/Gara</TableHead>
-                      <TableHead className="text-center">Gol</TableHead>
-                      <TableHead className="text-center">Assist</TableHead>
+                      <TableHead 
+                        className="w-16 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => handleSort('number')}
+                      >
+                        <div className="flex items-center justify-center">
+                          # <SortIndicator columnKey="number" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => handleSort('firstName')}
+                      >
+                        <div className="flex items-center">
+                          Nome <SortIndicator columnKey="firstName" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => handleSort('lastName')}
+                      >
+                        <div className="flex items-center">
+                          Cognome <SortIndicator columnKey="lastName" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => handleSort('role')}
+                      >
+                        <div className="flex items-center">
+                          Ruolo <SortIndicator columnKey="role" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => handleSort('appearances')}
+                      >
+                        <div className="flex items-center justify-center">
+                          Presenze <SortIndicator columnKey="appearances" />
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-center text-muted-foreground">Min/Gara</TableHead>
+                      <TableHead 
+                        className="text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => handleSort('goals')}
+                      >
+                        <div className="flex items-center justify-center">
+                          Gol <SortIndicator columnKey="goals" />
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => handleSort('assists')}
+                      >
+                        <div className="flex items-center justify-center">
+                          Assist <SortIndicator columnKey="assists" />
+                        </div>
+                      </TableHead>
                       <TableHead className="w-12"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {players.map((player) => {
+                    {sortedPlayers.map((player) => {
                       const { firstName, lastName } = splitName(player.name);
                       return (
                         <TableRow key={player.id}>
