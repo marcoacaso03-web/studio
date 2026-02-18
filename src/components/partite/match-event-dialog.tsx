@@ -31,7 +31,17 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
   const [playerId, setPlayerId] = React.useState<string>("");
   const [playerName, setPlayerName] = React.useState<string>("");
   const [minute, setMinute] = React.useState<number>(0);
-  const [period, setPeriod] = React.useState<'1T' | '2T' | 'Rec'>('1T');
+  const [period, setPeriod] = React.useState<'1T' | '2T' | '1TS' | '2TS'>('1T');
+
+  // Determina il limite dei minuti in base al periodo selezionato
+  const maxMinutes = (period === '1T' || period === '2T') ? 60 : 20;
+
+  // Reset del minuto se supera il nuovo limite quando cambia il periodo
+  React.useEffect(() => {
+    if (minute > maxMinutes) {
+      setMinute(maxMinutes);
+    }
+  }, [period, minute, maxMinutes]);
 
   const handleSave = async () => {
     const selectedPlayer = allPlayers.find(p => p.id === playerId);
@@ -49,6 +59,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
     setPlayerId("");
     setPlayerName("");
     setMinute(0);
+    setPeriod('1T');
   };
 
   const getEventLabel = (t: MatchEventType) => {
@@ -135,7 +146,8 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
                     <SelectContent className="bg-[#1a2a24] text-white border-gray-700">
                         <SelectItem value="1T">1T</SelectItem>
                         <SelectItem value="2T">2T</SelectItem>
-                        <SelectItem value="Rec">Rec</SelectItem>
+                        <SelectItem value="1TS">1TS</SelectItem>
+                        <SelectItem value="2TS">2TS</SelectItem>
                     </SelectContent>
                 </Select>
                 <Select value={minute.toString()} onValueChange={(v) => setMinute(parseInt(v))}>
@@ -143,7 +155,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-[#1a2a24] text-white border-gray-700">
-                        {Array.from({length: 121}, (_, i) => (
+                        {Array.from({length: maxMinutes + 1}, (_, i) => (
                             <SelectItem key={i} value={i.toString()}>{i}&apos;</SelectItem>
                         ))}
                     </SelectContent>

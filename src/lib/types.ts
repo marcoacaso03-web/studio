@@ -64,5 +64,5 @@ export type MatchEvent = {
   playerId?: string;
   playerName?: string; // fallback per avversari o nomi testuali
   minute: number;
-  period: '1T' | '2T' | 'Rec';
+  period: '1T' | '2T' | '1TS' | '2TS';
 };

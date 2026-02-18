@@ -8,13 +8,13 @@
 - Lingua UI: it-IT (date e formati italiani)
 
 ## CURRENT TASK
-- ID: R13
-- Titolo: Cronaca Eventi e Inserimento Rapido
+- ID: R14
+- Titolo: Perfezionamento Inserimento Eventi (Tempi e Minuti)
 - Stato: COMPLETED
 
 ## LAST KNOWN GOOD
 - Build status: OK
-- Descrizione: Implementato il sistema di cronaca eventi (Timeline) che sostituisce la tabella statistica manuale. Aggiunto dialog di inserimento evento fedele alle specifiche grafiche.
+- Descrizione: Aggiornato MatchEventDialog per supportare 1T, 2T, 1TS, 2TS con limiti di minutaggio dinamici (60' per i tempi regolamentari, 20' per i supplementari).
 
 ## TASK BOARD STATUS
 ### STEP R (Repairs & UX)
@@ -32,11 +32,11 @@
 - [x] R11 Rimozione ridondanza Convocazioni
 - [x] R12 Selezione esclusiva in Formazione
 - [x] R13 Cronaca Eventi e Inserimento Rapido
+- [x] R14 Perfezionamento Inserimento Eventi (Tempi e Minuti)
 
 ## DECISION LOG
-- **R11**: Rimossa la gestione manuale "Convocati" (presente/assente) in quanto ridondante rispetto alla formazione.
-- **R12**: I giocatori selezionati in uno slot della formazione vengono filtrati dagli altri dropdown per evitare duplicati.
-- **R13**: Eliminata la tabella statistiche manuale in favore di una Timeline eventi (Goal, Assist, Cartellini). Le statistiche globali dei giocatori sono ora calcolate automaticamente dagli eventi delle partite completate.
+- **R13**: Eliminata la tabella statistiche manuale in favore di una Timeline eventi (Goal, Assist, Cartellini).
+- **R14**: Modificati i tempi di gioco per supportare i supplementari (1TS, 2TS) e rimosso il tempo di recupero generico, con limiti di minuti specifici per periodo.
 
 ## NEXT 3 TASKS
 1. F1 **Pulizia finale e ottimizzazione**: Revisione generale del codice.
