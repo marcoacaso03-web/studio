@@ -11,6 +11,15 @@ export function MatchLineupTab() {
   const { lineup, allPlayers } = useMatchDetailStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
 
+  // Filtriamo i titolari e le riserve che hanno un ID giocatore valido
+  const activeStarters = lineup?.starters
+    .map((id, idx) => ({ id, displayNum: idx + 1 }))
+    .filter(item => item.id !== "") || [];
+    
+  const activeSubstitutes = lineup?.substitutes
+    .map((id, idx) => ({ id, displayNum: idx + 12 }))
+    .filter(item => item.id !== "") || [];
+
   return (
     <div className="space-y-6">
       {!lineup ? (
@@ -34,35 +43,46 @@ export function MatchLineupTab() {
             </Button>
           </div>
           <Card>
-            <CardContent className="p-4 space-y-4">
-                <div>
+            <CardContent className="p-4 space-y-6">
+                {activeStarters.length > 0 && (
+                  <div>
                     <h4 className="text-xs font-bold uppercase text-muted-foreground mb-2">Titolari</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {lineup.starters.map((id, idx) => {
-                            const p = allPlayers.find(player => player.id === id);
+                        {activeStarters.map((item) => {
+                            const p = allPlayers.find(player => player.id === item.id);
                             return (
-                                <div key={idx} className="flex items-center gap-2 p-2 bg-muted/30 rounded text-sm">
-                                    <span className="font-bold w-5">{idx + 1}</span>
-                                    <span>{p ? p.name : '-- giocatore --'}</span>
+                                <div key={item.id} className="flex items-center gap-2 p-2 bg-muted/30 rounded text-sm">
+                                    <span className="font-bold w-5 text-muted-foreground">{item.displayNum}</span>
+                                    <span className="font-medium">{p ? p.name : 'Giocatore non trovato'}</span>
                                 </div>
                             );
                         })}
                     </div>
-                </div>
-                <div>
+                  </div>
+                )}
+                
+                {activeSubstitutes.length > 0 && (
+                  <div>
                     <h4 className="text-xs font-bold uppercase text-muted-foreground mb-2">Riserve</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {lineup.substitutes.map((id, idx) => {
-                            const p = allPlayers.find(player => player.id === id);
+                        {activeSubstitutes.map((item) => {
+                            const p = allPlayers.find(player => player.id === item.id);
                             return (
-                                <div key={idx} className="flex items-center gap-2 p-2 bg-muted/30 rounded text-sm">
-                                    <span className="font-bold w-5">{idx + 12}</span>
-                                    <span>{p ? p.name : '-- giocatore --'}</span>
+                                <div key={item.id} className="flex items-center gap-2 p-2 bg-muted/30 rounded text-sm">
+                                    <span className="font-bold w-5 text-muted-foreground">{item.displayNum}</span>
+                                    <span className="font-medium">{p ? p.name : 'Giocatore non trovato'}</span>
                                 </div>
                             );
                         })}
                     </div>
-                </div>
+                  </div>
+                )}
+
+                {activeStarters.length === 0 && activeSubstitutes.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    Nessun giocatore selezionato nella formazione.
+                  </p>
+                )}
             </CardContent>
           </Card>
         </div>
