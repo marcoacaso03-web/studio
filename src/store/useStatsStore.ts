@@ -22,9 +22,23 @@ interface PlayerLeaderboardEntry {
     };
 }
 
+interface TrendEntry {
+    date: string;
+    opponent: string;
+    value: number;
+}
+
+interface IntervalEntry {
+    name: string;
+    value: number;
+    fill: string;
+}
+
 interface StatsState {
     teamRecord: TeamRecord | null;
     playerLeaderboard: PlayerLeaderboardEntry[];
+    teamTrend: TrendEntry[];
+    goalsIntervals: IntervalEntry[];
     loading: boolean;
     loadStats: () => Promise<void>;
 }
@@ -32,12 +46,16 @@ interface StatsState {
 export const useStatsStore = create<StatsState>((set) => ({
     teamRecord: null,
     playerLeaderboard: [],
+    teamTrend: [],
+    goalsIntervals: [],
     loading: true,
     loadStats: async () => {
         set({ loading: true });
-        const [teamRecord, playerLeaderboard] = await Promise.all([
+        const [teamRecord, playerLeaderboard, teamTrend, goalsIntervals] = await Promise.all([
             aggregationRepository.getTeamRecord(),
-            aggregationRepository.getAllPlayersAggregatedStats()
+            aggregationRepository.getAllPlayersAggregatedStats(),
+            aggregationRepository.getTeamTrend(),
+            aggregationRepository.getGoalsByInterval()
         ]);
         
         const sortedLeaderboard = [...playerLeaderboard].sort((a, b) => {
@@ -50,6 +68,12 @@ export const useStatsStore = create<StatsState>((set) => ({
             return b.stats.appearances - a.stats.appearances;
         });
 
-        set({ teamRecord, playerLeaderboard: sortedLeaderboard, loading: false });
+        set({ 
+            teamRecord, 
+            playerLeaderboard: sortedLeaderboard, 
+            teamTrend: teamTrend as TrendEntry[], 
+            goalsIntervals,
+            loading: false 
+        });
     },
 }));

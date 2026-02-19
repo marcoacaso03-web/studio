@@ -39,6 +39,57 @@ export const aggregationRepository = {
     },
 
     /**
+     * Returns the chronological trend of match results (1: win, 0: draw, -1: loss).
+     */
+    async getTeamTrend() {
+        const completedMatches = await db.matches.where('status').equals('completed').sortBy('date');
+        return completedMatches.map(match => {
+            if (!match.result) return null;
+            let value = 0;
+            if (match.isHome) {
+                if (match.result.home > match.result.away) value = 1;
+                else if (match.result.home < match.result.away) value = -1;
+            } else {
+                if (match.result.away > match.result.home) value = 1;
+                else if (match.result.away < match.result.home) value = -1;
+            }
+            return {
+                date: new Date(match.date).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' }),
+                opponent: match.opponent,
+                value
+            };
+        }).filter(Boolean);
+    },
+
+    /**
+     * Aggregates goals scored by interval.
+     */
+    async getGoalsByInterval() {
+        const events = await db.matchEvents.where('type').equals('goal').and(e => e.team === 'home').toArray();
+        const intervals = {
+            '1-30': 0,
+            '31-60': 0,
+            '61-90+': 0
+        };
+
+        events.forEach(event => {
+            if (event.period === '1T') {
+                if (event.minute <= 30) intervals['1-30']++;
+                else intervals['31-60']++;
+            } else {
+                // 2T o TS sono considerati 61+
+                intervals['61-90+']++;
+            }
+        });
+
+        return [
+            { name: '1-30\'', value: intervals['1-30'], fill: "hsl(var(--chart-1))" },
+            { name: '31-60\'', value: intervals['31-60'], fill: "hsl(var(--chart-2))" },
+            { name: '61-90\'+', value: intervals['61-90+'], fill: "hsl(var(--chart-3))" }
+        ];
+    },
+
+    /**
      * Calculates and returns aggregated stats (appearances, goals, assists) for all players.
      * Based on match lineups and chronological events.
      * @returns An array of objects, each containing a player's ID, name, and their aggregated stats.

@@ -1,72 +1,68 @@
 "use client";
 
 import { useStatsStore } from "@/store/useStatsStore";
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
+import { Line, LineChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 
 export function TeamPerformanceChart() {
-    const { teamRecord } = useStatsStore();
+    const { teamTrend } = useStatsStore();
 
-    if (!teamRecord || teamRecord.matchesPlayed === 0) {
+    if (!teamTrend || teamTrend.length === 0) {
         return (
             <Card>
                 <CardHeader>
-                    <CardTitle>Andamento Squadra</CardTitle>
+                    <CardTitle>Andamento Risultati</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p>Nessun dato disponibile. Gioca qualche partita per vedere il grafico.</p>
+                    <p className="text-sm text-muted-foreground">Gioca qualche partita per vedere l'andamento.</p>
                 </CardContent>
             </Card>
         );
     }
     
-    const chartData = [
-        { name: 'Vittorie', value: teamRecord.wins, fill: "hsl(var(--chart-2))" },
-        { name: 'Pareggi', value: teamRecord.draws, fill: "hsl(var(--chart-4))" },
-        { name: 'Sconfitte', value: teamRecord.losses, fill: "hsl(var(--chart-1))" },
-    ];
-    
     const chartConfig = {
         value: {
-            label: "Partite",
-        },
-        Vittorie: {
-            label: "Vittorie",
-            color: "hsl(var(--chart-2))",
-        },
-        Pareggi: {
-            label: "Pareggi",
-            color: "hsl(var(--chart-4))",
-        },
-        Sconfitte: {
-            label: "Sconfitte",
-            color: "hsl(var(--chart-1))",
-        },
+            label: "Esito",
+            color: "hsl(var(--primary))",
+        }
     }
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Andamento Stagionale</CardTitle>
-                <CardDescription>Riepilogo visivo dei risultati della squadra.</CardDescription>
+                <CardTitle>Andamento Risultati</CardTitle>
+                <CardDescription>Visualizza la sequenza di vittorie (1), pareggi (0) e sconfitte (-1).</CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+                <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
                     <ResponsiveContainer width="100%" height={250}>
-                        <BarChart data={chartData} layout="vertical" margin={{ left: 10 }}>
-                            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                            <XAxis type="number" allowDecimals={false} />
-                            <YAxis 
-                                dataKey="name" 
-                                type="category" 
-                                tickLine={false} 
+                        <LineChart data={teamTrend} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                            <XAxis 
+                                dataKey="date" 
+                                tickLine={false}
                                 axisLine={false}
                                 tickMargin={10}
                             />
-                            <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<ChartTooltipContent />} />
-                            <Bar dataKey="value" name="Partite" radius={4} />
-                        </BarChart>
+                            <YAxis 
+                                domain={[-1.2, 1.2]} 
+                                ticks={[-1, 0, 1]} 
+                                tickFormatter={(val) => val === 1 ? 'V' : val === -1 ? 'S' : 'P'}
+                                tickLine={false}
+                                axisLine={false}
+                            />
+                            <Tooltip content={<ChartTooltipContent />} />
+                            <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" />
+                            <Line 
+                                type="monotone" 
+                                dataKey="value" 
+                                stroke="hsl(var(--primary))" 
+                                strokeWidth={3}
+                                dot={{ r: 6, fill: "hsl(var(--primary))" }}
+                                activeDot={{ r: 8 }}
+                            />
+                        </LineChart>
                     </ResponsiveContainer>
                 </ChartContainer>
             </CardContent>
