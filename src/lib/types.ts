@@ -1,4 +1,3 @@
-
 export const ROLES = ['Portiere', 'Difensore', 'Centrocampista', 'Attaccante'] as const;
 export type Role = typeof ROLES[number];
 
@@ -28,6 +27,7 @@ export type Match = {
     away: number;
   };
   status: 'scheduled' | 'completed' | 'canceled';
+  notes?: string;
 };
 
 export const ATTENDANCE_STATUSES = ['presente', 'assente', 'in dubbio'] as const;

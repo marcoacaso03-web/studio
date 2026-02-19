@@ -1,18 +1,19 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { notFound, useParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MatchLineupTab } from "@/components/partite/match-lineup-tab";
 import { MatchEventsTab } from "@/components/partite/match-events-tab";
-import { useMatchDetailStore } from '@/store/useMatchDetailStore';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { MatchFormDialog } from '@/components/partite/match-form-dialog';
-import { useToast } from '@/hooks/use-toast';
-import { CalendarDays, MapPin, Settings2, Users, Zap } from 'lucide-react';
+import { MatchNotesTab } from "@/components/partite/match-notes-tab";
+import { useMatchDetailStore } from "@/store/useMatchDetailStore";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { MatchFormDialog } from "@/components/partite/match-form-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { CalendarDays, MapPin, Settings2, Users, Zap, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export default function MatchDetailPage() {
@@ -117,12 +118,15 @@ export default function MatchDetailPage() {
         </div>
         
         <Tabs defaultValue="eventi" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4 h-11">
+          <TabsList className="grid w-full grid-cols-3 mb-4 h-11">
             <TabsTrigger value="eventi" className="flex items-center gap-2 text-xs">
               <Zap className="h-4 w-4" /> Cronaca
             </TabsTrigger>
             <TabsTrigger value="squadra" className="flex items-center gap-2 text-xs">
               <Users className="h-4 w-4" /> Formazione
+            </TabsTrigger>
+            <TabsTrigger value="note" className="flex items-center gap-2 text-xs">
+              <FileText className="h-4 w-4" /> Note Tattiche
             </TabsTrigger>
           </TabsList>
 
@@ -132,6 +136,10 @@ export default function MatchDetailPage() {
 
           <TabsContent value="squadra">
               <MatchLineupTab />
+          </TabsContent>
+
+          <TabsContent value="note">
+              <MatchNotesTab />
           </TabsContent>
         </Tabs>
       </div>
