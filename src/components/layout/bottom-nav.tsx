@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  CalendarDays,
+  LayoutDashboard,
   Users,
   BarChart3,
   Settings,
@@ -13,7 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/calendario", label: "Calendario", icon: CalendarDays },
+  { href: "/calendario", label: "Dashboard", icon: LayoutDashboard },
   { href: "/membri", label: "Rosa", icon: Users },
   { href: "/statistiche", label: "Statistiche", icon: BarChart3 },
   { href: "/altro", label: "Altro", icon: Settings },
