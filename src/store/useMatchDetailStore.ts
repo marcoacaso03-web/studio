@@ -1,4 +1,3 @@
-
 "use client";
 
 import { create } from 'zustand';
@@ -27,6 +26,7 @@ interface MatchDetailState {
     addEvent: (event: Omit<MatchEvent, 'id'>) => Promise<void>;
     addEvents: (events: Omit<MatchEvent, 'id'>[]) => Promise<void>;
     deleteEvent: (eventId: string) => Promise<void>;
+    syncMinutes: () => void;
 }
 
 export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
@@ -52,29 +52,59 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         const matchLineup = await lineupRepository.getForMatch(matchId);
         const matchStats = await statsRepository.getForMatch(matchId);
 
-        // Se non ci sono stats ma c'è una formazione, inizializzale per i presenti
-        let finalStats = matchStats;
-        if (matchStats.length === 0 && matchLineup) {
-            const participants = new Set([...matchLineup.starters, ...matchLineup.substitutes].filter(id => id !== ""));
-            finalStats = Array.from(participants).map(playerId => ({
-                matchId,
-                playerId,
-                minutesPlayed: matchLineup.starters.includes(playerId) ? 90 : 0,
-                goals: 0,
-                assists: 0,
-                yellowCards: 0,
-                redCards: 0
-            }));
-        }
-
         set({ 
             match, 
             allPlayers,
             events: matchEvents,
             lineup: matchLineup || null,
-            stats: finalStats,
+            stats: matchStats,
             loading: false 
         });
+
+        // Dopo il caricamento, se non ci sono stats o se vogliamo aggiornarle in base agli eventi
+        get().syncMinutes();
+    },
+
+    syncMinutes: () => {
+        const { match, lineup, events, stats } = get();
+        if (!match || !lineup) return;
+
+        const duration = match.duration || 90;
+        const participants = new Set([...lineup.starters, ...lineup.substitutes].filter(id => id !== ""));
+        
+        const newStats = Array.from(participants).map(playerId => {
+            const existingStat = stats.find(s => s.playerId === playerId);
+            
+            // Calcolo automatico minuti
+            let minutesPlayed = 0;
+            const isStarter = lineup.starters.includes(playerId);
+
+            if (isStarter) {
+                // Titolare: gioca fino alla prima sostituzione in uscita o fine gara
+                const subOutEvent = events.find(e => e.type === 'substitution' && e.subOutPlayerId === playerId && e.team === 'home');
+                minutesPlayed = subOutEvent ? subOutEvent.minute : duration;
+            } else {
+                // Riserva: gioca dal momento in cui entra (se entra) fino a eventuale uscita o fine gara
+                const subInEvent = events.find(e => e.type === 'substitution' && e.playerId === playerId && e.team === 'home');
+                if (subInEvent) {
+                    const subOutEventLater = events.find(e => e.type === 'substitution' && e.subOutPlayerId === playerId && e.team === 'home' && (e.minute > subInEvent.minute || e.period !== subInEvent.period));
+                    const endMin = subOutEventLater ? subOutEventLater.minute : duration;
+                    minutesPlayed = Math.max(0, endMin - subInEvent.minute);
+                }
+            }
+
+            return {
+                matchId: match.id,
+                playerId,
+                minutesPlayed,
+                goals: existingStat?.goals || 0,
+                assists: existingStat?.assists || 0,
+                yellowCards: existingStat?.yellowCards || 0,
+                redCards: existingStat?.redCards || 0
+            };
+        });
+
+        set({ stats: newStats });
     },
 
     addEvent: async (eventData) => {
@@ -91,10 +121,13 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             result: { home: homeGoals, away: awayGoals }
         });
 
+        set({ events: updatedEvents, match: updatedMatch || get().match });
+        
+        // Sincronizza i minuti dopo un cambio eventi (specialmente sostituzioni)
+        get().syncMinutes();
+        
         await aggregationRepository.syncAllPlayersStats();
         useStatsStore.getState().loadStats();
-
-        set({ events: updatedEvents, match: updatedMatch || get().match });
     },
 
     addEvents: async (eventsData) => {
@@ -114,10 +147,13 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             result: { home: homeGoals, away: awayGoals }
         });
 
+        set({ events: updatedEvents, match: updatedMatch || get().match });
+
+        // Sincronizza i minuti
+        get().syncMinutes();
+
         await aggregationRepository.syncAllPlayersStats();
         useStatsStore.getState().loadStats();
-
-        set({ events: updatedEvents, match: updatedMatch || get().match });
     },
 
     deleteEvent: async (eventId) => {
@@ -134,10 +170,13 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             result: { home: homeGoals, away: awayGoals }
         });
 
+        set({ events: updatedEvents, match: updatedMatch || get().match });
+
+        // Sincronizza i minuti
+        get().syncMinutes();
+
         await aggregationRepository.syncAllPlayersStats();
         useStatsStore.getState().loadStats();
-
-        set({ events: updatedEvents, match: updatedMatch || get().match });
     },
     
     updateMatch: async (data) => {
@@ -146,9 +185,10 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
 
         const updatedMatch = await matchRepository.update(matchId, data);
         if (updatedMatch) {
+            set({ match: updatedMatch });
+            get().syncMinutes();
             await aggregationRepository.syncAllPlayersStats();
             useStatsStore.getState().loadStats();
-            set({ match: updatedMatch });
         }
     },
 
@@ -157,23 +197,8 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         if (!matchId) return;
         await lineupRepository.save({ ...lineup, matchId });
         
-        // Sincronizza anche la lista delle statistiche individuali per chi è in formazione
-        const participants = new Set([...lineup.starters, ...lineup.substitutes].filter(id => id !== ""));
-        const currentStats = get().stats;
-        const newStats = Array.from(participants).map(playerId => {
-            const existing = currentStats.find(s => s.playerId === playerId);
-            return existing || {
-                matchId,
-                playerId,
-                minutesPlayed: lineup.starters.includes(playerId) ? 90 : 0,
-                goals: 0,
-                assists: 0,
-                yellowCards: 0,
-                redCards: 0
-            };
-        });
-
-        set({ lineup, stats: newStats });
+        set({ lineup });
+        get().syncMinutes();
     },
 
     saveAllStats: async (stats) => {

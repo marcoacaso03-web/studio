@@ -48,6 +48,7 @@ const formSchema = z.object({
   location: z.string().min(2, { message: "Il luogo è richiesto." }),
   date: z.string().min(1, { message: "La data e l'ora sono richieste." }),
   isHome: z.boolean(),
+  duration: z.coerce.number().int().min(1, "Durata richiesta"),
   status: z.enum(['scheduled', 'completed', 'canceled']),
 });
 
@@ -59,6 +60,7 @@ type MatchSaveData = {
     location: string;
     date: Date;
     isHome: boolean;
+    duration: number;
     status: 'scheduled' | 'completed' | 'canceled';
 };
 
@@ -77,6 +79,7 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
       location: "",
       date: "",
       isHome: true,
+      duration: 90,
       status: 'scheduled',
     },
   });
@@ -89,6 +92,7 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
         location: match?.location || "",
         date: initialDate,
         isHome: match?.isHome ?? true,
+        duration: match?.duration || 90,
         status: match?.status || 'scheduled',
       });
     }
@@ -101,6 +105,7 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
         location: data.location,
         isHome: data.isHome,
         status: data.status,
+        duration: data.duration,
         date: new Date(data.date),
     };
     onSave(saveData, match?.id);
@@ -149,24 +154,49 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Data e Ora</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="datetime-local"
-                      min={min}
-                      max={max}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+                <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Data e Ora</FormLabel>
+                    <FormControl>
+                        <Input
+                        type="datetime-local"
+                        min={min}
+                        max={max}
+                        {...field}
+                        />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+
+                <FormField
+                control={form.control}
+                name="duration"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Durata Partita</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value.toString()} value={field.value.toString()}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Durata" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="70">70 minuti</SelectItem>
+                            <SelectItem value="80">80 minuti</SelectItem>
+                            <SelectItem value="90">90 minuti</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+            </div>
 
             <FormField
               control={form.control}

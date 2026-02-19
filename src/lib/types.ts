@@ -1,4 +1,3 @@
-
 export const ROLES = ['Portiere', 'Difensore', 'Centrocampista', 'Attaccante'] as const;
 export type Role = typeof ROLES[number];
 
@@ -23,6 +22,7 @@ export type Match = {
   date: string;
   location: string;
   isHome: boolean;
+  duration: number; // Durata totale in minuti (70, 80, 90)
   result?: {
     home: number;
     away: number;
