@@ -98,9 +98,6 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
 
   const currentTeamName = match?.isHome ? "PITCHMAN" : (match?.opponent || "PITCHMAN");
 
-  const filteredStarters = starters.map((s, i) => ({ id: s, num: i + 1 })).filter(item => item.id !== "");
-  const filteredSubstitutes = substitutes.map((s, i) => ({ id: s, num: i + 12 })).filter(item => item.id !== "");
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-full h-full sm:max-w-md p-0 overflow-hidden flex flex-col gap-0 border-none bg-background">
