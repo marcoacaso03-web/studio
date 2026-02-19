@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -96,7 +95,7 @@ export function MatchEventsTab() {
                                 <p className="font-bold leading-none">{event.playerName || (event.team === 'home' ? 'Giocatore' : 'Avversario')}</p>
                               )}
                               <Badge variant="outline" className="text-[10px] py-0 px-1 font-normal opacity-70">
-                                  {event.team === 'home' ? 'SQUADRA+' : 'AVVERSARIO'}
+                                  {event.team === 'home' ? 'PITCHMAN' : 'AVVERSARIO'}
                               </Badge>
                           </div>
                           <p className="text-[10px] text-muted-foreground mt-1 font-bold tracking-wider">{getEventLabel(event)}</p>

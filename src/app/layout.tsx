@@ -1,4 +1,3 @@
-
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
@@ -7,7 +6,7 @@ import { BottomNav } from '@/components/layout/bottom-nav';
 import { ThemeProvider } from '@/components/layout/theme-provider';
 
 export const metadata: Metadata = {
-  title: 'Squadra+',
+  title: 'PitchMan',
   description: 'La tua app per la gestione della squadra',
 };
 

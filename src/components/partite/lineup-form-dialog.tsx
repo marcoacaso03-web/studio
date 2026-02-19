@@ -96,6 +96,11 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
     );
   };
 
+  const currentTeamName = match?.isHome ? "PITCHMAN" : (match?.opponent || "PITCHMAN");
+
+  const filteredStarters = starters.map((s, i) => ({ id: s, num: i + 1 })).filter(item => item.id !== "");
+  const filteredSubstitutes = substitutes.map((s, i) => ({ id: s, num: i + 12 })).filter(item => item.id !== "");
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-full h-full sm:max-w-md p-0 overflow-hidden flex flex-col gap-0 border-none bg-background">
@@ -109,7 +114,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
         <div className="bg-muted text-muted-foreground px-4 py-2 flex items-center justify-between text-xs uppercase font-bold">
           <div className="flex items-center gap-2">
             <div className="w-5 h-5 bg-primary rounded-full" />
-            <span className="text-foreground">{match?.isHome ? "SQUADRA+" : (match?.opponent || "SQUADRA+") }</span>
+            <span className="text-foreground">{currentTeamName}</span>
           </div>
           <div className="flex items-center gap-1">
             <span>MODULO</span>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -77,15 +76,15 @@ export default function AltroPage() {
     try {
       const players = await playerRepository.getAll();
       const playersCSV = convertToCSV(players.map(({avatarUrl, imageHint, ...p}) => p));
-      downloadCSV(playersCSV, 'squadra_plus_players.csv');
+      downloadCSV(playersCSV, 'pitchman_players.csv');
       
       const matches = await matchRepository.getAll();
       const matchesCSV = convertToCSV(matches);
-      downloadCSV(matchesCSV, 'squadra_plus_matches.csv');
+      downloadCSV(matchesCSV, 'pitchman_matches.csv');
       
       const playerMatchStats = await statsRepository.getAll();
       const playerMatchStatsCSV = convertToCSV(playerMatchStats);
-      downloadCSV(playerMatchStatsCSV, 'squadra_plus_player_match_stats.csv');
+      downloadCSV(playerMatchStatsCSV, 'pitchman_player_match_stats.csv');
       
       toast({
         title: "Esportazione completata",
@@ -145,9 +144,9 @@ export default function AltroPage() {
           <CardContent>
             <p className="mb-4 text-sm text-muted-foreground">Verranno generati 3 file:</p>
             <ul className="mb-6 list-disc list-inside text-sm space-y-1">
-              <li><code className="font-mono bg-muted px-1 py-0.5 rounded">squadra_plus_players.csv</code></li>
-              <li><code className="font-mono bg-muted px-1 py-0.5 rounded">squadra_plus_matches.csv</code></li>
-              <li><code className="font-mono bg-muted px-1 py-0.5 rounded">squadra_plus_player_match_stats.csv</code></li>
+              <li><code className="font-mono bg-muted px-1 py-0.5 rounded">pitchman_players.csv</code></li>
+              <li><code className="font-mono bg-muted px-1 py-0.5 rounded">pitchman_matches.csv</code></li>
+              <li><code className="font-mono bg-muted px-1 py-0.5 rounded">pitchman_player_match_stats.csv</code></li>
             </ul>
              <Button onClick={handleExport} disabled={isExporting} className="w-full md:w-auto font-black uppercase text-xs">
               <Download className="mr-2 h-4 w-4" />

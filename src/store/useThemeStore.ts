@@ -1,4 +1,3 @@
-
 "use client";
 
 import { create } from 'zustand';
@@ -18,7 +17,7 @@ export const useThemeStore = create<ThemeState>()(
       setTheme: (theme) => set({ theme }),
     }),
     {
-      name: 'squadra-plus-theme',
+      name: 'pitchman-theme',
     }
   )
 );

@@ -170,7 +170,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
                 <SelectValue placeholder="Seleziona" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="home">Squadra+</SelectItem>
+                <SelectItem value="home">PitchMan</SelectItem>
                 <SelectItem value="away">{match?.opponent || "Avversario"}</SelectItem>
               </SelectContent>
             </Select>

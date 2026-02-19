@@ -1,5 +1,5 @@
 
-# Consigli per lo Sviluppo Futuro di Squadra+
+# Consigli per lo Sviluppo Futuro di PitchMan
 
 Questo documento raccoglie suggerimenti per l'evoluzione del software come gestionale tecnico e amministrativo interno.
 

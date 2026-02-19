@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -82,12 +81,12 @@ export default function MatchDetailPage() {
               <div className="flex flex-col items-center justify-center space-y-6">
                 <div className="flex items-center justify-center gap-8 md:gap-16">
                   <div className="text-center">
-                    <p className="text-xs opacity-70 mb-1 font-bold uppercase tracking-widest">{match.isHome ? "SQUADRA+" : match.opponent.toUpperCase()}</p>
+                    <p className="text-xs opacity-70 mb-1 font-bold uppercase tracking-widest">{match.isHome ? "PITCHMAN" : match.opponent.toUpperCase()}</p>
                     <p className="text-6xl font-black">{match.result?.home ?? "-"}</p>
                   </div>
                   <div className="text-4xl font-light opacity-30">VS</div>
                   <div className="text-center">
-                    <p className="text-xs opacity-70 mb-1 font-bold uppercase tracking-widest">{!match.isHome ? "SQUADRA+" : match.opponent.toUpperCase()}</p>
+                    <p className="text-xs opacity-70 mb-1 font-bold uppercase tracking-widest">{!match.isHome ? "PITCHMAN" : match.opponent.toUpperCase()}</p>
                     <p className="text-6xl font-black">{match.result?.away ?? "-"}</p>
                   </div>
                 </div>

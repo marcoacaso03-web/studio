@@ -2,7 +2,7 @@
 # AI_PROGRESS — Allenatore Calcio Offline (Next.js)
 
 ## PROJECT SNAPSHOT
-- Nome progetto: Squadra+
+- Nome progetto: PitchMan
 - Target: Gestionale interno per singoli allenatori o società (Uso Personale)
 - Natura: 100% Offline-only (No Cloud, No Social)
 - Stack: Next.js (App Router) + TypeScript + Dexie (IndexedDB) + Zustand + Zod + Recharts

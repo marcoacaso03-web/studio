@@ -82,7 +82,7 @@ export function MatchResultDialog({ open, onOpenChange, onSave, match }: MatchRe
                 name="home"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-center block">{match.isHome ? "Squadra+" : match.opponent}</FormLabel>
+                    <FormLabel className="text-center block">{match.isHome ? "PitchMan" : match.opponent}</FormLabel>
                     <FormControl>
                       <Input type="number" className="text-center text-2xl font-bold h-16" {...field} />
                     </FormControl>
@@ -95,7 +95,7 @@ export function MatchResultDialog({ open, onOpenChange, onSave, match }: MatchRe
                 name="away"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-center block">{!match.isHome ? "Squadra+" : match.opponent}</FormLabel>
+                    <FormLabel className="text-center block">{!match.isHome ? "PitchMan" : match.opponent}</FormLabel>
                     <FormControl>
                       <Input type="number" className="text-center text-2xl font-bold h-16" {...field} />
                     </FormControl>
