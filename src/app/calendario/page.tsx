@@ -118,8 +118,8 @@ export default function DashboardPage() {
   return (
     <TooltipProvider>
       <div className="space-y-4 md:space-y-6">
-        <Card className="overflow-hidden border-none shadow-md">
-          <CardHeader className="p-4 md:p-6 pb-2 md:pb-4 bg-white border-b">
+        <Card className="overflow-hidden border shadow-md bg-card">
+          <CardHeader className="p-4 md:p-6 pb-2 md:pb-4 border-b bg-muted/5">
             <div className="flex flex-row items-center justify-between gap-2">
               <div>
                 <CardTitle className="text-lg md:text-2xl text-primary font-black uppercase tracking-tight">Partite</CardTitle>
@@ -228,7 +228,7 @@ export default function DashboardPage() {
 
         {/* Riepilogo Dashboard */}
         <div className="grid grid-cols-2 gap-3 md:gap-4">
-          <Card className="shadow-sm border-none bg-white">
+          <Card className="shadow-sm border bg-card">
             <CardHeader className="flex flex-row items-center justify-between p-3 md:p-4 pb-1 md:pb-2">
               <CardTitle className="text-[10px] md:text-sm font-black uppercase tracking-wider text-muted-foreground/60">Rosa</CardTitle>
               <Users className="h-3.5 w-3.5 text-primary" />
@@ -252,7 +252,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm border-none bg-white">
+          <Card className="shadow-sm border bg-card">
             <CardHeader className="flex flex-row items-center justify-between p-3 md:p-4 pb-1 md:pb-2">
               <CardTitle className="text-[10px] md:text-sm font-black uppercase tracking-wider text-muted-foreground/60">Record</CardTitle>
               <Trophy className="h-3.5 w-3.5 text-accent" />
