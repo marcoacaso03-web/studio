@@ -31,10 +31,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 type SortConfig = {
   key: string | null;
   direction: 'asc' | 'desc' | null;
+};
+
+const roleInitials: Record<Role, string> = {
+  'Portiere': 'P',
+  'Difensore': 'D',
+  'Centrocampista': 'C',
+  'Attaccante': 'A'
 };
 
 export default function RosaPage() {
@@ -141,158 +149,156 @@ export default function RosaPage() {
 
   const SortIndicator = ({ columnKey }: { columnKey: string }) => {
     if (sortConfig.key !== columnKey) return <ArrowUpDown className="ml-1 h-3 w-3 opacity-30" />;
-    if (sortConfig.direction === 'asc') return <ChevronUp className="ml-1 h-4 w-4 text-primary" />;
-    if (sortConfig.direction === 'desc') return <ChevronDown className="ml-1 h-4 w-4 text-primary" />;
+    if (sortConfig.direction === 'asc') return <ChevronUp className="ml-1 h-3 w-3 text-primary" />;
+    if (sortConfig.direction === 'desc') return <ChevronDown className="ml-1 h-3 w-3 text-primary" />;
     return <ArrowUpDown className="ml-1 h-3 w-3 opacity-30" />;
   };
 
   return (
     <TooltipProvider>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         <PageHeader 
           title={
-            <div className="flex items-center gap-3">
-              <span>Rosa</span>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl md:text-3xl">Rosa</span>
               {!loading && (
-                <Badge variant="secondary" className="text-lg px-3 py-0">
+                <Badge variant="secondary" className="text-sm md:text-lg px-2 py-0">
                   {players.length}
                 </Badge>
               )}
             </div>
           }
         >
-          <Button className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => handleOpenForm(null)}>
+          <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => handleOpenForm(null)}>
             <PlusCircle className="mr-2 h-4 w-4" />
-            Aggiungi Giocatore
+            <span className="hidden md:inline">Aggiungi</span>
+            <span className="md:hidden">Add</span>
           </Button>
         </PageHeader>
 
         <Card>
           <CardContent className="p-0">
             {loading ? (
-                <div className="p-6 space-y-4">
-                  {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+                <div className="p-4 space-y-3">
+                  {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
                 </div>
               ) : players.length === 0 ? (
-                <div className="text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg m-6">
-                    <h3 className="text-lg font-semibold text-foreground">Nessun giocatore in rosa</h3>
-                    <p className="mt-2">Inizia a costruire il tuo team aggiungendo il primo giocatore.</p>
+                <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg m-4">
+                    <h3 className="text-sm font-semibold text-foreground">Rosa vuota</h3>
+                    <p className="text-xs mt-1">Inizia aggiungendo il primo giocatore.</p>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead 
-                        className="w-16 text-center cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => handleSort('number')}
-                      >
-                        <div className="flex items-center justify-center">
-                          # <SortIndicator columnKey="number" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => handleSort('firstName')}
-                      >
-                        <div className="flex items-center">
-                          Nome <SortIndicator columnKey="firstName" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => handleSort('lastName')}
-                      >
-                        <div className="flex items-center">
-                          Cognome <SortIndicator columnKey="lastName" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => handleSort('role')}
-                      >
-                        <div className="flex items-center">
-                          Ruolo <SortIndicator columnKey="role" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="text-center cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => handleSort('appearances')}
-                      >
-                        <div className="flex items-center justify-center">
-                          Presenze <SortIndicator columnKey="appearances" />
-                        </div>
-                      </TableHead>
-                      <TableHead className="text-center text-muted-foreground">Min/Gara</TableHead>
-                      <TableHead 
-                        className="text-center cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => handleSort('goals')}
-                      >
-                        <div className="flex items-center justify-center">
-                          Gol <SortIndicator columnKey="goals" />
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="text-center cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => handleSort('assists')}
-                      >
-                        <div className="flex items-center justify-center">
-                          Assist <SortIndicator columnKey="assists" />
-                        </div>
-                      </TableHead>
-                      <TableHead className="w-24 text-right pr-6">Azioni</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sortedPlayers.map((player) => {
-                      const { firstName, lastName } = splitName(player.name);
-                      return (
-                        <TableRow key={player.id}>
-                          <TableCell className="font-bold text-center text-muted-foreground">{player.number}</TableCell>
-                          <TableCell className="font-medium">{firstName}</TableCell>
-                          <TableCell className="font-medium">{lastName}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="font-normal">{player.role}</Badge>
-                          </TableCell>
-                          <TableCell className="text-center">{player.stats.appearances}</TableCell>
-                          <TableCell className="text-center text-muted-foreground">0'</TableCell>
-                          <TableCell className="text-center font-bold text-green-600">{player.stats.goals}</TableCell>
-                          <TableCell className="text-center font-bold text-blue-600">{player.stats.assists}</TableCell>
-                          <TableCell className="text-right pr-4">
-                            <div className="flex items-center justify-end gap-1">
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="icon" 
-                                    className="h-8 w-8 text-muted-foreground hover:text-primary"
-                                    onClick={() => handleOpenForm(player)}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>Modifica</TooltipContent>
-                              </Tooltip>
-                              
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="icon" 
-                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                    onClick={() => setPlayerToDelete(player)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>Elimina</TooltipContent>
-                              </Tooltip>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead 
+                          className="w-10 md:w-16 px-2 text-center cursor-pointer"
+                          onClick={() => handleSort('number')}
+                        >
+                          <div className="flex items-center justify-center">
+                            # <SortIndicator columnKey="number" />
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="px-2 cursor-pointer"
+                          onClick={() => handleSort('firstName')}
+                        >
+                          <div className="flex items-center">
+                            Nome <SortIndicator columnKey="firstName" />
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="px-2 cursor-pointer"
+                          onClick={() => handleSort('lastName')}
+                        >
+                          <div className="flex items-center">
+                            Cogn. <SortIndicator columnKey="lastName" />
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="w-10 px-2 text-center cursor-pointer"
+                          onClick={() => handleSort('role')}
+                        >
+                          <div className="flex items-center justify-center">
+                            R. <SortIndicator columnKey="role" />
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="w-10 px-1 text-center cursor-pointer"
+                          onClick={() => handleSort('appearances')}
+                        >
+                          <div className="flex items-center justify-center">
+                            P <SortIndicator columnKey="appearances" />
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="w-10 px-1 text-center cursor-pointer"
+                          onClick={() => handleSort('goals')}
+                        >
+                          <div className="flex items-center justify-center">
+                            G <SortIndicator columnKey="goals" />
+                          </div>
+                        </TableHead>
+                        <TableHead 
+                          className="w-10 px-1 text-center cursor-pointer"
+                          onClick={() => handleSort('assists')}
+                        >
+                          <div className="flex items-center justify-center">
+                            A <SortIndicator columnKey="assists" />
+                          </div>
+                        </TableHead>
+                        <TableHead className="w-16 px-2 text-right">Az.</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {sortedPlayers.map((player) => {
+                        const { firstName, lastName } = splitName(player.name);
+                        return (
+                          <TableRow key={player.id} className="h-12">
+                            <TableCell className="px-2 font-bold text-center text-muted-foreground text-xs md:text-sm">
+                              {player.number}
+                            </TableCell>
+                            <TableCell className="px-2 font-medium text-xs md:text-sm truncate max-w-[60px] md:max-w-none">
+                              {firstName}
+                            </TableCell>
+                            <TableCell className="px-2 font-medium text-xs md:text-sm truncate max-w-[60px] md:max-w-none">
+                              {lastName}
+                            </TableCell>
+                            <TableCell className="px-2 text-center">
+                              <span className="text-[10px] md:text-xs font-bold bg-muted px-1.5 py-0.5 rounded border">
+                                {roleInitials[player.role]}
+                              </span>
+                            </TableCell>
+                            <TableCell className="px-1 text-center text-xs md:text-sm">{player.stats.appearances}</TableCell>
+                            <TableCell className="px-1 text-center font-bold text-green-600 text-xs md:text-sm">{player.stats.goals}</TableCell>
+                            <TableCell className="px-1 text-center font-bold text-blue-600 text-xs md:text-sm">{player.stats.assists}</TableCell>
+                            <TableCell className="px-2 text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-7 w-7 text-muted-foreground hover:text-primary"
+                                  onClick={() => handleOpenForm(player)}
+                                >
+                                  <Edit className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                                  onClick={() => setPlayerToDelete(player)}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
             )}
           </CardContent>
         </Card>
@@ -306,16 +312,16 @@ export default function RosaPage() {
       />
       
       <AlertDialog open={!!playerToDelete} onOpenChange={(open) => !open && setPlayerToDelete(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[90vw] rounded-lg">
           <AlertDialogHeader>
             <AlertDialogTitle>Sei sicuro?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Questa azione non può essere annullata. Il giocatore Verrà eliminato definitivamente dalla rosa.
+            <AlertDialogDescription className="text-xs">
+              Questa azione eliminerà definitivamente {playerToDelete?.name} dalla rosa.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annulla</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeletePlayer} className="bg-destructive hover:bg-destructive/90">
+          <AlertDialogFooter className="flex-row justify-end gap-2">
+            <AlertDialogCancel className="mt-0 text-xs">Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeletePlayer} className="bg-destructive hover:bg-destructive/90 text-xs">
               Elimina
             </AlertDialogAction>
           </AlertDialogFooter>
