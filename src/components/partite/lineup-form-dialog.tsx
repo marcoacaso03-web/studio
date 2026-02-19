@@ -96,8 +96,6 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
     );
   };
 
-  const currentTeamName = match?.isHome ? "PITCHMAN" : (match?.opponent || "PITCHMAN");
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-full h-full sm:max-w-md p-0 overflow-hidden flex flex-col gap-0 border-none bg-background">
@@ -111,7 +109,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
         <div className="bg-muted text-muted-foreground px-4 py-2 flex items-center justify-between text-xs uppercase font-bold">
           <div className="flex items-center gap-2">
             <div className="w-5 h-5 bg-primary rounded-full" />
-            <span className="text-foreground">{currentTeamName}</span>
+            <span className="text-foreground">PITCHMAN</span>
           </div>
           <div className="flex items-center gap-1">
             <span>MODULO</span>

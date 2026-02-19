@@ -54,9 +54,11 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
 
   const maxMinutes = (period === '1T' || period === '2T') ? 60 : 20;
 
+  const isPitchManSide = match?.isHome ? team === 'home' : team === 'away';
+
   // Calcola i giocatori in campo e in panchina al minuto selezionato
   const playersStatus = React.useMemo(() => {
-    if (team !== 'home' || !lineup) return { onPitch: allPlayers, onBench: [] };
+    if (!isPitchManSide || !lineup) return { onPitch: allPlayers, onBench: [] };
 
     let currentPitch = new Set<string>(lineup.starters.filter(id => id !== ""));
     let currentBench = new Set<string>(lineup.substitutes.filter(id => id !== ""));
@@ -77,7 +79,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
       
       if (!isBefore) break;
 
-      if (event.team === 'home') {
+      if (event.team === (match?.isHome ? 'home' : 'away')) {
         if (event.type === 'substitution') {
            if (event.subOutPlayerId) currentPitch.delete(event.subOutPlayerId);
            if (event.subOutPlayerId) currentBench.add(event.subOutPlayerId);
@@ -91,7 +93,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
       onPitch: allPlayers.filter(p => currentPitch.has(p.id)),
       onBench: allPlayers.filter(p => currentBench.has(p.id))
     };
-  }, [allPlayers, allEvents, lineup, minute, period, team]);
+  }, [allPlayers, allEvents, lineup, minute, period, team, isPitchManSide, match?.isHome]);
 
   React.useEffect(() => {
     if (minute > maxMinutes) setMinute(maxMinutes);
@@ -121,10 +123,10 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
       events.push({
         ...baseEvent,
         type: 'goal',
-        playerId: team === 'home' ? playerId : undefined,
-        playerName: team === 'home' ? selectedScorer?.name : (playerName || match?.opponent || "Avversario"),
-        assistPlayerId: (team === 'home' && assistPlayerId && assistPlayerId !== "none") ? assistPlayerId : undefined,
-        assistPlayerName: team === 'home' 
+        playerId: isPitchManSide ? playerId : undefined,
+        playerName: isPitchManSide ? selectedScorer?.name : (playerName || match?.opponent || "Avversario"),
+        assistPlayerId: (isPitchManSide && assistPlayerId && assistPlayerId !== "none") ? assistPlayerId : undefined,
+        assistPlayerName: isPitchManSide 
           ? (selectedAssist?.name || undefined) 
           : (assistPlayerName || undefined),
       });
@@ -135,18 +137,18 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
       events.push({
         ...baseEvent,
         type: 'substitution',
-        playerId: team === 'home' ? subInPlayerId : undefined,
-        playerName: team === 'home' ? selectedIn?.name : (subInPlayerName || "Subentrante"),
-        subOutPlayerId: team === 'home' ? subOutPlayerId : undefined,
-        subOutPlayerName: team === 'home' ? selectedOut?.name : (subOutPlayerName || "Uscente"),
+        playerId: isPitchManSide ? subInPlayerId : undefined,
+        playerName: isPitchManSide ? selectedIn?.name : (subInPlayerName || "Subentrante"),
+        subOutPlayerId: isPitchManSide ? subOutPlayerId : undefined,
+        subOutPlayerName: isPitchManSide ? selectedOut?.name : (subOutPlayerName || "Uscente"),
       });
     } else {
       const selectedPlayer = allPlayers.find(p => p.id === playerId);
       events.push({
         ...baseEvent,
         type: uiType as MatchEventType,
-        playerId: team === 'home' ? playerId : undefined,
-        playerName: team === 'home' ? selectedPlayer?.name : (playerName || match?.opponent || "Avversario"),
+        playerId: isPitchManSide ? playerId : undefined,
+        playerName: isPitchManSide ? selectedPlayer?.name : (playerName || match?.opponent || "Avversario"),
       });
     }
 
@@ -170,8 +172,8 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
                 <SelectValue placeholder="Seleziona" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="home">PitchMan</SelectItem>
-                <SelectItem value="away">{match?.opponent || "Avversario"}</SelectItem>
+                <SelectItem value="home">{match?.isHome ? "PitchMan" : (match?.opponent || "Avversario")}</SelectItem>
+                <SelectItem value="away">{!match?.isHome ? "PitchMan" : (match?.opponent || "Avversario")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -195,7 +197,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
             <>
               <div className="flex items-center justify-between border-b border-muted pb-2">
                 <span className="text-muted-foreground font-medium">Marcatore:</span>
-                {team === 'home' ? (
+                {isPitchManSide ? (
                   <Select value={playerId} onValueChange={setPlayerId}>
                     <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-bold focus:ring-0">
                       <SelectValue placeholder="In campo" />
@@ -212,7 +214,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
               </div>
               <div className="flex items-center justify-between border-b border-muted pb-2">
                 <span className="text-muted-foreground font-medium">Assist:</span>
-                {team === 'home' ? (
+                {isPitchManSide ? (
                   <Select value={assistPlayerId} onValueChange={setAssistPlayerId}>
                     <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-bold focus:ring-0">
                       <SelectValue placeholder="In campo (opz.)" />
@@ -235,7 +237,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
             <>
               <div className="flex items-center justify-between border-b border-muted pb-2">
                 <span className="text-muted-foreground font-medium">Esce:</span>
-                {team === 'home' ? (
+                {isPitchManSide ? (
                   <Select value={subOutPlayerId} onValueChange={setSubOutPlayerId}>
                     <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-bold focus:ring-0">
                       <SelectValue placeholder="Dal campo" />
@@ -252,7 +254,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
               </div>
               <div className="flex items-center justify-between border-b border-muted pb-2">
                 <span className="text-muted-foreground font-medium">Entra:</span>
-                {team === 'home' ? (
+                {isPitchManSide ? (
                   <Select value={subInPlayerId} onValueChange={setSubInPlayerId}>
                     <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-bold focus:ring-0">
                       <SelectValue placeholder="Dalla panchina" />
@@ -273,7 +275,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
           {(uiType === 'yellow_card' || uiType === 'red_card') && (
             <div className="flex items-center justify-between border-b border-muted pb-2">
               <span className="text-muted-foreground font-medium">Giocatore:</span>
-              {team === 'home' ? (
+              {isPitchManSide ? (
                 <Select value={playerId} onValueChange={setPlayerId}>
                   <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-bold focus:ring-0">
                     <SelectValue placeholder="In campo" />

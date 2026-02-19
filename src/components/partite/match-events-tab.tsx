@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { MatchEventType } from "@/lib/types";
 
 export function MatchEventsTab() {
-  const { events, deleteEvent } = useMatchDetailStore();
+  const { events, deleteEvent, match } = useMatchDetailStore();
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
 
   const getEventIcon = (type: MatchEventType) => {
@@ -61,7 +61,7 @@ export function MatchEventsTab() {
           >
             <Plus className="h-6 w-6" />
           </Button>
-        </CardHeader>
+        </Header>
         <CardContent>
           {events.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-lg">
@@ -72,6 +72,8 @@ export function MatchEventsTab() {
           ) : (
             <div className="space-y-4">
               {events.map((event) => {
+                const isPitchMan = match?.isHome ? event.team === 'home' : event.team === 'away';
+                
                 return (
                   <div key={event.id} className="flex items-center justify-between border-b border-muted pb-3 last:border-0">
                     <div className="flex items-center gap-4">
@@ -92,10 +94,10 @@ export function MatchEventsTab() {
                                    </div>
                                 </div>
                               ) : (
-                                <p className="font-bold leading-none">{event.playerName || (event.team === 'home' ? 'Giocatore' : 'Avversario')}</p>
+                                <p className="font-bold leading-none">{event.playerName || (isPitchMan ? 'Giocatore' : (match?.opponent || 'Avversario'))}</p>
                               )}
                               <Badge variant="outline" className="text-[10px] py-0 px-1 font-normal opacity-70">
-                                  {event.team === 'home' ? 'PITCHMAN' : 'AVVERSARIO'}
+                                  {isPitchMan ? 'PITCHMAN' : 'AVVERSARIO'}
                               </Badge>
                           </div>
                           <p className="text-[10px] text-muted-foreground mt-1 font-bold tracking-wider">{getEventLabel(event)}</p>

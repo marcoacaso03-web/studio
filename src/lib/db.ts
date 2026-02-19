@@ -1,7 +1,7 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type { Player, Match, MatchAttendance, PlayerMatchStats, MatchLineup, MatchEvent } from './types';
 
-class SquadraPlusDB extends Dexie {
+class PitchManDB extends Dexie {
     players!: EntityTable<Player, 'id'>;
     matches!: EntityTable<Match, 'id'>;
     matchAttendances!: EntityTable<MatchAttendance, ['matchId', 'playerId']>;
@@ -10,7 +10,7 @@ class SquadraPlusDB extends Dexie {
     matchEvents!: EntityTable<MatchEvent, 'id'>;
 
     constructor() {
-        super('SquadraPlusDB');
+        super('PitchManDB');
         // Versione 4: aggiunto supporto per matchEvents
         this.version(4).stores({
             players: 'id, name',
@@ -36,4 +36,4 @@ class SquadraPlusDB extends Dexie {
     }
 }
 
-export const db = new SquadraPlusDB();
+export const db = new PitchManDB();
