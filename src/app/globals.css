@@ -31,25 +31,25 @@
     --radius: 0.5rem;
   }
   .dark {
-    /* Background blu notte profondissimo per restare on-brand */
-    --background: 235 66% 4%;
-    --foreground: 210 40% 98%;
+    /* Background quasi nero con tonalità blu molto scura */
+    --background: 235 50% 2%;
+    --foreground: 215 20% 80%; /* Grigio chiaro morbido per ridurre l'abbagliamento */
     
-    --card: 235 66% 6%;
-    --card-foreground: 210 40% 98%;
+    --card: 235 50% 4%;
+    --card-foreground: 215 20% 90%;
     
-    --popover: 235 66% 5%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 235 50% 3%;
+    --popover-foreground: 215 20% 90%;
     
-    /* Primary blu leggermente più vibrante per risaltare sul fondo scuro */
-    --primary: 235 66% 45%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary blu vibrante */
+    --primary: 235 75% 55%;
+    --primary-foreground: 0 0% 100%; /* Bianco puro solo per testi su sfondi colorati */
     
-    --secondary: 235 66% 12%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 235 40% 8%;
+    --secondary-foreground: 215 20% 95%;
     
-    --muted: 235 30% 15%;
-    --muted-foreground: 215 20% 75%;
+    --muted: 235 30% 10%;
+    --muted-foreground: 215 15% 60%;
     
     --accent: 34 100% 50%;
     --accent-foreground: 24 9.8% 10%;
@@ -57,9 +57,9 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     
-    /* Bordi più discreti per evitare l'effetto griglia */
-    --border: 235 30% 15%;
-    --input: 235 30% 15%;
+    /* Bordi quasi invisibili per un look moderno e pulito */
+    --border: 235 30% 10%;
+    --input: 235 30% 10%;
     --ring: 34 100% 50%;
   }
 }
