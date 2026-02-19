@@ -1,3 +1,4 @@
+
 export const ROLES = ['Portiere', 'Difensore', 'Centrocampista', 'Attaccante'] as const;
 export type Role = typeof ROLES[number];
 
@@ -56,7 +57,7 @@ export type PlayerMatchStats = {
   redCards: number;
 };
 
-export const EVENT_TYPES = ['goal', 'assist', 'yellow_card', 'red_card', 'sub_in', 'sub_out', 'substitution'] as const;
+export const EVENT_TYPES = ['goal', 'yellow_card', 'red_card', 'substitution'] as const;
 export type MatchEventType = typeof EVENT_TYPES[number];
 
 export type MatchEvent = {
@@ -65,11 +66,11 @@ export type MatchEvent = {
   type: MatchEventType;
   team: 'home' | 'away';
   playerId?: string;
-  playerName?: string; // fallback per avversari o nomi testuali o giocatore che entra
-  subOutPlayerId?: string; // ID del giocatore che esce (per tipo 'substitution')
-  subOutPlayerName?: string; // Nome del giocatore che esce (per tipo 'substitution')
-  assistPlayerId?: string; // ID del giocatore che ha fatto l'assist (per tipo 'goal')
-  assistPlayerName?: string; // Nome del giocatore che ha fatto l'assist (per tipo 'goal')
+  playerName?: string; 
+  subOutPlayerId?: string; 
+  subOutPlayerName?: string; 
+  assistPlayerId?: string; 
+  assistPlayerName?: string; 
   minute: number;
   period: '1T' | '2T' | '1TS' | '2TS';
 };
