@@ -31,7 +31,7 @@ export const seasonRepository = {
     async ensureDefaultSeason() {
         const seasons = await db.seasons.count();
         if (seasons === 0) {
-            const defaultSeason = await this.add('2024/25');
+            const defaultSeason = await this.add('2025/26');
             await this.setActive(defaultSeason.id);
             
             // Migra le partite esistenti senza seasonId
