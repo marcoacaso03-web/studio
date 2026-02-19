@@ -8,8 +8,9 @@ import { aggregationRepository } from '@/lib/repositories/aggregation-repository
 import { lineupRepository } from '@/lib/repositories/lineup-repository';
 import { eventRepository } from '@/lib/repositories/event-repository';
 import { statsRepository } from '@/lib/repositories/stats-repository';
+import { attendanceRepository } from '@/lib/repositories/attendance-repository';
 import { useStatsStore } from './useStatsStore';
-import type { Match, Player, MatchLineup, MatchEvent, PlayerMatchStats } from '@/lib/types';
+import type { Match, Player, MatchLineup, MatchEvent, PlayerMatchStats, MatchAttendance, AttendanceStatus } from '@/lib/types';
 
 interface MatchDetailState {
     matchId: string | null;
@@ -18,6 +19,7 @@ interface MatchDetailState {
     events: MatchEvent[];
     lineup: MatchLineup | null;
     stats: PlayerMatchStats[];
+    attendance: MatchAttendance[];
     loading: boolean;
     
     load: (matchId: string) => Promise<void>;
@@ -27,6 +29,7 @@ interface MatchDetailState {
     addEvents: (events: Omit<MatchEvent, 'id'>[]) => Promise<void>;
     deleteEvent: (eventId: string) => Promise<void>;
     syncAndPersistMinutes: () => Promise<void>;
+    updateAttendance: (playerId: string, status: AttendanceStatus) => Promise<void>;
 }
 
 export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
@@ -36,10 +39,11 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     events: [],
     lineup: null,
     stats: [],
+    attendance: [],
     loading: true,
 
     load: async (matchId) => {
-        set({ loading: true, matchId, match: null, events: [], lineup: null, stats: [] });
+        set({ loading: true, matchId, match: null, events: [], lineup: null, stats: [], attendance: [] });
         
         const match = await matchRepository.getById(matchId);
         if (!match) {
@@ -51,6 +55,7 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         const matchEvents = await eventRepository.getForMatch(matchId);
         const matchLineup = await lineupRepository.getForMatch(matchId);
         const matchStats = await statsRepository.getForMatch(matchId);
+        const matchAttendance = await attendanceRepository.getForMatch(matchId);
 
         set({ 
             match, 
@@ -58,6 +63,7 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             events: matchEvents,
             lineup: matchLineup || null,
             stats: matchStats,
+            attendance: matchAttendance,
             loading: false 
         });
 
@@ -111,6 +117,15 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         // Sincronizza le statistiche globali dei giocatori
         await aggregationRepository.syncAllPlayersStats();
         useStatsStore.getState().loadStats();
+    },
+
+    updateAttendance: async (playerId: string, status: AttendanceStatus) => {
+        const { matchId } = get();
+        if (!matchId) return;
+
+        await attendanceRepository.upsert(matchId, playerId, status);
+        const updatedAttendance = await attendanceRepository.getForMatch(matchId);
+        set({ attendance: updatedAttendance });
     },
 
     addEvent: async (eventData) => {

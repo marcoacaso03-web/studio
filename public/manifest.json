@@ -1,6 +1,6 @@
 {
-  "name": "Squadra+",
-  "short_name": "Squadra+",
+  "name": "PitchMan",
+  "short_name": "PitchMan",
   "description": "La tua app per la gestione della squadra di calcio.",
   "start_url": "/",
   "display": "standalone",
