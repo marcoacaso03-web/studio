@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMatchDetailStore } from "@/store/useMatchDetailStore";
 import { Badge } from "@/components/ui/badge";
-import { Goal, Info, Zap, Plus, Trash2, ArrowRightLeft, CreditCard } from "lucide-react";
+import { Goal, Info, Zap, Plus, Trash2, ArrowRightLeft } from "lucide-react";
 import { MatchEventDialog } from "./match-event-dialog";
 import { Button } from "@/components/ui/button";
 import { MatchEventType } from "@/lib/types";
@@ -25,15 +25,17 @@ export function MatchEventsTab() {
     }
   };
 
-  const getEventLabel = (type: MatchEventType) => {
-    switch(type) {
-      case 'goal': return 'GOAL';
+  const getEventLabel = (event: any) => {
+    if (event.type === 'goal') {
+      return event.assistPlayerName ? `GOAL (ASSIST: ${event.assistPlayerName})` : 'GOAL';
+    }
+    switch(event.type) {
       case 'assist': return 'ASSIST';
       case 'yellow_card': return 'AMMONIZIONE';
       case 'red_card': return 'ESPULSIONE';
       case 'sub_in': return 'ENTRATA';
       case 'sub_out': return 'USCITA';
-      default: return type.toUpperCase();
+      default: return event.type.toUpperCase();
     }
   };
 
@@ -65,38 +67,42 @@ export function MatchEventsTab() {
             </div>
           ) : (
             <div className="space-y-4">
-              {events.map((event) => (
-                <div key={event.id} className="flex items-center justify-between border-b border-muted pb-3 last:border-0">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center justify-center w-8">
-                        {getEventIcon(event.type)}
+              {events.map((event) => {
+                // Se è un evento assist 'vecchio stile' (stand-alone), lo visualizziamo ancora per compatibilità
+                // ma prioritizziamo gli assist integrati nei nuovi gol.
+                return (
+                  <div key={event.id} className="flex items-center justify-between border-b border-muted pb-3 last:border-0">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center justify-center w-8">
+                          {getEventIcon(event.type)}
+                      </div>
+                      <div>
+                          <div className="flex items-center gap-2">
+                              <p className="font-bold leading-none">{event.playerName || (event.team === 'home' ? 'Giocatore' : 'Avversario')}</p>
+                              <Badge variant="outline" className="text-[10px] py-0 px-1 font-normal opacity-70">
+                                  {event.team === 'home' ? 'SQUADRA+' : 'AVVERSARIO'}
+                              </Badge>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground mt-1 font-bold tracking-wider">{getEventLabel(event)}</p>
+                      </div>
                     </div>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <p className="font-bold leading-none">{event.playerName || (event.team === 'home' ? 'Giocatore' : 'Avversario')}</p>
-                            <Badge variant="outline" className="text-[10px] py-0 px-1 font-normal opacity-70">
-                                {event.team === 'home' ? 'SQUADRA+' : 'AVVERSARIO'}
-                            </Badge>
-                        </div>
-                        <p className="text-[10px] text-muted-foreground mt-1 font-bold tracking-wider">{getEventLabel(event.type)}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                          <span className="text-sm font-bold">{event.minute}&apos;</span>
+                          <span className="text-[10px] text-muted-foreground block leading-none">{event.period}</span>
+                      </div>
+                      <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-destructive opacity-20 hover:opacity-100 transition-opacity"
+                          onClick={() => deleteEvent(event.id)}
+                      >
+                          <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                        <span className="text-sm font-bold">{event.minute}&apos;</span>
-                        <span className="text-[10px] text-muted-foreground block leading-none">{event.period}</span>
-                    </div>
-                    <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 text-destructive opacity-20 hover:opacity-100 transition-opacity"
-                        onClick={() => deleteEvent(event.id)}
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>

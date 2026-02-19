@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -118,22 +117,20 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
 
     if (uiType === 'goal') {
       const selectedScorer = allPlayers.find(p => p.id === playerId);
+      const selectedAssist = allPlayers.find(p => p.id === assistPlayerId);
+      
       events.push({
         ...baseEvent,
         type: 'goal',
         playerId: team === 'home' ? playerId : undefined,
         playerName: team === 'home' ? selectedScorer?.name : (playerName || match?.opponent || "Avversario"),
+        assistPlayerId: (team === 'home' && assistPlayerId && assistPlayerId !== "none") ? assistPlayerId : undefined,
+        assistPlayerName: team === 'home' 
+          ? (selectedAssist?.name || undefined) 
+          : (assistPlayerName || undefined),
       });
-
-      if (assistPlayerId && assistPlayerId !== "none") {
-        const selectedAssist = allPlayers.find(p => p.id === assistPlayerId);
-        events.push({
-          ...baseEvent,
-          type: 'assist',
-          playerId: team === 'home' ? assistPlayerId : undefined,
-          playerName: team === 'home' ? selectedAssist?.name : (assistPlayerName || match?.opponent || "Avversario"),
-        });
-      }
+      
+      // NOTA: Non aggiungiamo più un evento separato per l'assist
     } else if (uiType === 'substitution') {
       const selectedIn = allPlayers.find(p => p.id === subInPlayerId);
       const selectedOut = allPlayers.find(p => p.id === subOutPlayerId);

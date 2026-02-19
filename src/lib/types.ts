@@ -63,6 +63,8 @@ export type MatchEvent = {
   team: 'home' | 'away';
   playerId?: string;
   playerName?: string; // fallback per avversari o nomi testuali
+  assistPlayerId?: string; // ID del giocatore che ha fatto l'assist (per tipo 'goal')
+  assistPlayerName?: string; // Nome del giocatore che ha fatto l'assist (per tipo 'goal')
   minute: number;
   period: '1T' | '2T' | '1TS' | '2TS';
 };

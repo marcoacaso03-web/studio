@@ -113,8 +113,18 @@ export const aggregationRepository = {
                 return e.playerId === player.id;
             });
             
+            // Gol: quando il giocatore è l'autore del goal
             const goals = playerEvents.filter(e => e.type === 'goal').length;
-            const assists = playerEvents.filter(e => e.type === 'assist').length;
+            
+            // Assist: quando il giocatore è assistPlayerId in un evento goal (nuovo sistema)
+            // o quando è l'autore di un evento assist (vecchio sistema/compatibilità)
+            const newAssists = allEvents.filter(e => {
+                if (!completedMatchIds.has(e.matchId)) return false;
+                return e.type === 'goal' && e.assistPlayerId === player.id;
+            }).length;
+            
+            const oldAssists = playerEvents.filter(e => e.type === 'assist').length;
+            const assists = newAssists + oldAssists;
 
             return {
                 playerId: player.id,
