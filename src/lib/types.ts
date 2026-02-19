@@ -5,7 +5,6 @@ export type Role = typeof ROLES[number];
 export type Player = {
   id: string;
   name: string;
-  number: number;
   role: Role;
   avatarUrl: string;
   imageHint: string;

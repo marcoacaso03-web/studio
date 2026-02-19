@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -45,9 +46,9 @@ export default function DashboardPage() {
 
   const handleSeedData = async () => {
     try {
-        await playerRepository.add({ name: "Marco Rossi", number: 10, role: "Attaccante" });
-        await playerRepository.add({ name: "Luca Bianchi", number: 5, role: "Difensore" });
-        await playerRepository.add({ name: "Davide Neri", number: 1, role: "Portiere" });
+        await playerRepository.add({ name: "Marco Rossi", role: "Attaccante" });
+        await playerRepository.add({ name: "Luca Bianchi", role: "Difensore" });
+        await playerRepository.add({ name: "Davide Neri", role: "Portiere" });
         
         const matchDate = new Date();
         matchDate.setDate(matchDate.getDate() - 2);

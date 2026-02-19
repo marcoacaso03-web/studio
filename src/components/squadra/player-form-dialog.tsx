@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -36,7 +37,6 @@ import {
 const formSchema = z.object({
   firstName: z.string().min(2, { message: "Il nome è richiesto." }),
   lastName: z.string().min(2, { message: "Il cognome è richiesto." }),
-  number: z.coerce.number().int().min(1, { message: "Il numero di maglia deve essere positivo." }).max(99, { message: "Numero di maglia non valido." }),
   role: z.enum(ROLES, { required_error: "Il ruolo è richiesto."}),
 });
 
@@ -45,7 +45,6 @@ type FormValues = z.infer<typeof formSchema>;
 // The parent component expects this shape
 type PlayerSaveData = {
   name: string;
-  number: number;
   role: Role;
 };
 
@@ -62,7 +61,6 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
     defaultValues: {
       firstName: "",
       lastName: "",
-      number: 0,
       role: "Centrocampista",
     },
   });
@@ -76,14 +74,12 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
           form.reset({
               firstName,
               lastName,
-              number: player.number,
               role: player.role,
           });
       } else {
           form.reset({
               firstName: "",
               lastName: "",
-              number: "" as any, // Use empty string to keep input controlled
               role: "Centrocampista"
           });
       }
@@ -94,7 +90,6 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
   function onSubmit(data: FormValues) {
     const saveData: PlayerSaveData = {
       name: `${data.firstName} ${data.lastName}`.trim(),
-      number: data.number,
       role: data.role
     };
     onSave(saveData, player?.id);
@@ -143,43 +138,28 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
               />
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
-                <FormField
-                control={form.control}
-                name="number"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Numero Maglia</FormLabel>
-                    <FormControl>
-                        <Input type="number" placeholder="Es: 10" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Ruolo</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                            <FormControl>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Seleziona un ruolo" />
-                                </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                                {ROLES.map(role => (
-                                    <SelectItem key={role} value={role}>{role}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-            </div>
+            <FormField
+            control={form.control}
+            name="role"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Ruolo</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Seleziona un ruolo" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            {ROLES.map(role => (
+                                <SelectItem key={role} value={role}>{role}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
 
             <DialogFooter className="pt-4">
               <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Annulla</Button>

@@ -1,3 +1,4 @@
+
 import type { Player } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -44,7 +45,6 @@ export function PlayerCard({ player, onEdit, onDelete }: PlayerCardProps) {
           <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
         </Avatar>
         <CardTitle className="text-xl">{player.name}</CardTitle>
-        <CardDescription>#{player.number}</CardDescription>
         <Badge variant="secondary" className="mt-2">{player.role}</Badge>
       </CardHeader>
       <CardContent className="flex-grow">
