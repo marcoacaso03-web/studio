@@ -9,7 +9,7 @@ Questo documento raccoglie suggerimenti per l'evoluzione del software come gesti
 - **Backup Manuale**: Potenziare la sezione Impostazioni con una funzione di "Snapshot" (import/export JSON completo) per permettere all'utente di spostare i dati tra dispositivi manualmente.
 
 ## 🎨 Stile e UI/UX
-- **Dark Mode Tuning**: Ottimizzare i contrasti della modalità scura per l'uso serale sui campi di allenamento.
+- Aggiornamento con icone personalizzate
 - **Drag & Drop**: Implementare il trascinamento dei giocatori per definire l'ordine di entrata in panchina o la disposizione tattica.
 
 ## 🚀 Funzionalità Gestionali (Focus Interno)
