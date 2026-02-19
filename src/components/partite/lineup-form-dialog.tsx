@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft, ArrowDown, ArrowUp } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 
 interface LineupFormDialogProps {
   open: boolean;
@@ -63,7 +63,6 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
     num, 
     value, 
     onValueChange, 
-    isStarter 
   }: { 
     num: number, 
     value: string, 
@@ -93,17 +92,6 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
               ))}
             </SelectContent>
           </Select>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-5 h-7 bg-yellow-100/50 border border-yellow-200 rounded-sm" />
-          <div className="w-5 h-7 bg-red-100/50 border border-red-200 rounded-sm" />
-          <div className="w-6 h-6 flex items-center justify-center">
-            {isStarter ? (
-              <ArrowDown className="h-4 w-4 text-red-600" />
-            ) : (
-              <ArrowUp className="h-4 w-4 text-green-600" />
-            )}
-          </div>
         </div>
       </div>
     );
