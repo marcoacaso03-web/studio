@@ -78,6 +78,9 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         const duration = match.duration || 90;
         const participants = new Set([...lineup.starters, ...lineup.substitutes].filter(id => id !== ""));
         
+        // Determiniamo quale team (home/away) rappresenta PitchMan in questa partita
+        const pitchManTeam = match.isHome ? 'home' : 'away';
+
         const newStats: PlayerMatchStats[] = Array.from(participants).map(playerId => {
             const existingStat = stats.find(s => s.playerId === playerId);
             
@@ -85,12 +88,27 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             const isStarter = lineup.starters.includes(playerId);
 
             if (isStarter) {
-                const subOutEvent = events.find(e => e.type === 'substitution' && e.subOutPlayerId === playerId && e.team === 'home');
+                // Un titolare gioca fino a quando non viene sostituito o finisce la gara
+                const subOutEvent = events.find(e => 
+                    e.type === 'substitution' && 
+                    e.subOutPlayerId === playerId && 
+                    e.team === pitchManTeam
+                );
                 minutesPlayed = subOutEvent ? subOutEvent.minute : duration;
             } else {
-                const subInEvent = events.find(e => e.type === 'substitution' && e.playerId === playerId && e.team === 'home');
+                // Una riserva gioca dal momento in cui entra fino a quando viene sostituita o finisce la gara
+                const subInEvent = events.find(e => 
+                    e.type === 'substitution' && 
+                    e.playerId === playerId && 
+                    e.team === pitchManTeam
+                );
                 if (subInEvent) {
-                    const subOutEventLater = events.find(e => e.type === 'substitution' && e.subOutPlayerId === playerId && e.team === 'home' && (e.minute > subInEvent.minute || e.period !== subInEvent.period));
+                    const subOutEventLater = events.find(e => 
+                        e.type === 'substitution' && 
+                        e.subOutPlayerId === playerId && 
+                        e.team === pitchManTeam && 
+                        (e.period !== subInEvent.period || e.minute > subInEvent.minute)
+                    );
                     const endMin = subOutEventLater ? subOutEventLater.minute : duration;
                     minutesPlayed = Math.max(0, endMin - subInEvent.minute);
                 }

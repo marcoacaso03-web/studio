@@ -66,20 +66,33 @@ export const aggregationRepository = {
      * Aggregates goals scored by interval.
      */
     async getGoalsByInterval() {
-        const events = await db.matchEvents.where('type').equals('goal').and(e => e.team === 'home').toArray();
+        const completedMatches = await db.matches.where('status').equals('completed').toArray();
+        const completedMatchIds = new Set(completedMatches.map(m => m.id));
+        const allEvents = await db.matchEvents.where('type').equals('goal').toArray();
+        
         const intervals = {
             '1-30': 0,
             '31-60': 0,
             '61-90+': 0
         };
 
-        events.forEach(event => {
-            if (event.period === '1T') {
-                if (event.minute <= 30) intervals['1-30']++;
-                else intervals['31-60']++;
-            } else {
-                // 2T o TS sono considerati 61+
-                intervals['61-90+']++;
+        allEvents.forEach(event => {
+            if (!completedMatchIds.has(event.matchId)) return;
+            
+            const match = completedMatches.find(m => m.id === event.matchId);
+            if (!match) return;
+
+            // Verifichiamo se il gol è di PitchMan
+            const isPitchManGoal = match.isHome ? event.team === 'home' : event.team === 'away';
+            
+            if (isPitchManGoal) {
+                if (event.period === '1T') {
+                    if (event.minute <= 30) intervals['1-30']++;
+                    else intervals['31-60']++;
+                } else {
+                    // 2T o TS sono considerati 61+
+                    intervals['61-90+']++;
+                }
             }
         });
 
