@@ -62,6 +62,7 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
     defaultValues: {
       firstName: "",
       lastName: "",
+      number: 0,
       role: "Centrocampista",
     },
   });
@@ -82,8 +83,8 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
           form.reset({
               firstName: "",
               lastName: "",
-              number: undefined,
-              role: undefined
+              number: "" as any, // Use empty string to keep input controlled
+              role: "Centrocampista"
           });
       }
     }
