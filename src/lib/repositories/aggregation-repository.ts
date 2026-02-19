@@ -1,4 +1,3 @@
-
 import { db } from '@/lib/db';
 
 export const aggregationRepository = {
@@ -23,12 +22,14 @@ export const aggregationRepository = {
             record.matchesPlayed++;
 
             if (match.isHome) {
+                // PitchMan è in casa
                 record.goalsFor += match.result.home;
                 record.goalsAgainst += match.result.away;
                 if (match.result.home > match.result.away) record.wins++;
                 else if (match.result.home < match.result.away) record.losses++;
                 else record.draws++;
-            } else { // Away match
+            } else { // Match fuori casa
+                // PitchMan è fuori casa
                 record.goalsFor += match.result.away;
                 record.goalsAgainst += match.result.home;
                 if (match.result.away > match.result.home) record.wins++;
@@ -63,7 +64,7 @@ export const aggregationRepository = {
     },
 
     /**
-     * Aggregates goals scored by interval.
+     * Aggregates goals scored by interval for PitchMan.
      */
     async getGoalsByInterval() {
         const completedMatches = await db.matches.where('status').equals('completed').toArray();
@@ -104,9 +105,7 @@ export const aggregationRepository = {
     },
 
     /**
-     * Calculates and returns aggregated stats (appearances, goals, assists, avgMinutes) for all players.
-     * Based on match lineups and chronological events.
-     * @returns An array of objects, each containing a player's ID, name, and their aggregated stats.
+     * Calculates and returns aggregated stats for all players.
      */
     async getAllPlayersAggregatedStats() {
         const players = await db.players.toArray();
@@ -117,7 +116,6 @@ export const aggregationRepository = {
         const completedMatchIds = new Set(completedMatches.map(m => m.id));
 
         return players.map(player => {
-            // Presenze: giocatore in formazione (starters o subs) in partite completate
             const matchInvolvement = allLineups.filter(lineup => {
                 if (!completedMatchIds.has(lineup.matchId)) return false;
                 return lineup.starters.includes(player.id) || lineup.substitutes.includes(player.id);
@@ -129,18 +127,13 @@ export const aggregationRepository = {
                 return e.playerId === player.id;
             });
 
-            // Minuti totali basati su partite completate
             const totalMinutes = allStats
                 .filter(s => s.playerId === player.id && completedMatchIds.has(s.matchId))
                 .reduce((acc, s) => acc + (s.minutesPlayed || 0), 0);
             
-            // Media minuti per presenza (partita giocata)
             const avgMinutes = appearances > 0 ? Math.round(totalMinutes / appearances) : 0;
-            
-            // Gol: quando il giocatore è l'autore del goal
             const goals = playerEvents.filter(e => e.type === 'goal').length;
             
-            // Assist: quando il giocatore è assistPlayerId in un evento goal
             const assists = allEvents.filter(e => {
                 if (!completedMatchIds.has(e.matchId)) return false;
                 return e.type === 'goal' && e.assistPlayerId === player.id;
@@ -159,9 +152,6 @@ export const aggregationRepository = {
         });
     },
 
-    /**
-     * Re-calculates and updates the aggregated `stats` property for all players in the database.
-     */
     async syncAllPlayersStats() {
         const allPlayerAggregatedStats = await this.getAllPlayersAggregatedStats();
         
