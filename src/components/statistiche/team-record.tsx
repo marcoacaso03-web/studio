@@ -1,55 +1,91 @@
+
 "use client";
 
 import { useStatsStore } from "@/store/useStatsStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Goal, Handshake, Minus, Plus, ShieldAlert, ShieldOff, Swords } from "lucide-react";
-
-function StatCard({ title, value, icon: Icon }: { title: string, value: string | number, icon: React.ElementType }) {
-    return (
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{value}</div>
-            </CardContent>
-        </Card>
-    );
-}
-
+import { Goal, Handshake, ShieldAlert, Swords, TrendingUp, TrendingDown } from "lucide-react";
 
 export function TeamRecord() {
     const { teamRecord } = useStatsStore();
 
     if (!teamRecord) {
-        return <p>Nessun dato disponibile.</p>;
+        return <p className="text-center py-10 text-muted-foreground">Nessun dato disponibile.</p>;
     }
 
     const goalDifference = teamRecord.goalsFor - teamRecord.goalsAgainst;
 
     return (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-             <Card>
+        <div className="grid gap-4 md:grid-cols-2">
+             {/* Card Record Partite */}
+             <Card className="shadow-sm">
                 <CardHeader className="pb-2">
-                    <CardTitle className="text-base font-medium">Record</CardTitle>
+                    <CardTitle className="text-base font-bold flex items-center gap-2">
+                        <Swords className="h-4 w-4 text-primary" />
+                        Andamento Stagione
+                    </CardTitle>
                 </CardHeader>
                 <CardContent>
-                   <div className="text-2xl font-bold">{teamRecord.matchesPlayed} Partite Giocate</div>
-                   <div className="flex items-center space-x-4 text-sm text-muted-foreground pt-2">
-                       <div className="flex items-center"><Swords className="mr-1 h-4 w-4 text-green-500"/> V: {teamRecord.wins}</div>
-                       <div className="flex items-center"><Handshake className="mr-1 h-4 w-4 text-yellow-500"/> P: {teamRecord.draws}</div>
-                       <div className="flex items-center"><ShieldOff className="mr-1 h-4 w-4 text-red-500"/> S: {teamRecord.losses}</div>
+                   <div className="text-3xl font-black text-primary mb-4">{teamRecord.matchesPlayed} <span className="text-sm font-normal text-muted-foreground">Gare totali</span></div>
+                   <div className="grid grid-cols-3 gap-2">
+                       <div className="flex flex-col items-center p-2 bg-green-50 rounded-lg border border-green-100">
+                           <span className="text-[10px] font-bold text-green-700 uppercase">Vinte</span>
+                           <span className="text-xl font-black text-green-600">{teamRecord.wins}</span>
+                       </div>
+                       <div className="flex flex-col items-center p-2 bg-yellow-50 rounded-lg border border-yellow-100">
+                           <span className="text-[10px] font-bold text-yellow-700 uppercase">Pari</span>
+                           <span className="text-xl font-black text-yellow-600">{teamRecord.draws}</span>
+                       </div>
+                       <div className="flex flex-col items-center p-2 bg-red-50 rounded-lg border border-red-100">
+                           <span className="text-[10px] font-bold text-red-700 uppercase">Perse</span>
+                           <span className="text-xl font-black text-red-600">{teamRecord.losses}</span>
+                       </div>
                    </div>
                 </CardContent>
             </Card>
-            <StatCard title="Gol Fatti" value={teamRecord.goalsFor} icon={Goal} />
-            <StatCard title="Gol Subiti" value={teamRecord.goalsAgainst} icon={ShieldAlert} />
-            <StatCard 
-                title="Differenza Reti" 
-                value={`${goalDifference > 0 ? '+' : ''}${goalDifference}`} 
-                icon={goalDifference >= 0 ? Plus : Minus} 
-            />
+
+            {/* Card Bilancio Reti (Accorpata) */}
+            <Card className="shadow-sm">
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-base font-bold flex items-center gap-2">
+                        <Goal className="h-4 w-4 text-accent" />
+                        Bilancio Reti
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex items-end justify-between mb-6">
+                        <div className="space-y-1">
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase">Differenza Reti</p>
+                            <div className="flex items-center gap-2">
+                                <span className={`text-4xl font-black ${goalDifference > 0 ? 'text-green-600' : goalDifference < 0 ? 'text-red-600' : 'text-primary'}`}>
+                                    {goalDifference > 0 ? `+${goalDifference}` : goalDifference}
+                                </span>
+                                {goalDifference > 0 ? <TrendingUp className="h-6 w-6 text-green-500" /> : goalDifference < 0 ? <TrendingDown className="h-6 w-6 text-red-500" /> : null}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                        <div className="flex items-start gap-3">
+                            <div className="p-2 bg-green-100 rounded-full">
+                                <Goal className="h-4 w-4 text-green-600" />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase">Gol Fatti</p>
+                                <p className="text-xl font-black text-foreground">{teamRecord.goalsFor}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                            <div className="p-2 bg-red-100 rounded-full">
+                                <ShieldAlert className="h-4 w-4 text-red-600" />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase">Gol Subiti</p>
+                                <p className="text-xl font-black text-foreground">{teamRecord.goalsAgainst}</p>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 }
