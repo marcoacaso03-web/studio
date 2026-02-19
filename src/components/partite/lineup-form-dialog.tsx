@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -77,7 +76,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
 
     return (
       <div className="flex items-center gap-2 border-b py-1 last:border-0">
-        <div className="bg-gray-600 text-white w-8 h-8 flex items-center justify-center font-bold text-sm rounded">
+        <div className="bg-primary/20 text-primary w-8 h-8 flex items-center justify-center font-bold text-sm rounded">
           {num}
         </div>
         <div className="flex-1">
@@ -99,25 +98,23 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-full h-full sm:max-w-md p-0 overflow-hidden flex flex-col gap-0 border-none bg-gray-50">
-        <DialogHeader className="bg-[#052d1d] text-white p-4 flex-row items-center gap-4 space-y-0">
+      <DialogContent className="max-w-full h-full sm:max-w-md p-0 overflow-hidden flex flex-col gap-0 border-none bg-background">
+        <DialogHeader className="bg-primary text-primary-foreground p-4 flex-row items-center gap-4 space-y-0">
           <Button variant="ghost" size="icon" className="text-white hover:bg-white/10" onClick={() => onOpenChange(false)}>
             <ChevronLeft className="h-6 w-6" />
           </Button>
           <DialogTitle className="text-xl font-medium">Inserisci formazioni</DialogTitle>
         </DialogHeader>
 
-        <div className="bg-[#4a4a4a] text-white px-4 py-2 flex items-center justify-between text-xs uppercase font-bold">
+        <div className="bg-muted text-muted-foreground px-4 py-2 flex items-center justify-between text-xs uppercase font-bold">
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center overflow-hidden">
-                <div className="bg-primary w-full h-full" />
-            </div>
-            <span>{match?.isHome ? "SQUADRA+" : (match?.opponent || "SQUADRA+")}</span>
+            <div className="w-5 h-5 bg-primary rounded-full" />
+            <span className="text-foreground">{match?.isHome ? "SQUADRA+" : (match?.opponent || "SQUADRA+") }</span>
           </div>
           <div className="flex items-center gap-1">
             <span>MODULO</span>
             <Select value={modulo} onValueChange={setModulo}>
-                <SelectTrigger className="bg-white text-black h-7 text-[10px] w-20 py-0 font-bold border-none">
+                <SelectTrigger className="bg-background text-foreground h-7 text-[10px] w-20 py-0 font-bold border-none shadow-sm">
                     <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -131,7 +128,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
         </div>
 
         <div className="flex-1 overflow-y-auto p-2 space-y-4">
-          <div className="bg-white rounded shadow-sm">
+          <div className="bg-card rounded-lg shadow-sm border p-1">
             {starters.map((s, i) => (
               <PlayerRow 
                 key={i} 
@@ -148,13 +145,11 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
           </div>
 
           <div className="space-y-2">
-            <div className="bg-[#4a4a4a] text-white px-4 py-2 flex items-center gap-2 text-xs uppercase font-bold rounded-t">
-              <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center overflow-hidden">
-                <div className="bg-primary w-full h-full" />
-              </div>
-              <span>Riserve</span>
+            <div className="bg-muted text-muted-foreground px-4 py-2 flex items-center gap-2 text-xs uppercase font-bold rounded-t-lg">
+              <div className="w-5 h-5 bg-secondary rounded-full" />
+              <span className="text-foreground">Riserve</span>
             </div>
-            <div className="bg-white rounded-b shadow-sm">
+            <div className="bg-card rounded-b-lg shadow-sm border p-1">
               {substitutes.map((s, i) => (
                 <PlayerRow 
                   key={i} 
@@ -172,9 +167,9 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
           </div>
         </div>
 
-        <div className="p-4 bg-white border-t">
+        <div className="p-4 bg-background border-t">
           <Button 
-            className="w-full bg-[#24a148] hover:bg-[#1e8a3d] text-white font-black uppercase text-sm h-12"
+            className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-black uppercase text-sm h-12"
             onClick={handleSave}
           >
             Invia le formazioni
