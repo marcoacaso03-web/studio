@@ -61,7 +61,7 @@ export function MatchEventsTab() {
           >
             <Plus className="h-6 w-6" />
           </Button>
-        </Header>
+        </CardHeader>
         <CardContent>
           {events.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-lg">
