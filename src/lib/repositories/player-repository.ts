@@ -1,14 +1,17 @@
-
 import { db } from '@/lib/db';
 import type { Player, Role } from '@/lib/types';
 
 export type PlayerCreateData = {
     name: string;
     role: Role;
+    seasonId: string;
 }
 
 export const playerRepository = {
-  async getAll() {
+  async getAll(seasonId?: string) {
+    if (seasonId) {
+        return await db.players.where('seasonId').equals(seasonId).sortBy('name');
+    }
     return await db.players.orderBy('name').toArray();
   },
 
@@ -19,6 +22,7 @@ export const playerRepository = {
   async add(data: PlayerCreateData) {
     const newPlayer: Player = {
       id: `p_${new Date().getTime()}`,
+      seasonId: data.seasonId,
       name: data.name,
       role: data.role,
       avatarUrl: `https://picsum.photos/seed/p${new Date().getTime()}/200/200`,
@@ -29,7 +33,7 @@ export const playerRepository = {
     return newPlayer;
   },
 
-  async update(id: string, updates: Partial<PlayerCreateData>) {
+  async update(id: string, updates: Partial<Omit<PlayerCreateData, 'seasonId'>>) {
     await db.players.update(id, updates);
     return await db.players.get(id);
   },

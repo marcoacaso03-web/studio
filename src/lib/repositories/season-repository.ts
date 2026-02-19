@@ -34,8 +34,9 @@ export const seasonRepository = {
             const defaultSeason = await this.add('2025/26');
             await this.setActive(defaultSeason.id);
             
-            // Migra le partite esistenti senza seasonId
+            // Migra le partite e i giocatori esistenti senza seasonId alla stagione predefinita
             await db.matches.toCollection().modify({ seasonId: defaultSeason.id });
+            await db.players.toCollection().modify({ seasonId: defaultSeason.id });
             return defaultSeason;
         }
         return await this.getActive();

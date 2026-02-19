@@ -12,7 +12,16 @@ class PitchManDB extends Dexie {
 
     constructor() {
         super('PitchManDB');
-        // Versione 5: aggiunta tabella seasons e seasonId su matches
+        // Versione 6: aggiunta seasonId alla tabella players per isolamento totale
+        this.version(6).stores({
+            players: 'id, seasonId, name',
+            matches: 'id, seasonId, date, status',
+            matchAttendances: '[matchId+playerId], status',
+            playerMatchStats: '[matchId+playerId]',
+            matchLineups: 'matchId',
+            matchEvents: 'id, matchId, playerId, type',
+            seasons: 'id, isActive'
+        });
         this.version(5).stores({
             players: 'id, name',
             matches: 'id, seasonId, date, status',
@@ -36,12 +45,6 @@ class PitchManDB extends Dexie {
             matchAttendances: '[matchId+playerId], status',
             playerMatchStats: '[matchId+playerId]',
             matchLineups: 'matchId',
-        });
-        this.version(2).stores({
-            players: 'id, name',
-            matches: 'id, date, status',
-            matchAttendances: '[matchId+playerId], status',
-            playerMatchStats: '[matchId+playerId]',
         });
     }
 }

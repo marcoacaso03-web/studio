@@ -9,6 +9,7 @@ export type Season = {
 
 export type Player = {
   id: string;
+  seasonId: string;
   name: string;
   role: Role;
   avatarUrl: string;

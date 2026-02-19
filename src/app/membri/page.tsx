@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -27,6 +26,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { usePlayersStore } from "@/store/usePlayersStore";
+import { useSeasonsStore } from "@/store/useSeasonsStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -46,6 +46,7 @@ const roleInitials: Record<Role, string> = {
 
 export default function RosaPage() {
   const { players, loading, fetchAll, add, update, remove } = usePlayersStore();
+  const { activeSeason } = useSeasonsStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
@@ -142,13 +143,18 @@ export default function RosaPage() {
       <div className="space-y-4 md:space-y-6">
         <PageHeader 
           title={
-            <div className="flex items-center gap-2">
-              <span className="text-2xl md:text-3xl">Rosa</span>
-              {!loading && (
-                <Badge variant="secondary" className="text-sm md:text-lg px-2 py-0">
-                  {players.length}
-                </Badge>
-              )}
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl md:text-3xl">Rosa</span>
+                {!loading && (
+                  <Badge variant="secondary" className="text-sm md:text-lg px-2 py-0">
+                    {players.length}
+                  </Badge>
+                )}
+              </div>
+              <span className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                Stagione {activeSeason?.name || '...'}
+              </span>
             </div>
           }
         >
@@ -167,8 +173,8 @@ export default function RosaPage() {
                 </div>
               ) : players.length === 0 ? (
                 <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg m-4">
-                    <h3 className="text-sm font-semibold text-foreground">Rosa vuota</h3>
-                    <p className="text-xs mt-1">Inizia aggiungendo il primo giocatore.</p>
+                    <h3 className="text-sm font-semibold text-foreground">Rosa vuota per questa stagione</h3>
+                    <p className="text-xs mt-1">Inizia aggiungendo il primo giocatore alla stagione {activeSeason?.name}.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -261,7 +267,7 @@ export default function RosaPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Sei sicuro?</AlertDialogTitle>
             <AlertDialogDescription className="text-xs">
-              Questa azione eliminerà definitivamente {playerToDelete?.name} dalla rosa.
+              Questa azione eliminerà definitivamente {playerToDelete?.name} dalla rosa della stagione {activeSeason?.name}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row justify-end gap-2">

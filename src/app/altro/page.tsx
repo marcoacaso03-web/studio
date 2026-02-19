@@ -15,6 +15,7 @@ import { statsRepository } from '@/lib/repositories/stats-repository';
 import { useThemeStore } from '@/store/useThemeStore';
 import { useSeasonsStore } from '@/store/useSeasonsStore';
 import { useMatchesStore } from '@/store/useMatchesStore';
+import { usePlayersStore } from '@/store/usePlayersStore';
 import { useStatsStore } from '@/store/useStatsStore';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -42,6 +43,7 @@ export default function AltroPage() {
   const handleSwitchSeason = async (id: string, name: string) => {
     await setActiveSeason(id);
     useMatchesStore.getState().fetchAll();
+    usePlayersStore.getState().fetchAll();
     useStatsStore.getState().loadStats();
     toast({ title: "Cambio Stagione", description: `Ora stai visualizzando i dati della stagione ${name}.` });
   };
@@ -141,7 +143,7 @@ export default function AltroPage() {
               <CardTitle>Archivio Stagioni</CardTitle>
             </div>
             <CardDescription>
-              Gestisci le tue stagioni sportive. I dati di ogni stagione sono isolati.
+              Gestisci le tue stagioni sportive. I dati di ogni stagione (Rosa e Partite) sono isolati.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
