@@ -91,7 +91,7 @@ export const aggregationRepository = {
     },
 
     /**
-     * Calculates and returns aggregated stats (appearances, goals, assists) for all players.
+     * Calculates and returns aggregated stats (appearances, goals, assists, avgMinutes) for all players.
      * Based on match lineups and chronological events.
      * @returns An array of objects, each containing a player's ID, name, and their aggregated stats.
      */
@@ -105,21 +105,23 @@ export const aggregationRepository = {
 
         return players.map(player => {
             // Presenze: giocatore in formazione (starters o subs) in partite completate
-            const appearances = allLineups.filter(lineup => {
+            const matchInvolvement = allLineups.filter(lineup => {
                 if (!completedMatchIds.has(lineup.matchId)) return false;
                 return lineup.starters.includes(player.id) || lineup.substitutes.includes(player.id);
-            }).length;
+            });
+            const appearances = matchInvolvement.length;
 
             const playerEvents = allEvents.filter(e => {
                 if (!completedMatchIds.has(e.matchId)) return false;
                 return e.playerId === player.id;
             });
 
-            // Minuti totali
+            // Minuti totali basati su partite completate
             const totalMinutes = allStats
                 .filter(s => s.playerId === player.id && completedMatchIds.has(s.matchId))
                 .reduce((acc, s) => acc + (s.minutesPlayed || 0), 0);
             
+            // Media minuti per presenza (partita giocata)
             const avgMinutes = appearances > 0 ? Math.round(totalMinutes / appearances) : 0;
             
             // Gol: quando il giocatore è l'autore del goal

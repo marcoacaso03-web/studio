@@ -1,3 +1,4 @@
+
 "use client";
 
 import { create } from 'zustand';
@@ -22,11 +23,10 @@ interface MatchDetailState {
     load: (matchId: string) => Promise<void>;
     updateMatch: (data: Partial<Omit<Match, 'id'>>) => Promise<void>;
     saveLineup: (lineup: MatchLineup) => Promise<void>;
-    saveAllStats: (stats: PlayerMatchStats[]) => Promise<void>;
     addEvent: (event: Omit<MatchEvent, 'id'>) => Promise<void>;
     addEvents: (events: Omit<MatchEvent, 'id'>[]) => Promise<void>;
     deleteEvent: (eventId: string) => Promise<void>;
-    syncMinutes: () => void;
+    syncAndPersistMinutes: () => Promise<void>;
 }
 
 export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
@@ -61,30 +61,27 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             loading: false 
         });
 
-        // Dopo il caricamento, se non ci sono stats o se vogliamo aggiornarle in base agli eventi
-        get().syncMinutes();
+        // Sincronizza i minuti al caricamento per sicurezza
+        await get().syncAndPersistMinutes();
     },
 
-    syncMinutes: () => {
-        const { match, lineup, events, stats } = get();
-        if (!match || !lineup) return;
+    syncAndPersistMinutes: async () => {
+        const { match, lineup, events, stats, matchId } = get();
+        if (!match || !lineup || !matchId) return;
 
         const duration = match.duration || 90;
         const participants = new Set([...lineup.starters, ...lineup.substitutes].filter(id => id !== ""));
         
-        const newStats = Array.from(participants).map(playerId => {
+        const newStats: PlayerMatchStats[] = Array.from(participants).map(playerId => {
             const existingStat = stats.find(s => s.playerId === playerId);
             
-            // Calcolo automatico minuti
             let minutesPlayed = 0;
             const isStarter = lineup.starters.includes(playerId);
 
             if (isStarter) {
-                // Titolare: gioca fino alla prima sostituzione in uscita o fine gara
                 const subOutEvent = events.find(e => e.type === 'substitution' && e.subOutPlayerId === playerId && e.team === 'home');
                 minutesPlayed = subOutEvent ? subOutEvent.minute : duration;
             } else {
-                // Riserva: gioca dal momento in cui entra (se entra) fino a eventuale uscita o fine gara
                 const subInEvent = events.find(e => e.type === 'substitution' && e.playerId === playerId && e.team === 'home');
                 if (subInEvent) {
                     const subOutEventLater = events.find(e => e.type === 'substitution' && e.subOutPlayerId === playerId && e.team === 'home' && (e.minute > subInEvent.minute || e.period !== subInEvent.period));
@@ -104,7 +101,16 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             };
         });
 
+        // Salva nel database
+        for (const stat of newStats) {
+            await statsRepository.upsert(matchId, stat.playerId, stat);
+        }
+
         set({ stats: newStats });
+        
+        // Sincronizza le statistiche globali dei giocatori
+        await aggregationRepository.syncAllPlayersStats();
+        useStatsStore.getState().loadStats();
     },
 
     addEvent: async (eventData) => {
@@ -123,11 +129,7 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
 
         set({ events: updatedEvents, match: updatedMatch || get().match });
         
-        // Sincronizza i minuti dopo un cambio eventi (specialmente sostituzioni)
-        get().syncMinutes();
-        
-        await aggregationRepository.syncAllPlayersStats();
-        useStatsStore.getState().loadStats();
+        await get().syncAndPersistMinutes();
     },
 
     addEvents: async (eventsData) => {
@@ -149,11 +151,7 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
 
         set({ events: updatedEvents, match: updatedMatch || get().match });
 
-        // Sincronizza i minuti
-        get().syncMinutes();
-
-        await aggregationRepository.syncAllPlayersStats();
-        useStatsStore.getState().loadStats();
+        await get().syncAndPersistMinutes();
     },
 
     deleteEvent: async (eventId) => {
@@ -172,11 +170,7 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
 
         set({ events: updatedEvents, match: updatedMatch || get().match });
 
-        // Sincronizza i minuti
-        get().syncMinutes();
-
-        await aggregationRepository.syncAllPlayersStats();
-        useStatsStore.getState().loadStats();
+        await get().syncAndPersistMinutes();
     },
     
     updateMatch: async (data) => {
@@ -186,37 +180,16 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         const updatedMatch = await matchRepository.update(matchId, data);
         if (updatedMatch) {
             set({ match: updatedMatch });
-            get().syncMinutes();
-            await aggregationRepository.syncAllPlayersStats();
-            useStatsStore.getState().loadStats();
+            await get().syncAndPersistMinutes();
         }
     },
 
-    saveLineup: async (lineup) => {
+    saveLineup: async (lineupData) => {
         const matchId = get().matchId;
         if (!matchId) return;
-        await lineupRepository.save({ ...lineup, matchId });
+        await lineupRepository.save({ ...lineupData, matchId });
         
-        set({ lineup });
-        get().syncMinutes();
-    },
-
-    saveAllStats: async (stats) => {
-        const matchId = get().matchId;
-        if (!matchId) return;
-        
-        for (const stat of stats) {
-            await statsRepository.upsert(matchId, stat.playerId, {
-                minutesPlayed: stat.minutesPlayed,
-                goals: stat.goals,
-                assists: stat.assists,
-                yellowCards: stat.yellowCards,
-                redCards: stat.redCards
-            });
-        }
-        
-        await aggregationRepository.syncAllPlayersStats();
-        useStatsStore.getState().loadStats();
-        set({ stats });
+        set({ lineup: { ...lineupData, matchId } });
+        await get().syncAndPersistMinutes();
     }
 }));
