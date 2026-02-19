@@ -7,7 +7,6 @@ export const aggregationRepository = {
     async getTeamRecord(seasonId?: string) {
         let query = db.matches.where('status').equals('completed');
         if (seasonId) {
-            // Dexie filtering for season
             const completedMatches = await query.and(m => m.seasonId === seasonId).toArray();
             return this.processMatchesRecord(completedMatches);
         }
@@ -121,7 +120,11 @@ export const aggregationRepository = {
      * Calculates and returns aggregated stats for all players.
      */
     async getAllPlayersAggregatedStats(seasonId?: string) {
-        const players = await db.players.toArray();
+        // Filter players by season to ensure independence
+        const players = seasonId 
+            ? await db.players.where('seasonId').equals(seasonId).toArray()
+            : await db.players.toArray();
+
         const allEvents = await db.matchEvents.toArray();
         const allLineups = await db.matchLineups.toArray();
         const allStats = await db.playerMatchStats.toArray();

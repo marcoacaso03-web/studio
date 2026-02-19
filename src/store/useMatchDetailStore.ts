@@ -1,4 +1,3 @@
-
 "use client";
 
 import { create } from 'zustand';
@@ -52,7 +51,8 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             return;
         }
 
-        const allPlayers = await playerRepository.getAll();
+        // Fetch players belonging specifically to the match's season
+        const allPlayers = await playerRepository.getAll(match.seasonId);
         const matchEvents = await eventRepository.getForMatch(matchId);
         const matchLineup = await lineupRepository.getForMatch(matchId);
         const matchStats = await statsRepository.getForMatch(matchId);
@@ -80,7 +80,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         const participants = new Set([...lineup.starters, ...lineup.substitutes].filter(id => id !== ""));
         const pitchManTeam = match.isHome ? 'home' : 'away';
 
-        // Helper per calcolare il minuto assoluto di un evento
         const getAbsoluteMinute = (event: MatchEvent) => {
             if (event.period === '1T') return Math.min(event.minute, halfTime);
             if (event.period === '2T') return halfTime + Math.min(event.minute, halfTime);
@@ -89,7 +88,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             return event.minute;
         };
 
-        // Ordiniamo gli eventi cronologicamente per il calcolo
         const chronologicalEvents = [...events].sort((a, b) => {
             const periodOrder: Record<string, number> = { '1T': 1, '2T': 2, '1TS': 3, '2TS': 4 };
             if (periodOrder[a.period] !== periodOrder[b.period]) return periodOrder[a.period] - periodOrder[b.period];
@@ -102,7 +100,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             const isStarter = lineup.starters.includes(playerId);
 
             if (isStarter) {
-                // Titolare: gioca dal minuto 0 fino alla prima sostituzione in uscita
                 const subOutEvent = chronologicalEvents.find(e => 
                     e.type === 'substitution' && 
                     e.subOutPlayerId === playerId && 
@@ -110,7 +107,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
                 );
                 minutesPlayed = subOutEvent ? getAbsoluteMinute(subOutEvent) : duration;
             } else {
-                // Riserva: gioca dal momento in cui entra fino alla eventuale uscita
                 const subInEvent = chronologicalEvents.find(e => 
                     e.type === 'substitution' && 
                     e.playerId === playerId && 
@@ -145,20 +141,21 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         }
 
         set({ stats: newStats });
-        await aggregationRepository.syncAllPlayersStats();
+        // Synchronize stats only for the match's season
+        await aggregationRepository.syncAllPlayersStats(match.seasonId);
         useStatsStore.getState().loadStats();
     },
 
     saveAllStats: async (newStats) => {
-        const { matchId } = get();
-        if (!matchId) return;
+        const { matchId, match } = get();
+        if (!matchId || !match) return;
 
         for (const stat of newStats) {
             await statsRepository.upsert(matchId, stat.playerId, stat);
         }
         
         set({ stats: newStats });
-        await aggregationRepository.syncAllPlayersStats();
+        await aggregationRepository.syncAllPlayersStats(match.seasonId);
         useStatsStore.getState().loadStats();
     },
 
@@ -172,8 +169,8 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     },
 
     addEvent: async (eventData) => {
-        const matchId = get().matchId;
-        if (!matchId) return;
+        const { matchId, match } = get();
+        if (!matchId || !match) return;
 
         await eventRepository.add({ ...eventData, matchId });
         const updatedEvents = await eventRepository.getForMatch(matchId);
@@ -190,8 +187,8 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     },
 
     addEvents: async (eventsData) => {
-        const matchId = get().matchId;
-        if (!matchId) return;
+        const { matchId, match } = get();
+        if (!matchId || !match) return;
 
         for (const data of eventsData) {
             await eventRepository.add({ ...data, matchId });
@@ -210,8 +207,8 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     },
 
     deleteEvent: async (eventId) => {
-        const matchId = get().matchId;
-        if (!matchId) return;
+        const { matchId, match } = get();
+        if (!matchId || !match) return;
 
         await eventRepository.delete(eventId);
         const updatedEvents = await eventRepository.getForMatch(matchId);
