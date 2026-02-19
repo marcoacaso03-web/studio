@@ -13,6 +13,7 @@ export type Player = {
     appearances: number;
     goals: number;
     assists: number;
+    avgMinutes: number;
   };
 };
 
@@ -48,6 +49,7 @@ export type MatchLineup = {
 export type PlayerMatchStats = {
   matchId: string;
   playerId: string;
+  minutesPlayed: number;
   goals: number;
   assists: number;
   yellowCards: number;

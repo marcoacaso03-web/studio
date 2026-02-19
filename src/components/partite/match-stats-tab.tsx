@@ -1,10 +1,11 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
 import type { PlayerMatchStats } from "@/lib/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useMatchDetailStore } from "@/store/useMatchDetailStore";
@@ -31,19 +32,17 @@ export function MatchStatsTab() {
     
     const handleSaveStats = () => {
         saveAllStats(localStats);
-        toast({ title: "Statistiche salvate", description: "Le statistiche della partita sono state aggiornate." });
+        toast({ title: "Statistiche salvate", description: "Le statistiche individuali sono state aggiornate." });
     };
     
-    const statPlayers = allPlayers.filter(p => localStats.some(s => s.playerId === p.id));
-
-    if (statPlayers.length === 0) {
+    if (localStats.length === 0) {
         return (
              <Card>
                 <CardHeader>
-                <CardTitle>Statistiche Partita</CardTitle>
+                <CardTitle>Statistiche Individuali</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-muted-foreground">Nessun giocatore contrassegnato come 'presente'. Seleziona i convocati nella scheda 'Convocati' per inserire le statistiche.</p>
+                    <p className="text-muted-foreground">Nessun giocatore in formazione. Inserisci la formazione per abilitare le statistiche.</p>
                 </CardContent>
             </Card>
         )
@@ -51,73 +50,85 @@ export function MatchStatsTab() {
 
     return (
         <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <div>
-                    <CardTitle>Statistiche Partita</CardTitle>
-                    <CardDescription>Inserisci le performance individuali dei giocatori presenti.</CardDescription>
+                    <CardTitle>Performance Individuali</CardTitle>
+                    <CardDescription>Minutaggio e altri dati della gara.</CardDescription>
                 </div>
-                <Button onClick={handleSaveStats}>Salva Statistiche</Button>
+                <Button onClick={handleSaveStats}>Salva Dati</Button>
             </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Giocatore</TableHead>
-                    <TableHead className="text-center w-24">Gol</TableHead>
-                    <TableHead className="text-center w-24">Assist</TableHead>
-                    <TableHead className="text-center w-24">Gialli</TableHead>
-                    <TableHead className="text-center w-24">Rossi</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {localStats.map(stat => {
-                    const player = allPlayers.find(p => p.id === stat.playerId);
-                    if (!player) return null;
-                    
-                    return (
-                        <TableRow key={stat.playerId}>
-                            <TableCell className="font-medium">{player.name}</TableCell>
-                            <TableCell>
-                                <Input 
-                                    type="number" 
-                                    className="text-center" 
-                                    value={stat.goals} 
-                                    onChange={(e) => handleStatChange(stat.playerId, 'goals', e.target.value)}
-                                    min={0}
-                                />
-                            </TableCell>
-                            <TableCell>
-                                <Input 
-                                    type="number" 
-                                    className="text-center" 
-                                    value={stat.assists}
-                                    onChange={(e) => handleStatChange(stat.playerId, 'assists', e.target.value)}
-                                    min={0}
-                                />
-                            </TableCell>
-                            <TableCell>
-                                <Input 
-                                    type="number" 
-                                    className="text-center" 
-                                    value={stat.yellowCards} 
-                                    onChange={(e) => handleStatChange(stat.playerId, 'yellowCards', e.target.value)}
-                                    min={0} max={2}
-                                />
-                            </TableCell>
-                            <TableCell>
-                                <Input 
-                                    type="number" 
-                                    className="text-center" 
-                                    value={stat.redCards} 
-                                    onChange={(e) => handleStatChange(stat.playerId, 'redCards', e.target.value)}
-                                    min={0} max={1}
-                                />
-                            </TableCell>
-                        </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
+            <CardContent className="p-0 md:p-6">
+              <div className="overflow-x-auto">
+                <Table>
+                    <TableHeader>
+                    <TableRow>
+                        <TableHead className="min-w-[120px]">Giocatore</TableHead>
+                        <TableHead className="text-center w-24">Minuti</TableHead>
+                        <TableHead className="text-center w-24">Gol</TableHead>
+                        <TableHead className="text-center w-24">Ass.</TableHead>
+                        <TableHead className="text-center w-20">Amm.</TableHead>
+                        <TableHead className="text-center w-20">Esp.</TableHead>
+                    </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                    {localStats.map(stat => {
+                        const player = allPlayers.find(p => p.id === stat.playerId);
+                        if (!player) return null;
+                        
+                        return (
+                            <TableRow key={stat.playerId}>
+                                <TableCell className="font-medium whitespace-nowrap">{player.name}</TableCell>
+                                <TableCell>
+                                    <Input 
+                                        type="number" 
+                                        className="text-center h-8" 
+                                        value={stat.minutesPlayed} 
+                                        onChange={(e) => handleStatChange(stat.playerId, 'minutesPlayed', e.target.value)}
+                                        min={0} max={120}
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    <Input 
+                                        type="number" 
+                                        className="text-center h-8" 
+                                        value={stat.goals} 
+                                        onChange={(e) => handleStatChange(stat.playerId, 'goals', e.target.value)}
+                                        min={0}
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    <Input 
+                                        type="number" 
+                                        className="text-center h-8" 
+                                        value={stat.assists}
+                                        onChange={(e) => handleStatChange(stat.playerId, 'assists', e.target.value)}
+                                        min={0}
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    <Input 
+                                        type="number" 
+                                        className="text-center h-8" 
+                                        value={stat.yellowCards} 
+                                        onChange={(e) => handleStatChange(stat.playerId, 'yellowCards', e.target.value)}
+                                        min={0} max={2}
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    <Input 
+                                        type="number" 
+                                        className="text-center h-8" 
+                                        value={stat.redCards} 
+                                        onChange={(e) => handleStatChange(stat.playerId, 'redCards', e.target.value)}
+                                        min={0} max={1}
+                                    />
+                                </TableCell>
+                            </TableRow>
+                        )
+                    })}
+                    </TableBody>
+                </Table>
+              </div>
             </CardContent>
         </Card>
     )

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from "react";
@@ -19,7 +20,7 @@ import {
 } from "@/components/ui/table";
 import { ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react";
 
-type SortKey = 'name' | 'appearances' | 'goals' | 'assists';
+type SortKey = 'name' | 'appearances' | 'goals' | 'assists' | 'avgMinutes';
 type SortOrder = 'asc' | 'desc' | null;
 
 export function PlayerLeaderboard() {
@@ -34,9 +35,9 @@ export function PlayerLeaderboard() {
       let aVal: any = a[sortKey as keyof typeof a] || 0;
       let bVal: any = b[sortKey as keyof typeof b] || 0;
 
-      if (sortKey === 'appearances' || sortKey === 'goals' || sortKey === 'assists') {
-          aVal = a.stats[sortKey];
-          bVal = b.stats[sortKey];
+      if (['appearances', 'goals', 'assists', 'avgMinutes'].includes(sortKey)) {
+          aVal = a.stats[sortKey as keyof typeof a.stats];
+          bVal = b.stats[sortKey as keyof typeof b.stats];
       }
 
       if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
@@ -83,40 +84,46 @@ export function PlayerLeaderboard() {
       <CardHeader>
         <CardTitle>Leaderboard Giocatori</CardTitle>
         <CardDescription>
-          Classifica dei giocatori basata sulle performance stagionali. Clicca sui titoli per ordinare.
+          Classifica stagionale. Clicca sui titoli per ordinare.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50px]">#</TableHead>
-              <TableHead className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSort('name')}>
-                <div className="flex items-center">Giocatore <SortIcon column="name" /></div>
-              </TableHead>
-              <TableHead className="text-center cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSort('appearances')}>
-                <div className="flex items-center justify-center">Presenze <SortIcon column="appearances" /></div>
-              </TableHead>
-              <TableHead className="text-center cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSort('goals')}>
-                <div className="flex items-center justify-center">Gol <SortIcon column="goals" /></div>
-              </TableHead>
-              <TableHead className="text-center cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSort('assists')}>
-                <div className="flex items-center justify-center">Assist <SortIcon column="assists" /></div>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedData.map((player, index) => (
-              <TableRow key={player.playerId}>
-                <TableCell className="font-medium">{index + 1}</TableCell>
-                <TableCell className="font-medium">{player.name}</TableCell>
-                <TableCell className="text-center">{player.stats.appearances}</TableCell>
-                <TableCell className="text-center font-bold text-green-600">{player.stats.goals}</TableCell>
-                <TableCell className="text-center font-bold text-blue-600">{player.stats.assists}</TableCell>
+      <CardContent className="p-0 md:p-6">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[40px]">#</TableHead>
+                <TableHead className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSort('name')}>
+                  <div className="flex items-center">Giocatore <SortIcon column="name" /></div>
+                </TableHead>
+                <TableHead className="text-center cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSort('appearances')}>
+                  <div className="flex items-center justify-center">Pres. <SortIcon column="appearances" /></div>
+                </TableHead>
+                <TableHead className="text-center cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSort('avgMinutes')}>
+                  <div className="flex items-center justify-center">Min/G <SortIcon column="avgMinutes" /></div>
+                </TableHead>
+                <TableHead className="text-center cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSort('goals')}>
+                  <div className="flex items-center justify-center">Gol <SortIcon column="goals" /></div>
+                </TableHead>
+                <TableHead className="text-center cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleSort('assists')}>
+                  <div className="flex items-center justify-center">Ass. <SortIcon column="assists" /></div>
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {sortedData.map((player, index) => (
+                <TableRow key={player.playerId}>
+                  <TableCell className="font-medium">{index + 1}</TableCell>
+                  <TableCell className="font-medium whitespace-nowrap">{player.name}</TableCell>
+                  <TableCell className="text-center">{player.stats.appearances}</TableCell>
+                  <TableCell className="text-center text-muted-foreground">{player.stats.avgMinutes}&apos;</TableCell>
+                  <TableCell className="text-center font-bold text-green-600">{player.stats.goals}</TableCell>
+                  <TableCell className="text-center font-bold text-blue-600">{player.stats.assists}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );

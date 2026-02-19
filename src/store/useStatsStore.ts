@@ -1,3 +1,4 @@
+
 "use client";
 
 import { create } from 'zustand';
@@ -19,6 +20,7 @@ interface PlayerLeaderboardEntry {
         appearances: number;
         goals: number;
         assists: number;
+        avgMinutes: number;
     };
 }
 
@@ -70,7 +72,7 @@ export const useStatsStore = create<StatsState>((set) => ({
 
         set({ 
             teamRecord, 
-            playerLeaderboard: sortedLeaderboard, 
+            playerLeaderboard: sortedLeaderboard as PlayerLeaderboardEntry[], 
             teamTrend: teamTrend as TrendEntry[], 
             goalsIntervals,
             loading: false 

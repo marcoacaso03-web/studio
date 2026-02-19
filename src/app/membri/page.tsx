@@ -31,7 +31,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
 
 type SortConfig = {
   key: string | null;
@@ -137,6 +136,10 @@ export default function RosaPage() {
           aValue = a.stats.assists;
           bValue = b.stats.assists;
           break;
+        case 'avgMinutes':
+          aValue = a.stats.avgMinutes;
+          bValue = b.stats.avgMinutes;
+          break;
         default:
           return 0;
       }
@@ -233,6 +236,14 @@ export default function RosaPage() {
                           </div>
                         </TableHead>
                         <TableHead 
+                          className="w-12 px-1 text-center cursor-pointer"
+                          onClick={() => handleSort('avgMinutes')}
+                        >
+                          <div className="flex items-center justify-center">
+                            Min/G <SortIndicator columnKey="avgMinutes" />
+                          </div>
+                        </TableHead>
+                        <TableHead 
                           className="w-10 px-1 text-center cursor-pointer"
                           onClick={() => handleSort('goals')}
                         >
@@ -271,6 +282,7 @@ export default function RosaPage() {
                               </span>
                             </TableCell>
                             <TableCell className="px-1 text-center text-xs md:text-sm">{player.stats.appearances}</TableCell>
+                            <TableCell className="px-1 text-center text-[10px] md:text-xs text-muted-foreground">{player.stats.avgMinutes}&apos;</TableCell>
                             <TableCell className="px-1 text-center font-bold text-green-600 text-xs md:text-sm">{player.stats.goals}</TableCell>
                             <TableCell className="px-1 text-center font-bold text-blue-600 text-xs md:text-sm">{player.stats.assists}</TableCell>
                             <TableCell className="px-2 text-right">

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -7,12 +8,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MatchLineupTab } from "@/components/partite/match-lineup-tab";
 import { MatchEventsTab } from "@/components/partite/match-events-tab";
+import { MatchStatsTab } from "@/components/partite/match-stats-tab";
 import { useMatchDetailStore } from '@/store/useMatchDetailStore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { MatchFormDialog } from '@/components/partite/match-form-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarDays, MapPin, Settings2, Users, Zap } from 'lucide-react';
+import { CalendarDays, MapPin, Settings2, Users, Zap, BarChart3 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export default function MatchDetailPage() {
@@ -57,7 +59,6 @@ export default function MatchDetailPage() {
   }
 
   const matchDate = new Date(match.date);
-  const isCompleted = match.status === 'completed';
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -77,22 +78,22 @@ export default function MatchDetailPage() {
              {getStatusBadge(match.status)}
           </div>
 
-          <Card className="bg-primary text-primary-foreground">
+          <Card className="bg-primary text-primary-foreground shadow-lg">
             <CardContent className="p-6">
               <div className="flex flex-col items-center justify-center space-y-6">
                 <div className="flex items-center justify-center gap-8 md:gap-16">
                   <div className="text-center">
-                    <p className="text-sm opacity-80 mb-1">{match.isHome ? "SQUADRA+" : match.opponent.toUpperCase()}</p>
-                    <p className="text-5xl font-black">{match.result?.home ?? "-"}</p>
+                    <p className="text-xs opacity-70 mb-1 font-bold uppercase tracking-widest">{match.isHome ? "SQUADRA+" : match.opponent.toUpperCase()}</p>
+                    <p className="text-6xl font-black">{match.result?.home ?? "-"}</p>
                   </div>
-                  <div className="text-3xl font-light opacity-50">-</div>
+                  <div className="text-4xl font-light opacity-30">VS</div>
                   <div className="text-center">
-                    <p className="text-sm opacity-80 mb-1">{!match.isHome ? "SQUADRA+" : match.opponent.toUpperCase()}</p>
-                    <p className="text-5xl font-black">{match.result?.away ?? "-"}</p>
+                    <p className="text-xs opacity-70 mb-1 font-bold uppercase tracking-widest">{!match.isHome ? "SQUADRA+" : match.opponent.toUpperCase()}</p>
+                    <p className="text-6xl font-black">{match.result?.away ?? "-"}</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 w-full pt-4 border-t border-primary-foreground/20">
+                <div className="grid grid-cols-2 gap-4 w-full pt-4 border-t border-primary-foreground/10">
                   <div className="flex items-center gap-2 text-sm">
                     <CalendarDays className="h-4 w-4 opacity-70" />
                     <span>{matchDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
@@ -106,11 +107,11 @@ export default function MatchDetailPage() {
                 <Button 
                   variant="secondary" 
                   size="sm" 
-                  className="w-full mt-2"
+                  className="w-full mt-2 font-bold uppercase text-xs"
                   onClick={() => setIsFormOpen(true)}
                 >
                   <Settings2 className="mr-2 h-4 w-4" />
-                  Modifica Dettagli
+                  Modifica Partita
                 </Button>
               </div>
             </CardContent>
@@ -118,12 +119,15 @@ export default function MatchDetailPage() {
         </div>
         
         <Tabs defaultValue="eventi" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="eventi" className="flex items-center gap-2">
-              <Zap className="h-4 w-4" /> Cronaca & Eventi
+          <TabsList className="grid w-full grid-cols-3 mb-4 h-11">
+            <TabsTrigger value="eventi" className="flex items-center gap-2 text-xs">
+              <Zap className="h-4 w-4" /> Cronaca
             </TabsTrigger>
-            <TabsTrigger value="squadra" className="flex items-center gap-2">
-              <Users className="h-4 w-4" /> Formazione & Convocati
+            <TabsTrigger value="squadra" className="flex items-center gap-2 text-xs">
+              <Users className="h-4 w-4" /> Formazione
+            </TabsTrigger>
+            <TabsTrigger value="statistiche" className="flex items-center gap-2 text-xs">
+              <BarChart3 className="h-4 w-4" /> Statistiche
             </TabsTrigger>
           </TabsList>
 
@@ -133,6 +137,10 @@ export default function MatchDetailPage() {
 
           <TabsContent value="squadra">
               <MatchLineupTab />
+          </TabsContent>
+
+          <TabsContent value="statistiche">
+              <MatchStatsTab />
           </TabsContent>
         </Tabs>
       </div>

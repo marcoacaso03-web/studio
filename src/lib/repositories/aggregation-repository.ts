@@ -1,3 +1,4 @@
+
 import { db } from '@/lib/db';
 
 export const aggregationRepository = {
@@ -98,6 +99,7 @@ export const aggregationRepository = {
         const players = await db.players.toArray();
         const allEvents = await db.matchEvents.toArray();
         const allLineups = await db.matchLineups.toArray();
+        const allStats = await db.playerMatchStats.toArray();
         const completedMatches = await db.matches.where('status').equals('completed').toArray();
         const completedMatchIds = new Set(completedMatches.map(m => m.id));
 
@@ -112,19 +114,22 @@ export const aggregationRepository = {
                 if (!completedMatchIds.has(e.matchId)) return false;
                 return e.playerId === player.id;
             });
+
+            // Minuti totali
+            const totalMinutes = allStats
+                .filter(s => s.playerId === player.id && completedMatchIds.has(s.matchId))
+                .reduce((acc, s) => acc + (s.minutesPlayed || 0), 0);
+            
+            const avgMinutes = appearances > 0 ? Math.round(totalMinutes / appearances) : 0;
             
             // Gol: quando il giocatore è l'autore del goal
             const goals = playerEvents.filter(e => e.type === 'goal').length;
             
-            // Assist: quando il giocatore è assistPlayerId in un evento goal (nuovo sistema)
-            // o quando è l'autore di un evento assist (vecchio sistema/compatibilità)
-            const newAssists = allEvents.filter(e => {
+            // Assist: quando il giocatore è assistPlayerId in un evento goal
+            const assists = allEvents.filter(e => {
                 if (!completedMatchIds.has(e.matchId)) return false;
                 return e.type === 'goal' && e.assistPlayerId === player.id;
             }).length;
-            
-            const oldAssists = playerEvents.filter(e => e.type === 'assist').length;
-            const assists = newAssists + oldAssists;
 
             return {
                 playerId: player.id,
@@ -133,6 +138,7 @@ export const aggregationRepository = {
                     appearances,
                     goals,
                     assists,
+                    avgMinutes
                 }
             };
         });
