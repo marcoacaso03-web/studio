@@ -243,10 +243,10 @@ export default function DashboardPage() {
                     {roleStats.total}
                   </div>
                   <div className="flex flex-wrap gap-x-2 text-[8px] md:text-[10px] font-bold text-muted-foreground/80 uppercase">
-                    <span>A: {roleStats.attaccanti}</span>
-                    <span>C: {roleStats.centrocampisti}</span>
-                    <span>D: {roleStats.difensori}</span>
-                    <span>P: {roleStats.portieri}</span>
+                    <span>ATT: {roleStats.attaccanti}</span>
+                    <span>CEN: {roleStats.centrocampisti}</span>
+                    <span>DIF: {roleStats.difensori}</span>
+                    <span>POR: {roleStats.portieri}</span>
                   </div>
                 </div>
               )}

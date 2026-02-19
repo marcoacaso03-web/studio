@@ -38,10 +38,10 @@ type SortConfig = {
 };
 
 const roleInitials: Record<Role, string> = {
-  'Portiere': 'P',
-  'Difensore': 'D',
-  'Centrocampista': 'C',
-  'Attaccante': 'A'
+  'Portiere': 'POR',
+  'Difensore': 'DIF',
+  'Centrocampista': 'CEN',
+  'Attaccante': 'ATT'
 };
 
 export default function RosaPage() {
@@ -61,7 +61,7 @@ export default function RosaPage() {
     setIsFormOpen(true);
   };
   
-  const handleSavePlayer = async (data: {name: string, number: number, role: Role}, playerId?: string) => {
+  const handleSavePlayer = async (data: {name: string, role: Role}, playerId?: string) => {
     if (playerId) {
       await update(playerId, data);
       toast({ title: "Giocatore aggiornato", description: `I dati di ${data.name} sono stati modificati.` });
@@ -192,7 +192,7 @@ export default function RosaPage() {
                           </div>
                         </TableHead>
                         <TableHead 
-                          className="w-20 px-2 text-center cursor-pointer"
+                          className="w-24 px-2 text-center cursor-pointer"
                           onClick={() => handleSort('role')}
                         >
                           <div className="flex items-center justify-center">
@@ -214,7 +214,7 @@ export default function RosaPage() {
                               {lastName}
                             </TableCell>
                             <TableCell className="px-2 text-center">
-                              <span className="text-xs font-bold bg-muted px-2.5 py-1 rounded border">
+                              <span className="text-[10px] font-bold bg-muted px-2 py-1 rounded border min-w-[36px] inline-block">
                                 {roleInitials[player.role]}
                               </span>
                             </TableCell>
