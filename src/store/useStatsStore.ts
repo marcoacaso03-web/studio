@@ -1,8 +1,8 @@
-
 "use client";
 
 import { create } from 'zustand';
 import { aggregationRepository } from '@/lib/repositories/aggregation-repository';
+import { useSeasonsStore } from './useSeasonsStore';
 
 interface TeamRecord {
     wins: number;
@@ -53,11 +53,13 @@ export const useStatsStore = create<StatsState>((set) => ({
     loading: true,
     loadStats: async () => {
         set({ loading: true });
+        const activeSeasonId = useSeasonsStore.getState().activeSeason?.id;
+
         const [teamRecord, playerLeaderboard, teamTrend, goalsIntervals] = await Promise.all([
-            aggregationRepository.getTeamRecord(),
-            aggregationRepository.getAllPlayersAggregatedStats(),
-            aggregationRepository.getTeamTrend(),
-            aggregationRepository.getGoalsByInterval()
+            aggregationRepository.getTeamRecord(activeSeasonId),
+            aggregationRepository.getAllPlayersAggregatedStats(activeSeasonId),
+            aggregationRepository.getTeamTrend(activeSeasonId),
+            aggregationRepository.getGoalsByInterval(activeSeasonId)
         ]);
         
         const sortedLeaderboard = [...playerLeaderboard].sort((a, b) => {

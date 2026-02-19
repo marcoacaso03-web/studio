@@ -6,22 +6,45 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Download, Moon, Sun } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Download, Moon, Sun, Plus, CheckCircle2, History } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { playerRepository } from '@/lib/repositories/player-repository';
 import { matchRepository } from '@/lib/repositories/match-repository';
 import { statsRepository } from '@/lib/repositories/stats-repository';
 import { useThemeStore } from '@/store/useThemeStore';
+import { useSeasonsStore } from '@/store/useSeasonsStore';
+import { useMatchesStore } from '@/store/useMatchesStore';
+import { useStatsStore } from '@/store/useStatsStore';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 export default function AltroPage() {
   const [isExporting, setIsExporting] = useState(false);
+  const [newSeasonName, setNewSeasonName] = useState('');
   const { toast } = useToast();
   const { theme, toggleTheme } = useThemeStore();
+  const { seasons, activeSeason, fetchAll: fetchSeasons, addSeason, setActiveSeason } = useSeasonsStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    fetchSeasons();
+  }, [fetchSeasons]);
+
+  const handleAddSeason = async () => {
+    if (!newSeasonName.trim()) return;
+    await addSeason(newSeasonName);
+    setNewSeasonName('');
+    toast({ title: "Stagione creata", description: `La stagione ${newSeasonName} è stata aggiunta all'archivio.` });
+  };
+
+  const handleSwitchSeason = async (id: string, name: string) => {
+    await setActiveSeason(id);
+    useMatchesStore.getState().fetchAll();
+    useStatsStore.getState().loadStats();
+    toast({ title: "Cambio Stagione", description: `Ora stai visualizzando i dati della stagione ${name}.` });
+  };
 
   const convertToCSV = (data: any[]) => {
     if (data.length === 0) return '';
@@ -106,9 +129,63 @@ export default function AltroPage() {
   if (!mounted) return null;
 
   return (
-    <div>
+    <div className="pb-8">
       <PageHeader title="Impostazioni" />
       <div className="space-y-6">
+        
+        {/* Gestione Stagioni */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <History className="h-5 w-5 text-primary" />
+              <CardTitle>Archivio Stagioni</CardTitle>
+            </div>
+            <CardDescription>
+              Gestisci le tue stagioni sportive. I dati di ogni stagione sono isolati.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex gap-2">
+              <Input 
+                placeholder="Es: 2025/26" 
+                value={newSeasonName} 
+                onChange={(e) => setNewSeasonName(e.target.value)}
+                className="font-bold uppercase text-xs"
+              />
+              <Button onClick={handleAddSeason} className="bg-accent text-accent-foreground">
+                <Plus className="h-4 w-4 mr-1" /> Crea
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              {seasons.map((s) => (
+                <div 
+                  key={s.id} 
+                  className={cn(
+                    "flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer",
+                    s.isActive ? "bg-primary/5 border-primary shadow-sm" : "bg-muted/20 hover:bg-muted/40"
+                  )}
+                  onClick={() => !s.isActive && handleSwitchSeason(s.id, s.name)}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className={cn("text-sm font-black uppercase tracking-tight", s.isActive ? "text-primary" : "text-muted-foreground")}>
+                      Stagione {s.name}
+                    </span>
+                    {s.isActive && (
+                      <Badge className="text-[8px] bg-primary text-white font-black uppercase py-0 px-1.5">Attiva</Badge>
+                    )}
+                  </div>
+                  {s.isActive ? (
+                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                  ) : (
+                    <div className="h-5 w-5 rounded-full border border-muted-foreground/30" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Aspetto</CardTitle>

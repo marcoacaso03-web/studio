@@ -4,12 +4,13 @@ import { create } from 'zustand';
 import { matchRepository } from '@/lib/repositories/match-repository';
 import type { Match } from '@/lib/types';
 import type { MatchCreateData } from '@/lib/repositories/match-repository';
+import { useSeasonsStore } from './useSeasonsStore';
 
 interface MatchState {
     matches: Match[];
     loading: boolean;
     fetchAll: () => Promise<void>;
-    add: (data: MatchCreateData) => Promise<Match | undefined>;
+    add: (data: Omit<MatchCreateData, 'seasonId'>) => Promise<Match | undefined>;
     update: (id: string, updates: Partial<Omit<Match, 'id'>>) => Promise<void>;
     remove: (id: string) => Promise<void>;
 }
@@ -19,20 +20,27 @@ export const useMatchesStore = create<MatchState>((set, get) => ({
     loading: true,
     fetchAll: async () => {
         set({ loading: true });
-        const matches = await matchRepository.getAll();
+        const activeSeason = useSeasonsStore.getState().activeSeason;
+        const matches = await matchRepository.getAll(activeSeason?.id);
         set({ matches, loading: false });
     },
     add: async (data) => {
-        const newMatch = await matchRepository.add(data);
-        await get().fetchAll(); // Refetch the entire list to ensure consistency
+        const activeSeason = useSeasonsStore.getState().activeSeason;
+        if (!activeSeason) return undefined;
+
+        const newMatch = await matchRepository.add({ 
+            ...data, 
+            seasonId: activeSeason.id 
+        });
+        await get().fetchAll();
         return newMatch;
     },
     update: async (id, updates) => {
         await matchRepository.update(id, updates);
-        await get().fetchAll(); // Refetch the entire list
+        await get().fetchAll();
     },
     remove: async (id) => {
         await matchRepository.delete(id);
-        await get().fetchAll(); // Refetch the entire list
+        await get().fetchAll();
     },
 }));

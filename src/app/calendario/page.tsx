@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -24,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMatchesStore } from "@/store/useMatchesStore";
 import { usePlayersStore } from "@/store/usePlayersStore";
 import { useStatsStore } from "@/store/useStatsStore";
+import { useSeasonsStore } from "@/store/useSeasonsStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { playerRepository } from "@/lib/repositories/player-repository";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -33,16 +33,21 @@ export default function DashboardPage() {
   const { matches, loading: matchesLoading, fetchAll: fetchMatches, add: addMatch, remove: removeMatch } = useMatchesStore();
   const { players, loading: playersLoading, fetchAll: fetchPlayers } = usePlayersStore();
   const { teamRecord, loading: statsLoading, loadStats } = useStatsStore();
+  const { activeSeason, fetchAll: fetchSeasons } = useSeasonsStore();
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [matchToDelete, setMatchToDelete] = useState<Match | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchMatches();
-    fetchPlayers();
-    loadStats();
-  }, [fetchMatches, fetchPlayers, loadStats]);
+    const initialize = async () => {
+      await fetchSeasons();
+      fetchMatches();
+      fetchPlayers();
+      loadStats();
+    };
+    initialize();
+  }, [fetchMatches, fetchPlayers, loadStats, fetchSeasons]);
 
   const handleSeedData = async () => {
     try {
@@ -124,7 +129,9 @@ export default function DashboardPage() {
             <div className="flex flex-row items-center justify-between gap-2">
               <div>
                 <CardTitle className="text-lg md:text-2xl text-primary font-black uppercase tracking-tight">Partite</CardTitle>
-                <CardDescription className="text-[10px] md:text-sm uppercase font-bold text-muted-foreground/60">Stagione 2024/25</CardDescription>
+                <CardDescription className="text-[10px] md:text-sm uppercase font-bold text-muted-foreground/60">
+                   {activeSeason ? `Stagione ${activeSeason.name}` : 'Caricamento...'}
+                </CardDescription>
               </div>
               <div className="flex gap-2">
                 {matches.length === 0 && !loading && (
