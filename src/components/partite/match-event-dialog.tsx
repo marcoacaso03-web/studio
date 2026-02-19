@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -77,11 +78,16 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
       
       if (!isBefore) break;
 
-      if (event.team === 'home' && event.playerId) {
-        if (event.type === 'sub_out') {
+      if (event.team === 'home') {
+        if (event.type === 'substitution') {
+           if (event.subOutPlayerId) currentPitch.delete(event.subOutPlayerId);
+           if (event.subOutPlayerId) currentBench.add(event.subOutPlayerId);
+           if (event.playerId) currentBench.delete(event.playerId);
+           if (event.playerId) currentPitch.add(event.playerId);
+        } else if (event.type === 'sub_out' && event.playerId) {
           currentPitch.delete(event.playerId);
           currentBench.add(event.playerId);
-        } else if (event.type === 'sub_in') {
+        } else if (event.type === 'sub_in' && event.playerId) {
           currentBench.delete(event.playerId);
           currentPitch.add(event.playerId);
         }
@@ -129,24 +135,17 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
           ? (selectedAssist?.name || undefined) 
           : (assistPlayerName || undefined),
       });
-      
-      // NOTA: Non aggiungiamo più un evento separato per l'assist
     } else if (uiType === 'substitution') {
       const selectedIn = allPlayers.find(p => p.id === subInPlayerId);
       const selectedOut = allPlayers.find(p => p.id === subOutPlayerId);
 
       events.push({
         ...baseEvent,
-        type: 'sub_out',
-        playerId: team === 'home' ? subOutPlayerId : undefined,
-        playerName: team === 'home' ? selectedOut?.name : (subOutPlayerName || match?.opponent || "Avversario"),
-      });
-
-      events.push({
-        ...baseEvent,
-        type: 'sub_in',
+        type: 'substitution',
         playerId: team === 'home' ? subInPlayerId : undefined,
-        playerName: team === 'home' ? selectedIn?.name : (subInPlayerName || match?.opponent || "Avversario"),
+        playerName: team === 'home' ? selectedIn?.name : (subInPlayerName || "Subentrante"),
+        subOutPlayerId: team === 'home' ? subOutPlayerId : undefined,
+        subOutPlayerName: team === 'home' ? selectedOut?.name : (subOutPlayerName || "Uscente"),
       });
     } else {
       const selectedPlayer = allPlayers.find(p => p.id === playerId);
@@ -246,7 +245,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
                 {team === 'home' ? (
                   <Select value={subOutPlayerId} onValueChange={setSubOutPlayerId}>
                     <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-medium focus:ring-0">
-                      <SelectValue placeholder="Dalla campo" />
+                      <SelectValue placeholder="Dal campo" />
                     </SelectTrigger>
                     <SelectContent className="bg-[#1a2a24] text-white border-gray-700">
                       {playersStatus.onPitch.map(p => (

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -19,6 +20,7 @@ export function MatchEventsTab() {
       case 'assist': return <Zap className="h-5 w-5 text-blue-400" />;
       case 'yellow_card': return <div className="h-5 w-4 bg-yellow-400 rounded-sm border" />;
       case 'red_card': return <div className="h-5 w-4 bg-red-600 rounded-sm border" />;
+      case 'substitution':
       case 'sub_in':
       case 'sub_out': return <ArrowRightLeft className="h-5 w-5 text-orange-400" />;
       default: return <Info className="h-5 w-5 text-muted-foreground" />;
@@ -28,6 +30,9 @@ export function MatchEventsTab() {
   const getEventLabel = (event: any) => {
     if (event.type === 'goal') {
       return event.assistPlayerName ? `GOAL (ASSIST: ${event.assistPlayerName})` : 'GOAL';
+    }
+    if (event.type === 'substitution') {
+      return 'SOSTITUZIONE';
     }
     switch(event.type) {
       case 'assist': return 'ASSIST';
@@ -68,17 +73,28 @@ export function MatchEventsTab() {
           ) : (
             <div className="space-y-4">
               {events.map((event) => {
-                // Se è un evento assist 'vecchio stile' (stand-alone), lo visualizziamo ancora per compatibilità
-                // ma prioritizziamo gli assist integrati nei nuovi gol.
                 return (
                   <div key={event.id} className="flex items-center justify-between border-b border-muted pb-3 last:border-0">
                     <div className="flex items-center gap-4">
                       <div className="flex items-center justify-center w-8">
                           {getEventIcon(event.type)}
                       </div>
-                      <div>
+                      <div className="flex-1">
                           <div className="flex items-center gap-2">
-                              <p className="font-bold leading-none">{event.playerName || (event.team === 'home' ? 'Giocatore' : 'Avversario')}</p>
+                              {event.type === 'substitution' ? (
+                                <div className="flex flex-col">
+                                   <div className="flex items-center gap-2">
+                                      <span className="text-[10px] font-bold text-green-500 uppercase">Entra:</span>
+                                      <p className="font-bold leading-none">{event.playerName}</p>
+                                   </div>
+                                   <div className="flex items-center gap-2 mt-1">
+                                      <span className="text-[10px] font-bold text-red-500 uppercase">Esce:</span>
+                                      <p className="text-xs opacity-70 leading-none">{event.subOutPlayerName}</p>
+                                   </div>
+                                </div>
+                              ) : (
+                                <p className="font-bold leading-none">{event.playerName || (event.team === 'home' ? 'Giocatore' : 'Avversario')}</p>
+                              )}
                               <Badge variant="outline" className="text-[10px] py-0 px-1 font-normal opacity-70">
                                   {event.team === 'home' ? 'SQUADRA+' : 'AVVERSARIO'}
                               </Badge>
