@@ -25,6 +25,7 @@ interface MatchDetailState {
     load: (matchId: string) => Promise<void>;
     updateMatch: (data: Partial<Omit<Match, 'id'>>) => Promise<void>;
     saveLineup: (lineup: MatchLineup) => Promise<void>;
+    saveAllStats: (stats: PlayerMatchStats[]) => Promise<void>;
     addEvent: (event: Omit<MatchEvent, 'id'>) => Promise<void>;
     addEvents: (events: Omit<MatchEvent, 'id'>[]) => Promise<void>;
     deleteEvent: (eventId: string) => Promise<void>;
@@ -67,7 +68,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             loading: false 
         });
 
-        // Sincronizza i minuti al caricamento per sicurezza
         await get().syncAndPersistMinutes();
     },
 
@@ -76,41 +76,56 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         if (!match || !lineup || !matchId) return;
 
         const duration = match.duration || 90;
+        const halfTime = duration / 2;
         const participants = new Set([...lineup.starters, ...lineup.substitutes].filter(id => id !== ""));
-        
-        // Determiniamo quale team (home/away) rappresenta PitchMan in questa partita
         const pitchManTeam = match.isHome ? 'home' : 'away';
+
+        // Helper per calcolare il minuto assoluto di un evento
+        const getAbsoluteMinute = (event: MatchEvent) => {
+            if (event.period === '1T') return Math.min(event.minute, halfTime);
+            if (event.period === '2T') return halfTime + Math.min(event.minute, halfTime);
+            if (event.period === '1TS') return duration + event.minute;
+            if (event.period === '2TS') return duration + 15 + event.minute;
+            return event.minute;
+        };
+
+        // Ordiniamo gli eventi cronologicamente per il calcolo
+        const chronologicalEvents = [...events].sort((a, b) => {
+            const periodOrder: Record<string, number> = { '1T': 1, '2T': 2, '1TS': 3, '2TS': 4 };
+            if (periodOrder[a.period] !== periodOrder[b.period]) return periodOrder[a.period] - periodOrder[b.period];
+            return a.minute - b.minute;
+        });
 
         const newStats: PlayerMatchStats[] = Array.from(participants).map(playerId => {
             const existingStat = stats.find(s => s.playerId === playerId);
-            
             let minutesPlayed = 0;
             const isStarter = lineup.starters.includes(playerId);
 
             if (isStarter) {
-                // Un titolare gioca fino a quando non viene sostituito o finisce la gara
-                const subOutEvent = events.find(e => 
+                // Titolare: gioca dal minuto 0 fino alla prima sostituzione in uscita
+                const subOutEvent = chronologicalEvents.find(e => 
                     e.type === 'substitution' && 
                     e.subOutPlayerId === playerId && 
                     e.team === pitchManTeam
                 );
-                minutesPlayed = subOutEvent ? subOutEvent.minute : duration;
+                minutesPlayed = subOutEvent ? getAbsoluteMinute(subOutEvent) : duration;
             } else {
-                // Una riserva gioca dal momento in cui entra fino a quando viene sostituita o finisce la gara
-                const subInEvent = events.find(e => 
+                // Riserva: gioca dal momento in cui entra fino alla eventuale uscita
+                const subInEvent = chronologicalEvents.find(e => 
                     e.type === 'substitution' && 
                     e.playerId === playerId && 
                     e.team === pitchManTeam
                 );
                 if (subInEvent) {
-                    const subOutEventLater = events.find(e => 
+                    const subInMin = getAbsoluteMinute(subInEvent);
+                    const subOutEventLater = chronologicalEvents.find(e => 
                         e.type === 'substitution' && 
                         e.subOutPlayerId === playerId && 
                         e.team === pitchManTeam && 
-                        (e.period !== subInEvent.period || e.minute > subInEvent.minute)
+                        getAbsoluteMinute(e) > subInMin
                     );
-                    const endMin = subOutEventLater ? subOutEventLater.minute : duration;
-                    minutesPlayed = Math.max(0, endMin - subInEvent.minute);
+                    const endMin = subOutEventLater ? getAbsoluteMinute(subOutEventLater) : duration;
+                    minutesPlayed = Math.max(0, endMin - subInMin);
                 }
             }
 
@@ -125,14 +140,24 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             };
         });
 
-        // Salva nel database
         for (const stat of newStats) {
             await statsRepository.upsert(matchId, stat.playerId, stat);
         }
 
         set({ stats: newStats });
+        await aggregationRepository.syncAllPlayersStats();
+        useStatsStore.getState().loadStats();
+    },
+
+    saveAllStats: async (newStats) => {
+        const { matchId } = get();
+        if (!matchId) return;
+
+        for (const stat of newStats) {
+            await statsRepository.upsert(matchId, stat.playerId, stat);
+        }
         
-        // Sincronizza le statistiche globali dei giocatori
+        set({ stats: newStats });
         await aggregationRepository.syncAllPlayersStats();
         useStatsStore.getState().loadStats();
     },
@@ -161,7 +186,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         });
 
         set({ events: updatedEvents, match: updatedMatch || get().match });
-        
         await get().syncAndPersistMinutes();
     },
 
@@ -174,7 +198,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         }
         
         const updatedEvents = await eventRepository.getForMatch(matchId);
-        
         const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
         const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
         
@@ -183,7 +206,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         });
 
         set({ events: updatedEvents, match: updatedMatch || get().match });
-
         await get().syncAndPersistMinutes();
     },
 
@@ -202,7 +224,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         });
 
         set({ events: updatedEvents, match: updatedMatch || get().match });
-
         await get().syncAndPersistMinutes();
     },
     
