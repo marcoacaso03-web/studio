@@ -9,7 +9,6 @@ Questo documento raccoglie suggerimenti per l'evoluzione del software come gesti
 - **Backup Manuale**: Potenziare la sezione Impostazioni con una funzione di "Snapshot" (import/export JSON completo) per permettere all'utente di spostare i dati tra dispositivi manualmente.
 
 ## 🎨 Stile e UI/UX
-- **Custom Icons**: Sostituire le icone generiche con SVG che richiamino specificamente l'attrezzatura tecnica (coni, lavagne tattiche, fischetti).
 - **Dark Mode Tuning**: Ottimizzare i contrasti della modalità scura per l'uso serale sui campi di allenamento.
 - **Drag & Drop**: Implementare il trascinamento dei giocatori per definire l'ordine di entrata in panchina o la disposizione tattica.
 
