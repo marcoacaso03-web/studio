@@ -16,7 +16,7 @@ const navItems = [
   { href: "/calendario", label: "Dashboard", icon: LayoutDashboard },
   { href: "/membri", label: "Rosa", icon: Users },
   { href: "/statistiche", label: "Statistiche", icon: BarChart3 },
-  { href: "/altro", label: "Altro", icon: Settings },
+  { href: "/altro", label: "Impostazioni", icon: Settings },
 ];
 
 function NavLink({ href, label, icon: Icon }: { href: string; label: string; icon: React.ElementType }) {

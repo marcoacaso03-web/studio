@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -100,7 +101,7 @@ export default function AltroPage() {
 
   return (
     <div>
-      <PageHeader title="Altro" />
+      <PageHeader title="Impostazioni" />
       <div className="space-y-6">
         <Card>
           <CardHeader>
