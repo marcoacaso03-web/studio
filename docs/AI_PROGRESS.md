@@ -3,15 +3,21 @@
 
 ## PROJECT SNAPSHOT
 - Nome progetto: Squadra+
-- Target: Web (PWA) — Offline-only
+- Target: Gestionale interno per singoli allenatori o società (Uso Personale)
+- Natura: 100% Offline-only (No Cloud, No Social)
 - Stack: Next.js (App Router) + TypeScript + Dexie (IndexedDB) + Zustand + Zod + Recharts
 - Lingua UI: it-IT (date e formati italiani)
 - Tema: Deep Blue (#1A237E) & Accent Orange (#FF8F00)
 
 ## CURRENT TASK
-- ID: F1
-- Titolo: Pulizia finale e ottimizzazione
+- ID: F2
+- Titolo: Revisione strategica documentazione
 - Stato: COMPLETED
+
+## LONG-TERM STRATEGY (Blueprint)
+- **Sincronizzazione Cloud & Multi-device**: Da valutare solo per architetture enterprise centralizzate (non priorità per uso personale).
+- **Conflict Resolution**: Gestione integrità dati in scenari di import/export massivo.
+- **Modello Multi-Società**: Evoluzione verso una struttura gerarchica per gestire più squadre sotto un'unica entità gestionale.
 
 ## LAST KNOWN GOOD
 - Build status: OK
@@ -19,21 +25,12 @@
 
 ## TASK BOARD STATUS
 ### STEP R (Repairs & UX)
-- [x] R1-R18 Riparazioni e perfezionamento UI/UX
-- [x] R19 Unificazione Gol e Assist (Evento unico)
-- [x] R20 Sostituzioni atomiche (Entra/Esce in riga unica)
-- [x] R21 Automazione Minuti (Calcolo da durata gara e cambi)
-- [x] R22 Refactoring Colori Brand (Blu/Arancio)
-- [x] R23 Ottimizzazione Rosa e Dashboard (Visuale compatta)
+- [x] R1-R23 Riparazioni e perfezionamento UI/UX (Completato)
 
 ### STEP F (Finalize)
 - [x] F1 Pulizia finale e ottimizzazione codice
-- [x] F2 Creazione file Consigli.md per sviluppi futuri
+- [x] F2 Revisione strategica Blueprint e Consigli.md
 
 ## DECISION LOG
-- **Automazione**: Si è deciso di rimuovere l'inserimento manuale delle statistiche individuali a favore di un calcolo automatico basato sulla cronaca, per ridurre il carico di lavoro dell'utente durante la gara.
-- **UI Mobile**: La tabella Rosa è stata privata delle statistiche per favorire la velocità di gestione anagrafica, lasciando la consultazione dei dati alla sezione 'Statistiche'.
-
-## NEXT STEPS
-1. **Export avanzato**: Aggiunta possibilità di esportare PDF della formazione (Suggerito).
-2. **Cloud Sync**: Integrazione con Firebase per multi-device (Suggerito).
+- **Uso Personale**: L'app è intesa come strumento di lavoro individuale. Le funzioni social sono rimosse dal perimetro per mantenere il focus sulla gestione dati pura.
+- **Offline First**: La persistenza è locale per garantire velocità e privacy totale dei dati sensibili degli atleti.

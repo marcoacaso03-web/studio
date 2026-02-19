@@ -2,7 +2,7 @@
 
 ## Core Features:
 
-- Project setup and base configuration: Initial setup of Flutter project with Material 3, Italian locale, and folder structure.
+- Project setup and base configuration: Initialize a new Next project, Italian locale, and folder structure.
 - Navigation Setup: Implement app navigation using go_router, including main routes, match detail, and category screens.
 - Design System: Develop a basic design system including a reusable gradient header widget, match/player cards, a green FAB, consistent spacing (16/24), and large typography for titles.
 - Match Calendar (Mock): Implement a mock match calendar feature with CRUD operations (add, edit, delete) for matches stored in memory.
