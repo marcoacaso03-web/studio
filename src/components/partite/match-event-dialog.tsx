@@ -17,9 +17,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MatchEventType, MatchEvent } from "@/lib/types";
+import { MatchEventType, MatchEvent, Player } from "@/lib/types";
 
-// Definiamo i tipi di evento per la UI (unificati)
+// Ordine dei periodi per il calcolo cronologico
+const periodOrder: Record<string, number> = {
+  '1T': 1,
+  '2T': 2,
+  '1TS': 3,
+  '2TS': 4
+};
+
 type UIEventType = 'goal' | 'yellow_card' | 'red_card' | 'substitution';
 
 interface MatchEventDialogProps {
@@ -28,18 +35,16 @@ interface MatchEventDialogProps {
 }
 
 export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) {
-  const { allPlayers, addEvents, match } = useMatchDetailStore();
+  const { allPlayers, events: allEvents, lineup, addEvents, match } = useMatchDetailStore();
   
   const [uiType, setUiType] = React.useState<UIEventType>('goal');
   const [team, setTeam] = React.useState<'home' | 'away'>('home');
   
-  // Campi per Goal
   const [playerId, setPlayerId] = React.useState<string>("");
   const [playerName, setPlayerName] = React.useState<string>("");
   const [assistPlayerId, setAssistPlayerId] = React.useState<string>("");
   const [assistPlayerName, setAssistPlayerName] = React.useState<string>("");
   
-  // Campi per Sostituzione
   const [subInPlayerId, setSubInPlayerId] = React.useState<string>("");
   const [subInPlayerName, setSubInPlayerName] = React.useState<string>("");
   const [subOutPlayerId, setSubOutPlayerId] = React.useState<string>("");
@@ -50,10 +55,48 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
 
   const maxMinutes = (period === '1T' || period === '2T') ? 60 : 20;
 
-  React.useEffect(() => {
-    if (minute > maxMinutes) {
-      setMinute(maxMinutes);
+  // Calcola i giocatori in campo e in panchina al minuto selezionato
+  const playersStatus = React.useMemo(() => {
+    if (team !== 'home' || !lineup) return { onPitch: allPlayers, onBench: [] };
+
+    let currentPitch = new Set<string>(lineup.starters.filter(id => id !== ""));
+    let currentBench = new Set<string>(lineup.substitutes.filter(id => id !== ""));
+
+    // Ordina eventi per tempo per processarli cronologicamente
+    const sortedEvents = [...allEvents].sort((a, b) => {
+      if (periodOrder[a.period] !== periodOrder[b.period]) {
+        return periodOrder[a.period] - periodOrder[b.period];
+      }
+      return a.minute - b.minute;
+    });
+
+    // Processa sostituzioni avvenute PRIMA del minuto selezionato
+    for (const event of sortedEvents) {
+      const isBefore = 
+        periodOrder[event.period] < periodOrder[period] || 
+        (event.period === period && event.minute < minute);
+      
+      if (!isBefore) break;
+
+      if (event.team === 'home' && event.playerId) {
+        if (event.type === 'sub_out') {
+          currentPitch.delete(event.playerId);
+          currentBench.add(event.playerId);
+        } else if (event.type === 'sub_in') {
+          currentBench.delete(event.playerId);
+          currentPitch.add(event.playerId);
+        }
+      }
     }
+
+    return {
+      onPitch: allPlayers.filter(p => currentPitch.has(p.id)),
+      onBench: allPlayers.filter(p => currentBench.has(p.id))
+    };
+  }, [allPlayers, allEvents, lineup, minute, period, team]);
+
+  React.useEffect(() => {
+    if (minute > maxMinutes) setMinute(maxMinutes);
   }, [period, minute, maxMinutes]);
 
   const resetForm = () => {
@@ -82,7 +125,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
         playerName: team === 'home' ? selectedScorer?.name : (playerName || match?.opponent || "Avversario"),
       });
 
-      if (assistPlayerId || assistPlayerName) {
+      if (assistPlayerId && assistPlayerId !== "none") {
         const selectedAssist = allPlayers.find(p => p.id === assistPlayerId);
         events.push({
           ...baseEvent,
@@ -109,7 +152,6 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
         playerName: team === 'home' ? selectedIn?.name : (subInPlayerName || match?.opponent || "Avversario"),
       });
     } else {
-      // Cartellini
       const selectedPlayer = allPlayers.find(p => p.id === playerId);
       events.push({
         ...baseEvent,
@@ -124,16 +166,6 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
     resetForm();
   };
 
-  const getUITypeLabel = (t: UIEventType) => {
-    switch(t) {
-        case 'goal': return 'Goal';
-        case 'yellow_card': return 'Cartellino Giallo';
-        case 'red_card': return 'Cartellino Rosso';
-        case 'substitution': return 'Sostituzione';
-        default: return t;
-    }
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[90vw] sm:max-w-md bg-[#0a1a14] border-[#1e3a2f] text-white p-6 rounded-2xl overflow-y-auto max-h-[90vh]">
@@ -142,7 +174,19 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Evento */}
+          <div className="flex items-center justify-between border-b border-gray-700 pb-2">
+            <span className="text-gray-400">Squadra:</span>
+            <Select value={team} onValueChange={(v) => { setTeam(v as any); setPlayerId(""); setSubInPlayerId(""); setSubOutPlayerId(""); }}>
+              <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-medium focus:ring-0">
+                <SelectValue placeholder="Seleziona" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#1a2a24] text-white border-gray-700">
+                <SelectItem value="home">Squadra+</SelectItem>
+                <SelectItem value="away">{match?.opponent || "Avversario"}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="flex items-center justify-between border-b border-gray-700 pb-2">
             <span className="text-gray-400">Evento:</span>
             <Select value={uiType} onValueChange={(v) => setUiType(v as UIEventType)}>
@@ -158,21 +202,6 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
             </Select>
           </div>
 
-          {/* Squadra */}
-          <div className="flex items-center justify-between border-b border-gray-700 pb-2">
-            <span className="text-gray-400">Squadra:</span>
-            <Select value={team} onValueChange={(v) => setTeam(v as 'home' | 'away')}>
-              <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-medium focus:ring-0">
-                <SelectValue placeholder="Seleziona" />
-              </SelectTrigger>
-              <SelectContent className="bg-[#1a2a24] text-white border-gray-700">
-                <SelectItem value="home">Squadra+</SelectItem>
-                <SelectItem value="away">{match?.opponent || "Avversario"}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Logica Condizionale Giocatori */}
           {uiType === 'goal' && (
             <>
               <div className="flex items-center justify-between border-b border-gray-700 pb-2">
@@ -180,21 +209,16 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
                 {team === 'home' ? (
                   <Select value={playerId} onValueChange={setPlayerId}>
                     <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-medium focus:ring-0">
-                      <SelectValue placeholder="Seleziona" />
+                      <SelectValue placeholder="In campo" />
                     </SelectTrigger>
                     <SelectContent className="bg-[#1a2a24] text-white border-gray-700">
-                      {allPlayers.map(p => (
+                      {playersStatus.onPitch.map(p => (
                         <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 ) : (
-                  <input 
-                    className="w-[180px] bg-transparent border-none text-right font-medium focus:outline-none placeholder:text-gray-600"
-                    placeholder="Nome giocatore"
-                    value={playerName}
-                    onChange={(e) => setPlayerName(e.target.value)}
-                  />
+                  <input className="w-[180px] bg-transparent border-none text-right font-medium focus:outline-none" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} />
                 )}
               </div>
               <div className="flex items-center justify-between border-b border-gray-700 pb-2">
@@ -202,22 +226,17 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
                 {team === 'home' ? (
                   <Select value={assistPlayerId} onValueChange={setAssistPlayerId}>
                     <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-medium focus:ring-0">
-                      <SelectValue placeholder="Seleziona (opzionale)" />
+                      <SelectValue placeholder="In campo (opz.)" />
                     </SelectTrigger>
                     <SelectContent className="bg-[#1a2a24] text-white border-gray-700">
                       <SelectItem value="none">-- nessuno --</SelectItem>
-                      {allPlayers.filter(p => p.id !== playerId).map(p => (
+                      {playersStatus.onPitch.filter(p => p.id !== playerId).map(p => (
                         <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 ) : (
-                  <input 
-                    className="w-[180px] bg-transparent border-none text-right font-medium focus:outline-none placeholder:text-gray-600"
-                    placeholder="Nome assistman"
-                    value={assistPlayerName}
-                    onChange={(e) => setAssistPlayerName(e.target.value)}
-                  />
+                  <input className="w-[180px] bg-transparent border-none text-right font-medium focus:outline-none" placeholder="Nome" value={assistPlayerName} onChange={e => setAssistPlayerName(e.target.value)} />
                 )}
               </div>
             </>
@@ -230,21 +249,16 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
                 {team === 'home' ? (
                   <Select value={subOutPlayerId} onValueChange={setSubOutPlayerId}>
                     <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-medium focus:ring-0">
-                      <SelectValue placeholder="Seleziona" />
+                      <SelectValue placeholder="Dalla campo" />
                     </SelectTrigger>
                     <SelectContent className="bg-[#1a2a24] text-white border-gray-700">
-                      {allPlayers.map(p => (
+                      {playersStatus.onPitch.map(p => (
                         <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 ) : (
-                  <input 
-                    className="w-[180px] bg-transparent border-none text-right font-medium focus:outline-none placeholder:text-gray-600"
-                    placeholder="Giocatore in uscita"
-                    value={subOutPlayerName}
-                    onChange={(e) => setSubOutPlayerName(e.target.value)}
-                  />
+                  <input className="w-[180px] bg-transparent border-none text-right font-medium focus:outline-none" placeholder="Esce" value={subOutPlayerName} onChange={e => setSubOutPlayerName(e.target.value)} />
                 )}
               </div>
               <div className="flex items-center justify-between border-b border-gray-700 pb-2">
@@ -252,21 +266,16 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
                 {team === 'home' ? (
                   <Select value={subInPlayerId} onValueChange={setSubInPlayerId}>
                     <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-medium focus:ring-0">
-                      <SelectValue placeholder="Seleziona" />
+                      <SelectValue placeholder="Dalla panchina" />
                     </SelectTrigger>
                     <SelectContent className="bg-[#1a2a24] text-white border-gray-700">
-                      {allPlayers.filter(p => p.id !== subOutPlayerId).map(p => (
+                      {playersStatus.onBench.map(p => (
                         <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 ) : (
-                  <input 
-                    className="w-[180px] bg-transparent border-none text-right font-medium focus:outline-none placeholder:text-gray-600"
-                    placeholder="Giocatore in entrata"
-                    value={subInPlayerName}
-                    onChange={(e) => setSubInPlayerName(e.target.value)}
-                  />
+                  <input className="w-[180px] bg-transparent border-none text-right font-medium focus:outline-none" placeholder="Entra" value={subInPlayerName} onChange={e => setSubInPlayerName(e.target.value)} />
                 )}
               </div>
             </>
@@ -278,28 +287,22 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
               {team === 'home' ? (
                 <Select value={playerId} onValueChange={setPlayerId}>
                   <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-medium focus:ring-0">
-                    <SelectValue placeholder="Seleziona" />
+                    <SelectValue placeholder="In campo" />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1a2a24] text-white border-gray-700">
-                    {allPlayers.map(p => (
+                    {playersStatus.onPitch.map(p => (
                       <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               ) : (
-                <input 
-                  className="w-[180px] bg-transparent border-none text-right font-medium focus:outline-none placeholder:text-gray-600"
-                  placeholder="Nome giocatore"
-                  value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
-                />
+                <input className="w-[180px] bg-transparent border-none text-right font-medium focus:outline-none" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} />
               )}
             </div>
           )}
 
-          {/* Minuto */}
           <div className="flex items-center justify-between border-b border-gray-700 pb-2 pt-2">
-            <span className="text-gray-400">Minuto:</span>
+            <span className="text-gray-400">Tempo & Minuto:</span>
             <div className="flex items-center gap-2">
                 <Select value={period} onValueChange={(v) => setPeriod(v as any)}>
                     <SelectTrigger className="w-20 bg-transparent border-none text-right font-medium focus:ring-0">
