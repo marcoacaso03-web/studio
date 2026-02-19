@@ -30,7 +30,7 @@ import { usePlayersStore } from "@/store/usePlayersStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 type SortConfig = {
   key: string | null;
@@ -108,10 +108,6 @@ export default function RosaPage() {
       const bName = splitName(b.name);
 
       switch (sortConfig.key) {
-        case 'number':
-          aValue = a.number;
-          bValue = b.number;
-          break;
         case 'firstName':
           aValue = aName.firstName.toLowerCase();
           bValue = bName.firstName.toLowerCase();
@@ -123,22 +119,6 @@ export default function RosaPage() {
         case 'role':
           aValue = a.role;
           bValue = b.role;
-          break;
-        case 'appearances':
-          aValue = a.stats.appearances;
-          bValue = b.stats.appearances;
-          break;
-        case 'goals':
-          aValue = a.stats.goals;
-          bValue = b.stats.goals;
-          break;
-        case 'assists':
-          aValue = a.stats.assists;
-          bValue = b.stats.assists;
-          break;
-        case 'avgMinutes':
-          aValue = a.stats.avgMinutes;
-          bValue = b.stats.avgMinutes;
           break;
         default:
           return 0;
@@ -196,15 +176,7 @@ export default function RosaPage() {
                     <TableHeader>
                       <TableRow className="hover:bg-transparent">
                         <TableHead 
-                          className="w-10 md:w-16 px-2 text-center cursor-pointer"
-                          onClick={() => handleSort('number')}
-                        >
-                          <div className="flex items-center justify-center">
-                            # <SortIndicator columnKey="number" />
-                          </div>
-                        </TableHead>
-                        <TableHead 
-                          className="px-2 cursor-pointer"
+                          className="px-4 cursor-pointer"
                           onClick={() => handleSort('firstName')}
                         >
                           <div className="flex items-center">
@@ -212,96 +184,57 @@ export default function RosaPage() {
                           </div>
                         </TableHead>
                         <TableHead 
-                          className="px-2 cursor-pointer"
+                          className="px-4 cursor-pointer"
                           onClick={() => handleSort('lastName')}
                         >
                           <div className="flex items-center">
-                            Cogn. <SortIndicator columnKey="lastName" />
+                            Cognome <SortIndicator columnKey="lastName" />
                           </div>
                         </TableHead>
                         <TableHead 
-                          className="w-10 px-2 text-center cursor-pointer"
+                          className="w-20 px-2 text-center cursor-pointer"
                           onClick={() => handleSort('role')}
                         >
                           <div className="flex items-center justify-center">
-                            R. <SortIndicator columnKey="role" />
+                            Ruolo <SortIndicator columnKey="role" />
                           </div>
                         </TableHead>
-                        <TableHead 
-                          className="w-10 px-1 text-center cursor-pointer"
-                          onClick={() => handleSort('appearances')}
-                        >
-                          <div className="flex items-center justify-center">
-                            P <SortIndicator columnKey="appearances" />
-                          </div>
-                        </TableHead>
-                        <TableHead 
-                          className="w-12 px-1 text-center cursor-pointer"
-                          onClick={() => handleSort('avgMinutes')}
-                        >
-                          <div className="flex items-center justify-center">
-                            Min/G <SortIndicator columnKey="avgMinutes" />
-                          </div>
-                        </TableHead>
-                        <TableHead 
-                          className="w-10 px-1 text-center cursor-pointer"
-                          onClick={() => handleSort('goals')}
-                        >
-                          <div className="flex items-center justify-center">
-                            G <SortIndicator columnKey="goals" />
-                          </div>
-                        </TableHead>
-                        <TableHead 
-                          className="w-10 px-1 text-center cursor-pointer"
-                          onClick={() => handleSort('assists')}
-                        >
-                          <div className="flex items-center justify-center">
-                            A <SortIndicator columnKey="assists" />
-                          </div>
-                        </TableHead>
-                        <TableHead className="w-16 px-2 text-right">Az.</TableHead>
+                        <TableHead className="w-24 px-4 text-right">Azioni</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {sortedPlayers.map((player) => {
                         const { firstName, lastName } = splitName(player.name);
                         return (
-                          <TableRow key={player.id} className="h-12">
-                            <TableCell className="px-2 font-bold text-center text-muted-foreground text-xs md:text-sm">
-                              {player.number}
-                            </TableCell>
-                            <TableCell className="px-2 font-medium text-xs md:text-sm truncate max-w-[60px] md:max-w-none">
+                          <TableRow key={player.id} className="h-14">
+                            <TableCell className="px-4 font-medium text-sm md:text-base">
                               {firstName}
                             </TableCell>
-                            <TableCell className="px-2 font-medium text-xs md:text-sm truncate max-w-[60px] md:max-w-none">
+                            <TableCell className="px-4 font-medium text-sm md:text-base">
                               {lastName}
                             </TableCell>
                             <TableCell className="px-2 text-center">
-                              <span className="text-[10px] md:text-xs font-bold bg-muted px-1.5 py-0.5 rounded border">
+                              <span className="text-xs font-bold bg-muted px-2.5 py-1 rounded border">
                                 {roleInitials[player.role]}
                               </span>
                             </TableCell>
-                            <TableCell className="px-1 text-center text-xs md:text-sm">{player.stats.appearances}</TableCell>
-                            <TableCell className="px-1 text-center text-[10px] md:text-xs text-muted-foreground">{player.stats.avgMinutes}&apos;</TableCell>
-                            <TableCell className="px-1 text-center font-bold text-green-600 text-xs md:text-sm">{player.stats.goals}</TableCell>
-                            <TableCell className="px-1 text-center font-bold text-blue-600 text-xs md:text-sm">{player.stats.assists}</TableCell>
-                            <TableCell className="px-2 text-right">
-                              <div className="flex items-center justify-end gap-1">
+                            <TableCell className="px-4 text-right">
+                              <div className="flex items-center justify-end gap-2">
                                 <Button 
                                   variant="ghost" 
                                   size="icon" 
-                                  className="h-7 w-7 text-muted-foreground hover:text-primary"
+                                  className="h-8 w-8 text-muted-foreground hover:text-primary"
                                   onClick={() => handleOpenForm(player)}
                                 >
-                                  <Edit className="h-3.5 w-3.5" />
+                                  <Edit className="h-4 w-4" />
                                 </Button>
                                 <Button 
                                   variant="ghost" 
                                   size="icon" 
-                                  className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
                                   onClick={() => setPlayerToDelete(player)}
                                 >
-                                  <Trash2 className="h-3.5 w-3.5" />
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
                             </TableCell>
