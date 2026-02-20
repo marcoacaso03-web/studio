@@ -12,6 +12,7 @@ import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, Refres
 import { useToast } from '@/hooks/use-toast';
 import { playerRepository } from '@/lib/repositories/player-repository';
 import { matchRepository } from '@/lib/repositories/match-repository';
+import { seasonRepository } from '@/lib/repositories/season-repository';
 import { useThemeStore } from '@/store/useThemeStore';
 import { useSeasonsStore } from '@/store/useSeasonsStore';
 import { useMatchesStore } from '@/store/useMatchesStore';
@@ -20,7 +21,6 @@ import { useStatsStore } from '@/store/useStatsStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { db } from '@/lib/db';
 import { useRouter } from 'next/navigation';
 import {
   AlertDialog,
@@ -142,8 +142,10 @@ export default function AltroPage() {
   }
 
   const handleFullReset = async () => {
+    if (!user) return;
     try {
-      await db.delete();
+      await seasonRepository.resetUser(user.id);
+      toast({ title: "Reset completato", description: `Tutti i dati dell'account ${user.username} sono stati rimossi.` });
       window.location.reload();
     } catch (e) {
       toast({ variant: "destructive", title: "Errore nel reset" });
@@ -301,7 +303,7 @@ export default function AltroPage() {
               <AlertDialogHeader>
                 <AlertDialogTitle className="uppercase font-black">Sei assolutamente sicuro?</AlertDialogTitle>
                 <AlertDialogDescription className="text-xs">
-                  Questa azione cancellerà DEFINITIVAMENTE tutti i giocatori, le partite, le stagioni e le statistiche salvate su questo dispositivo. Non è possibile annullare l&apos;operazione.
+                  Questa azione cancellerà DEFINITIVAMENTE tutti i tuoi dati (giocatori, partite, stagioni) associati all'account <strong>{user?.username}</strong>. Gli altri utenti non saranno influenzati. Non è possibile annullare l&apos;operazione.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter className="flex-row gap-2 mt-4">

@@ -67,5 +67,29 @@ export const seasonRepository = {
             return { ...defaultSeason, isActive: true };
         }
         return await this.getActive(userId);
+    },
+
+    async resetUser(userId: string) {
+        if (!userId) return;
+        return await db.transaction('rw', [db.seasons, db.players, db.matches, db.matchAttendances, db.playerMatchStats, db.matchLineups, db.matchEvents], async () => {
+            // Trova tutte le partite dell'utente per pulire le tabelle dipendenti
+            const matches = await db.matches.where('userId').equals(userId).toArray();
+            const matchIds = matches.map(m => m.id);
+            
+            if (matchIds.length > 0) {
+                await db.matchAttendances.where('matchId').anyOf(matchIds).delete();
+                await db.playerMatchStats.where('matchId').anyOf(matchIds).delete();
+                await db.matchLineups.where('matchId').anyOf(matchIds).delete();
+                await db.matchEvents.where('matchId').anyOf(matchIds).delete();
+            }
+            
+            // Elimina i record primari dell'utente
+            await db.matches.where('userId').equals(userId).delete();
+            await db.players.where('userId').equals(userId).delete();
+            await db.seasons.where('userId').equals(userId).delete();
+            
+            // Ricrea la stagione predefinita per non lasciare l'utente in uno stato inconsistente
+            await this.ensureDefaultSeason(userId);
+        });
     }
 };
