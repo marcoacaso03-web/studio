@@ -60,13 +60,28 @@ export const seasonRepository = {
 
     async ensureDefaultSeason(userId: string) {
         if (!userId) return undefined;
-        const seasonsCount = await db.seasons.where('userId').equals(userId).count();
-        if (seasonsCount === 0) {
-            const defaultSeason = await this.add('2025/26', userId);
-            await this.setActive(defaultSeason.id, userId);
-            return { ...defaultSeason, isActive: true };
-        }
-        return await this.getActive(userId);
+        
+        // Utilizziamo una transazione per prevenire race conditions durante l'inizializzazione
+        return await db.transaction('rw', db.seasons, async () => {
+            const existingSeasons = await db.seasons.where('userId').equals(userId).toArray();
+            
+            if (existingSeasons.length === 0) {
+                const id = `s_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+                const defaultSeason: Season = { id, userId, name: '2025/26', isActive: true };
+                await db.seasons.add(defaultSeason);
+                return defaultSeason;
+            }
+            
+            // Se esistono stagioni ma nessuna è attiva, impostiamo la prima come attiva
+            const active = existingSeasons.find(s => s.isActive === true);
+            if (!active && existingSeasons.length > 0) {
+                const firstId = existingSeasons[0].id;
+                await db.seasons.update(firstId, { isActive: true });
+                return { ...existingSeasons[0], isActive: true };
+            }
+            
+            return active;
+        });
     },
 
     async resetUser(userId: string) {
@@ -88,8 +103,10 @@ export const seasonRepository = {
             await db.players.where('userId').equals(userId).delete();
             await db.seasons.where('userId').equals(userId).delete();
             
-            // Ricrea la stagione predefinita per non lasciare l'utente in uno stato inconsistente
-            await this.ensureDefaultSeason(userId);
+            // Ricrea la stagione predefinita atomica
+            const id = `s_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+            const defaultSeason: Season = { id, userId, name: '2025/26', isActive: true };
+            await db.seasons.add(defaultSeason);
         });
     }
 };
