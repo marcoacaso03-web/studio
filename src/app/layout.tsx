@@ -1,9 +1,11 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import { AppHeader } from '@/components/layout/app-header';
-import { BottomNav } from '@/components/layout/bottom-nav';
+import { AppHeaderWrapper } from '@/components/layout/app-header-wrapper';
+import { BottomNavWrapper } from '@/components/layout/bottom-nav-wrapper';
 import { ThemeProvider } from '@/components/layout/theme-provider';
+import { AuthGuard } from '@/components/layout/auth-guard';
 
 export const metadata: Metadata = {
   title: 'PitchMan',
@@ -26,13 +28,15 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <ThemeProvider>
-          <div className="relative flex min-h-screen w-full flex-col">
-            <AppHeader />
-            <main className="flex-1 p-4 pb-20 md:pb-4 lg:p-6">
-                {children}
-            </main>
-            <BottomNav />
-          </div>
+          <AuthGuard>
+            <div className="relative flex min-h-screen w-full flex-col">
+              <AppHeaderWrapper />
+              <main className="flex-1 p-4 pb-20 md:pb-4 lg:p-6">
+                  {children}
+              </main>
+              <BottomNavWrapper />
+            </div>
+          </AuthGuard>
           <Toaster />
         </ThemeProvider>
       </body>

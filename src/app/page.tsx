@@ -1,9 +1,21 @@
 
-import { redirect } from 'next/navigation';
+"use client";
 
-/**
- * The root page now redirects to the dashboard (route /calendario), which is the main screen of the application.
- */
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/useAuthStore';
+
 export default function Home() {
-  redirect('/calendario');
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/calendario');
+    } else {
+      router.push('/login');
+    }
+  }, [isAuthenticated, router]);
+
+  return null;
 }
