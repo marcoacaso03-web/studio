@@ -13,12 +13,13 @@ class PitchManDB extends Dexie {
 
     constructor() {
         super('PitchManDB');
-        // Versione 8: aggiunto userId a tutte le tabelle principali per isolamento multi-utente
-        this.version(8).stores({
+        // Versione 9: Aggiunta tabella matchLineups mancante e supporto multi-utente
+        this.version(9).stores({
             players: 'id, userId, seasonId, name',
             matches: 'id, userId, seasonId, date, status',
             matchAttendances: '[matchId+playerId], matchId, status',
             playerMatchStats: '[matchId+playerId], matchId',
+            matchLineups: 'matchId',
             matchEvents: 'id, matchId, playerId, type',
             seasons: 'id, userId, isActive'
         });

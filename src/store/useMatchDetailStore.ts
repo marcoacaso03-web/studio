@@ -1,3 +1,4 @@
+
 "use client";
 
 import { create } from 'zustand';
@@ -51,8 +52,7 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             return;
         }
 
-        // Fetch players belonging specifically to the match's season
-        const allPlayers = await playerRepository.getAll(match.seasonId);
+        const allPlayers = await playerRepository.getAll(match.userId, match.seasonId);
         const matchEvents = await eventRepository.getForMatch(matchId);
         const matchLineup = await lineupRepository.getForMatch(matchId);
         const matchStats = await statsRepository.getForMatch(matchId);
@@ -79,8 +79,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         const halfTime = duration / 2;
         const pitchManTeam = match.isHome ? 'home' : 'away';
 
-        // Calcoliamo le statistiche per TUTTI i giocatori della rosa della stagione
-        // per permettere la registrazione di eventi (come cartellini) anche a chi non ha giocato.
         const rosterPlayerIds = allPlayers.map(p => p.id);
 
         const getAbsoluteMinute = (event: MatchEvent) => {
@@ -98,7 +96,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         });
 
         const newStats: PlayerMatchStats[] = rosterPlayerIds.map(playerId => {
-            // Sincronizzazione automatica dei dati basata sugli eventi della cronaca
             const yellowCards = events.filter(e => e.type === 'yellow_card' && e.playerId === playerId && e.team === pitchManTeam).length;
             const redCards = events.filter(e => e.type === 'red_card' && e.playerId === playerId && e.team === pitchManTeam).length;
             const goals = events.filter(e => e.type === 'goal' && e.playerId === playerId && e.team === pitchManTeam).length;
@@ -108,7 +105,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             const isStarter = lineup?.starters.includes(playerId);
             const isSubstitute = lineup?.substitutes.includes(playerId);
 
-            // Calcolo minuti solo se il giocatore è stato in distinta
             if (lineup && (isStarter || isSubstitute)) {
                 if (isStarter) {
                     const subOutEvent = chronologicalEvents.find(e => 
@@ -147,7 +143,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
                 redCards
             };
         }).filter(stat => 
-            // Salviamo solo se il giocatore ha partecipato alla gara o ha avuto un evento
             stat.minutesPlayed > 0 || 
             stat.goals > 0 || 
             stat.assists > 0 || 
@@ -161,9 +156,7 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         }
 
         set({ stats: newStats });
-        // Sincronizza le statistiche aggregate per la stagione corretta
-        await aggregationRepository.syncAllPlayersStats(match.seasonId);
-        // Forza il ricaricamento degli store delle statistiche globali
+        await aggregationRepository.syncAllPlayersStats(match.userId, match.seasonId);
         useStatsStore.getState().loadStats();
     },
 
@@ -176,7 +169,7 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         }
         
         set({ stats: newStats });
-        await aggregationRepository.syncAllPlayersStats(match.seasonId);
+        await aggregationRepository.syncAllPlayersStats(match.userId, match.seasonId);
         useStatsStore.getState().loadStats();
     },
 
