@@ -1,3 +1,4 @@
+
 "use client";
 
 import { create } from 'zustand';
@@ -11,7 +12,7 @@ import { useSeasonsStore } from './useSeasonsStore';
 interface PlayerState {
     players: Player[];
     loading: boolean;
-    fetchAll: () => Promise<void>;
+    fetchAll: (seasonId?: string) => Promise<void>;
     add: (data: Omit<PlayerCreateData, 'seasonId'>) => Promise<Player | undefined>;
     update: (id: string, updates: Partial<Omit<PlayerCreateData, 'seasonId'>>) => Promise<void>;
     remove: (id: string) => Promise<void>;
@@ -20,10 +21,16 @@ interface PlayerState {
 export const usePlayersStore = create<PlayerState>((set, get) => ({
     players: [],
     loading: true,
-    fetchAll: async () => {
+    fetchAll: async (seasonId) => {
         set({ loading: true });
-        const activeSeason = useSeasonsStore.getState().activeSeason;
-        const players = await playerRepository.getAll(activeSeason?.id);
+        const targetSeasonId = seasonId || useSeasonsStore.getState().activeSeason?.id;
+        
+        if (!targetSeasonId) {
+            set({ players: [], loading: false });
+            return;
+        }
+
+        const players = await playerRepository.getAll(targetSeasonId);
         set({ players, loading: false });
     },
     add: async (data) => {
@@ -31,22 +38,23 @@ export const usePlayersStore = create<PlayerState>((set, get) => ({
         if (!activeSeason) return undefined;
 
         const newPlayer = await playerRepository.add({ ...data, seasonId: activeSeason.id });
-        set(state => ({ players: [...state.players, newPlayer].sort((a,b) => a.name.localeCompare(b.name)) }));
+        await get().fetchAll(activeSeason.id);
         useStatsStore.getState().loadStats();
         return newPlayer;
     },
     update: async (id, updates) => {
+        const player = await playerRepository.getById(id);
         const updatedPlayer = await playerRepository.update(id, updates);
         if (updatedPlayer) {
-            set(state => ({
-                players: state.players.map(p => p.id === id ? updatedPlayer : p)
-            }));
+            await get().fetchAll(player?.seasonId);
             useStatsStore.getState().loadStats();
         }
     },
     remove: async (id) => {
+        const player = await playerRepository.getById(id);
+        const seasonId = player?.seasonId;
         await playerRepository.delete(id);
-        set(state => ({ players: state.players.filter(p => p.id !== id) }));
+        await get().fetchAll(seasonId);
         useStatsStore.getState().loadStats();
     },
 }));

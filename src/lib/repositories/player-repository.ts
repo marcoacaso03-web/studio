@@ -1,3 +1,4 @@
+
 import { db } from '@/lib/db';
 import type { Player, Role } from '@/lib/types';
 
@@ -9,10 +10,8 @@ export type PlayerCreateData = {
 
 export const playerRepository = {
   async getAll(seasonId?: string) {
-    if (seasonId) {
-        return await db.players.where('seasonId').equals(seasonId).sortBy('name');
-    }
-    return await db.players.orderBy('name').toArray();
+    if (!seasonId) return [];
+    return await db.players.where('seasonId').equals(seasonId).sortBy('name');
   },
 
   async getById(id: string) {

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { create } from 'zustand';
@@ -9,7 +10,7 @@ import { useSeasonsStore } from './useSeasonsStore';
 interface MatchState {
     matches: Match[];
     loading: boolean;
-    fetchAll: () => Promise<void>;
+    fetchAll: (seasonId?: string) => Promise<void>;
     add: (data: Omit<MatchCreateData, 'seasonId'>) => Promise<Match | undefined>;
     update: (id: string, updates: Partial<Omit<Match, 'id'>>) => Promise<void>;
     remove: (id: string) => Promise<void>;
@@ -18,10 +19,17 @@ interface MatchState {
 export const useMatchesStore = create<MatchState>((set, get) => ({
     matches: [],
     loading: true,
-    fetchAll: async () => {
+    fetchAll: async (seasonId) => {
         set({ loading: true });
-        const activeSeason = useSeasonsStore.getState().activeSeason;
-        const matches = await matchRepository.getAll(activeSeason?.id);
+        // Se seasonId non è fornito, usa quello dello store delle stagioni
+        const targetSeasonId = seasonId || useSeasonsStore.getState().activeSeason?.id;
+        
+        if (!targetSeasonId) {
+            set({ matches: [], loading: false });
+            return;
+        }
+
+        const matches = await matchRepository.getAll(targetSeasonId);
         set({ matches, loading: false });
     },
     add: async (data) => {
@@ -32,15 +40,22 @@ export const useMatchesStore = create<MatchState>((set, get) => ({
             ...data, 
             seasonId: activeSeason.id 
         });
-        await get().fetchAll();
+        await get().fetchAll(activeSeason.id);
         return newMatch;
     },
     update: async (id, updates) => {
+        const match = await matchRepository.getById(id);
         await matchRepository.update(id, updates);
-        await get().fetchAll();
+        if (match) {
+            await get().fetchAll(match.seasonId);
+        } else {
+            await get().fetchAll();
+        }
     },
     remove: async (id) => {
+        const match = await matchRepository.getById(id);
+        const seasonId = match?.seasonId;
         await matchRepository.delete(id);
-        await get().fetchAll();
+        await get().fetchAll(seasonId);
     },
 }));

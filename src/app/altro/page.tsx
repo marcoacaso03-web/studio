@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -25,7 +26,7 @@ export default function AltroPage() {
   const [newSeasonName, setNewSeasonName] = useState('');
   const { toast } = useToast();
   const { theme, toggleTheme } = useThemeStore();
-  const { seasons, activeSeason, fetchAll: fetchSeasons, addSeason, setActiveSeason } = useSeasonsStore();
+  const { seasons, fetchAll: fetchSeasons, addSeason, setActiveSeason } = useSeasonsStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -41,10 +42,17 @@ export default function AltroPage() {
   };
 
   const handleSwitchSeason = async (id: string, name: string) => {
+    // 1. Imposta la stagione attiva nel repository e nello store delle stagioni
     await setActiveSeason(id);
-    useMatchesStore.getState().fetchAll();
-    usePlayersStore.getState().fetchAll();
-    useStatsStore.getState().loadStats();
+    
+    // 2. Forza il re-fetch degli altri store passando esplicitamente il nuovo ID
+    // Questo evita race conditions e assicura che i dati siano aggiornati immediatamente
+    await Promise.all([
+        useMatchesStore.getState().fetchAll(id),
+        usePlayersStore.getState().fetchAll(id),
+        useStatsStore.getState().loadStats() // loadStats usa già lo store delle stagioni aggiornato
+    ]);
+
     toast({ title: "Cambio Stagione", description: `Ora stai visualizzando i dati della stagione ${name}.` });
   };
 

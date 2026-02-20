@@ -1,3 +1,4 @@
+
 import { db } from '@/lib/db';
 import type { Match } from '@/lib/types';
 
@@ -5,10 +6,8 @@ export type MatchCreateData = Omit<Match, 'id' | 'status' | 'result'>;
 
 export const matchRepository = {
   async getAll(seasonId?: string) {
-    if (seasonId) {
-        return await db.matches.where('seasonId').equals(seasonId).sortBy('date');
-    }
-    return await db.matches.orderBy('date').toArray();
+    if (!seasonId) return [];
+    return await db.matches.where('seasonId').equals(seasonId).sortBy('date');
   },
   
   async getById(id: string) {
