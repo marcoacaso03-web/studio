@@ -40,6 +40,8 @@ interface IntervalEntry {
 
 interface StatsState {
     teamRecord: TeamRecord | null;
+    homeRecord: TeamRecord | null;
+    awayRecord: TeamRecord | null;
     playerLeaderboard: PlayerLeaderboardEntry[];
     teamTrend: TrendEntry[];
     goalsIntervals: IntervalEntry[];
@@ -49,6 +51,8 @@ interface StatsState {
 
 export const useStatsStore = create<StatsState>((set) => ({
     teamRecord: null,
+    homeRecord: null,
+    awayRecord: null,
     playerLeaderboard: [],
     teamTrend: [],
     goalsIntervals: [],
@@ -57,7 +61,7 @@ export const useStatsStore = create<StatsState>((set) => ({
         set({ loading: true });
         const activeSeasonId = useSeasonsStore.getState().activeSeason?.id;
 
-        const [teamRecord, playerLeaderboard, teamTrend, goalsIntervals] = await Promise.all([
+        const [records, playerLeaderboard, teamTrend, goalsIntervals] = await Promise.all([
             aggregationRepository.getTeamRecord(activeSeasonId),
             aggregationRepository.getAllPlayersAggregatedStats(activeSeasonId),
             aggregationRepository.getTeamTrend(activeSeasonId),
@@ -75,7 +79,9 @@ export const useStatsStore = create<StatsState>((set) => ({
         });
 
         set({ 
-            teamRecord, 
+            teamRecord: records.overall, 
+            homeRecord: records.home,
+            awayRecord: records.away,
             playerLeaderboard: sortedLeaderboard as PlayerLeaderboardEntry[], 
             teamTrend: teamTrend as TrendEntry[], 
             goalsIntervals,

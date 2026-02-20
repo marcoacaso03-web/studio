@@ -10,6 +10,7 @@ import { PlayerLeaderboard } from "@/components/statistiche/player-leaderboard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TeamPerformanceChart } from "@/components/statistiche/team-performance-chart";
 import { GoalsIntervalChart } from "@/components/statistiche/goals-interval-chart";
+import { VenueStatsCharts } from "@/components/statistiche/venue-stats-charts";
 
 export default function StatistichePage() {
   const { loading, loadStats } = useStatsStore();
@@ -50,9 +51,11 @@ export default function StatistichePage() {
              <div className="space-y-6">
                 <Skeleton className="h-80 w-full" />
                 <Skeleton className="h-80 w-full" />
+                <Skeleton className="h-80 w-full" />
              </div>
            ) : (
             <div className="space-y-6">
+                <VenueStatsCharts />
                 <TeamPerformanceChart />
                 <GoalsIntervalChart />
             </div>

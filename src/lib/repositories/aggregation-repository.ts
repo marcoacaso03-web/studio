@@ -3,44 +3,62 @@ import { db } from '@/lib/db';
 export const aggregationRepository = {
     /**
      * Aggregates team-level stats like wins, draws, losses, and goals from all completed matches.
+     * Returns detailed stats for overall, home, and away.
      */
     async getTeamRecord(seasonId?: string) {
         let query = db.matches.where('status').equals('completed');
+        let completedMatches: any[];
+        
         if (seasonId) {
-            const completedMatches = await query.and(m => m.seasonId === seasonId).toArray();
-            return this.processMatchesRecord(completedMatches);
+            completedMatches = await query.and(m => m.seasonId === seasonId).toArray();
+        } else {
+            completedMatches = await query.toArray();
         }
-        const completedMatches = await query.toArray();
+        
         return this.processMatchesRecord(completedMatches);
     },
 
     processMatchesRecord(completedMatches: any[]) {
-        const record = {
+        const createRecord = () => ({
             wins: 0,
             draws: 0,
             losses: 0,
             goalsFor: 0,
             goalsAgainst: 0,
             matchesPlayed: 0,
+        });
+
+        const record = {
+            overall: createRecord(),
+            home: createRecord(),
+            away: createRecord()
         };
 
         for (const match of completedMatches) {
             if (!match.result) continue;
             
-            record.matchesPlayed++;
+            const target = match.isHome ? record.home : record.away;
+            record.overall.matchesPlayed++;
+            target.matchesPlayed++;
 
             if (match.isHome) {
-                record.goalsFor += match.result.home;
-                record.goalsAgainst += match.result.away;
-                if (match.result.home > match.result.away) record.wins++;
-                else if (match.result.home < match.result.away) record.losses++;
-                else record.draws++;
+                record.overall.goalsFor += match.result.home;
+                record.overall.goalsAgainst += match.result.away;
+                target.goalsFor += match.result.home;
+                target.goalsAgainst += match.result.away;
+                
+                if (match.result.home > match.result.away) { record.overall.wins++; target.wins++; }
+                else if (match.result.home < match.result.away) { record.overall.losses++; target.losses++; }
+                else { record.overall.draws++; target.draws++; }
             } else {
-                record.goalsFor += match.result.away;
-                record.goalsAgainst += match.result.home;
-                if (match.result.away > match.result.home) record.wins++;
-                else if (match.result.away < match.result.home) record.losses++;
-                else record.draws++;
+                record.overall.goalsFor += match.result.away;
+                record.overall.goalsAgainst += match.result.home;
+                target.goalsFor += match.result.away;
+                target.goalsAgainst += match.result.home;
+                
+                if (match.result.away > match.result.home) { record.overall.wins++; target.wins++; }
+                else if (match.result.away < match.result.home) { record.overall.losses++; target.losses++; }
+                else { record.overall.draws++; target.draws++; }
             }
         }
         return record;
