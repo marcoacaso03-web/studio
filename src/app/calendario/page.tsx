@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Eye, PlusCircle, Rocket, Trash2, Users, Trophy, Calendar } from "lucide-react";
+import { Eye, PlusCircle, Trash2, Users, Trophy, Calendar } from "lucide-react";
 import Link from "next/link";
 import { Match } from "@/lib/types";
 import { MatchFormDialog } from "@/components/partite/match-form-dialog";
@@ -25,9 +25,7 @@ import { usePlayersStore } from "@/store/usePlayersStore";
 import { useStatsStore } from "@/store/useStatsStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
 import { Skeleton } from "@/components/ui/skeleton";
-import { playerRepository } from "@/lib/repositories/player-repository";
 import { TooltipProvider } from "@/components/ui/tooltip";
-
 
 export default function DashboardPage() {
   const { matches, loading: matchesLoading, fetchAll: fetchMatches, add: addMatch, remove: removeMatch } = useMatchesStore();
@@ -49,32 +47,6 @@ export default function DashboardPage() {
     initialize();
   }, [fetchMatches, fetchPlayers, loadStats, fetchSeasons]);
 
-  const handleSeedData = async () => {
-    try {
-        await playerRepository.add({ name: "Marco Rossi", role: "Attaccante" });
-        await playerRepository.add({ name: "Luca Bianchi", role: "Difensore" });
-        await playerRepository.add({ name: "Davide Neri", role: "Portiere" });
-        
-        const matchDate = new Date();
-        matchDate.setDate(matchDate.getDate() - 2);
-        
-        await addMatch({
-            opponent: "Real Isola",
-            location: "Stadio Comunale",
-            date: matchDate,
-            isHome: true,
-            duration: 90
-        });
-
-        toast({ title: "Dati di esempio creati", description: "Abbiamo aggiunto giocatori e una partita per farti esplorare l'app." });
-        fetchMatches();
-        fetchPlayers();
-        loadStats();
-    } catch (e) {
-        console.error(e);
-    }
-  };
-
   const getStatusBadge = (status: 'scheduled' | 'completed' | 'canceled') => {
     switch (status) {
       case 'completed':
@@ -89,11 +61,7 @@ export default function DashboardPage() {
   }
 
   const handleSaveMatch = async (data: any) => {
-    const matchData = { 
-        ...data, 
-        date: data.date.toISOString(),
-    };
-
+    const matchData = { ...data, date: data.date.toISOString() };
     const newMatch = await addMatch(matchData);
     if (newMatch) {
       toast({ title: "Partita aggiunta", description: `La partita contro ${newMatch.opponent} è stata creata.` });
@@ -133,17 +101,10 @@ export default function DashboardPage() {
                    {activeSeason ? `Stagione ${activeSeason.name}` : 'Caricamento...'}
                 </CardDescription>
               </div>
-              <div className="flex gap-2">
-                {matches.length === 0 && !loading && (
-                    <Button variant="outline" size="sm" onClick={handleSeedData} className="h-8 text-[10px] px-2">
-                        <Rocket className="mr-1 h-3 w-3" /> Esempio
-                    </Button>
-                )}
-                <Button className="bg-accent text-accent-foreground hover:bg-accent/90 h-8 md:h-9 text-[10px] md:text-xs font-black uppercase" size="sm" onClick={() => setIsFormOpen(true)}>
-                    <PlusCircle className="mr-1 h-3.5 w-3.5" />
-                    Nuova
-                </Button>
-              </div>
+              <Button className="bg-accent text-accent-foreground hover:bg-accent/90 h-8 md:h-9 text-[10px] md:text-xs font-black uppercase" size="sm" onClick={() => setIsFormOpen(true)}>
+                  <PlusCircle className="mr-1 h-3.5 w-3.5" />
+                  Nuova
+              </Button>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -186,42 +147,23 @@ export default function DashboardPage() {
                         </span>
                       </div>
                     </TableCell>
-                    
-                    <TableCell className="hidden md:table-cell font-bold">
-                      {match.opponent}
-                    </TableCell>
-
+                    <TableCell className="hidden md:table-cell font-bold">{match.opponent}</TableCell>
                     <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
                       {match.location} {match.isHome ? '(C)' : '(T)'}
                     </TableCell>
-
                     <TableCell className="p-0 md:p-4 block md:table-cell text-center md:text-left flex flex-col items-center md:block mr-4 md:mr-0">
                       <span className="text-xs md:text-base font-black bg-primary/5 px-2 py-1 rounded border border-primary/10">
                         {match.result ? `${match.result.home}-${match.result.away}` : 'v-v'}
                       </span>
-                      <div className="md:hidden mt-1">
-                        {getStatusBadge(match.status)}
-                      </div>
+                      <div className="md:hidden mt-1">{getStatusBadge(match.status)}</div>
                     </TableCell>
-
-                    <TableCell className="hidden md:table-cell">
-                      {getStatusBadge(match.status)}
-                    </TableCell>
-
+                    <TableCell className="hidden md:table-cell">{getStatusBadge(match.status)}</TableCell>
                     <TableCell className="text-right p-0 md:p-4 md:pr-4 block md:table-cell">
                       <div className="flex items-center justify-end gap-1.5">
                         <Button variant="outline" size="icon" className="h-8 w-8 md:h-9 md:w-9 border-primary/20 text-primary hover:bg-primary/5" asChild>
-                          <Link href={`/calendario/${match.id}`}>
-                            <Eye className="h-4 w-4" />
-                          </Link>
+                          <Link href={`/calendario/${match.id}`}><Eye className="h-4 w-4" /></Link>
                         </Button>
-
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 md:h-9 md:w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/5"
-                          onClick={() => setMatchToDelete(match)}
-                        >
+                        <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/5" onClick={() => setMatchToDelete(match)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -234,7 +176,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Riepilogo Dashboard */}
         <div className="grid grid-cols-2 gap-3 md:gap-4">
           <Card className="shadow-sm border bg-card">
             <CardHeader className="flex flex-row items-center justify-between p-3 md:p-4 pb-1 md:pb-2">
@@ -242,13 +183,9 @@ export default function DashboardPage() {
               <Users className="h-3.5 w-3.5 text-primary" />
             </CardHeader>
             <CardContent className="p-3 md:p-4 pt-0">
-              {playersLoading ? (
-                <Skeleton className="h-10 w-full" />
-              ) : (
+              {playersLoading ? <Skeleton className="h-10 w-full" /> : (
                 <div className="flex flex-col">
-                  <div className="text-2xl md:text-4xl font-black text-primary leading-tight">
-                    {roleStats.total}
-                  </div>
+                  <div className="text-2xl md:text-4xl font-black text-primary leading-tight">{roleStats.total}</div>
                   <div className="flex flex-wrap gap-x-2 text-[8px] md:text-[10px] font-bold text-muted-foreground/80 uppercase">
                     <span>ATT: {roleStats.attaccanti}</span>
                     <span>CEN: {roleStats.centrocampisti}</span>
@@ -259,20 +196,15 @@ export default function DashboardPage() {
               )}
             </CardContent>
           </Card>
-
           <Card className="shadow-sm border bg-card">
             <CardHeader className="flex flex-row items-center justify-between p-3 md:p-4 pb-1 md:pb-2">
               <CardTitle className="text-[10px] md:text-sm font-black uppercase tracking-wider text-muted-foreground/60">Record</CardTitle>
               <Trophy className="h-3.5 w-3.5 text-accent" />
             </CardHeader>
             <CardContent className="p-3 md:p-4 pt-0">
-              {statsLoading ? (
-                <Skeleton className="h-10 w-full" />
-              ) : (
+              {statsLoading ? <Skeleton className="h-10 w-full" /> : (
                 <div className="flex flex-col">
-                  <div className="text-2xl md:text-4xl font-black text-primary leading-tight">
-                    {teamRecord?.matchesPlayed || 0}
-                  </div>
+                  <div className="text-2xl md:text-4xl font-black text-primary leading-tight">{teamRecord?.matchesPlayed || 0}</div>
                   <div className="flex gap-1.5 md:gap-2">
                     <span className="text-[8px] md:text-[10px] font-bold text-green-600 uppercase">V: {teamRecord?.wins || 0}</span>
                     <span className="text-[8px] md:text-[10px] font-bold text-yellow-600 uppercase">P: {teamRecord?.draws || 0}</span>
@@ -285,19 +217,14 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <MatchFormDialog 
-        open={isFormOpen} 
-        onOpenChange={setIsFormOpen} 
-        onSave={handleSaveMatch} 
-        match={null} 
-      />
+      <MatchFormDialog open={isFormOpen} onOpenChange={setIsFormOpen} onSave={handleSaveMatch} match={null} />
 
       <AlertDialog open={!!matchToDelete} onOpenChange={(open) => !open && setMatchToDelete(null)}>
         <AlertDialogContent className="max-w-[90vw] rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-primary font-black uppercase">Elimina Gara</AlertDialogTitle>
             <AlertDialogDescription className="text-xs font-medium">
-              Questa azione non può essere annullata. Tutti gli eventi e le statistiche di questa partita verranno eliminati.
+              Questa azione non può essere annullata. Tutti gli eventi e le statistiche verranno eliminati.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 sm:gap-0 mt-4">
