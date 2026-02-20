@@ -1,4 +1,3 @@
-
 "use client";
 
 import { create } from 'zustand';
@@ -73,13 +72,16 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     },
 
     syncAndPersistMinutes: async () => {
-        const { match, lineup, events, matchId } = get();
-        if (!match || !lineup || !matchId) return;
+        const { match, lineup, events, matchId, allPlayers } = get();
+        if (!match || !matchId) return;
 
         const duration = match.duration || 90;
         const halfTime = duration / 2;
-        const participants = new Set([...lineup.starters, ...lineup.substitutes].filter(id => id !== ""));
         const pitchManTeam = match.isHome ? 'home' : 'away';
+
+        // Calcoliamo le statistiche per TUTTI i giocatori della rosa della stagione
+        // per permettere la registrazione di eventi (come cartellini) anche a chi non ha giocato.
+        const rosterPlayerIds = allPlayers.map(p => p.id);
 
         const getAbsoluteMinute = (event: MatchEvent) => {
             if (event.period === '1T') return Math.min(event.minute, halfTime);
@@ -95,7 +97,7 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             return a.minute - b.minute;
         });
 
-        const newStats: PlayerMatchStats[] = Array.from(participants).map(playerId => {
+        const newStats: PlayerMatchStats[] = rosterPlayerIds.map(playerId => {
             // Sincronizzazione automatica dei dati basata sugli eventi della cronaca
             const yellowCards = events.filter(e => e.type === 'yellow_card' && e.playerId === playerId && e.team === pitchManTeam).length;
             const redCards = events.filter(e => e.type === 'red_card' && e.playerId === playerId && e.team === pitchManTeam).length;
@@ -103,31 +105,35 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             const assists = events.filter(e => e.type === 'goal' && e.assistPlayerId === playerId && e.team === pitchManTeam).length;
 
             let minutesPlayed = 0;
-            const isStarter = lineup.starters.includes(playerId);
+            const isStarter = lineup?.starters.includes(playerId);
+            const isSubstitute = lineup?.substitutes.includes(playerId);
 
-            if (isStarter) {
-                const subOutEvent = chronologicalEvents.find(e => 
-                    e.type === 'substitution' && 
-                    e.subOutPlayerId === playerId && 
-                    e.team === pitchManTeam
-                );
-                minutesPlayed = subOutEvent ? getAbsoluteMinute(subOutEvent) : duration;
-            } else {
-                const subInEvent = chronologicalEvents.find(e => 
-                    e.type === 'substitution' && 
-                    e.playerId === playerId && 
-                    e.team === pitchManTeam
-                );
-                if (subInEvent) {
-                    const subInMin = getAbsoluteMinute(subInEvent);
-                    const subOutEventLater = chronologicalEvents.find(e => 
+            // Calcolo minuti solo se il giocatore è stato in distinta
+            if (lineup && (isStarter || isSubstitute)) {
+                if (isStarter) {
+                    const subOutEvent = chronologicalEvents.find(e => 
                         e.type === 'substitution' && 
                         e.subOutPlayerId === playerId && 
-                        e.team === pitchManTeam && 
-                        getAbsoluteMinute(e) > subInMin
+                        e.team === pitchManTeam
                     );
-                    const endMin = subOutEventLater ? getAbsoluteMinute(subOutEventLater) : duration;
-                    minutesPlayed = Math.max(0, endMin - subInMin);
+                    minutesPlayed = subOutEvent ? getAbsoluteMinute(subOutEvent) : duration;
+                } else {
+                    const subInEvent = chronologicalEvents.find(e => 
+                        e.type === 'substitution' && 
+                        e.playerId === playerId && 
+                        e.team === pitchManTeam
+                    );
+                    if (subInEvent) {
+                        const subInMin = getAbsoluteMinute(subInEvent);
+                        const subOutEventLater = chronologicalEvents.find(e => 
+                            e.type === 'substitution' && 
+                            e.subOutPlayerId === playerId && 
+                            e.team === pitchManTeam && 
+                            getAbsoluteMinute(e) > subInMin
+                        );
+                        const endMin = subOutEventLater ? getAbsoluteMinute(subOutEventLater) : duration;
+                        minutesPlayed = Math.max(0, endMin - subInMin);
+                    }
                 }
             }
 
@@ -140,7 +146,15 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
                 yellowCards,
                 redCards
             };
-        });
+        }).filter(stat => 
+            // Salviamo solo se il giocatore ha partecipato alla gara o ha avuto un evento
+            stat.minutesPlayed > 0 || 
+            stat.goals > 0 || 
+            stat.assists > 0 || 
+            stat.yellowCards > 0 || 
+            stat.redCards > 0 ||
+            (lineup && (lineup.starters.includes(stat.playerId) || lineup.substitutes.includes(stat.playerId)))
+        );
 
         for (const stat of newStats) {
             await statsRepository.upsert(matchId, stat.playerId, stat);

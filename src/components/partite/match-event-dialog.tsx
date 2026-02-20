@@ -278,10 +278,10 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
               {isPitchManSide ? (
                 <Select value={playerId} onValueChange={setPlayerId}>
                   <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-bold focus:ring-0">
-                    <SelectValue placeholder="In campo" />
+                    <SelectValue placeholder="Seleziona giocatore" />
                   </SelectTrigger>
                   <SelectContent>
-                    {playersStatus.onPitch.map(p => (
+                    {allPlayers.map(p => (
                       <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                     ))}
                   </SelectContent>
