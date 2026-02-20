@@ -12,13 +12,21 @@ class PitchManDB extends Dexie {
 
     constructor() {
         super('PitchManDB');
-        // Versione 6: aggiunta seasonId alla tabella players per isolamento totale
+        // Versione 7: aggiunti indici espliciti per matchId nelle tabelle con chiavi composte
+        // per permettere query filtrate correttamente senza incorrere in DataError
+        this.version(7).stores({
+            players: 'id, seasonId, name',
+            matches: 'id, seasonId, date, status',
+            matchAttendances: '[matchId+playerId], matchId, status',
+            playerMatchStats: '[matchId+playerId], matchId',
+            matchEvents: 'id, matchId, playerId, type',
+            seasons: 'id, isActive'
+        });
         this.version(6).stores({
             players: 'id, seasonId, name',
             matches: 'id, seasonId, date, status',
             matchAttendances: '[matchId+playerId], status',
             playerMatchStats: '[matchId+playerId]',
-            matchLineups: 'matchId',
             matchEvents: 'id, matchId, playerId, type',
             seasons: 'id, isActive'
         });
@@ -27,7 +35,6 @@ class PitchManDB extends Dexie {
             matches: 'id, seasonId, date, status',
             matchAttendances: '[matchId+playerId], status',
             playerMatchStats: '[matchId+playerId]',
-            matchLineups: 'matchId',
             matchEvents: 'id, matchId, playerId, type',
             seasons: 'id, isActive'
         });
@@ -36,7 +43,6 @@ class PitchManDB extends Dexie {
             matches: 'id, date, status',
             matchAttendances: '[matchId+playerId], status',
             playerMatchStats: '[matchId+playerId]',
-            matchLineups: 'matchId',
             matchEvents: 'id, matchId, playerId, type',
         });
         this.version(3).stores({

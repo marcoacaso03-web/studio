@@ -10,10 +10,13 @@ export type PlayerCreateData = {
 export const playerRepository = {
   async getAll(seasonId?: string) {
     if (!seasonId) return [];
-    return await db.players.where('seasonId').equals(seasonId).sortBy('name');
+    // Recuperiamo i dati filtrati e ordiniamo in memoria per stabilità (evita DataError su sortBy)
+    const players = await db.players.where('seasonId').equals(seasonId).toArray();
+    return players.sort((a, b) => a.name.localeCompare(b.name));
   },
 
   async getById(id: string) {
+    if (!id) return undefined;
     return await db.players.get(id);
   },
 

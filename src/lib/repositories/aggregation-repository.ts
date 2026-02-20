@@ -51,9 +51,16 @@ export const aggregationRepository = {
      */
     async getTeamTrend(seasonId?: string) {
         let query = db.matches.where('status').equals('completed');
-        const completedMatches = seasonId 
-            ? await query.and(m => m.seasonId === seasonId).sortBy('date')
-            : await query.sortBy('date');
+        let completedMatches: any[];
+        
+        if (seasonId) {
+            completedMatches = await query.and(m => m.seasonId === seasonId).toArray();
+        } else {
+            completedMatches = await query.toArray();
+        }
+
+        // Ordiniamo in memoria per evitare conflitti tra indici Dexie
+        completedMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
         return completedMatches.map(match => {
             if (!match.result) return null;

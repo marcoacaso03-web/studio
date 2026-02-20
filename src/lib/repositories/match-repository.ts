@@ -7,11 +7,13 @@ export type MatchCreateData = Omit<Match, 'id' | 'result'> & { status?: Match['s
 export const matchRepository = {
   async getAll(seasonId?: string) {
     if (!seasonId) return [];
-    // Sort by date while filtering by seasonId
-    return await db.matches.where('seasonId').equals(seasonId).sortBy('date');
+    // Recuperiamo i dati filtrati per stagione e ordiniamo in memoria per evitare conflitti tra indici Dexie
+    const matches = await db.matches.where('seasonId').equals(seasonId).toArray();
+    return matches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   },
   
   async getById(id: string) {
+    if (!id) return undefined;
     return await db.matches.get(id);
   },
 
