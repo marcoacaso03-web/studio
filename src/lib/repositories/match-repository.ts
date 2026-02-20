@@ -1,12 +1,13 @@
-
 import { db } from '@/lib/db';
 import type { Match } from '@/lib/types';
 
-export type MatchCreateData = Omit<Match, 'id' | 'status' | 'result'>;
+// Include status in creation data if needed, but provide default
+export type MatchCreateData = Omit<Match, 'id' | 'result'> & { status?: Match['status'] };
 
 export const matchRepository = {
   async getAll(seasonId?: string) {
     if (!seasonId) return [];
+    // Sort by date while filtering by seasonId
     return await db.matches.where('seasonId').equals(seasonId).sortBy('date');
   },
   
@@ -16,9 +17,9 @@ export const matchRepository = {
 
   async add(data: MatchCreateData) {
     const newMatch: Match = {
+      status: 'scheduled', // Default status
       ...data,
-      id: `m_${new Date().getTime()}`,
-      status: 'scheduled',
+      id: `m_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
     };
     await db.matches.add(newMatch);
     return newMatch;

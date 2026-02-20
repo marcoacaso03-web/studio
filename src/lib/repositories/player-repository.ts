@@ -1,4 +1,3 @@
-
 import { db } from '@/lib/db';
 import type { Player, Role } from '@/lib/types';
 
@@ -20,11 +19,11 @@ export const playerRepository = {
 
   async add(data: PlayerCreateData) {
     const newPlayer: Player = {
-      id: `p_${new Date().getTime()}`,
+      id: `p_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       seasonId: data.seasonId,
       name: data.name,
       role: data.role,
-      avatarUrl: `https://picsum.photos/seed/p${new Date().getTime()}/200/200`,
+      avatarUrl: `https://picsum.photos/seed/p${Date.now()}/200/200`,
       imageHint: 'player portrait',
       stats: { appearances: 0, goals: 0, assists: 0, avgMinutes: 0 },
     };

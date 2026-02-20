@@ -1,4 +1,3 @@
-
 "use client";
 
 import { create } from 'zustand';
@@ -21,7 +20,6 @@ export const useMatchesStore = create<MatchState>((set, get) => ({
     loading: true,
     fetchAll: async (seasonId) => {
         set({ loading: true });
-        // Se seasonId non è fornito, usa quello dello store delle stagioni
         const targetSeasonId = seasonId || useSeasonsStore.getState().activeSeason?.id;
         
         if (!targetSeasonId) {
@@ -34,22 +32,24 @@ export const useMatchesStore = create<MatchState>((set, get) => ({
     },
     add: async (data) => {
         const activeSeason = useSeasonsStore.getState().activeSeason;
-        if (!activeSeason) return undefined;
+        if (!activeSeason) {
+            console.error("Tentativo di aggiungere una partita senza una stagione attiva.");
+            return undefined;
+        }
 
         const newMatch = await matchRepository.add({ 
             ...data, 
             seasonId: activeSeason.id 
-        });
+        } as MatchCreateData);
+        
         await get().fetchAll(activeSeason.id);
         return newMatch;
     },
     update: async (id, updates) => {
         const match = await matchRepository.getById(id);
-        await matchRepository.update(id, updates);
-        if (match) {
-            await get().fetchAll(match.seasonId);
-        } else {
-            await get().fetchAll();
+        const updatedMatch = await matchRepository.update(id, updates);
+        if (updatedMatch) {
+            await get().fetchAll(match?.seasonId);
         }
     },
     remove: async (id) => {

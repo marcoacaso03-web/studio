@@ -1,4 +1,3 @@
-
 "use client";
 
 import { create } from 'zustand';
@@ -7,7 +6,6 @@ import type { Player } from '@/lib/types';
 import type { PlayerCreateData } from '@/lib/repositories/player-repository';
 import { useStatsStore } from './useStatsStore';
 import { useSeasonsStore } from './useSeasonsStore';
-
 
 interface PlayerState {
     players: Player[];
@@ -35,9 +33,16 @@ export const usePlayersStore = create<PlayerState>((set, get) => ({
     },
     add: async (data) => {
         const activeSeason = useSeasonsStore.getState().activeSeason;
-        if (!activeSeason) return undefined;
+        if (!activeSeason) {
+             console.error("Tentativo di aggiungere un giocatore senza una stagione attiva.");
+             return undefined;
+        }
 
-        const newPlayer = await playerRepository.add({ ...data, seasonId: activeSeason.id });
+        const newPlayer = await playerRepository.add({ 
+            ...data, 
+            seasonId: activeSeason.id 
+        });
+        
         await get().fetchAll(activeSeason.id);
         useStatsStore.getState().loadStats();
         return newPlayer;

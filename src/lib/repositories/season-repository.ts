@@ -11,11 +11,12 @@ export const seasonRepository = {
     },
 
     async getActive() {
-        return await db.seasons.where('isActive').equals(1).first();
+        // Dexie stores booleans and queries them consistently with boolean values
+        return await db.seasons.where('isActive').equals(true).first();
     },
 
     async add(name: string) {
-        const id = `s_${Date.now()}`;
+        const id = `s_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
         const newSeason: Season = { id, name, isActive: false };
         await db.seasons.add(newSeason);
         return newSeason;
@@ -23,21 +24,24 @@ export const seasonRepository = {
 
     async setActive(id: string) {
         return await db.transaction('rw', db.seasons, async () => {
+            // Set all to false first
             await db.seasons.toCollection().modify({ isActive: false });
+            // Set target to true
             await db.seasons.update(id, { isActive: true });
         });
     },
 
     async ensureDefaultSeason() {
-        const seasons = await db.seasons.count();
-        if (seasons === 0) {
+        const seasonsCount = await db.seasons.count();
+        if (seasonsCount === 0) {
             const defaultSeason = await this.add('2025/26');
             await this.setActive(defaultSeason.id);
             
-            // Migra le partite e i giocatori esistenti senza seasonId alla stagione predefinita
-            await db.matches.toCollection().modify({ seasonId: defaultSeason.id });
-            await db.players.toCollection().modify({ seasonId: defaultSeason.id });
-            return defaultSeason;
+            // Migrate any existing orphaned records to this default season
+            await db.matches.toCollection().modify((m: any) => { if (!m.seasonId) m.seasonId = defaultSeason.id; });
+            await db.players.toCollection().modify((p: any) => { if (!p.seasonId) p.seasonId = defaultSeason.id; });
+            
+            return { ...defaultSeason, isActive: true };
         }
         return await this.getActive();
     }
