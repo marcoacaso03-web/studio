@@ -24,10 +24,6 @@ export function MatchNotesTab() {
     setIsSaving(true);
     try {
       await updateMatch({ notes: localNotes });
-      toast({
-        title: "Note salvate",
-        description: "Le annotazioni tattiche sono state aggiornate con successo.",
-      });
     } catch (error) {
       toast({
         variant: "destructive",

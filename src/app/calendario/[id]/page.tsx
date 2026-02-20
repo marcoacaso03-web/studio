@@ -12,7 +12,6 @@ import { useMatchDetailStore } from "@/store/useMatchDetailStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { MatchFormDialog } from "@/components/partite/match-form-dialog";
-import { useToast } from "@/hooks/use-toast";
 import { CalendarDays, Settings2, Users, Zap, FileText, Home, Plane } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -22,7 +21,6 @@ export default function MatchDetailPage() {
 
   const { match, loading, load, updateMatch } = useMatchDetailStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const { toast } = useToast();
   
   useEffect(() => {
     if (id) {
@@ -36,10 +34,6 @@ export default function MatchDetailPage() {
         date: data.date.toISOString()
     };
     await updateMatch(updateData);
-    toast({
-      title: "Partita aggiornata",
-      description: `I dettagli della partita contro ${data.opponent} sono stati salvati.`,
-    });
   };
 
   if (loading) {

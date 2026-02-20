@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -27,10 +26,6 @@ export default function LoginPage() {
     setTimeout(() => {
       const success = login(username, password);
       if (success) {
-        toast({
-          title: "Accesso eseguito",
-          description: "Benvenuto in PitchMan.",
-        });
         router.push('/calendario');
       } else {
         toast({

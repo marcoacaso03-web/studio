@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -20,7 +19,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
 import { useMatchesStore } from "@/store/useMatchesStore";
 import { usePlayersStore } from "@/store/usePlayersStore";
 import { useStatsStore } from "@/store/useStatsStore";
@@ -35,7 +33,6 @@ export default function DashboardPage() {
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [matchToDelete, setMatchToDelete] = useState<Match | null>(null);
-  const { toast } = useToast();
 
   useEffect(() => {
     const initialize = async () => {
@@ -64,7 +61,6 @@ export default function DashboardPage() {
     const matchData = { ...data, date: data.date.toISOString() };
     const newMatch = await addMatch(matchData);
     if (newMatch) {
-      toast({ title: "Partita aggiunta", description: `La partita contro ${newMatch.opponent} è stata creata.` });
       loadStats();
     }
   };
@@ -72,7 +68,6 @@ export default function DashboardPage() {
   const handleDeleteMatch = async () => {
     if (!matchToDelete) return;
     await removeMatch(matchToDelete.id);
-    toast({ title: "Partita eliminata", variant: "destructive" });
     setMatchToDelete(null);
     loadStats();
   };

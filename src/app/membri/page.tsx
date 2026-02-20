@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -7,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react";
 import type { Player, Role } from "@/lib/types";
 import { PlayerFormDialog } from "@/components/squadra/player-form-dialog";
-import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,7 +49,6 @@ export default function RosaPage() {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: null });
-  const { toast } = useToast();
 
   useEffect(() => {
     fetchAll();
@@ -65,19 +62,14 @@ export default function RosaPage() {
   const handleSavePlayer = async (data: {name: string, role: Role}, playerId?: string) => {
     if (playerId) {
       await update(playerId, data);
-      toast({ title: "Giocatore aggiornato", description: `I dati di ${data.name} sono stati modificati.` });
     } else {
-      const newPlayer = await add(data);
-      if (newPlayer) {
-        toast({ title: "Giocatore aggiunto", description: `${newPlayer.name} è stato aggiunto alla rosa.` });
-      }
+      await add(data);
     }
   };
 
   const handleDeletePlayer = async () => {
     if (!playerToDelete) return;
     await remove(playerToDelete.id);
-    toast({ title: "Giocatore eliminato", description: `${playerToDelete.name} è stato rimosso dalla rosa.`, variant: "destructive" });
     setPlayerToDelete(null);
   };
 

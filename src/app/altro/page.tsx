@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -54,30 +53,26 @@ export default function AltroPage() {
     if (!newSeasonName.trim()) return;
     await addSeason(newSeasonName);
     setNewSeasonName('');
-    toast({ title: "Stagione creata", description: `La stagione ${newSeasonName} è stata aggiunta all'archivio.` });
   };
 
-  const handleSwitchSeason = async (id: string, name: string) => {
+  const handleSwitchSeason = async (id: string) => {
     await setActiveSeason(id);
     await Promise.all([
         useMatchesStore.getState().fetchAll(id),
         usePlayersStore.getState().fetchAll(id),
         useStatsStore.getState().loadStats()
     ]);
-    toast({ title: "Cambio Stagione", description: `Ora stai visualizzando i dati della stagione ${name}.` });
   };
 
   const handleDeleteSeason = async () => {
     if (!seasonToDelete) return;
     await removeSeason(seasonToDelete.id);
-    toast({ variant: "destructive", title: "Stagione eliminata", description: `La stagione ${seasonToDelete.name} e tutti i suoi dati sono stati rimossi.` });
     setSeasonToDelete(null);
   };
 
   const handleLogout = () => {
     logout();
     router.push('/login');
-    toast({ title: "Logout effettuato", description: "A presto su PitchMan!" });
   };
 
   const convertToCSV = (data: any[]) => {
@@ -132,8 +127,6 @@ export default function AltroPage() {
       const matches = await matchRepository.getAll(user.id, useSeasonsStore.getState().activeSeason?.id);
       const matchesCSV = convertToCSV(matches);
       downloadCSV(matchesCSV, `pitchman_matches_${user.username}.csv`);
-      
-      toast({ title: "Esportazione completata", description: "I file CSV sono stati scaricati." });
     } catch (error) {
       toast({ variant: "destructive", title: "Esportazione fallita" });
     } finally {
@@ -145,7 +138,6 @@ export default function AltroPage() {
     if (!user) return;
     try {
       await seasonRepository.resetUser(user.id);
-      toast({ title: "Reset completato", description: `Tutti i dati dell'account ${user.username} sono stati rimossi.` });
       window.location.reload();
     } catch (e) {
       toast({ variant: "destructive", title: "Errore nel reset" });
@@ -218,7 +210,7 @@ export default function AltroPage() {
                   "flex items-center justify-between p-3 rounded-xl border transition-all",
                   s.isActive ? "bg-primary/5 border-primary shadow-sm" : "bg-muted/20 hover:bg-muted/40 cursor-pointer"
                 )}
-                onClick={() => !s.isActive && handleSwitchSeason(s.id, s.name)}
+                onClick={() => !s.isActive && handleSwitchSeason(s.id)}
               >
                 <div className="flex items-center gap-3">
                   <span className={cn("text-sm font-black uppercase tracking-tight", s.isActive ? "text-primary" : "text-muted-foreground")}>
