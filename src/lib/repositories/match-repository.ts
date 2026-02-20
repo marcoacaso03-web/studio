@@ -1,14 +1,16 @@
+
 import { db } from '@/lib/db';
 import type { Match } from '@/lib/types';
 
-// Include status in creation data if needed, but provide default
 export type MatchCreateData = Omit<Match, 'id' | 'result'> & { status?: Match['status'] };
 
 export const matchRepository = {
-  async getAll(seasonId?: string) {
-    if (!seasonId) return [];
-    // Recuperiamo i dati filtrati per stagione e ordiniamo in memoria per evitare conflitti tra indici Dexie
-    const matches = await db.matches.where('seasonId').equals(seasonId).toArray();
+  async getAll(userId: string, seasonId?: string) {
+    if (!userId || !seasonId) return [];
+    const matches = await db.matches
+      .where('userId').equals(userId)
+      .and(m => m.seasonId === seasonId)
+      .toArray();
     return matches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   },
   
@@ -19,7 +21,7 @@ export const matchRepository = {
 
   async add(data: MatchCreateData) {
     const newMatch: Match = {
-      status: 'scheduled', // Default status
+      status: 'scheduled',
       ...data,
       id: `m_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
     };
@@ -27,7 +29,7 @@ export const matchRepository = {
     return newMatch;
   },
 
-  async update(id: string, updates: Partial<Omit<Match, 'id'>>) {
+  async update(id: string, updates: Partial<Omit<Match, 'id' | 'userId'>>) {
     await db.matches.update(id, updates);
     return await db.matches.get(id);
   },

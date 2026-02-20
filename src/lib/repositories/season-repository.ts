@@ -1,9 +1,11 @@
+
 import { db } from '@/lib/db';
 import type { Season } from '@/lib/types';
 
 export const seasonRepository = {
-    async getAll() {
-        return await db.seasons.toArray();
+    async getAll(userId: string) {
+        if (!userId) return [];
+        return await db.seasons.where('userId').equals(userId).toArray();
     },
 
     async getById(id: string) {
@@ -11,40 +13,37 @@ export const seasonRepository = {
         return await db.seasons.get(id);
     },
 
-    async getActive() {
-        // Utilizziamo filter() invece di where().equals() per evitare DataError con indici booleani in alcuni browser/ambienti
-        const seasons = await db.seasons.toArray();
+    async getActive(userId: string) {
+        if (!userId) return undefined;
+        const seasons = await db.seasons.where('userId').equals(userId).toArray();
         return seasons.find(s => s.isActive === true);
     },
 
-    async add(name: string) {
+    async add(name: string, userId: string) {
         const id = `s_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-        const newSeason: Season = { id, name, isActive: false };
+        const newSeason: Season = { id, userId, name, isActive: false };
         await db.seasons.add(newSeason);
         return newSeason;
     },
 
-    async setActive(id: string) {
+    async setActive(id: string, userId: string) {
+        if (!userId) return;
         return await db.transaction('rw', db.seasons, async () => {
-            // Set all to false first
-            await db.seasons.toCollection().modify({ isActive: false });
+            // Set all user's seasons to false first
+            await db.seasons.where('userId').equals(userId).modify({ isActive: false });
             // Set target to true
             await db.seasons.update(id, { isActive: true });
         });
     },
 
-    async ensureDefaultSeason() {
-        const seasonsCount = await db.seasons.count();
+    async ensureDefaultSeason(userId: string) {
+        if (!userId) return undefined;
+        const seasonsCount = await db.seasons.where('userId').equals(userId).count();
         if (seasonsCount === 0) {
-            const defaultSeason = await this.add('2025/26');
-            await this.setActive(defaultSeason.id);
-            
-            // Migrate any existing orphaned records to this default season
-            await db.matches.toCollection().modify((m: any) => { if (!m.seasonId) m.seasonId = defaultSeason.id; });
-            await db.players.toCollection().modify((p: any) => { if (!p.seasonId) p.seasonId = defaultSeason.id; });
-            
+            const defaultSeason = await this.add('2025/26', userId);
+            await this.setActive(defaultSeason.id, userId);
             return { ...defaultSeason, isActive: true };
         }
-        return await this.getActive();
+        return await this.getActive(userId);
     }
 };

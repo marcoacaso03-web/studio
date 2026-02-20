@@ -1,14 +1,17 @@
+
 export const ROLES = ['Portiere', 'Difensore', 'Centrocampista', 'Attaccante'] as const;
 export type Role = typeof ROLES[number];
 
 export type Season = {
   id: string;
+  userId: string;
   name: string;
   isActive: boolean;
 };
 
 export type Player = {
   id: string;
+  userId: string;
   seasonId: string;
   name: string;
   role: Role;
@@ -24,6 +27,7 @@ export type Player = {
 
 export type Match = {
   id: string;
+  userId: string;
   seasonId: string;
   opponent: string;
   date: string;

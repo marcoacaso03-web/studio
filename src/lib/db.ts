@@ -1,3 +1,4 @@
+
 import Dexie, { type EntityTable } from 'dexie';
 import type { Player, Match, MatchAttendance, PlayerMatchStats, MatchLineup, MatchEvent, Season } from './types';
 
@@ -12,8 +13,15 @@ class PitchManDB extends Dexie {
 
     constructor() {
         super('PitchManDB');
-        // Versione 7: aggiunti indici espliciti per matchId nelle tabelle con chiavi composte
-        // per permettere query filtrate correttamente senza incorrere in DataError
+        // Versione 8: aggiunto userId a tutte le tabelle principali per isolamento multi-utente
+        this.version(8).stores({
+            players: 'id, userId, seasonId, name',
+            matches: 'id, userId, seasonId, date, status',
+            matchAttendances: '[matchId+playerId], matchId, status',
+            playerMatchStats: '[matchId+playerId], matchId',
+            matchEvents: 'id, matchId, playerId, type',
+            seasons: 'id, userId, isActive'
+        });
         this.version(7).stores({
             players: 'id, seasonId, name',
             matches: 'id, seasonId, date, status',
@@ -21,36 +29,6 @@ class PitchManDB extends Dexie {
             playerMatchStats: '[matchId+playerId], matchId',
             matchEvents: 'id, matchId, playerId, type',
             seasons: 'id, isActive'
-        });
-        this.version(6).stores({
-            players: 'id, seasonId, name',
-            matches: 'id, seasonId, date, status',
-            matchAttendances: '[matchId+playerId], status',
-            playerMatchStats: '[matchId+playerId]',
-            matchEvents: 'id, matchId, playerId, type',
-            seasons: 'id, isActive'
-        });
-        this.version(5).stores({
-            players: 'id, name',
-            matches: 'id, seasonId, date, status',
-            matchAttendances: '[matchId+playerId], status',
-            playerMatchStats: '[matchId+playerId]',
-            matchEvents: 'id, matchId, playerId, type',
-            seasons: 'id, isActive'
-        });
-        this.version(4).stores({
-            players: 'id, name',
-            matches: 'id, date, status',
-            matchAttendances: '[matchId+playerId], status',
-            playerMatchStats: '[matchId+playerId]',
-            matchEvents: 'id, matchId, playerId, type',
-        });
-        this.version(3).stores({
-            players: 'id, name',
-            matches: 'id, date, status',
-            matchAttendances: '[matchId+playerId], status',
-            playerMatchStats: '[matchId+playerId]',
-            matchLineups: 'matchId',
         });
     }
 }

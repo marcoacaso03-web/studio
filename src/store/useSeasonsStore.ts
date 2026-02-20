@@ -1,8 +1,10 @@
+
 "use client";
 
 import { create } from 'zustand';
 import { seasonRepository } from '@/lib/repositories/season-repository';
 import type { Season } from '@/lib/types';
+import { useAuthStore } from './useAuthStore';
 
 interface SeasonsState {
     seasons: Season[];
@@ -19,19 +21,29 @@ export const useSeasonsStore = create<SeasonsState>((set, get) => ({
     loading: true,
 
     fetchAll: async () => {
+        const user = useAuthStore.getState().user;
+        if (!user) {
+          set({ loading: false, seasons: [], activeSeason: null });
+          return;
+        }
+        
         set({ loading: true });
-        const active = await seasonRepository.ensureDefaultSeason();
-        const all = await seasonRepository.getAll();
+        const active = await seasonRepository.ensureDefaultSeason(user.id);
+        const all = await seasonRepository.getAll(user.id);
         set({ seasons: all, activeSeason: active || null, loading: false });
     },
 
     addSeason: async (name) => {
-        await seasonRepository.add(name);
+        const user = useAuthStore.getState().user;
+        if (!user) return;
+        await seasonRepository.add(name, user.id);
         await get().fetchAll();
     },
 
     setActiveSeason: async (id) => {
-        await seasonRepository.setActive(id);
+        const user = useAuthStore.getState().user;
+        if (!user) return;
+        await seasonRepository.setActive(id, user.id);
         await get().fetchAll();
     }
 }));

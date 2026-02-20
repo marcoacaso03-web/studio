@@ -1,3 +1,4 @@
+
 import { db } from '@/lib/db';
 import type { Player, Role } from '@/lib/types';
 
@@ -5,13 +6,16 @@ export type PlayerCreateData = {
     name: string;
     role: Role;
     seasonId: string;
+    userId: string;
 }
 
 export const playerRepository = {
-  async getAll(seasonId?: string) {
-    if (!seasonId) return [];
-    // Recuperiamo i dati filtrati e ordiniamo in memoria per stabilità (evita DataError su sortBy)
-    const players = await db.players.where('seasonId').equals(seasonId).toArray();
+  async getAll(userId: string, seasonId?: string) {
+    if (!userId || !seasonId) return [];
+    const players = await db.players
+      .where('userId').equals(userId)
+      .and(p => p.seasonId === seasonId)
+      .toArray();
     return players.sort((a, b) => a.name.localeCompare(b.name));
   },
 
@@ -23,6 +27,7 @@ export const playerRepository = {
   async add(data: PlayerCreateData) {
     const newPlayer: Player = {
       id: `p_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      userId: data.userId,
       seasonId: data.seasonId,
       name: data.name,
       role: data.role,
@@ -34,7 +39,7 @@ export const playerRepository = {
     return newPlayer;
   },
 
-  async update(id: string, updates: Partial<Omit<PlayerCreateData, 'seasonId'>>) {
+  async update(id: string, updates: Partial<Omit<PlayerCreateData, 'seasonId' | 'userId'>>) {
     await db.players.update(id, updates);
     return await db.players.get(id);
   },

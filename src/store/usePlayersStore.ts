@@ -1,3 +1,4 @@
+
 "use client";
 
 import { create } from 'zustand';
@@ -6,13 +7,14 @@ import type { Player } from '@/lib/types';
 import type { PlayerCreateData } from '@/lib/repositories/player-repository';
 import { useStatsStore } from './useStatsStore';
 import { useSeasonsStore } from './useSeasonsStore';
+import { useAuthStore } from './useAuthStore';
 
 interface PlayerState {
     players: Player[];
     loading: boolean;
     fetchAll: (seasonId?: string) => Promise<void>;
-    add: (data: Omit<PlayerCreateData, 'seasonId'>) => Promise<Player | undefined>;
-    update: (id: string, updates: Partial<Omit<PlayerCreateData, 'seasonId'>>) => Promise<void>;
+    add: (data: Omit<PlayerCreateData, 'seasonId' | 'userId'>) => Promise<Player | undefined>;
+    update: (id: string, updates: Partial<Omit<PlayerCreateData, 'seasonId' | 'userId'>>) => Promise<void>;
     remove: (id: string) => Promise<void>;
 }
 
@@ -20,6 +22,9 @@ export const usePlayersStore = create<PlayerState>((set, get) => ({
     players: [],
     loading: true,
     fetchAll: async (seasonId) => {
+        const user = useAuthStore.getState().user;
+        if (!user) return;
+
         set({ loading: true });
         const targetSeasonId = seasonId || useSeasonsStore.getState().activeSeason?.id;
         
@@ -28,18 +33,20 @@ export const usePlayersStore = create<PlayerState>((set, get) => ({
             return;
         }
 
-        const players = await playerRepository.getAll(targetSeasonId);
+        const players = await playerRepository.getAll(user.id, targetSeasonId);
         set({ players, loading: false });
     },
     add: async (data) => {
+        const user = useAuthStore.getState().user;
         const activeSeason = useSeasonsStore.getState().activeSeason;
-        if (!activeSeason) {
-             console.error("Tentativo di aggiungere un giocatore senza una stagione attiva.");
+        if (!activeSeason || !user) {
+             console.error("Dati mancanti per aggiungere il giocatore.");
              return undefined;
         }
 
         const newPlayer = await playerRepository.add({ 
             ...data, 
+            userId: user.id,
             seasonId: activeSeason.id 
         });
         
