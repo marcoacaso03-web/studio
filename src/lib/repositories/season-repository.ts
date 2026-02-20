@@ -15,6 +15,7 @@ export const seasonRepository = {
 
     async getActive(userId: string) {
         if (!userId) return undefined;
+        // Filtriamo linearmente per isActive per evitare DataError con chiavi booleane indicizzate
         const seasons = await db.seasons.where('userId').equals(userId).toArray();
         return seasons.find(s => s.isActive === true);
     },
@@ -29,9 +30,9 @@ export const seasonRepository = {
     async setActive(id: string, userId: string) {
         if (!userId) return;
         return await db.transaction('rw', db.seasons, async () => {
-            // Set all user's seasons to false first
+            // Disattiva tutte le stagioni dell'utente specifico
             await db.seasons.where('userId').equals(userId).modify({ isActive: false });
-            // Set target to true
+            // Attiva quella selezionata
             await db.seasons.update(id, { isActive: true });
         });
     },

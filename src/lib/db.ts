@@ -22,14 +22,6 @@ class PitchManDB extends Dexie {
             matchEvents: 'id, matchId, playerId, type',
             seasons: 'id, userId, isActive'
         });
-        this.version(7).stores({
-            players: 'id, seasonId, name',
-            matches: 'id, seasonId, date, status',
-            matchAttendances: '[matchId+playerId], matchId, status',
-            playerMatchStats: '[matchId+playerId], matchId',
-            matchEvents: 'id, matchId, playerId, type',
-            seasons: 'id, isActive'
-        });
     }
 }
 
