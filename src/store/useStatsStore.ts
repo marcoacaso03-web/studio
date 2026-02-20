@@ -21,6 +21,8 @@ interface PlayerLeaderboardEntry {
         goals: number;
         assists: number;
         avgMinutes: number;
+        yellowCards: number;
+        redCards: number;
     };
 }
 

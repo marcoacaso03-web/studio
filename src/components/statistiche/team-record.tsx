@@ -31,25 +31,25 @@ export function TeamRecord() {
                 <CardContent>
                    <div className="text-3xl font-black text-primary mb-4">{teamRecord.matchesPlayed} <span className="text-sm font-normal text-muted-foreground">Gare totali</span></div>
                    <div className="grid grid-cols-3 gap-2">
-                       <div className="flex flex-col items-center p-2 bg-green-50 rounded-lg border border-green-100">
-                           <span className="text-[9px] font-black text-green-700 uppercase tracking-tighter mb-1">Vittoria</span>
+                       <div className="flex flex-col items-center p-2 bg-primary/10 rounded-lg border border-primary/20">
+                           <span className="text-[9px] font-black text-primary uppercase tracking-tighter mb-1">VITTORIA</span>
                            <div className="flex items-baseline gap-0.5">
-                               <span className="text-xl font-black text-green-600">{teamRecord.wins}</span>
-                               <span className="text-[10px] font-bold text-green-600/70">({winPct}%)</span>
+                               <span className="text-xl font-black text-primary">{teamRecord.wins}</span>
+                               <span className="text-[10px] font-bold text-primary/70">({winPct}%)</span>
                            </div>
                        </div>
-                       <div className="flex flex-col items-center p-2 bg-yellow-50 rounded-lg border border-yellow-100">
-                           <span className="text-[9px] font-black text-yellow-700 uppercase tracking-tighter mb-1">Pareggio</span>
+                       <div className="flex flex-col items-center p-2 bg-muted/40 rounded-lg border border-muted">
+                           <span className="text-[9px] font-black text-muted-foreground uppercase tracking-tighter mb-1">PAREGGIO</span>
                            <div className="flex items-baseline gap-0.5">
-                               <span className="text-xl font-black text-yellow-600">{teamRecord.draws}</span>
-                               <span className="text-[10px] font-bold text-yellow-600/70">({drawPct}%)</span>
+                               <span className="text-xl font-black text-muted-foreground">{teamRecord.draws}</span>
+                               <span className="text-[10px] font-bold text-muted-foreground/70">({drawPct}%)</span>
                            </div>
                        </div>
-                       <div className="flex flex-col items-center p-2 bg-red-50 rounded-lg border border-red-100">
-                           <span className="text-[9px] font-black text-red-700 uppercase tracking-tighter mb-1">Sconfitta</span>
+                       <div className="flex flex-col items-center p-2 bg-accent/10 rounded-lg border border-accent/20">
+                           <span className="text-[9px] font-black text-accent uppercase tracking-tighter mb-1">SCONFITTA</span>
                            <div className="flex items-baseline gap-0.5">
-                               <span className="text-xl font-black text-red-600">{teamRecord.losses}</span>
-                               <span className="text-[10px] font-bold text-red-600/70">({lossPct}%)</span>
+                               <span className="text-xl font-black text-accent">{teamRecord.losses}</span>
+                               <span className="text-[10px] font-bold text-accent/70">({lossPct}%)</span>
                            </div>
                        </div>
                    </div>
@@ -69,18 +69,18 @@ export function TeamRecord() {
                         <div className="space-y-1">
                             <p className="text-[10px] font-bold text-muted-foreground uppercase">Differenza Reti</p>
                             <div className="flex items-center gap-2">
-                                <span className={`text-4xl font-black ${goalDifference > 0 ? 'text-green-600' : goalDifference < 0 ? 'text-red-600' : 'text-primary'}`}>
+                                <span className={`text-4xl font-black ${goalDifference > 0 ? 'text-primary' : goalDifference < 0 ? 'text-accent' : 'text-primary'}`}>
                                     {goalDifference > 0 ? `+${goalDifference}` : goalDifference}
                                 </span>
-                                {goalDifference > 0 ? <TrendingUp className="h-6 w-6 text-green-500" /> : goalDifference < 0 ? <TrendingDown className="h-6 w-6 text-red-500" /> : null}
+                                {goalDifference > 0 ? <TrendingUp className="h-6 w-6 text-primary" /> : goalDifference < 0 ? <TrendingDown className="h-6 w-6 text-accent" /> : null}
                             </div>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 pt-4 border-t">
                         <div className="flex items-start gap-3">
-                            <div className="p-2 bg-green-100 rounded-full">
-                                <Goal className="h-4 w-4 text-green-600" />
+                            <div className="p-2 bg-primary/10 rounded-full">
+                                <Goal className="h-4 w-4 text-primary" />
                             </div>
                             <div>
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase">Gol Fatti</p>
@@ -88,8 +88,8 @@ export function TeamRecord() {
                             </div>
                         </div>
                         <div className="flex items-start gap-3">
-                            <div className="p-2 bg-red-100 rounded-full">
-                                <ShieldAlert className="h-4 w-4 text-red-600" />
+                            <div className="p-2 bg-accent/10 rounded-full">
+                                <ShieldAlert className="h-4 w-4 text-accent" />
                             </div>
                             <div>
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase">Gol Subiti</p>

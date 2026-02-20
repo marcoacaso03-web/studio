@@ -155,9 +155,11 @@ export const aggregationRepository = {
                 return e.playerId === player.id;
             });
 
-            const totalMinutes = allStats
-                .filter(s => s.playerId === player.id && completedMatchIds.has(s.matchId))
-                .reduce((acc, s) => acc + (s.minutesPlayed || 0), 0);
+            const playerStats = allStats.filter(s => s.playerId === player.id && completedMatchIds.has(s.matchId));
+
+            const totalMinutes = playerStats.reduce((acc, s) => acc + (s.minutesPlayed || 0), 0);
+            const yellowCards = playerStats.reduce((acc, s) => acc + (s.yellowCards || 0), 0);
+            const redCards = playerStats.reduce((acc, s) => acc + (s.redCards || 0), 0);
             
             const avgMinutes = appearances > 0 ? Math.round(totalMinutes / appearances) : 0;
             const goals = playerEvents.filter(e => e.type === 'goal').length;
@@ -174,7 +176,9 @@ export const aggregationRepository = {
                     appearances,
                     goals,
                     assists,
-                    avgMinutes
+                    avgMinutes,
+                    yellowCards,
+                    redCards
                 }
             };
         });

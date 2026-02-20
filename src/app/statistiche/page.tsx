@@ -24,7 +24,7 @@ export default function StatistichePage() {
       <Tabs defaultValue="record" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="record">Record Squadra</TabsTrigger>
-          <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+          <TabsTrigger value="leaderboard">Giocatori</TabsTrigger>
           <TabsTrigger value="grafici">Grafici</TabsTrigger>
         </TabsList>
         <TabsContent value="record">
