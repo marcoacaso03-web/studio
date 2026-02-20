@@ -1,9 +1,8 @@
-
 "use client";
 
 import { useStatsStore } from "@/store/useStatsStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Goal, Handshake, ShieldAlert, Swords, TrendingUp, TrendingDown } from "lucide-react";
+import { Goal, ShieldAlert, Swords, TrendingUp, TrendingDown } from "lucide-react";
 
 export function TeamRecord() {
     const { teamRecord } = useStatsStore();
@@ -13,6 +12,11 @@ export function TeamRecord() {
     }
 
     const goalDifference = teamRecord.goalsFor - teamRecord.goalsAgainst;
+    const total = teamRecord.matchesPlayed;
+
+    const winPct = total > 0 ? Math.round((teamRecord.wins / total) * 100) : 0;
+    const drawPct = total > 0 ? Math.round((teamRecord.draws / total) * 100) : 0;
+    const lossPct = total > 0 ? Math.round((teamRecord.losses / total) * 100) : 0;
 
     return (
         <div className="grid gap-4 md:grid-cols-2">
@@ -28,22 +32,31 @@ export function TeamRecord() {
                    <div className="text-3xl font-black text-primary mb-4">{teamRecord.matchesPlayed} <span className="text-sm font-normal text-muted-foreground">Gare totali</span></div>
                    <div className="grid grid-cols-3 gap-2">
                        <div className="flex flex-col items-center p-2 bg-green-50 rounded-lg border border-green-100">
-                           <span className="text-[10px] font-bold text-green-700 uppercase">Vinte</span>
-                           <span className="text-xl font-black text-green-600">{teamRecord.wins}</span>
+                           <span className="text-[9px] font-black text-green-700 uppercase tracking-tighter mb-1">Vittoria</span>
+                           <div className="flex items-baseline gap-0.5">
+                               <span className="text-xl font-black text-green-600">{teamRecord.wins}</span>
+                               <span className="text-[10px] font-bold text-green-600/70">({winPct}%)</span>
+                           </div>
                        </div>
                        <div className="flex flex-col items-center p-2 bg-yellow-50 rounded-lg border border-yellow-100">
-                           <span className="text-[10px] font-bold text-yellow-700 uppercase">Pari</span>
-                           <span className="text-xl font-black text-yellow-600">{teamRecord.draws}</span>
+                           <span className="text-[9px] font-black text-yellow-700 uppercase tracking-tighter mb-1">Pareggio</span>
+                           <div className="flex items-baseline gap-0.5">
+                               <span className="text-xl font-black text-yellow-600">{teamRecord.draws}</span>
+                               <span className="text-[10px] font-bold text-yellow-600/70">({drawPct}%)</span>
+                           </div>
                        </div>
                        <div className="flex flex-col items-center p-2 bg-red-50 rounded-lg border border-red-100">
-                           <span className="text-[10px] font-bold text-red-700 uppercase">Perse</span>
-                           <span className="text-xl font-black text-red-600">{teamRecord.losses}</span>
+                           <span className="text-[9px] font-black text-red-700 uppercase tracking-tighter mb-1">Sconfitta</span>
+                           <div className="flex items-baseline gap-0.5">
+                               <span className="text-xl font-black text-red-600">{teamRecord.losses}</span>
+                               <span className="text-[10px] font-bold text-red-600/70">({lossPct}%)</span>
+                           </div>
                        </div>
                    </div>
                 </CardContent>
             </Card>
 
-            {/* Card Bilancio Reti (Accorpata) */}
+            {/* Card Bilancio Reti */}
             <Card className="shadow-sm">
                 <CardHeader className="pb-2">
                     <CardTitle className="text-base font-bold flex items-center gap-2">
