@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from 'zustand';
 import { seasonRepository } from '@/lib/repositories/season-repository';
 import type { Season } from '@/lib/types';
