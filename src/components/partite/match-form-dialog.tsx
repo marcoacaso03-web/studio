@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -45,7 +44,6 @@ const toDatetimeLocal = (dateSource?: Date | string): string => {
 
 const formSchema = z.object({
   opponent: z.string().min(2, { message: "Il nome dell'avversario è richiesto." }),
-  location: z.string().min(2, { message: "Il luogo è richiesto." }),
   date: z.string().min(1, { message: "La data e l'ora sono richieste." }),
   isHome: z.boolean(),
   duration: z.coerce.number().int().min(1, "Durata richiesta"),
@@ -57,7 +55,6 @@ type MatchFormValues = z.infer<typeof formSchema>;
 // This is the data structure the parent component expects
 type MatchSaveData = {
     opponent: string;
-    location: string;
     date: Date;
     isHome: boolean;
     duration: number;
@@ -76,7 +73,6 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
     resolver: zodResolver(formSchema),
     defaultValues: {
       opponent: "",
-      location: "",
       date: "",
       isHome: true,
       duration: 90,
@@ -89,7 +85,6 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
       const initialDate = match ? toDatetimeLocal(match.date) : toDatetimeLocal(new Date());
       form.reset({
         opponent: match?.opponent || "",
-        location: match?.location || "",
         date: initialDate,
         isHome: match?.isHome ?? true,
         duration: match?.duration || 90,
@@ -102,7 +97,6 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
   function onSubmit(data: MatchFormValues) {
     const saveData: MatchSaveData = {
         opponent: data.opponent,
-        location: data.location,
         isHome: data.isHome,
         status: data.status,
         duration: data.duration,
@@ -197,20 +191,6 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
                 )}
                 />
             </div>
-
-            <FormField
-              control={form.control}
-              name="location"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Luogo</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Es: Campo Comunale" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <div className="grid grid-cols-2 gap-4">
                 <FormField

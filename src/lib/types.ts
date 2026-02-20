@@ -27,7 +27,6 @@ export type Match = {
   seasonId: string;
   opponent: string;
   date: string;
-  location: string;
   isHome: boolean;
   duration: number; // Durata totale in minuti (70, 80, 90)
   result?: {

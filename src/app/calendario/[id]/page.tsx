@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { MatchFormDialog } from "@/components/partite/match-form-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { CalendarDays, MapPin, Settings2, Users, Zap, FileText } from 'lucide-react';
+import { CalendarDays, Settings2, Users, Zap, FileText, Home, Plane } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export default function MatchDetailPage() {
@@ -98,8 +98,8 @@ export default function MatchDetailPage() {
                     <span>{matchDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="h-4 w-4 opacity-70" />
-                    <span className="truncate">{match.location}</span>
+                    {match.isHome ? <Home className="h-4 w-4 opacity-70" /> : <Plane className="h-4 w-4 opacity-70" />}
+                    <span className="truncate uppercase font-bold text-[10px] tracking-wider">{match.isHome ? 'In Casa' : 'Trasferta'}</span>
                   </div>
                 </div>
                 

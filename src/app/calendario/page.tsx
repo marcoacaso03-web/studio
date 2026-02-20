@@ -124,7 +124,7 @@ export default function DashboardPage() {
                 <TableRow>
                   <TableHead className="text-[10px] font-bold uppercase">Data</TableHead>
                   <TableHead className="text-[10px] font-bold uppercase">Avversario</TableHead>
-                  <TableHead className="text-[10px] font-bold uppercase">Luogo</TableHead>
+                  <TableHead className="text-[10px] font-bold uppercase">Tipo</TableHead>
                   <TableHead className="text-[10px] font-bold uppercase">Risultato</TableHead>
                   <TableHead className="text-[10px] font-bold uppercase">Stato</TableHead>
                   <TableHead className="w-24 text-right pr-6 text-[10px] font-bold uppercase">Azioni</TableHead>
@@ -148,8 +148,8 @@ export default function DashboardPage() {
                       </div>
                     </TableCell>
                     <TableCell className="hidden md:table-cell font-bold">{match.opponent}</TableCell>
-                    <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
-                      {match.location} {match.isHome ? '(C)' : '(T)'}
+                    <TableCell className="hidden md:table-cell text-xs text-muted-foreground uppercase font-bold">
+                      {match.isHome ? 'In Casa' : 'Trasferta'}
                     </TableCell>
                     <TableCell className="p-0 md:p-4 block md:table-cell text-center md:text-left flex flex-col items-center md:block mr-4 md:mr-0">
                       <span className="text-xs md:text-base font-black bg-primary/5 px-2 py-1 rounded border border-primary/10">
