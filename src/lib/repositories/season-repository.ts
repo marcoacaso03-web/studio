@@ -7,12 +7,14 @@ export const seasonRepository = {
     },
 
     async getById(id: string) {
+        if (!id) return undefined;
         return await db.seasons.get(id);
     },
 
     async getActive() {
-        // Dexie stores booleans and queries them consistently with boolean values
-        return await db.seasons.where('isActive').equals(true).first();
+        // Utilizziamo filter() invece di where().equals() per evitare DataError con indici booleani in alcuni browser/ambienti
+        const seasons = await db.seasons.toArray();
+        return seasons.find(s => s.isActive === true);
     },
 
     async add(name: string) {
