@@ -1,4 +1,4 @@
-"use client";
+le"use client";
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -49,7 +49,7 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-3xl font-black tracking-tighter text-primary">PitchMan</CardTitle>
           <CardDescription className="text-xs uppercase font-bold tracking-widest text-muted-foreground/60">
-            Gestionale Tecnico Offline
+            Gestionale Tecnico Personale
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
