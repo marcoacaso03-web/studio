@@ -1,3 +1,4 @@
+
 "use client";
 
 import { create } from 'zustand';
@@ -72,7 +73,7 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     },
 
     syncAndPersistMinutes: async () => {
-        const { match, lineup, events, stats, matchId } = get();
+        const { match, lineup, events, matchId } = get();
         if (!match || !lineup || !matchId) return;
 
         const duration = match.duration || 90;
@@ -95,7 +96,12 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         });
 
         const newStats: PlayerMatchStats[] = Array.from(participants).map(playerId => {
-            const existingStat = stats.find(s => s.playerId === playerId);
+            // Sincronizzazione automatica dei dati basata sugli eventi della cronaca
+            const yellowCards = events.filter(e => e.type === 'yellow_card' && e.playerId === playerId && e.team === pitchManTeam).length;
+            const redCards = events.filter(e => e.type === 'red_card' && e.playerId === playerId && e.team === pitchManTeam).length;
+            const goals = events.filter(e => e.type === 'goal' && e.playerId === playerId && e.team === pitchManTeam).length;
+            const assists = events.filter(e => e.type === 'goal' && e.assistPlayerId === playerId && e.team === pitchManTeam).length;
+
             let minutesPlayed = 0;
             const isStarter = lineup.starters.includes(playerId);
 
@@ -129,10 +135,10 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
                 matchId: match.id,
                 playerId,
                 minutesPlayed,
-                goals: existingStat?.goals || 0,
-                assists: existingStat?.assists || 0,
-                yellowCards: existingStat?.yellowCards || 0,
-                redCards: existingStat?.redCards || 0
+                goals,
+                assists,
+                yellowCards,
+                redCards
             };
         });
 
@@ -141,8 +147,9 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         }
 
         set({ stats: newStats });
-        // Synchronize stats only for the match's season
+        // Sincronizza le statistiche aggregate per la stagione corretta
         await aggregationRepository.syncAllPlayersStats(match.seasonId);
+        // Forza il ricaricamento degli store delle statistiche globali
         useStatsStore.getState().loadStats();
     },
 

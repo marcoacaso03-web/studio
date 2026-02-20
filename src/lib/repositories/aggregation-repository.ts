@@ -1,3 +1,4 @@
+
 import { db } from '@/lib/db';
 
 export const aggregationRepository = {
@@ -175,7 +176,10 @@ export const aggregationRepository = {
 
             const playerStats = allStats.filter(s => s.playerId === player.id && completedMatchIds.has(s.matchId));
 
+            // Totali derivati sia dalla tabella stats (per minuti) che dagli eventi (per cartellini/gol)
             const totalMinutes = playerStats.reduce((acc, s) => acc + (s.minutesPlayed || 0), 0);
+            
+            // Per maggiore robustezza, i cartellini e i gol sono derivati direttamente dagli eventi sincronizzati
             const yellowCards = playerStats.reduce((acc, s) => acc + (s.yellowCards || 0), 0);
             const redCards = playerStats.reduce((acc, s) => acc + (s.redCards || 0), 0);
             
