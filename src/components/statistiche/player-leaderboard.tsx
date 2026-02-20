@@ -72,7 +72,7 @@ export function PlayerLeaderboard() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Classifica Giocatori</CardTitle>
+          <CardTitle>Giocatori</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground text-center py-10">Nessun dato disponibile. Gioca qualche partita per vedere le statistiche.</p>
@@ -84,7 +84,7 @@ export function PlayerLeaderboard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Classifica Giocatori</CardTitle>
+        <CardTitle>Giocatori</CardTitle>
         <CardDescription>
           Rendimento stagionale. Clicca sulle intestazioni per ordinare.
         </CardDescription>
@@ -94,7 +94,6 @@ export function PlayerLeaderboard() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[40px] text-[10px] font-bold uppercase text-center">#</TableHead>
                 <TableHead 
                   className="cursor-pointer hover:bg-muted/50 transition-colors text-[10px] font-bold uppercase" 
                   onClick={() => handleSort('name')}
@@ -102,51 +101,50 @@ export function PlayerLeaderboard() {
                   <div className="flex items-center">Giocatore <SortIcon column="name" /></div>
                 </TableHead>
                 <TableHead 
-                  className="text-center cursor-pointer hover:bg-muted/50 transition-colors text-[10px] font-bold uppercase" 
+                  className="w-12 text-center cursor-pointer hover:bg-muted/50 transition-colors text-[10px] font-bold uppercase px-1" 
                   onClick={() => handleSort('appearances')}
                 >
-                  <div className="flex items-center justify-center">Pres. <SortIcon column="appearances" /></div>
+                  <div className="flex items-center justify-center">P <SortIcon column="appearances" /></div>
                 </TableHead>
                 <TableHead 
-                  className="text-center cursor-pointer hover:bg-muted/50 transition-colors text-[10px] font-bold uppercase" 
+                  className="w-12 text-center cursor-pointer hover:bg-muted/50 transition-colors text-[10px] font-bold uppercase px-1" 
                   onClick={() => handleSort('goals')}
                 >
-                  <div className="flex items-center justify-center">Gol <SortIcon column="goals" /></div>
+                  <div className="flex items-center justify-center">G <SortIcon column="goals" /></div>
                 </TableHead>
                 <TableHead 
-                  className="text-center cursor-pointer hover:bg-muted/50 transition-colors text-[10px] font-bold uppercase" 
+                  className="w-12 text-center cursor-pointer hover:bg-muted/50 transition-colors text-[10px] font-bold uppercase px-1" 
                   onClick={() => handleSort('assists')}
                 >
-                  <div className="flex items-center justify-center">Ass. <SortIcon column="assists" /></div>
+                  <div className="flex items-center justify-center">A <SortIcon column="assists" /></div>
                 </TableHead>
                 <TableHead 
-                  className="text-center cursor-pointer hover:bg-muted/50 transition-colors text-[10px] font-bold uppercase" 
+                  className="w-14 text-center cursor-pointer hover:bg-muted/50 transition-colors text-[10px] font-bold uppercase px-1" 
                   onClick={() => handleSort('yellowCards')}
                 >
-                  <div className="flex items-center justify-center">Amm. <SortIcon column="yellowCards" /></div>
+                  <div className="flex items-center justify-center">AMM <SortIcon column="yellowCards" /></div>
                 </TableHead>
                 <TableHead 
-                  className="text-center cursor-pointer hover:bg-muted/50 transition-colors text-[10px] font-bold uppercase" 
+                  className="w-14 text-center cursor-pointer hover:bg-muted/50 transition-colors text-[10px] font-bold uppercase px-1" 
                   onClick={() => handleSort('redCards')}
                 >
-                  <div className="flex items-center justify-center">Esp. <SortIcon column="redCards" /></div>
+                  <div className="flex items-center justify-center">ESP <SortIcon column="redCards" /></div>
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sortedData.map((player, index) => (
+              {sortedData.map((player) => (
                 <TableRow key={player.playerId} className="h-12">
-                  <TableCell className="text-center text-xs font-bold text-muted-foreground">{index + 1}</TableCell>
-                  <TableCell className="font-bold whitespace-nowrap text-sm">{player.name}</TableCell>
-                  <TableCell className="text-center text-xs">{player.stats.appearances}</TableCell>
-                  <TableCell className="text-center font-black text-sm text-primary">{player.stats.goals}</TableCell>
-                  <TableCell className="text-center font-bold text-xs text-blue-500">{player.stats.assists}</TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="font-bold whitespace-nowrap text-sm px-4">{player.name}</TableCell>
+                  <TableCell className="text-center text-xs px-1">{player.stats.appearances}</TableCell>
+                  <TableCell className="text-center font-black text-sm text-primary px-1">{player.stats.goals}</TableCell>
+                  <TableCell className="text-center font-bold text-xs text-blue-500 px-1">{player.stats.assists}</TableCell>
+                  <TableCell className="text-center px-1">
                     <span className="text-[10px] font-bold bg-yellow-400/20 text-yellow-700 px-1.5 py-0.5 rounded border border-yellow-400/30">
                         {player.stats.yellowCards}
                     </span>
                   </TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="text-center px-1">
                     <span className="text-[10px] font-bold bg-red-500/20 text-red-700 px-1.5 py-0.5 rounded border border-red-500/30">
                         {player.stats.redCards}
                     </span>
