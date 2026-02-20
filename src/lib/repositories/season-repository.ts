@@ -37,6 +37,27 @@ export const seasonRepository = {
         });
     },
 
+    async delete(id: string) {
+        // Eliminiamo tutti i dati associati alla stagione per non lasciare orfani
+        return await db.transaction('rw', [db.seasons, db.players, db.matches, db.matchAttendances, db.playerMatchStats, db.matchLineups, db.matchEvents], async () => {
+            const matches = await db.matches.where('seasonId').equals(id).toArray();
+            const matchIds = matches.map(m => m.id);
+            
+            // Pulizia tabelle relazionali per ogni partita della stagione
+            if (matchIds.length > 0) {
+                await db.matchAttendances.where('matchId').anyOf(matchIds).delete();
+                await db.playerMatchStats.where('matchId').anyOf(matchIds).delete();
+                await db.matchLineups.where('matchId').anyOf(matchIds).delete();
+                await db.matchEvents.where('matchId').anyOf(matchIds).delete();
+            }
+            
+            // Pulizia record principali
+            await db.matches.where('seasonId').equals(id).delete();
+            await db.players.where('seasonId').equals(id).delete();
+            await db.seasons.delete(id);
+        });
+    },
+
     async ensureDefaultSeason(userId: string) {
         if (!userId) return undefined;
         const seasonsCount = await db.seasons.where('userId').equals(userId).count();

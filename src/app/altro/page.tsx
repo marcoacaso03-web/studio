@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -7,11 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, RefreshCw, LogOut, User } from 'lucide-react';
+import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, RefreshCw, LogOut, User, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { playerRepository } from '@/lib/repositories/player-repository';
 import { matchRepository } from '@/lib/repositories/match-repository';
-import { statsRepository } from '@/lib/repositories/stats-repository';
 import { useThemeStore } from '@/store/useThemeStore';
 import { useSeasonsStore } from '@/store/useSeasonsStore';
 import { useMatchesStore } from '@/store/useMatchesStore';
@@ -37,10 +37,11 @@ import {
 export default function AltroPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [newSeasonName, setNewSeasonName] = useState('');
+  const [seasonToDelete, setSeasonToDelete] = useState<{id: string, name: string} | null>(null);
   const { toast } = useToast();
   const router = useRouter();
   const { theme, toggleTheme } = useThemeStore();
-  const { seasons, fetchAll: fetchSeasons, addSeason, setActiveSeason } = useSeasonsStore();
+  const { seasons, fetchAll: fetchSeasons, addSeason, setActiveSeason, removeSeason } = useSeasonsStore();
   const { user, logout } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
@@ -64,6 +65,13 @@ export default function AltroPage() {
         useStatsStore.getState().loadStats()
     ]);
     toast({ title: "Cambio Stagione", description: `Ora stai visualizzando i dati della stagione ${name}.` });
+  };
+
+  const handleDeleteSeason = async () => {
+    if (!seasonToDelete) return;
+    await removeSeason(seasonToDelete.id);
+    toast({ variant: "destructive", title: "Stagione eliminata", description: `La stagione ${seasonToDelete.name} e tutti i suoi dati sono stati rimossi.` });
+    setSeasonToDelete(null);
   };
 
   const handleLogout = () => {
@@ -205,8 +213,8 @@ export default function AltroPage() {
               <div 
                 key={s.id} 
                 className={cn(
-                  "flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer",
-                  s.isActive ? "bg-primary/5 border-primary shadow-sm" : "bg-muted/20 hover:bg-muted/40"
+                  "flex items-center justify-between p-3 rounded-xl border transition-all",
+                  s.isActive ? "bg-primary/5 border-primary shadow-sm" : "bg-muted/20 hover:bg-muted/40 cursor-pointer"
                 )}
                 onClick={() => !s.isActive && handleSwitchSeason(s.id, s.name)}
               >
@@ -218,11 +226,26 @@ export default function AltroPage() {
                     <Badge className="text-[8px] bg-primary text-white font-black uppercase py-0 px-1.5">Attiva</Badge>
                   )}
                 </div>
-                {s.isActive ? (
-                  <CheckCircle2 className="h-5 w-5 text-primary" />
-                ) : (
-                  <div className="h-5 w-5 rounded-full border border-muted-foreground/30" />
-                )}
+                <div className="flex items-center gap-2">
+                  {!s.isActive && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/5"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSeasonToDelete({ id: s.id, name: s.name });
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {s.isActive ? (
+                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                  ) : (
+                    <div className="h-5 w-5 rounded-full border border-muted-foreground/30" />
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -291,6 +314,23 @@ export default function AltroPage() {
           </AlertDialog>
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!seasonToDelete} onOpenChange={(open) => !open && setSeasonToDelete(null)}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="uppercase font-black">Elimina Stagione?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs">
+              Questa azione cancellerà DEFINITIVAMENTE la stagione <strong>{seasonToDelete?.name}</strong> e tutti i relativi dati (giocatori e partite). Non è possibile annullare.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2 mt-4">
+            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs">Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteSeason} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase">
+              Elimina
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
