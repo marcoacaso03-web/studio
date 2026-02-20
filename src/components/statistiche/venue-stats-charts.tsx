@@ -56,7 +56,7 @@ export function VenueStatsCharts() {
     return (
         <Card className="shadow-sm">
             <CardHeader className="pb-2">
-                <CardTitle className="text-base font-bold">Rendimento per Sede</CardTitle>
+                <CardTitle className="text-base font-bold">Risultati:</CardTitle>
                 <CardDescription className="text-xs">Distribuzione esiti Totale, In Casa e In Trasferta.</CardDescription>
             </CardHeader>
             <CardContent className="pt-4">

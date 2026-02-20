@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TeamPerformanceChart } from "@/components/statistiche/team-performance-chart";
 import { GoalsIntervalChart } from "@/components/statistiche/goals-interval-chart";
 import { VenueStatsCharts } from "@/components/statistiche/venue-stats-charts";
+import { GoalVenueCharts } from "@/components/statistiche/goal-venue-charts";
 
 export default function StatistichePage() {
   const { loading, loadStats } = useStatsStore();
@@ -56,6 +57,7 @@ export default function StatistichePage() {
            ) : (
             <div className="space-y-6">
                 <VenueStatsCharts />
+                <GoalVenueCharts />
                 <TeamPerformanceChart />
                 <GoalsIntervalChart />
             </div>
