@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, RefreshCw, LogOut, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { playerRepository } from '@/lib/repositories/player-repository';
 import { matchRepository } from '@/lib/repositories/match-repository';
@@ -17,9 +17,11 @@ import { useSeasonsStore } from '@/store/useSeasonsStore';
 import { useMatchesStore } from '@/store/useMatchesStore';
 import { usePlayersStore } from '@/store/usePlayersStore';
 import { useStatsStore } from '@/store/useStatsStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { db } from '@/lib/db';
+import { useRouter } from 'next/navigation';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,8 +38,10 @@ export default function AltroPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [newSeasonName, setNewSeasonName] = useState('');
   const { toast } = useToast();
+  const router = useRouter();
   const { theme, toggleTheme } = useThemeStore();
   const { seasons, fetchAll: fetchSeasons, addSeason, setActiveSeason } = useSeasonsStore();
+  const { user, logout } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -60,6 +64,12 @@ export default function AltroPage() {
         useStatsStore.getState().loadStats()
     ]);
     toast({ title: "Cambio Stagione", description: `Ora stai visualizzando i dati della stagione ${name}.` });
+  };
+
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+    toast({ title: "Logout effettuato", description: "A presto su PitchMan!" });
   };
 
   const convertToCSV = (data: any[]) => {
@@ -104,19 +114,16 @@ export default function AltroPage() {
   }
 
   const handleExport = async () => {
+    if (!user) return;
     setIsExporting(true);
     try {
-      const players = await playerRepository.getAll();
+      const players = await playerRepository.getAll(user.id, useSeasonsStore.getState().activeSeason?.id);
       const playersCSV = convertToCSV(players.map(({avatarUrl, imageHint, ...p}) => p));
-      downloadCSV(playersCSV, 'pitchman_players.csv');
+      downloadCSV(playersCSV, `pitchman_players_${user.username}.csv`);
       
-      const matches = await matchRepository.getAll();
+      const matches = await matchRepository.getAll(user.id, useSeasonsStore.getState().activeSeason?.id);
       const matchesCSV = convertToCSV(matches);
-      downloadCSV(matchesCSV, 'pitchman_matches.csv');
-      
-      const playerMatchStats = await statsRepository.getAll();
-      const playerMatchStatsCSV = convertToCSV(playerMatchStats);
-      downloadCSV(playerMatchStatsCSV, 'pitchman_player_match_stats.csv');
+      downloadCSV(matchesCSV, `pitchman_matches_${user.username}.csv`);
       
       toast({ title: "Esportazione completata", description: "I file CSV sono stati scaricati." });
     } catch (error) {
@@ -140,6 +147,36 @@ export default function AltroPage() {
   return (
     <div className="pb-12 space-y-6">
       <PageHeader title="Impostazioni" />
+
+      {/* Sezione Profilo Utente */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <User className="h-5 w-5 text-primary" />
+            <CardTitle>Account</CardTitle>
+          </div>
+          <CardDescription>
+            Informazioni sull'utente attualmente collegato.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/10">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-black uppercase">
+                {user?.username.charAt(0)}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-black uppercase tracking-tight">{user?.username}</span>
+                <span className="text-[10px] text-muted-foreground font-bold uppercase">ID: {user?.id}</span>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={handleLogout} className="border-destructive/30 text-destructive hover:bg-destructive/5 font-bold uppercase text-[10px]">
+              <LogOut className="h-3.5 w-3.5 mr-1.5" />
+              Esci
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
       
       <Card>
         <CardHeader>
