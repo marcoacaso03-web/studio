@@ -178,7 +178,7 @@ export default function DashboardPage() {
             {playersLoading ? <Skeleton className="h-10 w-full" /> : (
               <div className="flex flex-col">
                 <div className="text-2xl md:text-4xl font-black text-primary leading-tight">{roleStats.total}</div>
-                <div className="flex flex-wrap gap-x-2 text-[8px] md:text-[10px] font-bold text-muted-foreground/80 uppercase">
+                <div className="flex flex-wrap gap-x-3 text-sm md:text-xl font-black text-muted-foreground/80 uppercase mt-1">
                   <span>ATT: {roleStats.attaccanti}</span>
                   <span>CEN: {roleStats.centrocampisti}</span>
                   <span>DIF: {roleStats.difensori}</span>
@@ -197,10 +197,10 @@ export default function DashboardPage() {
             {statsLoading ? <Skeleton className="h-10 w-full" /> : (
               <div className="flex flex-col">
                 <div className="text-2xl md:text-4xl font-black text-primary leading-tight">{teamRecord?.matchesPlayed || 0}</div>
-                <div className="flex gap-1.5 md:gap-2">
-                  <span className="text-[8px] md:text-[10px] font-bold text-primary uppercase">V: {teamRecord?.wins || 0}</span>
-                  <span className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase">P: {teamRecord?.draws || 0}</span>
-                  <span className="text-[8px] md:text-[10px] font-bold text-accent uppercase">S: {teamRecord?.losses || 0}</span>
+                <div className="flex gap-3 md:gap-4 mt-1">
+                  <span className="text-sm md:text-xl font-black text-primary uppercase">V: {teamRecord?.wins || 0}</span>
+                  <span className="text-sm md:text-xl font-black text-muted-foreground uppercase">P: {teamRecord?.draws || 0}</span>
+                  <span className="text-sm md:text-xl font-black text-accent uppercase">S: {teamRecord?.losses || 0}</span>
                 </div>
               </div>
             )}
