@@ -47,7 +47,7 @@ export function BulkPlayerDialog({ open, onOpenChange, onSave }: BulkPlayerDialo
   }, [open]);
 
   const addRow = () => {
-    setRows([...rows, { id: Date.now().toString(), firstName: '', lastName: '', role: 'Centrocampista' }]);
+    setRows([...rows, { id: Math.random().toString(36).substr(2, 9), firstName: '', lastName: '', role: 'Centrocampista' }]);
   };
 
   const removeRow = (id: string) => {
@@ -114,7 +114,7 @@ export function BulkPlayerDialog({ open, onOpenChange, onSave }: BulkPlayerDialo
                   />
                 </div>
                 <div className="col-span-9 sm:col-span-4 ml-6 sm:ml-0">
-                  <Select value={row.role} onValueChange={(v) => updateRow(row.id, 'role', v)}>
+                  <Select value={row.role} onValueChange={(v) => updateRow(row.id, 'role', v as Role)}>
                     <SelectTrigger className="h-9 text-[10px] font-bold uppercase">
                       <SelectValue />
                     </SelectTrigger>

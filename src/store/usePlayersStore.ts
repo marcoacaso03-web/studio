@@ -8,7 +8,6 @@ import type { PlayerCreateData } from '@/lib/repositories/player-repository';
 import { useStatsStore } from './useStatsStore';
 import { useSeasonsStore } from './useSeasonsStore';
 import { useAuthStore } from './useAuthStore';
-import { db } from '@/lib/db';
 
 interface PlayerState {
     players: Player[];
@@ -61,18 +60,8 @@ export const usePlayersStore = create<PlayerState>((set, get) => ({
         const activeSeason = useSeasonsStore.getState().activeSeason;
         if (!activeSeason || !user) return;
 
-        const newPlayers: Player[] = playersData.map(p => ({
-            id: `p_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-            userId: user.id,
-            seasonId: activeSeason.id,
-            name: p.name,
-            role: p.role,
-            avatarUrl: `https://picsum.photos/seed/p${Date.now()}${Math.random()}/200/200`,
-            imageHint: 'player portrait',
-            stats: { appearances: 0, goals: 0, assists: 0, avgMinutes: 0 },
-        }));
-
-        await db.players.bulkAdd(newPlayers);
+        await playerRepository.bulkAdd(playersData, user.id, activeSeason.id);
+        
         await get().fetchAll(activeSeason.id);
         useStatsStore.getState().loadStats();
     },

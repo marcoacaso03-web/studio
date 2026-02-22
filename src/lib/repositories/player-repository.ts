@@ -39,6 +39,23 @@ export const playerRepository = {
     return newPlayer;
   },
 
+  async bulkAdd(playersData: { name: string, role: Role }[], userId: string, seasonId: string) {
+    const timestamp = Date.now();
+    const newPlayers: Player[] = playersData.map((p, index) => ({
+      id: `p_${timestamp}_${index}_${Math.random().toString(36).substr(2, 5)}`,
+      userId,
+      seasonId,
+      name: p.name,
+      role: p.role,
+      avatarUrl: `https://picsum.photos/seed/p${timestamp}${index}/200/200`,
+      imageHint: 'player portrait',
+      stats: { appearances: 0, goals: 0, assists: 0, avgMinutes: 0 },
+    }));
+
+    await db.players.bulkAdd(newPlayers);
+    return newPlayers;
+  },
+
   async update(id: string, updates: Partial<Omit<PlayerCreateData, 'seasonId' | 'userId'>>) {
     await db.players.update(id, updates);
     return await db.players.get(id);
