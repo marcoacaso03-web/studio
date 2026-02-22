@@ -171,7 +171,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 gap-3 md:gap-4">
         <Card className="shadow-sm border bg-card">
           <CardHeader className="flex flex-row items-center justify-between p-3 md:p-4 pb-1 md:pb-2">
-            <CardTitle className="text-[10px] md:text-sm font-black uppercase tracking-wider text-muted-foreground/60">Rosa</CardTitle>
+            <CardTitle className="text-xs md:text-base font-black uppercase tracking-wider text-muted-foreground/60">Rosa</CardTitle>
             <Users className="h-3.5 w-3.5 text-primary" />
           </CardHeader>
           <CardContent className="p-3 md:p-4 pt-0">
@@ -190,7 +190,7 @@ export default function DashboardPage() {
         </Card>
         <Card className="shadow-sm border bg-card">
           <CardHeader className="flex flex-row items-center justify-between p-3 md:p-4 pb-1 md:pb-2">
-            <CardTitle className="text-[10px] md:text-sm font-black uppercase tracking-wider text-muted-foreground/60">Record</CardTitle>
+            <CardTitle className="text-xs md:text-base font-black uppercase tracking-wider text-muted-foreground/60">Record</CardTitle>
             <Trophy className="h-3.5 w-3.5 text-accent" />
           </CardHeader>
           <CardContent className="p-3 md:p-4 pt-0">
