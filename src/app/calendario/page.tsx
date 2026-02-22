@@ -198,9 +198,9 @@ export default function DashboardPage() {
               <div className="flex flex-col">
                 <div className="text-2xl md:text-4xl font-black text-primary leading-tight">{teamRecord?.matchesPlayed || 0}</div>
                 <div className="flex gap-1.5 md:gap-2">
-                  <span className="text-[8px] md:text-[10px] font-bold text-green-600 uppercase">V: {teamRecord?.wins || 0}</span>
-                  <span className="text-[8px] md:text-[10px] font-bold text-yellow-600 uppercase">P: {teamRecord?.draws || 0}</span>
-                  <span className="text-[8px] md:text-[10px] font-bold text-red-600 uppercase">S: {teamRecord?.losses || 0}</span>
+                  <span className="text-[8px] md:text-[10px] font-bold text-primary uppercase">V: {teamRecord?.wins || 0}</span>
+                  <span className="text-[8px] md:text-[10px] font-bold text-muted-foreground uppercase">P: {teamRecord?.draws || 0}</span>
+                  <span className="text-[8px] md:text-[10px] font-bold text-accent uppercase">S: {teamRecord?.losses || 0}</span>
                 </div>
               </div>
             )}
