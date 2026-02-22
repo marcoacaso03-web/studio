@@ -1,11 +1,13 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react";
+import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, ArrowUpDown, Users } from "lucide-react";
 import type { Player, Role } from "@/lib/types";
 import { PlayerFormDialog } from "@/components/squadra/player-form-dialog";
+import { BulkPlayerDialog } from "@/components/giocatori/bulk-player-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,13 +41,15 @@ const roleInitials: Record<Role, string> = {
   'Portiere': 'POR',
   'Difensore': 'DIF',
   'Centrocampista': 'CEN',
-  'Attaccante': 'ATT'
+  'Attaccante': 'ATT',
+  'Sconosciuto': 'N/A'
 };
 
 export default function RosaPage() {
-  const { players, loading, fetchAll, add, update, remove } = usePlayersStore();
+  const { players, loading, fetchAll, add, update, remove, bulkAdd } = usePlayersStore();
   const { activeSeason } = useSeasonsStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isBulkFormOpen, setIsBulkFormOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: null });
@@ -65,6 +69,10 @@ export default function RosaPage() {
     } else {
       await add(data);
     }
+  };
+
+  const handleBulkSavePlayers = async (playersData: { name: string, role: Role }[]) => {
+    await bulkAdd(playersData);
   };
 
   const handleDeletePlayer = async () => {
@@ -149,14 +157,19 @@ export default function RosaPage() {
           </div>
         }
       >
-        <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={() => handleOpenForm(null)}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          <span className="hidden md:inline">Aggiungi</span>
-          <span className="md:hidden">Add</span>
-        </Button>
+        <div className="flex gap-2">
+            <Button size="sm" variant="outline" className="border-dashed h-9 text-[10px] font-black uppercase rounded-xl" onClick={() => setIsBulkFormOpen(true)}>
+              <Users className="mr-2 h-4 w-4" />
+              In Blocco
+            </Button>
+            <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 h-9 text-[10px] font-black uppercase rounded-xl" onClick={() => handleOpenForm(null)}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Nuovo
+            </Button>
+        </div>
       </PageHeader>
 
-      <Card>
+      <Card className="rounded-2xl overflow-hidden border shadow-sm">
         <CardContent className="p-0">
           {loading ? (
               <div className="p-4 space-y-3">
@@ -170,10 +183,10 @@ export default function RosaPage() {
             ) : (
               <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader>
-                    <TableRow className="hover:bg-transparent">
+                  <TableHeader className="bg-muted/30">
+                    <TableRow className="hover:bg-transparent border-none">
                       <TableHead 
-                        className="px-4 cursor-pointer"
+                        className="px-4 cursor-pointer text-[10px] font-black uppercase tracking-widest"
                         onClick={() => handleSort('firstName')}
                       >
                         <div className="flex items-center">
@@ -181,7 +194,7 @@ export default function RosaPage() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="px-4 cursor-pointer"
+                        className="px-4 cursor-pointer text-[10px] font-black uppercase tracking-widest"
                         onClick={() => handleSort('lastName')}
                       >
                         <div className="flex items-center">
@@ -189,41 +202,41 @@ export default function RosaPage() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="w-24 px-2 text-center cursor-pointer"
+                        className="w-24 px-2 text-center cursor-pointer text-[10px] font-black uppercase tracking-widest"
                         onClick={() => handleSort('role')}
                       >
                         <div className="flex items-center justify-center">
                           Ruolo <SortIndicator columnKey="role" />
                         </div>
                       </TableHead>
-                      <TableHead className="w-24 px-4 text-right">Azioni</TableHead>
+                      <TableHead className="w-24 px-4 text-right text-[10px] font-black uppercase tracking-widest">Azioni</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {sortedPlayers.map((player) => {
                       const { firstName, lastName } = splitName(player.name);
                       return (
-                        <TableRow key={player.id} className="h-14">
-                          <TableCell className="px-4 font-medium text-sm md:text-base">
+                        <TableRow key={player.id} className="h-14 border-muted/50">
+                          <TableCell className="px-4 font-bold text-sm uppercase tracking-tight">
                             {firstName}
                           </TableCell>
-                          <TableCell className="px-4 font-medium text-sm md:text-base">
+                          <TableCell className="px-4 font-bold text-sm uppercase tracking-tight">
                             {lastName}
                           </TableCell>
                           <TableCell className="px-2 text-center">
-                            <span className="text-[10px] font-bold bg-muted px-2 py-1 rounded border min-w-[36px] inline-block">
-                              {roleInitials[player.role]}
+                            <span className="text-[9px] font-black bg-primary/5 text-primary px-2 py-0.5 rounded border border-primary/10 min-w-[36px] inline-block">
+                              {roleInitials[player.role] || roleInitials.Sconosciuto}
                             </span>
                           </TableCell>
                           <TableCell className="px-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
+                            <div className="flex items-center justify-end gap-1">
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
                                 className="h-8 w-8 text-muted-foreground hover:text-primary"
                                 onClick={() => handleOpenForm(player)}
                               >
-                                <Edit className="h-4 w-4" />
+                                <Edit className="h-3.5 w-3.5" />
                               </Button>
                               <Button 
                                 variant="ghost" 
@@ -231,7 +244,7 @@ export default function RosaPage() {
                                 className="h-8 w-8 text-muted-foreground hover:text-destructive"
                                 onClick={() => setPlayerToDelete(player)}
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             </div>
                           </TableCell>
@@ -251,18 +264,24 @@ export default function RosaPage() {
         onSave={handleSavePlayer} 
         player={selectedPlayer}
       />
+
+      <BulkPlayerDialog
+        open={isBulkFormOpen}
+        onOpenChange={setIsBulkFormOpen}
+        onSave={handleBulkSavePlayers}
+      />
       
       <AlertDialog open={!!playerToDelete} onOpenChange={(open) => !open && setPlayerToDelete(null)}>
-        <AlertDialogContent className="max-w-[90vw] rounded-lg">
+        <AlertDialogContent className="max-w-[90vw] rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Sei sicuro?</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs">
-              Questa azione eliminerà definitivamente {playerToDelete?.name} dalla rosa della stagione {activeSeason?.name}.
+            <AlertDialogTitle className="text-primary font-black uppercase">Rimuovi Giocatore</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs font-medium">
+              Sei sicuro di voler eliminare definitivamente <strong>{playerToDelete?.name}</strong> dalla rosa? Questa azione è irreversibile.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-row justify-end gap-2">
-            <AlertDialogCancel className="mt-0 text-xs">Annulla</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeletePlayer} className="bg-destructive hover:bg-destructive/90 text-xs">
+          <AlertDialogFooter className="flex-row justify-end gap-2 mt-4">
+            <AlertDialogCancel className="mt-0 text-xs font-bold uppercase rounded-xl flex-1">Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeletePlayer} className="bg-destructive hover:bg-destructive/90 text-xs font-bold uppercase rounded-xl flex-1">
               Elimina
             </AlertDialogAction>
           </AlertDialogFooter>

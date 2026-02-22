@@ -33,7 +33,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-
 const formSchema = z.object({
   firstName: z.string().min(2, { message: "Il nome è richiesto." }),
   lastName: z.string().min(2, { message: "Il cognome è richiesto." }),
@@ -42,7 +41,6 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-// The parent component expects this shape
 type PlayerSaveData = {
   name: string;
   role: Role;
@@ -86,7 +84,6 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
     }
   }, [player, open, form]);
 
-
   function onSubmit(data: FormValues) {
     const saveData: PlayerSaveData = {
       name: `${data.firstName} ${data.lastName}`.trim(),
@@ -98,26 +95,24 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] rounded-2xl">
         <DialogHeader>
-          <DialogTitle>{player ? "Modifica Giocatore" : "Aggiungi Giocatore"}</DialogTitle>
-          <DialogDescription>
-            {player
-              ? "Modifica i dettagli del giocatore e salva."
-              : "Inserisci i dettagli per creare un nuovo giocatore."}
+          <DialogTitle className="text-primary font-black uppercase">{player ? "Modifica Giocatore" : "Nuovo Giocatore"}</DialogTitle>
+          <DialogDescription className="text-xs">
+            Gestisci i dettagli anagrafici e il ruolo tecnico.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
-            <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
+            <div className="grid grid-cols-2 gap-3">
               <FormField
                 control={form.control}
                 name="firstName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nome</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Nome</FormLabel>
                     <FormControl>
-                      <Input placeholder="Es: Mario" {...field} />
+                      <Input placeholder="Mario" {...field} className="h-10 text-xs font-bold uppercase" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -128,9 +123,9 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
                 name="lastName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cognome</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Cognome</FormLabel>
                     <FormControl>
-                      <Input placeholder="Es: Rossi" {...field} />
+                      <Input placeholder="Rossi" {...field} className="h-10 text-xs font-bold uppercase" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -139,31 +134,31 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
             </div>
             
             <FormField
-            control={form.control}
-            name="role"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Ruolo</FormLabel>
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Ruolo</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                         <FormControl>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Seleziona un ruolo" />
+                            <SelectTrigger className="h-10 text-xs font-bold uppercase">
+                                <SelectValue placeholder="Seleziona ruolo" />
                             </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                             {ROLES.map(role => (
-                                <SelectItem key={role} value={role}>{role}</SelectItem>
+                                <SelectItem key={role} value={role} className="text-xs font-bold uppercase">{role}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
-                <FormMessage />
-                </FormItem>
-            )}
+                    <FormMessage />
+                  </FormItem>
+              )}
             />
 
-            <DialogFooter className="pt-4">
-              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Annulla</Button>
-              <Button type="submit">Salva</Button>
+            <DialogFooter className="pt-4 flex-row gap-2">
+              <Button type="button" variant="ghost" className="flex-1 rounded-xl font-bold uppercase text-xs h-11" onClick={() => onOpenChange(false)}>Annulla</Button>
+              <Button type="submit" className="flex-1 bg-primary hover:bg-primary/90 rounded-xl font-bold uppercase text-xs h-11">Salva</Button>
             </DialogFooter>
           </form>
         </Form>
