@@ -41,7 +41,6 @@ export const usePlayersStore = create<PlayerState>((set, get) => ({
         const user = useAuthStore.getState().user;
         const activeSeason = useSeasonsStore.getState().activeSeason;
         if (!activeSeason || !user) {
-             console.error("Dati mancanti per aggiungere il giocatore.");
              return undefined;
         }
 

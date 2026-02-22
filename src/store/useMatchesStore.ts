@@ -39,7 +39,6 @@ export const useMatchesStore = create<MatchState>((set, get) => ({
         const user = useAuthStore.getState().user;
         const activeSeason = useSeasonsStore.getState().activeSeason;
         if (!activeSeason || !user) {
-            console.error("Dati mancanti per creare la partita.");
             return undefined;
         }
 

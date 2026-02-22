@@ -46,17 +46,24 @@ const roleInitials: Record<Role, string> = {
 };
 
 export default function RosaPage() {
-  const { players, loading, fetchAll, add, update, remove, bulkAdd } = usePlayersStore();
-  const { activeSeason } = useSeasonsStore();
+  const { players, loading: playersLoading, fetchAll, add, update, remove, bulkAdd } = usePlayersStore();
+  const { activeSeason, loading: seasonsLoading, fetchAll: fetchSeasons } = useSeasonsStore();
+  
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isBulkFormOpen, setIsBulkFormOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: null });
 
+  const loading = playersLoading || seasonsLoading;
+
   useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+    const initialize = async () => {
+      await fetchSeasons();
+      fetchAll();
+    };
+    initialize();
+  }, [fetchAll, fetchSeasons]);
   
   const handleOpenForm = (player: Player | null) => {
     setSelectedPlayer(player);
@@ -158,11 +165,11 @@ export default function RosaPage() {
         }
       >
         <div className="flex gap-2">
-            <Button size="sm" variant="outline" className="border-dashed h-9 text-[10px] font-black uppercase rounded-xl" onClick={() => setIsBulkFormOpen(true)}>
+            <Button size="sm" variant="outline" className="border-dashed h-9 text-[10px] font-black uppercase rounded-xl" onClick={() => setIsBulkFormOpen(true)} disabled={loading}>
               <Users className="mr-2 h-4 w-4" />
               In Blocco
             </Button>
-            <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 h-9 text-[10px] font-black uppercase rounded-xl" onClick={() => handleOpenForm(null)}>
+            <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 h-9 text-[10px] font-black uppercase rounded-xl" onClick={() => handleOpenForm(null)} disabled={loading}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Nuovo
             </Button>
