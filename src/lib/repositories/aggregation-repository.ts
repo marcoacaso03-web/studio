@@ -1,4 +1,3 @@
-
 import { db } from '@/lib/db';
 
 export const aggregationRepository = {
@@ -164,7 +163,6 @@ export const aggregationRepository = {
 
         const completedMatchIds = new Set(completedMatches.map(m => m.id));
         
-        // Fetch all sub-tables and filter by completedMatchIds to ensure multi-user isolation
         const allEvents = (await db.matchEvents.toArray()).filter(e => completedMatchIds.has(e.matchId));
         const allLineups = (await db.matchLineups.toArray()).filter(l => completedMatchIds.has(l.matchId));
         const allStats = (await db.playerMatchStats.toArray()).filter(s => completedMatchIds.has(s.matchId));
