@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
+import { Shield } from 'lucide-react';
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -16,19 +17,34 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (mounted && !isAuthenticated && pathname !== '/login') {
+    if (mounted && !isAuthenticated && pathname !== '/login' && pathname !== '/') {
       router.push('/login');
     }
   }, [isAuthenticated, pathname, router, mounted]);
 
-  // Se siamo sulla pagina di login, non mostriamo l'header e la navigazione del layout principale
   const isLoginPage = pathname === '/login';
+  const isRootPage = pathname === '/';
 
-  if (!mounted) return null;
+  if (!mounted) {
+     return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary">
+        <Shield className="h-12 w-12 text-white animate-pulse" />
+      </div>
+    );
+  }
 
-  // Se non autenticato e non in login page, mostriamo uno stato vuoto mentre il router reindirizza
-  if (!isAuthenticated && !isLoginPage) {
-    return <div className="min-h-screen bg-background" />;
+  // Se siamo sulla root o in login, non blocchiamo il rendering
+  if (isLoginPage || isRootPage) {
+    return <>{children}</>;
+  }
+
+  // Se non autenticato e non in pagine libere, mostriamo lo splash di caricamento mentre reindirizza
+  if (!isAuthenticated) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary">
+        <Shield className="h-12 w-12 text-white animate-pulse" />
+      </div>
+    );
   }
 
   return <>{children}</>;

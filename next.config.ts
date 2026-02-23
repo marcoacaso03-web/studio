@@ -1,3 +1,4 @@
+
 import type { NextConfig } from 'next';
 
 /** @type {import('next').NextConfig} */
@@ -12,12 +13,6 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'placehold.co',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
         hostname: 'images.unsplash.com',
         port: '',
         pathname: '/**',
@@ -30,6 +25,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Disabilita telemetria e altri processi di background pesanti in dev
+  experimental: {
+    turbo: {
+      rules: {
+        // Configurazioni specifiche se necessario
+      }
+    }
+  }
 };
 
 export default nextConfig;
