@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -7,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, RefreshCw, LogOut, User, Trash2 } from 'lucide-react';
+import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, RefreshCw, LogOut, User, Trash2, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { playerRepository } from '@/lib/repositories/player-repository';
 import { matchRepository } from '@/lib/repositories/match-repository';
@@ -18,9 +19,17 @@ import { useMatchesStore } from '@/store/useMatchesStore';
 import { usePlayersStore } from '@/store/usePlayersStore';
 import { useStatsStore } from '@/store/useStatsStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +50,7 @@ export default function AltroPage() {
   const router = useRouter();
   const { theme, toggleTheme } = useThemeStore();
   const { seasons, fetchAll: fetchSeasons, addSeason, setActiveSeason, removeSeason } = useSeasonsStore();
+  const { defaultDuration, setDefaultDuration } = useSettingsStore();
   const { user, logout } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
@@ -183,6 +193,33 @@ export default function AltroPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-primary" />
+            <CardTitle>Preferenze Gare</CardTitle>
+          </div>
+          <CardDescription>
+            Configura i parametri predefiniti per le nuove partite.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between p-3 rounded-xl border bg-muted/30">
+            <Label className="text-sm font-black uppercase tracking-tight">Durata Default</Label>
+            <Select value={defaultDuration.toString()} onValueChange={(v) => setDefaultDuration(parseInt(v))}>
+              <SelectTrigger className="w-32 h-9 text-xs font-bold uppercase">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="70">70 minuti</SelectItem>
+                <SelectItem value="80">80 minuti</SelectItem>
+                <SelectItem value="90">90 minuti</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
             <History className="h-5 w-5 text-primary" />
             <CardTitle>Archivio Stagioni</CardTitle>
           </div>
@@ -295,7 +332,7 @@ export default function AltroPage() {
               <AlertDialogHeader>
                 <AlertDialogTitle className="uppercase font-black">Sei assolutamente sicuro?</AlertDialogTitle>
                 <AlertDialogDescription className="text-xs">
-                  Questa azione cancellerà DEFINITIVAMENTE tutti i tuoi dati (giocatori, partite, stagioni) associati all'account <strong>{user?.username}</strong>. Gli altri utenti non saranno influenzati. Non è possibile annullare l&apos;operazione.
+                  Questa azione cancellerà DEFINITIVAMENTE tutti i tuoi dati associati all'account <strong>{user?.username}</strong>.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter className="flex-row gap-2 mt-4">
@@ -314,7 +351,7 @@ export default function AltroPage() {
           <AlertDialogHeader>
             <AlertDialogTitle className="uppercase font-black">Elimina Stagione?</AlertDialogTitle>
             <AlertDialogDescription className="text-xs">
-              Questa azione cancellerà DEFINITIVAMENTE la stagione <strong>{seasonToDelete?.name}</strong> e tutti i relativi dati (giocatori e partite). Non è possibile annullare.
+              Questa azione cancellerà DEFINITIVAMENTE la stagione <strong>{seasonToDelete?.name}</strong> e tutti i relativi dati.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4">

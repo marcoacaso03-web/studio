@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -18,7 +19,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/components/ui/dialog";
 import { useMatchesStore } from "@/store/useMatchesStore";
 import { usePlayersStore } from "@/store/usePlayersStore";
 import { useStatsStore } from "@/store/useStatsStore";
@@ -47,7 +48,7 @@ export default function DashboardPage() {
   const getStatusBadge = (status: 'scheduled' | 'completed' | 'canceled') => {
     switch (status) {
       case 'completed':
-        return <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary border-primary/20">FIN</Badge>;
+        return <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary border-primary/20 uppercase">Finita</Badge>;
       case 'scheduled':
         return <Badge variant="secondary" className="text-[10px] px-1.5 py-0">PROG</Badge>;
       case 'canceled':
@@ -58,8 +59,7 @@ export default function DashboardPage() {
   }
 
   const handleSaveMatch = async (data: any) => {
-    const matchData = { ...data, date: data.date.toISOString() };
-    const newMatch = await addMatch(matchData);
+    const newMatch = await addMatch(data);
     if (newMatch) {
       loadStats();
     }
@@ -139,7 +139,12 @@ export default function DashboardPage() {
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell font-bold">{match.opponent}</TableCell>
+                  <TableCell className="hidden md:table-cell font-bold">
+                    <div className="flex flex-col">
+                      <span>{match.opponent}</span>
+                      <span className="text-[9px] text-muted-foreground uppercase">{match.type}</span>
+                    </div>
+                  </TableCell>
                   <TableCell className="hidden md:table-cell text-xs text-muted-foreground uppercase font-bold">
                     {match.isHome ? 'In Casa' : 'Trasferta'}
                   </TableCell>
@@ -178,7 +183,7 @@ export default function DashboardPage() {
             {playersLoading ? <Skeleton className="h-10 w-full" /> : (
               <div className="flex flex-col">
                 <div className="text-2xl md:text-4xl font-black text-primary leading-tight">{roleStats.total}</div>
-                <div className="flex flex-wrap gap-x-3 text-sm md:text-xl font-black text-muted-foreground/80 uppercase mt-1">
+                <div className="flex flex-wrap gap-x-2 text-[10px] md:text-sm font-black text-muted-foreground/80 uppercase mt-1">
                   <span>ATT: {roleStats.attaccanti}</span>
                   <span>CEN: {roleStats.centrocampisti}</span>
                   <span>DIF: {roleStats.difensori}</span>
@@ -197,10 +202,10 @@ export default function DashboardPage() {
             {statsLoading ? <Skeleton className="h-10 w-full" /> : (
               <div className="flex flex-col">
                 <div className="text-2xl md:text-4xl font-black text-primary leading-tight">{teamRecord?.matchesPlayed || 0}</div>
-                <div className="flex gap-3 md:gap-4 mt-1">
-                  <span className="text-sm md:text-xl font-black text-primary uppercase">V: {teamRecord?.wins || 0}</span>
-                  <span className="text-sm md:text-xl font-black text-muted-foreground uppercase">P: {teamRecord?.draws || 0}</span>
-                  <span className="text-sm md:text-xl font-black text-accent uppercase">S: {teamRecord?.losses || 0}</span>
+                <div className="flex gap-2 mt-1">
+                  <span className="text-[10px] md:text-sm font-black text-primary uppercase">V: {teamRecord?.wins || 0}</span>
+                  <span className="text-[10px] md:text-sm font-black text-muted-foreground uppercase">P: {teamRecord?.draws || 0}</span>
+                  <span className="text-[10px] md:text-sm font-black text-accent uppercase">S: {teamRecord?.losses || 0}</span>
                 </div>
               </div>
             )}
@@ -215,7 +220,7 @@ export default function DashboardPage() {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-primary font-black uppercase">Elimina Gara</AlertDialogTitle>
             <AlertDialogDescription className="text-xs font-medium">
-              Questa azione non può essere annullata. Tutti gli eventi e le statistiche verranno eliminati.
+              Questa azione non può essere annullata.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 sm:gap-0 mt-4">

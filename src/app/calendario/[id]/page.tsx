@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -12,7 +13,7 @@ import { useMatchDetailStore } from "@/store/useMatchDetailStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { MatchFormDialog } from "@/components/partite/match-form-dialog";
-import { CalendarDays, Settings2, Users, Zap, FileText, Home, Plane } from 'lucide-react';
+import { CalendarDays, Settings2, Users, Zap, FileText, Home, Plane, Shield } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export default function MatchDetailPage() {
@@ -29,11 +30,7 @@ export default function MatchDetailPage() {
   }, [id, load]);
   
   const handleSaveMatch = async (data: any) => {
-    const updateData = {
-        ...data,
-        date: data.date.toISOString()
-    };
-    await updateMatch(updateData);
+    await updateMatch(data);
   };
 
   if (loading) {
@@ -55,7 +52,7 @@ export default function MatchDetailPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'completed': return <Badge variant="default">Completata</Badge>;
+      case 'completed': return <Badge variant="default" className="uppercase">Finita</Badge>;
       case 'scheduled': return <Badge variant="secondary">In Programma</Badge>;
       case 'canceled': return <Badge variant="destructive">Annullata</Badge>;
       default: return null;
@@ -67,7 +64,12 @@ export default function MatchDetailPage() {
       <div className="space-y-6">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-             <PageHeader title={`Vs ${match.opponent}`} />
+             <div className="flex flex-col">
+                <PageHeader title={`Vs ${match.opponent}`} />
+                <Badge variant="outline" className="w-fit text-[10px] font-black uppercase tracking-widest -mt-4 mb-2">
+                  {match.type}
+                </Badge>
+             </div>
              {getStatusBadge(match.status)}
           </div>
 
@@ -104,7 +106,7 @@ export default function MatchDetailPage() {
                   onClick={() => setIsFormOpen(true)}
                 >
                   <Settings2 className="mr-2 h-4 w-4" />
-                  Modifica Partita
+                  Modifica Gara
                 </Button>
               </div>
             </CardContent>

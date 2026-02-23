@@ -25,6 +25,9 @@ export type Player = {
   };
 };
 
+export const MATCH_TYPES = ['Campionato', 'Torneo', 'Amichevole'] as const;
+export type MatchType = typeof MATCH_TYPES[number];
+
 export type Match = {
   id: string;
   userId: string;
@@ -32,6 +35,7 @@ export type Match = {
   opponent: string;
   date: string;
   isHome: boolean;
+  type: MatchType;
   duration: number; // Durata totale in minuti (70, 80, 90)
   result?: {
     home: number;

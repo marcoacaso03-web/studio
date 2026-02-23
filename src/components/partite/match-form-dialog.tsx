@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -23,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Match } from "@/lib/types";
+import { Match, MATCH_TYPES } from "@/lib/types";
 import {
   Dialog,
   DialogContent,
@@ -32,12 +33,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useSettingsStore } from "@/store/useSettingsStore";
 
-// Helper to convert a date object or ISO string to a 'YYYY-MM-DDTHH:mm' string for the input
 const toDatetimeLocal = (dateSource?: Date | string): string => {
   if (!dateSource) return '';
   const date = new Date(dateSource);
-  // Adjust for timezone offset to display correctly in the user's local time
   date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
   return date.toISOString().slice(0, 16);
 };
@@ -46,37 +46,32 @@ const formSchema = z.object({
   opponent: z.string().min(2, { message: "Il nome dell'avversario è richiesto." }),
   date: z.string().min(1, { message: "La data e l'ora sono richieste." }),
   isHome: z.boolean(),
+  type: z.enum(MATCH_TYPES),
   duration: z.coerce.number().int().min(1, "Durata richiesta"),
   status: z.enum(['scheduled', 'completed', 'canceled']),
 });
 
 type MatchFormValues = z.infer<typeof formSchema>;
 
-// This is the data structure the parent component expects
-type MatchSaveData = {
-    opponent: string;
-    date: Date;
-    isHome: boolean;
-    duration: number;
-    status: 'scheduled' | 'completed' | 'canceled';
-};
-
 interface MatchFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (data: MatchSaveData, matchId?: string) => void;
+  onSave: (data: any, matchId?: string) => void;
   match?: Match | null;
 }
 
 export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchFormDialogProps) {
+  const { defaultDuration } = useSettingsStore();
+  
   const form = useForm<MatchFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       opponent: "",
       date: "",
       isHome: true,
-      duration: 90,
-      status: 'scheduled',
+      type: 'Campionato',
+      duration: defaultDuration,
+      status: 'completed',
     },
   });
 
@@ -87,34 +82,28 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
         opponent: match?.opponent || "",
         date: initialDate,
         isHome: match?.isHome ?? true,
-        duration: match?.duration || 90,
-        status: match?.status || 'scheduled',
+        type: match?.type || 'Campionato',
+        duration: match?.duration || defaultDuration,
+        status: match?.status || 'completed',
       });
     }
-  }, [open, match, form]);
+  }, [open, match, form, defaultDuration]);
 
 
   function onSubmit(data: MatchFormValues) {
-    const saveData: MatchSaveData = {
-        opponent: data.opponent,
-        isHome: data.isHome,
-        status: data.status,
-        duration: data.duration,
+    onSave({
+        ...data,
         date: new Date(data.date),
-    };
-    onSave(saveData, match?.id);
+    }, match?.id);
     onOpenChange(false);
   }
 
   const { min, max } = React.useMemo(() => {
     const now = new Date();
-    
     const twoYearsAgo = new Date(now);
     twoYearsAgo.setFullYear(now.getFullYear() - 2);
-
     const twoYearsLater = new Date(now);
     twoYearsLater.setFullYear(now.getFullYear() + 2);
-
     return {
       min: toDatetimeLocal(twoYearsAgo),
       max: toDatetimeLocal(twoYearsLater),
@@ -128,7 +117,7 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
           <DialogTitle>{match ? "Modifica Dettagli Partita" : "Aggiungi Partita"}</DialogTitle>
           <DialogDescription>
             {match
-              ? "Modifica i dettagli della partita e lo stato. Il risultato viene aggiornato automaticamente dalla cronaca."
+              ? "Modifica i dettagli della partita e lo stato."
               : "Inserisci i dettagli per creare una nuova partita."}
           </DialogDescription>
         </DialogHeader>
@@ -151,18 +140,22 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
             <div className="grid grid-cols-2 gap-4">
                 <FormField
                 control={form.control}
-                name="date"
+                name="type"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Data e Ora</FormLabel>
-                    <FormControl>
-                        <Input
-                        type="datetime-local"
-                        min={min}
-                        max={max}
-                        {...field}
-                        />
-                    </FormControl>
+                    <FormLabel>Tipo Gara</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Tipo" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            {MATCH_TYPES.map(t => (
+                              <SelectItem key={t} value={t}>{t}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     <FormMessage />
                     </FormItem>
                 )}
@@ -174,7 +167,7 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
                 render={({ field }) => (
                     <FormItem>
                     <FormLabel>Durata Partita</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value.toString()} value={field.value.toString()}>
+                    <Select onValueChange={field.onChange} value={field.value.toString()}>
                         <FormControl>
                             <SelectTrigger>
                                 <SelectValue placeholder="Durata" />
@@ -191,6 +184,25 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
                 )}
                 />
             </div>
+
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                  <FormItem>
+                  <FormLabel>Data e Ora</FormLabel>
+                  <FormControl>
+                      <Input
+                      type="datetime-local"
+                      min={min}
+                      max={max}
+                      {...field}
+                      />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+              )}
+            />
 
             <div className="grid grid-cols-2 gap-4">
                 <FormField
@@ -216,7 +228,7 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
                     name="status"
                     render={({ field }) => (
                         <FormItem>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                             <SelectTrigger className="h-full py-3">
                                 <SelectValue placeholder="Stato" />
@@ -224,7 +236,7 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
                             </FormControl>
                             <SelectContent>
                                 <SelectItem value="scheduled">In Programma</SelectItem>
-                                <SelectItem value="completed">Completata</SelectItem>
+                                <SelectItem value="completed">Finita</SelectItem>
                                 <SelectItem value="canceled">Annullata</SelectItem>
                             </SelectContent>
                         </Select>
@@ -236,7 +248,7 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
 
             <DialogFooter className="pt-4">
               <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Annulla</Button>
-              <Button type="submit">Salva Modifiche</Button>
+              <Button type="submit">Salva Gara</Button>
             </DialogFooter>
           </form>
         </Form>
