@@ -1,5 +1,16 @@
 
-import { db } from '@/lib/db';
+import { 
+  getFirestore, 
+  collection, 
+  getDocs, 
+  getDoc, 
+  doc, 
+  setDoc, 
+  updateDoc, 
+  deleteDoc, 
+  query, 
+  where 
+} from 'firebase/firestore';
 import type { Match } from '@/lib/types';
 
 export type MatchCreateData = Omit<Match, 'id' | 'result'> & { status?: Match['status'] };
@@ -7,34 +18,44 @@ export type MatchCreateData = Omit<Match, 'id' | 'result'> & { status?: Match['s
 export const matchRepository = {
   async getAll(userId: string, seasonId?: string) {
     if (!userId || !seasonId) return [];
-    const matches = await db.matches
-      .where('userId').equals(userId)
-      .and(m => m.seasonId === seasonId)
-      .toArray();
+    const db = getFirestore();
+    const matchesRef = collection(db, 'teams', seasonId, 'matches');
+    const q = query(matchesRef, where('userId', '==', userId));
+    const snapshot = await getDocs(q);
+    const matches = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Match));
     return matches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   },
   
-  async getById(id: string) {
-    if (!id) return undefined;
-    return await db.matches.get(id);
+  async getById(id: string, seasonId: string) {
+    if (!id || !seasonId) return undefined;
+    const db = getFirestore();
+    const docRef = doc(db, 'teams', seasonId, 'matches', id);
+    const snapshot = await getDoc(docRef);
+    return snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } as Match : undefined;
   },
 
   async add(data: MatchCreateData) {
+    const db = getFirestore();
+    const id = `m_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
     const newMatch: Match = {
       status: 'scheduled',
       ...data,
-      id: `m_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      id,
     };
-    await db.matches.add(newMatch);
+    await setDoc(doc(db, 'teams', data.seasonId, 'matches', id), newMatch);
     return newMatch;
   },
 
-  async update(id: string, updates: Partial<Omit<Match, 'id' | 'userId'>>) {
-    await db.matches.update(id, updates);
-    return await db.matches.get(id);
+  async update(id: string, seasonId: string, updates: Partial<Omit<Match, 'id' | 'userId' | 'seasonId'>>) {
+    const db = getFirestore();
+    const docRef = doc(db, 'teams', seasonId, 'matches', id);
+    await updateDoc(docRef, updates);
+    const snapshot = await getDoc(docRef);
+    return snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } as Match : undefined;
   },
 
-  async delete(id: string) {
-    return await db.matches.delete(id);
+  async delete(id: string, seasonId: string) {
+    const db = getFirestore();
+    return await deleteDoc(doc(db, 'teams', seasonId, 'matches', id));
   },
 };

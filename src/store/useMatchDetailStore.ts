@@ -8,9 +8,8 @@ import { aggregationRepository } from '@/lib/repositories/aggregation-repository
 import { lineupRepository } from '@/lib/repositories/lineup-repository';
 import { eventRepository } from '@/lib/repositories/event-repository';
 import { statsRepository } from '@/lib/repositories/stats-repository';
-import { attendanceRepository } from '@/lib/repositories/attendance-repository';
 import { useStatsStore } from './useStatsStore';
-import type { Match, Player, MatchLineup, MatchEvent, PlayerMatchStats, MatchAttendance, AttendanceStatus } from '@/lib/types';
+import type { Match, Player, MatchLineup, MatchEvent, PlayerMatchStats, AttendanceStatus } from '@/lib/types';
 
 interface MatchDetailState {
     matchId: string | null;
@@ -19,7 +18,6 @@ interface MatchDetailState {
     events: MatchEvent[];
     lineup: MatchLineup | null;
     stats: PlayerMatchStats[];
-    attendance: MatchAttendance[];
     loading: boolean;
     
     load: (matchId: string) => Promise<void>;
@@ -30,7 +28,6 @@ interface MatchDetailState {
     addEvents: (events: Omit<MatchEvent, 'id'>[]) => Promise<void>;
     deleteEvent: (eventId: string) => Promise<void>;
     syncAndPersistMinutes: () => Promise<void>;
-    updateAttendance: (playerId: string, status: AttendanceStatus) => Promise<void>;
 }
 
 export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
@@ -40,23 +37,30 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     events: [],
     lineup: null,
     stats: [],
-    attendance: [],
     loading: true,
 
     load: async (matchId) => {
-        set({ loading: true, matchId, match: null, events: [], lineup: null, stats: [], attendance: [] });
+        set({ loading: true, matchId, match: null, events: [], lineup: null, stats: [] });
         
-        const match = await matchRepository.getById(matchId);
+        // Per recuperare i dati da Firestore serve anche il seasonId.
+        // Lo recuperiamo indirettamente o passandolo. Per semplicità usiamo lo store delle stagioni.
+        const { useSeasonsStore } = await import('./useSeasonsStore');
+        const seasonId = useSeasonsStore.getState().activeSeason?.id;
+        if (!seasonId) {
+            set({ loading: false });
+            return;
+        }
+
+        const match = await matchRepository.getById(matchId, seasonId);
         if (!match) {
             set({ loading: false });
             return;
         }
 
-        const allPlayers = await playerRepository.getAll(match.userId, match.seasonId);
-        const matchEvents = await eventRepository.getForMatch(matchId);
-        const matchLineup = await lineupRepository.getForMatch(matchId);
-        const matchStats = await statsRepository.getForMatch(matchId);
-        const matchAttendance = await attendanceRepository.getForMatch(matchId);
+        const allPlayers = await playerRepository.getAll(match.userId, seasonId);
+        const matchEvents = await eventRepository.getForMatch(matchId, seasonId);
+        const matchLineup = await lineupRepository.getForMatch(matchId, seasonId);
+        const matchStats = await statsRepository.getForMatch(matchId, seasonId);
 
         set({ 
             match, 
@@ -64,7 +68,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             events: matchEvents,
             lineup: matchLineup || null,
             stats: matchStats,
-            attendance: matchAttendance,
             loading: false 
         });
 
@@ -79,14 +82,11 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         const halfTime = duration / 2;
         const pitchManTeam = match.isHome ? 'home' : 'away';
 
-        const rosterPlayerIds = allPlayers.map(p => p.id);
-
         const getAbsoluteMinute = (event: MatchEvent) => {
+            const periodOrder: Record<string, number> = { '1T': 1, '2T': 2, '1TS': 3, '2TS': 4 };
             if (event.period === '1T') return Math.min(event.minute, halfTime);
             if (event.period === '2T') return halfTime + Math.min(event.minute, halfTime);
-            if (event.period === '1TS') return duration + event.minute;
-            if (event.period === '2TS') return duration + 15 + event.minute;
-            return event.minute;
+            return event.minute + duration; 
         };
 
         const chronologicalEvents = [...events].sort((a, b) => {
@@ -95,7 +95,8 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             return a.minute - b.minute;
         });
 
-        const newStats: PlayerMatchStats[] = rosterPlayerIds.map(playerId => {
+        const newStats: PlayerMatchStats[] = allPlayers.map(player => {
+            const playerId = player.id;
             const yellowCards = events.filter(e => e.type === 'yellow_card' && e.playerId === playerId && e.team === pitchManTeam).length;
             const redCards = events.filter(e => e.type === 'red_card' && e.playerId === playerId && e.team === pitchManTeam).length;
             const goals = events.filter(e => e.type === 'goal' && e.playerId === playerId && e.team === pitchManTeam).length;
@@ -108,24 +109,17 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             if (lineup && (isStarter || isSubstitute)) {
                 if (isStarter) {
                     const subOutEvent = chronologicalEvents.find(e => 
-                        e.type === 'substitution' && 
-                        e.subOutPlayerId === playerId && 
-                        e.team === pitchManTeam
+                        e.type === 'substitution' && e.subOutPlayerId === playerId && e.team === pitchManTeam
                     );
                     minutesPlayed = subOutEvent ? getAbsoluteMinute(subOutEvent) : duration;
                 } else {
                     const subInEvent = chronologicalEvents.find(e => 
-                        e.type === 'substitution' && 
-                        e.playerId === playerId && 
-                        e.team === pitchManTeam
+                        e.type === 'substitution' && e.playerId === playerId && e.team === pitchManTeam
                     );
                     if (subInEvent) {
                         const subInMin = getAbsoluteMinute(subInEvent);
                         const subOutEventLater = chronologicalEvents.find(e => 
-                            e.type === 'substitution' && 
-                            e.subOutPlayerId === playerId && 
-                            e.team === pitchManTeam && 
-                            getAbsoluteMinute(e) > subInMin
+                            e.type === 'substitution' && e.subOutPlayerId === playerId && e.team === pitchManTeam && getAbsoluteMinute(e) > subInMin
                         );
                         const endMin = subOutEventLater ? getAbsoluteMinute(subOutEventLater) : duration;
                         minutesPlayed = Math.max(0, endMin - subInMin);
@@ -133,26 +127,11 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
                 }
             }
 
-            return {
-                matchId: match.id,
-                playerId,
-                minutesPlayed,
-                goals,
-                assists,
-                yellowCards,
-                redCards
-            };
-        }).filter(stat => 
-            stat.minutesPlayed > 0 || 
-            stat.goals > 0 || 
-            stat.assists > 0 || 
-            stat.yellowCards > 0 || 
-            stat.redCards > 0 ||
-            (lineup && (lineup.starters.includes(stat.playerId) || lineup.substitutes.includes(stat.playerId)))
-        );
+            return { matchId, playerId, minutesPlayed, goals, assists, yellowCards, redCards };
+        }).filter(s => s.minutesPlayed > 0 || s.goals > 0 || s.assists > 0 || s.yellowCards > 0 || s.redCards > 0);
 
         for (const stat of newStats) {
-            await statsRepository.upsert(matchId, stat.playerId, stat);
+            await statsRepository.upsert(matchId, match.seasonId, stat.playerId, stat);
         }
 
         set({ stats: newStats });
@@ -163,39 +142,22 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     saveAllStats: async (newStats) => {
         const { matchId, match } = get();
         if (!matchId || !match) return;
-
         for (const stat of newStats) {
-            await statsRepository.upsert(matchId, stat.playerId, stat);
+            await statsRepository.upsert(matchId, match.seasonId, stat.playerId, stat);
         }
-        
         set({ stats: newStats });
         await aggregationRepository.syncAllPlayersStats(match.userId, match.seasonId);
         useStatsStore.getState().loadStats();
     },
 
-    updateAttendance: async (playerId: string, status: AttendanceStatus) => {
-        const { matchId } = get();
-        if (!matchId) return;
-
-        await attendanceRepository.upsert(matchId, playerId, status);
-        const updatedAttendance = await attendanceRepository.getForMatch(matchId);
-        set({ attendance: updatedAttendance });
-    },
-
     addEvent: async (eventData) => {
         const { matchId, match } = get();
         if (!matchId || !match) return;
-
-        await eventRepository.add({ ...eventData, matchId });
-        const updatedEvents = await eventRepository.getForMatch(matchId);
-        
+        await eventRepository.add({ ...eventData, matchId }, match.seasonId);
+        const updatedEvents = await eventRepository.getForMatch(matchId, match.seasonId);
         const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
         const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
-        
-        const updatedMatch = await matchRepository.update(matchId, {
-            result: { home: homeGoals, away: awayGoals }
-        });
-
+        const updatedMatch = await matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
         set({ events: updatedEvents, match: updatedMatch || get().match });
         await get().syncAndPersistMinutes();
     },
@@ -203,19 +165,13 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     addEvents: async (eventsData) => {
         const { matchId, match } = get();
         if (!matchId || !match) return;
-
         for (const data of eventsData) {
-            await eventRepository.add({ ...data, matchId });
+            await eventRepository.add({ ...data, matchId }, match.seasonId);
         }
-        
-        const updatedEvents = await eventRepository.getForMatch(matchId);
+        const updatedEvents = await eventRepository.getForMatch(matchId, match.seasonId);
         const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
         const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
-        
-        const updatedMatch = await matchRepository.update(matchId, {
-            result: { home: homeGoals, away: awayGoals }
-        });
-
+        const updatedMatch = await matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
         set({ events: updatedEvents, match: updatedMatch || get().match });
         await get().syncAndPersistMinutes();
     },
@@ -223,26 +179,19 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     deleteEvent: async (eventId) => {
         const { matchId, match } = get();
         if (!matchId || !match) return;
-
-        await eventRepository.delete(eventId);
-        const updatedEvents = await eventRepository.getForMatch(matchId);
-
+        await eventRepository.delete(eventId, matchId, match.seasonId);
+        const updatedEvents = await eventRepository.getForMatch(matchId, match.seasonId);
         const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
         const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
-        
-        const updatedMatch = await matchRepository.update(matchId, {
-            result: { home: homeGoals, away: awayGoals }
-        });
-
+        const updatedMatch = await matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
         set({ events: updatedEvents, match: updatedMatch || get().match });
         await get().syncAndPersistMinutes();
     },
     
     updateMatch: async (data) => {
-        const { matchId } = get();
-        if (!matchId) return;
-
-        const updatedMatch = await matchRepository.update(matchId, data);
+        const { matchId, match } = get();
+        if (!matchId || !match) return;
+        const updatedMatch = await matchRepository.update(matchId, match.seasonId, data);
         if (updatedMatch) {
             set({ match: updatedMatch });
             await get().syncAndPersistMinutes();
@@ -250,10 +199,9 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     },
 
     saveLineup: async (lineupData) => {
-        const matchId = get().matchId;
-        if (!matchId) return;
-        await lineupRepository.save({ ...lineupData, matchId });
-        
+        const { matchId, match } = get();
+        if (!matchId || !match) return;
+        await lineupRepository.save({ ...lineupData, matchId }, match.seasonId);
         set({ lineup: { ...lineupData, matchId } });
         await get().syncAndPersistMinutes();
     }

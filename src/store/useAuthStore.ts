@@ -10,6 +10,7 @@ import {
   onAuthStateChanged,
   type User as FirebaseUser 
 } from 'firebase/auth';
+import { initializeFirebase } from '@/firebase';
 
 interface User {
   id: string;
@@ -21,9 +22,14 @@ interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
   isInitialized: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   setAuth: (user: FirebaseUser | null) => void;
+}
+
+// Inizializza Firebase prima di usare Auth
+if (typeof window !== 'undefined') {
+  initializeFirebase();
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -32,8 +38,11 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       user: null,
       isInitialized: false,
-      login: async (email, password) => {
+      login: async (username, password) => {
         try {
+          // Firebase richiede un'email. Trasformiamo lo username in una pseudo-email
+          // per mantenere l'esperienza utente richiesta.
+          const email = username.includes('@') ? username : `${username.toLowerCase()}@pitchman.app`;
           const auth = getAuth();
           await signInWithEmailAndPassword(auth, email, password);
           return true;
@@ -53,12 +62,13 @@ export const useAuthStore = create<AuthState>()(
       },
       setAuth: (firebaseUser) => {
         if (firebaseUser) {
+          const username = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Utente';
           set({ 
             isAuthenticated: true, 
             isInitialized: true,
             user: { 
               id: firebaseUser.uid, 
-              username: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Utente',
+              username,
               email: firebaseUser.email || ''
             } 
           });
@@ -68,7 +78,7 @@ export const useAuthStore = create<AuthState>()(
       }
     }),
     {
-      name: 'pitchman-auth-cloud',
+      name: 'pitchman-auth-cloud-v2',
       partialize: (state) => ({ isAuthenticated: state.isAuthenticated, user: state.user }),
     }
   )
@@ -76,10 +86,8 @@ export const useAuthStore = create<AuthState>()(
 
 // Listener globale per lo stato di autenticazione
 if (typeof window !== 'undefined') {
-  setTimeout(() => {
-    const auth = getAuth();
-    onAuthStateChanged(auth, (user) => {
-      useAuthStore.getState().setAuth(user);
-    });
-  }, 1000);
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    useAuthStore.getState().setAuth(user);
+  });
 }

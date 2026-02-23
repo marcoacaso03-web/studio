@@ -1,4 +1,17 @@
-import { db } from '@/lib/db';
+
+import { 
+  getFirestore, 
+  collection, 
+  getDocs, 
+  getDoc, 
+  doc, 
+  setDoc, 
+  updateDoc, 
+  deleteDoc, 
+  query, 
+  where,
+  writeBatch
+} from 'firebase/firestore';
 import type { Player, Role } from '@/lib/types';
 import { PlaceHolderImages } from '../placeholder-images';
 
@@ -12,22 +25,29 @@ export type PlayerCreateData = {
 export const playerRepository = {
   async getAll(userId: string, seasonId?: string) {
     if (!userId || !seasonId) return [];
-    const players = await db.players
-      .where('userId').equals(userId)
-      .and(p => p.seasonId === seasonId)
-      .toArray();
+    const db = getFirestore();
+    const playersRef = collection(db, 'teams', seasonId, 'players');
+    const q = query(playersRef, where('userId', '==', userId));
+    const snapshot = await getDocs(q);
+    const players = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Player));
     return players.sort((a, b) => a.name.localeCompare(b.name));
   },
 
-  async getById(id: string) {
-    if (!id) return undefined;
-    return await db.players.get(id);
+  async getById(id: string, seasonId: string) {
+    if (!id || !seasonId) return undefined;
+    const db = getFirestore();
+    const docRef = doc(db, 'teams', seasonId, 'players', id);
+    const snapshot = await getDoc(docRef);
+    return snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } as Player : undefined;
   },
 
   async add(data: PlayerCreateData) {
+    const db = getFirestore();
     const placeholder = PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)];
+    const id = `p_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    
     const newPlayer: Player = {
-      id: `p_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      id,
       userId: data.userId,
       seasonId: data.seasonId,
       name: data.name,
@@ -36,16 +56,21 @@ export const playerRepository = {
       imageHint: placeholder.imageHint,
       stats: { appearances: 0, goals: 0, assists: 0, avgMinutes: 0 },
     };
-    await db.players.add(newPlayer);
+
+    await setDoc(doc(db, 'teams', data.seasonId, 'players', id), newPlayer);
     return newPlayer;
   },
 
   async bulkAdd(playersData: { name: string, role: Role }[], userId: string, seasonId: string) {
+    const db = getFirestore();
+    const batch = writeBatch(db);
     const timestamp = Date.now();
+    
     const newPlayers: Player[] = playersData.map((p, index) => {
       const placeholder = PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)];
-      return {
-        id: `p_${timestamp}_${index}_${Math.random().toString(36).substr(2, 5)}`,
+      const id = `p_${timestamp}_${index}_${Math.random().toString(36).substr(2, 5)}`;
+      const newPlayer: Player = {
+        id,
         userId,
         seasonId,
         name: p.name,
@@ -54,18 +79,26 @@ export const playerRepository = {
         imageHint: placeholder.imageHint,
         stats: { appearances: 0, goals: 0, assists: 0, avgMinutes: 0 },
       };
+      
+      const docRef = doc(db, 'teams', seasonId, 'players', id);
+      batch.set(docRef, newPlayer);
+      return newPlayer;
     });
 
-    await db.players.bulkAdd(newPlayers);
+    await batch.commit();
     return newPlayers;
   },
 
-  async update(id: string, updates: Partial<Omit<PlayerCreateData, 'seasonId' | 'userId'>>) {
-    await db.players.update(id, updates);
-    return await db.players.get(id);
+  async update(id: string, seasonId: string, updates: Partial<Omit<Player, 'id' | 'userId' | 'seasonId'>>) {
+    const db = getFirestore();
+    const docRef = doc(db, 'teams', seasonId, 'players', id);
+    await updateDoc(docRef, updates);
+    const snapshot = await getDoc(docRef);
+    return snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } as Player : undefined;
   },
 
-  async delete(id: string) {
-    return await db.players.delete(id);
+  async delete(id: string, seasonId: string) {
+    const db = getFirestore();
+    return await deleteDoc(doc(db, 'teams', seasonId, 'players', id));
   },
 };

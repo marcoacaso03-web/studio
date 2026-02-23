@@ -8,11 +8,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield, Lock, Mail } from 'lucide-react';
+import { Shield, Lock, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login, isAuthenticated } = useAuthStore();
@@ -29,14 +29,14 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    const success = await login(email, password);
+    const success = await login(username, password);
     if (success) {
       router.push('/calendario');
     } else {
       toast({
         variant: "destructive",
         title: "Accesso negato",
-        description: "Email o password errati. Assicurati di avere un account attivo.",
+        description: "Username o password errati. Assicurati che l'account 'admin' o 'loiacono' sia configurato.",
       });
       setIsLoading(false);
     }
@@ -59,16 +59,16 @@ export default function LoginPage() {
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-wider">Email</Label>
+              <Label htmlFor="username" className="text-[10px] font-black uppercase tracking-wider">Username</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input 
-                  id="email"
-                  type="email"
-                  placeholder="tua@email.it"
+                  id="username"
+                  type="text"
+                  placeholder="admin / loiacono"
                   className="pl-10 h-11"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
                 />
               </div>

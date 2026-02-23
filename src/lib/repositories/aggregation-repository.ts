@@ -1,22 +1,16 @@
-import { db } from '@/lib/db';
+
+import { getFirestore, collection, getDocs, query, where, doc, updateDoc } from 'firebase/firestore';
+import { matchRepository } from './match-repository';
+import { playerRepository } from './player-repository';
+import { eventRepository } from './event-repository';
+import { statsRepository } from './stats-repository';
+import { lineupRepository } from './lineup-repository';
 
 export const aggregationRepository = {
-    /**
-     * Aggregates team-level stats like wins, draws, losses, and goals from all completed matches.
-     * Returns detailed stats for overall, home, and away.
-     */
     async getTeamRecord(userId: string, seasonId?: string) {
-        if (!userId) return this.processMatchesRecord([]);
-
-        let query = db.matches.where('userId').equals(userId);
-        let completedMatches: any[];
-        
-        if (seasonId) {
-            completedMatches = await query.and(m => m.seasonId === seasonId && m.status === 'completed').toArray();
-        } else {
-            completedMatches = await query.and(m => m.status === 'completed').toArray();
-        }
-        
+        if (!userId || !seasonId) return this.processMatchesRecord([]);
+        const matches = await matchRepository.getAll(userId, seasonId);
+        const completedMatches = matches.filter(m => m.status === 'completed');
         return this.processMatchesRecord(completedMatches);
     },
 
@@ -66,22 +60,10 @@ export const aggregationRepository = {
         return record;
     },
 
-    /**
-     * Returns the chronological trend of match results.
-     */
     async getTeamTrend(userId: string, seasonId?: string) {
-        if (!userId) return [];
-
-        let query = db.matches.where('userId').equals(userId);
-        let completedMatches: any[];
-        
-        if (seasonId) {
-            completedMatches = await query.and(m => m.seasonId === seasonId && m.status === 'completed').toArray();
-        } else {
-            completedMatches = await query.and(m => m.status === 'completed').toArray();
-        }
-
-        completedMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        if (!userId || !seasonId) return [];
+        const matches = await matchRepository.getAll(userId, seasonId);
+        const completedMatches = matches.filter(m => m.status === 'completed');
 
         return completedMatches.map(match => {
             if (!match.result) return null;
@@ -101,43 +83,29 @@ export const aggregationRepository = {
         }).filter(Boolean);
     },
 
-    /**
-     * Aggregates goals scored by interval for PitchMan.
-     */
     async getGoalsByInterval(userId: string, seasonId?: string) {
-        if (!userId) return [];
-
-        let matchQuery = db.matches.where('userId').equals(userId);
-        const completedMatches = seasonId
-            ? await matchQuery.and(m => m.seasonId === seasonId && m.status === 'completed').toArray()
-            : await matchQuery.and(m => m.status === 'completed').toArray();
-
-        const completedMatchIds = new Set(completedMatches.map(m => m.id));
-        const allEvents = await db.matchEvents.where('type').equals('goal').toArray();
+        if (!userId || !seasonId) return [];
+        const matches = await matchRepository.getAll(userId, seasonId);
+        const completedMatches = matches.filter(m => m.status === 'completed');
         
-        const intervals = {
-            '1-30': 0,
-            '31-60': 0,
-            '61-90+': 0
-        };
+        const intervals = { '1-30': 0, '31-60': 0, '61-90+': 0 };
 
-        allEvents.forEach(event => {
-            if (!completedMatchIds.has(event.matchId)) return;
+        for (const match of completedMatches) {
+            const events = await eventRepository.getForMatch(match.id, seasonId);
+            const goals = events.filter(e => e.type === 'goal');
             
-            const match = completedMatches.find(m => m.id === event.matchId);
-            if (!match) return;
-
-            const isPitchManGoal = match.isHome ? event.team === 'home' : event.team === 'away';
-            
-            if (isPitchManGoal) {
-                if (event.period === '1T') {
-                    if (event.minute <= 30) intervals['1-30']++;
-                    else intervals['31-60']++;
-                } else {
-                    intervals['61-90+']++;
+            goals.forEach(event => {
+                const isPitchManGoal = match.isHome ? event.team === 'home' : event.team === 'away';
+                if (isPitchManGoal) {
+                    if (event.period === '1T') {
+                        if (event.minute <= 30) intervals['1-30']++;
+                        else intervals['31-60']++;
+                    } else {
+                        intervals['61-90+']++;
+                    }
                 }
-            }
-        });
+            });
+        }
 
         return [
             { name: '1-30\'', value: intervals['1-30'], fill: "hsl(var(--chart-1))" },
@@ -146,69 +114,66 @@ export const aggregationRepository = {
         ];
     },
 
-    /**
-     * Calculates and returns aggregated stats for all players.
-     */
     async getAllPlayersAggregatedStats(userId: string, seasonId?: string) {
-        if (!userId) return [];
+        if (!userId || !seasonId) return [];
+        const players = await playerRepository.getAll(userId, seasonId);
+        const matches = await matchRepository.getAll(userId, seasonId);
+        const completedMatches = matches.filter(m => m.status === 'completed');
 
-        const players = seasonId 
-            ? await db.players.where('userId').equals(userId).and(p => p.seasonId === seasonId).toArray()
-            : await db.players.where('userId').equals(userId).toArray();
+        const results = [];
+        for (const player of players) {
+            let appearances = 0;
+            let goals = 0;
+            let assists = 0;
+            let totalMinutes = 0;
+            let yellowCards = 0;
+            let redCards = 0;
 
-        let matchQuery = db.matches.where('userId').equals(userId).and(m => m.status === 'completed');
-        const completedMatches = seasonId
-            ? await matchQuery.and(m => m.seasonId === seasonId).toArray()
-            : await matchQuery.toArray();
+            for (const match of completedMatches) {
+                const [lineup, events, stats] = await Promise.all([
+                    lineupRepository.getForMatch(match.id, seasonId),
+                    eventRepository.getForMatch(match.id, seasonId),
+                    statsRepository.getForMatch(match.id, seasonId)
+                ]);
 
-        const completedMatchIds = new Set(completedMatches.map(m => m.id));
-        
-        const allEvents = (await db.matchEvents.toArray()).filter(e => completedMatchIds.has(e.matchId));
-        const allLineups = (await db.matchLineups.toArray()).filter(l => completedMatchIds.has(l.matchId));
-        const allStats = (await db.playerMatchStats.toArray()).filter(s => completedMatchIds.has(s.matchId));
+                const isInLineup = lineup?.starters.includes(player.id) || lineup?.substitutes.includes(player.id);
+                const playerStats = stats.find(s => s.playerId === player.id);
 
-        return players.map(player => {
-            const matchInvolvement = allLineups.filter(lineup => {
-                return lineup.starters.includes(player.id) || lineup.substitutes.includes(player.id);
-            });
-            const appearances = matchInvolvement.length;
+                if (isInLineup || playerStats) {
+                    appearances++;
+                    if (playerStats) {
+                        totalMinutes += playerStats.minutesPlayed || 0;
+                        yellowCards += playerStats.yellowCards || 0;
+                        redCards += playerStats.redCards || 0;
+                    }
+                    
+                    const isPitchManTeam = match.isHome ? 'home' : 'away';
+                    goals += events.filter(e => e.type === 'goal' && e.playerId === player.id && e.team === isPitchManTeam).length;
+                    assists += events.filter(e => e.type === 'goal' && e.assistPlayerId === player.id && e.team === isPitchManTeam).length;
+                }
+            }
 
-            const playerEvents = allEvents.filter(e => e.playerId === player.id);
-            const playerStats = allStats.filter(s => s.playerId === player.id);
-
-            const totalMinutes = playerStats.reduce((acc, s) => acc + (s.minutesPlayed || 0), 0);
-            const yellowCards = playerStats.reduce((acc, s) => acc + (s.yellowCards || 0), 0);
-            const redCards = playerStats.reduce((acc, s) => acc + (s.redCards || 0), 0);
-            
-            const avgMinutes = appearances > 0 ? Math.round(totalMinutes / appearances) : 0;
-            const goals = playerEvents.filter(e => e.type === 'goal').length;
-            
-            const assists = allEvents.filter(e => e.type === 'goal' && e.assistPlayerId === player.id).length;
-
-            return {
+            results.push({
                 playerId: player.id,
                 name: player.name,
                 stats: {
                     appearances,
                     goals,
                     assists,
-                    avgMinutes,
+                    avgMinutes: appearances > 0 ? Math.round(totalMinutes / appearances) : 0,
                     yellowCards,
                     redCards
                 }
-            };
-        });
+            });
+        }
+        return results;
     },
 
     async syncAllPlayersStats(userId: string, seasonId?: string) {
-        if (!userId) return;
-        const allPlayerAggregatedStats = await this.getAllPlayersAggregatedStats(userId, seasonId);
-        
-        await db.transaction('rw', db.players, async () => {
-            const updates = allPlayerAggregatedStats.map(({ playerId, stats }) => {
-                return db.players.update(playerId, { stats });
-            });
-            await Promise.all(updates);
-        });
+        if (!userId || !seasonId) return;
+        const allStats = await this.getAllPlayersAggregatedStats(userId, seasonId);
+        for (const { playerId, stats } of allStats) {
+            await playerRepository.update(playerId, seasonId, { stats });
+        }
     }
 };

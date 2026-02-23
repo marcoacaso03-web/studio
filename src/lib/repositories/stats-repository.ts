@@ -1,21 +1,30 @@
-import { db } from '@/lib/db';
+
+import { 
+  getFirestore, 
+  collection, 
+  getDocs, 
+  doc, 
+  setDoc,
+  query
+} from 'firebase/firestore';
 import type { PlayerMatchStats } from '@/lib/types';
 
 export type PlayerStatsUpdateData = Omit<PlayerMatchStats, 'matchId' | 'playerId'>;
 
 export const statsRepository = {
-    async getAll() {
-        return await db.playerMatchStats.toArray();
+    async getForMatch(matchId: string, seasonId: string) {
+        if (!matchId || !seasonId) return [];
+        const db = getFirestore();
+        const statsRef = collection(db, 'teams', seasonId, 'matches', matchId, 'stats');
+        const snapshot = await getDocs(query(statsRef));
+        return snapshot.docs.map(doc => ({ ...doc.data(), playerId: doc.id } as PlayerMatchStats));
     },
 
-    async getForMatch(matchId: string) {
-        return await db.playerMatchStats.where({ matchId }).toArray();
-    },
-
-    async upsert(matchId: string, playerId: string, stats: PlayerStatsUpdateData) {
+    async upsert(matchId: string, seasonId: string, playerId: string, stats: PlayerStatsUpdateData) {
+        const db = getFirestore();
+        const docRef = doc(db, 'teams', seasonId, 'matches', matchId, 'stats', playerId);
         const fullStats: PlayerMatchStats = { matchId, playerId, ...stats };
-        // Dexie's put method works as an "upsert"
-        await db.playerMatchStats.put(fullStats);
+        await setDoc(docRef, fullStats);
         return fullStats;
     }
 };
