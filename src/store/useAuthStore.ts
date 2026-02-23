@@ -41,7 +41,7 @@ export const useAuthStore = create<AuthState>()(
       login: async (username, password) => {
         try {
           // Firebase richiede un'email. Trasformiamo lo username in una pseudo-email
-          // per mantenere l'esperienza utente richiesta.
+          // per mantenere l'esperienza utente richiesta (es: admin -> admin@pitchman.app).
           const email = username.includes('@') ? username : `${username.toLowerCase()}@pitchman.app`;
           const auth = getAuth();
           await signInWithEmailAndPassword(auth, email, password);
@@ -78,7 +78,7 @@ export const useAuthStore = create<AuthState>()(
       }
     }),
     {
-      name: 'pitchman-auth-cloud-v2',
+      name: 'pitchman-auth-cloud-v3',
       partialize: (state) => ({ isAuthenticated: state.isAuthenticated, user: state.user }),
     }
   )

@@ -36,7 +36,7 @@ export default function LoginPage() {
       toast({
         variant: "destructive",
         title: "Accesso negato",
-        description: "Username o password errati. Assicurati che l'account 'admin' o 'loiacono' sia configurato.",
+        description: "Username o password errati. Verifica le credenziali nella console Firebase.",
       });
       setIsLoading(false);
     }
@@ -65,7 +65,7 @@ export default function LoginPage() {
                 <Input 
                   id="username"
                   type="text"
-                  placeholder="admin / loiacono"
+                  placeholder="username"
                   className="pl-10 h-11"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
