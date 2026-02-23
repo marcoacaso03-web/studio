@@ -1,0 +1,475 @@
+{
+  "entities": {
+    "Team": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Team",
+      "type": "object",
+      "description": "Represents a sports team managed within the Squadra+ application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Team entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The official name of the sports team."
+        },
+        "logoUrl": {
+          "type": "string",
+          "description": "Optional URL to the team's logo image.",
+          "format": "uri"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the team record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the team record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Player": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Player",
+      "type": "object",
+      "description": "Represents an individual player associated with a team.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Player entity."
+        },
+        "teamId": {
+          "type": "string",
+          "description": "Reference to the Team this player belongs to. (Relationship: Team 1:N Player)"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The player's first name."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The player's last name."
+        },
+        "jerseyNumber": {
+          "type": "number",
+          "description": "Optional: The player's jersey number."
+        },
+        "position": {
+          "type": "string",
+          "description": "Optional: The player's primary playing position (e.g., 'Forward', 'Midfielder')."
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "description": "Optional: The player's date of birth.",
+          "format": "date"
+        },
+        "email": {
+          "type": "string",
+          "description": "Optional: The player's email address.",
+          "format": "email"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "Optional: The player's phone number."
+        },
+        "profileImageUrl": {
+          "type": "string",
+          "description": "Optional: URL to the player's profile image.",
+          "format": "uri"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the player record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the player record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "teamId",
+        "firstName",
+        "lastName",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Match": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Match",
+      "type": "object",
+      "description": "Represents a single sports match event scheduled or played by the team.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Match entity."
+        },
+        "teamId": {
+          "type": "string",
+          "description": "Reference to the primary Team involved in this match (the user's team). (Relationship: Team 1:N Match)"
+        },
+        "opponentTeamName": {
+          "type": "string",
+          "description": "The name of the opposing team."
+        },
+        "matchDateTime": {
+          "type": "string",
+          "description": "The date and time when the match is scheduled or was played.",
+          "format": "date-time"
+        },
+        "location": {
+          "type": "string",
+          "description": "Optional: The venue or location where the match takes place."
+        },
+        "isHomeMatch": {
+          "type": "boolean",
+          "description": "Indicates if the match is a home game (true) or an away game (false)."
+        },
+        "homeTeamScore": {
+          "type": "number",
+          "description": "Optional: The score of the user's team."
+        },
+        "opponentTeamScore": {
+          "type": "number",
+          "description": "Optional: The score of the opposing team."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the match (e.g., 'Scheduled', 'Completed', 'Cancelled')."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional: Any additional notes or comments about the match."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the match record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the match record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "teamId",
+        "opponentTeamName",
+        "matchDateTime",
+        "isHomeMatch",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "PlayerMatchAttendance": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PlayerMatchAttendance",
+      "type": "object",
+      "description": "Records the attendance status of a specific player for a particular match.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the PlayerMatchAttendance entity."
+        },
+        "playerId": {
+          "type": "string",
+          "description": "Reference to the Player whose attendance is recorded. (Relationship: Player 1:N PlayerMatchAttendance)"
+        },
+        "matchId": {
+          "type": "string",
+          "description": "Reference to the Match for which attendance is recorded. (Relationship: Match 1:N PlayerMatchAttendance)"
+        },
+        "attendanceStatus": {
+          "type": "string",
+          "description": "The attendance status of the player (e.g., 'Present', 'Absent', 'Late', 'Excused')."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional: Any specific notes regarding the player's attendance for this match."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the attendance record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the attendance record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "playerId",
+        "matchId",
+        "attendanceStatus",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "PlayerMatchStat": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PlayerMatchStat",
+      "type": "object",
+      "description": "Stores statistical data for a player's performance in a specific match.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the PlayerMatchStat entity."
+        },
+        "playerId": {
+          "type": "string",
+          "description": "Reference to the Player who accumulated these statistics. (Relationship: Player 1:N PlayerMatchStat)"
+        },
+        "matchId": {
+          "type": "string",
+          "description": "Reference to the Match these statistics belong to. (Relationship: Match 1:N PlayerMatchStat)"
+        },
+        "goals": {
+          "type": "number",
+          "description": "Optional: Number of goals scored by the player in the match."
+        },
+        "assists": {
+          "type": "number",
+          "description": "Optional: Number of assists made by the player in the match."
+        },
+        "yellowCards": {
+          "type": "number",
+          "description": "Optional: Number of yellow cards received by the player in the match."
+        },
+        "redCards": {
+          "type": "number",
+          "description": "Optional: Number of red cards received by the player in the match."
+        },
+        "minutesPlayed": {
+          "type": "number",
+          "description": "Optional: Total minutes played by the player in the match."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional: Additional notes about the player's statistics or performance in the match."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the stat record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the stat record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "playerId",
+        "matchId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "MatchLineupPlayer": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "MatchLineupPlayer",
+      "type": "object",
+      "description": "Defines which players were part of the lineup (starters or substitutes) for a specific match.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the MatchLineupPlayer entity."
+        },
+        "matchId": {
+          "type": "string",
+          "description": "Reference to the Match for which the lineup is defined. (Relationship: Match 1:N MatchLineupPlayer)"
+        },
+        "playerId": {
+          "type": "string",
+          "description": "Reference to the Player included in the lineup. (Relationship: Player 1:N MatchLineupPlayer)"
+        },
+        "isStarter": {
+          "type": "boolean",
+          "description": "Indicates if the player was a starter (true) or a substitute (false) for the match."
+        },
+        "positionInLineup": {
+          "type": "string",
+          "description": "Optional: The player's specific position in the lineup for this match (e.g., 'Striker', 'Right Wing-back')."
+        },
+        "orderInLineup": {
+          "type": "number",
+          "description": "Optional: A numerical order or priority for players in the lineup, useful for display."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the lineup record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the lineup record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "matchId",
+        "playerId",
+        "isStarter",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/teams/{teamId}",
+        "definition": {
+          "entityName": "Team",
+          "schema": {
+            "$ref": "#/backend/entities/Team"
+          },
+          "description": "Top-level collection for all sports teams. Each document represents a single team. To fulfill authorization independence, documents here MUST include an 'ownerId' (string, UID of the creator) and a 'members' map (object, {'uid': 'role'}) for collaborative access and role-based authorization.",
+          "params": [
+            {
+              "name": "teamId",
+              "description": "Unique identifier for a specific Team."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/teams/{teamId}/players/{playerId}",
+        "definition": {
+          "entityName": "Player",
+          "schema": {
+            "$ref": "#/backend/entities/Player"
+          },
+          "description": "Subcollection storing players belonging to a specific team. Each document represents a player. To fulfill authorization independence, documents here MUST denormalize 'teamOwnerId' and 'teamMembers' from the parent Team document, allowing direct authorization checks.",
+          "params": [
+            {
+              "name": "teamId",
+              "description": "Unique identifier of the parent Team."
+            },
+            {
+              "name": "playerId",
+              "description": "Unique identifier for a specific Player."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/teams/{teamId}/matches/{matchId}",
+        "definition": {
+          "entityName": "Match",
+          "schema": {
+            "$ref": "#/backend/entities/Match"
+          },
+          "description": "Subcollection storing match events for a specific team. Each document represents a match. To fulfill authorization independence, documents here MUST denormalize 'teamOwnerId' and 'teamMembers' from the parent Team document, allowing direct authorization checks.",
+          "params": [
+            {
+              "name": "teamId",
+              "description": "Unique identifier of the parent Team."
+            },
+            {
+              "name": "matchId",
+              "description": "Unique identifier for a specific Match."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/teams/{teamId}/matches/{matchId}/attendance/{playerMatchAttendanceId}",
+        "definition": {
+          "entityName": "PlayerMatchAttendance",
+          "schema": {
+            "$ref": "#/backend/entities/PlayerMatchAttendance"
+          },
+          "description": "Subcollection storing player attendance records for a specific match within a team. To fulfill authorization independence, documents here MUST denormalize 'teamOwnerId' and 'teamMembers' from the ultimate parent Team document, allowing direct authorization checks without `get()` calls to parent Match or Team.",
+          "params": [
+            {
+              "name": "teamId",
+              "description": "Unique identifier of the grandparent Team."
+            },
+            {
+              "name": "matchId",
+              "description": "Unique identifier of the parent Match."
+            },
+            {
+              "name": "playerMatchAttendanceId",
+              "description": "Unique identifier for a specific PlayerMatchAttendance record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/teams/{teamId}/matches/{matchId}/stats/{playerMatchStatId}",
+        "definition": {
+          "entityName": "PlayerMatchStat",
+          "schema": {
+            "$ref": "#/backend/entities/PlayerMatchStat"
+          },
+          "description": "Subcollection storing player statistics for a specific match within a team. To fulfill authorization independence, documents here MUST denormalize 'teamOwnerId' and 'teamMembers' from the ultimate parent Team document, allowing direct authorization checks without `get()` calls to parent Match or Team.",
+          "params": [
+            {
+              "name": "teamId",
+              "description": "Unique identifier of the grandparent Team."
+            },
+            {
+              "name": "matchId",
+              "description": "Unique identifier of the parent Match."
+            },
+            {
+              "name": "playerMatchStatId",
+              "description": "Unique identifier for a specific PlayerMatchStat record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/teams/{teamId}/matches/{matchId}/lineup/{matchLineupPlayerId}",
+        "definition": {
+          "entityName": "MatchLineupPlayer",
+          "schema": {
+            "$ref": "#/backend/entities/MatchLineupPlayer"
+          },
+          "description": "Subcollection defining the lineup for a specific match within a team. To fulfill authorization independence, documents here MUST denormalize 'teamOwnerId' and 'teamMembers' from the ultimate parent Team document, allowing direct authorization checks without `get()` calls to parent Match or Team.",
+          "params": [
+            {
+              "name": "teamId",
+              "description": "Unique identifier of the grandparent Team."
+            },
+            {
+              "name": "matchId",
+              "description": "Unique identifier of the parent Match."
+            },
+            {
+              "name": "matchLineupPlayerId",
+              "description": "Unique identifier for a specific MatchLineupPlayer record."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure for Squadra+ is designed to achieve maximum security, scalability, and debuggability by strictly adhering to the core design principles, especially Authorization Independence and QAPs.The primary architectural decision is the heavy denormalization of authorization context.\n\n**Authorization Independence via Denormalization:**\nTo eliminate hierarchical authorization dependencies (`get()` calls in security rules), the `Team` document's ownership (`ownerId`) and membership (`members` map) must be denormalized into every document within its subcollections (Player, Match, PlayerMatchAttendance, PlayerMatchStat, MatchLineupPlayer). This means each document at paths like `/teams/{teamId}/players/{playerId}` or `/teams/{teamId}/matches/{matchId}/attendance/{playerMatchAttendanceId}` will explicitly contain `teamOwnerId` and `teamMembers` fields (representing the owning user and the member roles of the parent team). This ensures that any security rule for reading or writing these documents can operate solely on the `request.resource.data` (for writes) or `resource.data` (for reads), making rules atomic, simpler, and highly performant as they avoid additional database lookups during evaluation. While this introduces data redundancy and requires careful batch updates for team membership changes, it is a direct fulfillment of the 'CRITICAL: AVOID hierarchical authorization dependencies' mandate.\n\n**QAPs (Rules are not Filters):**\nThe structural segregation is key to enabling secure `list` operations without requiring rules to act as filters. All documents within a specific collection path (e.g., `/teams/{teamId}/players`) share the same security posture: they are accessible to members of the `{teamId}`. By having the `teamId` explicitly in the path and the denormalized `teamOwnerId` and `teamMembers` within each document, `list` queries can specify `where('teamId', '==', '{teamId}')` (if needed for filtering a global collection, though here `teamId` is implicit in the path) and then rules can directly check `request.auth.uid` against the `resource.data.teamOwnerId` or `resource.data.teamMembers` within the documents returned by the query. This prevents unauthorized data from ever leaving the database.\n\n**Structural Segregation & Access Modeling:**\nUser-owned data (Teams) uses a clear hierarchical path: `/teams/{teamId}`. Further nested data (Players, Matches) extends this hierarchy: `/teams/{teamId}/players/{playerId}` and `/teams/{teamId}/matches/{matchId}`. Deeply nested match-specific data (Attendance, Stats, Lineup) continues this pattern: `/teams/{teamId}/matches/{matchId}/attendance/{playerMatchAttendanceId}`, providing a highly predictable and secure structure where data is grouped by its primary `Team` context and then by `Match` context. Collaborative data is managed by the denormalized `members` map within each document, standardizing access control across the entire team-related data domain.\n\n**Data Clarity and Predictability:**\nNaming conventions are radical and consistent (`{teamId}`, `{playerId}`, `{matchId}`). The `Match` entity uses an explicit `status` field for state modeling. The schema remains predictable with no dynamic keys.\n\nThis design prioritizes robust security and simplified rule logic at the cost of increased denormalization for authorization attributes, ensuring that the app's core data access patterns are secure and easily auditable."
+  }
+}
