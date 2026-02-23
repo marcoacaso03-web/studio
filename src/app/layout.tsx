@@ -6,6 +6,7 @@ import { AppHeaderWrapper } from '@/components/layout/app-header-wrapper';
 import { BottomNavWrapper } from '@/components/layout/bottom-nav-wrapper';
 import { ThemeProvider } from '@/components/layout/theme-provider';
 import { AuthGuard } from '@/components/layout/auth-guard';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
   title: 'PitchMan',
@@ -27,18 +28,20 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <ThemeProvider>
-          <AuthGuard>
-            <div className="relative flex min-h-screen w-full flex-col">
-              <AppHeaderWrapper />
-              <main className="flex-1 p-4 pb-20 md:pb-4 lg:p-6">
-                  {children}
-              </main>
-              <BottomNavWrapper />
-            </div>
-          </AuthGuard>
-          <Toaster />
-        </ThemeProvider>
+        <FirebaseClientProvider>
+          <ThemeProvider>
+            <AuthGuard>
+              <div className="relative flex min-h-screen w-full flex-col">
+                <AppHeaderWrapper />
+                <main className="flex-1 p-4 pb-20 md:pb-4 lg:p-6">
+                    {children}
+                </main>
+                <BottomNavWrapper />
+              </div>
+            </AuthGuard>
+            <Toaster />
+          </ThemeProvider>
+        </FirebaseClientProvider>
       </body>
     </html>
   );

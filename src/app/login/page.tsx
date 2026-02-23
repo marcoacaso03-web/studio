@@ -1,41 +1,45 @@
+
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield, Lock, User } from 'lucide-react';
+import { Shield, Lock, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const login = useAuthStore((state) => state.login);
+  const { login, isAuthenticated } = useAuthStore();
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/calendario');
+    }
+  }, [isAuthenticated, router]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulazione leggero ritardo per feedback visivo
-    setTimeout(() => {
-      const success = login(username, password);
-      if (success) {
-        router.push('/calendario');
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Accesso negato",
-          description: "Username o password errati.",
-        });
-        setIsLoading(false);
-      }
-    }, 500);
+    const success = await login(email, password);
+    if (success) {
+      router.push('/calendario');
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Accesso negato",
+        description: "Email o password errati. Assicurati di avere un account attivo.",
+      });
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -49,21 +53,22 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-3xl font-black tracking-tighter text-primary">PitchMan</CardTitle>
           <CardDescription className="text-xs uppercase font-bold tracking-widest text-muted-foreground/60">
-            Gestionale Tecnico Personale
+            Sincronizzazione Cloud Attiva
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-[10px] font-black uppercase tracking-wider">Username</Label>
+              <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-wider">Email</Label>
               <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input 
-                  id="username"
-                  placeholder="admin"
+                  id="email"
+                  type="email"
+                  placeholder="tua@email.it"
                   className="pl-10 h-11"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
