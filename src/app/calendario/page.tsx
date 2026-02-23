@@ -18,6 +18,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useMatchesStore } from "@/store/useMatchesStore";
 import { usePlayersStore } from "@/store/usePlayersStore";
@@ -182,7 +183,7 @@ export default function DashboardPage() {
             {playersLoading ? <Skeleton className="h-10 w-full" /> : (
               <div className="flex flex-col">
                 <div className="text-2xl md:text-4xl font-black text-primary leading-tight">{roleStats.total}</div>
-                <div className="flex flex-wrap gap-x-2 text-[10px] md:text-sm font-black text-muted-foreground/80 uppercase mt-1">
+                <div className="flex flex-wrap gap-x-2 text-sm md:text-xl font-black text-muted-foreground/80 uppercase mt-1">
                   <span>ATT: {roleStats.attaccanti}</span>
                   <span>CEN: {roleStats.centrocampisti}</span>
                   <span>DIF: {roleStats.difensori}</span>
@@ -202,9 +203,9 @@ export default function DashboardPage() {
               <div className="flex flex-col">
                 <div className="text-2xl md:text-4xl font-black text-primary leading-tight">{teamRecord?.matchesPlayed || 0}</div>
                 <div className="flex gap-2 mt-1">
-                  <span className="text-[10px] md:text-sm font-black text-primary uppercase">V: {teamRecord?.wins || 0}</span>
-                  <span className="text-[10px] md:text-sm font-black text-muted-foreground uppercase">P: {teamRecord?.draws || 0}</span>
-                  <span className="text-[10px] md:text-sm font-black text-accent uppercase">S: {teamRecord?.losses || 0}</span>
+                  <span className="text-sm md:text-xl font-black text-primary uppercase">V: {teamRecord?.wins || 0}</span>
+                  <span className="text-sm md:text-xl font-black text-muted-foreground uppercase">P: {teamRecord?.draws || 0}</span>
+                  <span className="text-sm md:text-xl font-black text-accent uppercase">S: {teamRecord?.losses || 0}</span>
                 </div>
               </div>
             )}

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -8,14 +7,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield, Lock, User } from 'lucide-react';
+import { Shield, Lock, User, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, isAuthenticated } = useAuthStore();
+  const { login, signUp, isAuthenticated } = useAuthStore();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -29,14 +28,42 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    const success = await login(username, password);
-    if (success) {
+    const result = await login(username, password);
+    if (result.success) {
       router.push('/calendario');
     } else {
       toast({
         variant: "destructive",
         title: "Accesso negato",
-        description: "Username o password errati. Verifica le credenziali nella console Firebase.",
+        description: result.error || "Username o password errati.",
+      });
+      setIsLoading(false);
+    }
+  };
+
+  const handleInitializeAccount = async () => {
+    if (!username || !password) {
+      toast({
+        variant: "destructive",
+        title: "Dati mancanti",
+        description: "Inserisci username e password per inizializzare l'account.",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    const result = await signUp(username, password);
+    if (result.success) {
+      toast({
+        title: "Account Inizializzato",
+        description: `L'account ${username} è stato creato con successo. Accesso in corso...`,
+      });
+      router.push('/calendario');
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Errore",
+        description: result.error || "Impossibile creare l'account.",
       });
       setIsLoading(false);
     }
@@ -89,13 +116,33 @@ export default function LoginPage() {
               </div>
             </div>
           </CardContent>
-          <CardFooter className="pt-2">
+          <CardFooter className="flex flex-col gap-3 pt-2">
             <Button 
               type="submit" 
-              className="w-full h-12 bg-accent text-accent-foreground hover:bg-accent/90 font-black uppercase text-sm"
+              className="w-full h-12 bg-primary text-white hover:bg-primary/90 font-black uppercase text-sm"
               disabled={isLoading}
             >
               {isLoading ? "Verifica in corso..." : "Accedi al Pannello"}
+            </Button>
+            
+            <div className="relative w-full">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground font-bold">Oppure</span>
+              </div>
+            </div>
+
+            <Button 
+              type="button"
+              variant="outline"
+              onClick={handleInitializeAccount}
+              className="w-full h-10 border-accent/30 text-accent hover:bg-accent/5 font-black uppercase text-[10px]"
+              disabled={isLoading}
+            >
+              <Sparkles className="h-3.5 w-3.5 mr-2" />
+              Inizializza nuovo account
             </Button>
           </CardFooter>
         </form>
