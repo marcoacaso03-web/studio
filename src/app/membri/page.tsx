@@ -165,7 +165,7 @@ export default function RosaPage() {
         }
       >
         <div className="flex gap-2">
-            <Button size="sm" variant="outline" className="border-dashed h-9 text-[10px] font-black uppercase rounded-xl" onClick={() => setIsBulkFormOpen(true)} disabled={loading}>
+            <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 h-9 text-[10px] font-black uppercase rounded-xl" onClick={() => setIsBulkFormOpen(true)} disabled={loading}>
               <Users className="mr-2 h-4 w-4" />
               In Blocco
             </Button>
