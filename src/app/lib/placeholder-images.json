@@ -1,0 +1,52 @@
+{
+  "placeholderImages": [
+    {
+      "id": "player-1",
+      "description": "Avatar for Player 1",
+      "imageUrl": "https://images.unsplash.com/photo-1462870269668-718e186aebb5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwbGF5ZXIlMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njg5OTMwMTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "player portrait"
+    },
+    {
+      "id": "player-2",
+      "description": "Avatar for Player 2",
+      "imageUrl": "https://images.unsplash.com/photo-1691042138547-90995378b576?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwbGF5ZXIlMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njg5OTMwMTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "player portrait"
+    },
+    {
+      "id": "player-3",
+      "description": "Avatar for Player 3",
+      "imageUrl": "https://images.unsplash.com/photo-1462870269668-718e186aebb5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwbGF5ZXIlMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njg5OTMwMTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "player portrait"
+    },
+    {
+      "id": "player-4",
+      "description": "Avatar for Player 4",
+      "imageUrl": "https://images.unsplash.com/photo-1695918425489-6c56df5eff9b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGxheWVyJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzY4OTkzMDE5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "player portrait"
+    },
+    {
+      "id": "player-5",
+      "description": "Avatar for Player 5",
+      "imageUrl": "https://images.unsplash.com/photo-1613002864483-7464b6bd442e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwbGF5ZXIlMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njg5OTMwMTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "player portrait"
+    },
+    {
+      "id": "player-6",
+      "description": "Avatar for Player 6",
+      "imageUrl": "https://images.unsplash.com/photo-1695918425489-6c56df5eff9b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGxheWVyJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzY4OTkzMDE5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "player portrait"
+    },
+    {
+      "id": "player-7",
+      "description": "Avatar for Player 7",
+      "imageUrl": "https://images.unsplash.com/photo-1755495523970-3f905e0266db?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwbGF5ZXIlMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njg5OTMwMTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "player portrait"
+    },
+    {
+      "id": "player-8",
+      "description": "Avatar for Player 8",
+      "imageUrl": "https://images.unsplash.com/photo-1613002864483-7464b6bd442e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwbGF5ZXIlMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njg5OTMwMTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "player portrait"
+    }
+  ]
+}

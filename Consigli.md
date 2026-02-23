@@ -5,8 +5,9 @@ Questo documento raccoglie suggerimenti per l'evoluzione del software come gesti
 
 ## 🧠 Logica e Architettura
 
+- **Persistenza Locale (Offline-Only)**: Attualmente i dati risiedono esclusivamente nel browser del dispositivo tramite IndexedDB. Questo significa che l'accesso con lo stesso account da dispositivi diversi (es. PC e Smartphone) mostrerà database differenti.
 - **Backup Manuale**: Potenziare la sezione Impostazioni con una funzione di "Snapshot" (import/export JSON completo) per permettere all'utente di spostare i dati tra dispositivi manualmente.
-- **Isolamento Multi-utente**: La logica attuale garantisce che `admin` e `loiacono` non condividano dati. Per il futuro, si potrebbe implementare una condivisione selettiva dei giocatori tra società (Modello Multi-Società).
+- **Isolamento Multi-utente**: La logica attuale garantisce che `admin` e `loiacono` non condividano dati sullo stesso dispositivo. Per il futuro, si potrebbe implementare una sincronizzazione cloud selettiva (Firebase Firestore) per permettere l'uso multi-device.
 
 ## 🎨 Stile e UI/UX
 - **Drag & Drop**: Implementare il trascinamento dei giocatori per definire l'ordine di entrata in panchina o la disposizione tattica.
