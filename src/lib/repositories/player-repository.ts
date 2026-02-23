@@ -1,6 +1,6 @@
-
 import { db } from '@/lib/db';
 import type { Player, Role } from '@/lib/types';
+import { PlaceHolderImages } from '../placeholder-images';
 
 export type PlayerCreateData = {
     name: string;
@@ -25,14 +25,15 @@ export const playerRepository = {
   },
 
   async add(data: PlayerCreateData) {
+    const placeholder = PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)];
     const newPlayer: Player = {
       id: `p_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       userId: data.userId,
       seasonId: data.seasonId,
       name: data.name,
       role: data.role,
-      avatarUrl: `https://picsum.photos/seed/p${Date.now()}/200/200`,
-      imageHint: 'player portrait',
+      avatarUrl: placeholder.imageUrl,
+      imageHint: placeholder.imageHint,
       stats: { appearances: 0, goals: 0, assists: 0, avgMinutes: 0 },
     };
     await db.players.add(newPlayer);
@@ -41,16 +42,19 @@ export const playerRepository = {
 
   async bulkAdd(playersData: { name: string, role: Role }[], userId: string, seasonId: string) {
     const timestamp = Date.now();
-    const newPlayers: Player[] = playersData.map((p, index) => ({
-      id: `p_${timestamp}_${index}_${Math.random().toString(36).substr(2, 5)}`,
-      userId,
-      seasonId,
-      name: p.name,
-      role: p.role,
-      avatarUrl: `https://picsum.photos/seed/p${timestamp}${index}/200/200`,
-      imageHint: 'player portrait',
-      stats: { appearances: 0, goals: 0, assists: 0, avgMinutes: 0 },
-    }));
+    const newPlayers: Player[] = playersData.map((p, index) => {
+      const placeholder = PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)];
+      return {
+        id: `p_${timestamp}_${index}_${Math.random().toString(36).substr(2, 5)}`,
+        userId,
+        seasonId,
+        name: p.name,
+        role: p.role,
+        avatarUrl: placeholder.imageUrl,
+        imageHint: placeholder.imageHint,
+        stats: { appearances: 0, goals: 0, assists: 0, avgMinutes: 0 },
+      };
+    });
 
     await db.players.bulkAdd(newPlayers);
     return newPlayers;
