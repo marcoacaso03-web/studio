@@ -2,10 +2,19 @@
 export const ROLES = ['Portiere', 'Difensore', 'Centrocampista', 'Attaccante'] as const;
 export type Role = typeof ROLES[number];
 
+export interface PlayerStats {
+  appearances: number;
+  goals: number;
+  assists: number;
+  avgMinutes: number;
+  yellowCards?: number;
+  redCards?: number;
+}
+
 export type Season = {
   id: string;
   userId: string;
-  ownerId: string; // Per Security Rules
+  ownerId: string;
   name: string;
   isActive: boolean;
   createdAt: string;
@@ -15,19 +24,14 @@ export type Season = {
 export type Player = {
   id: string;
   userId: string;
-  teamOwnerId: string; // Per Security Rules
-  teamId: string;      // Per Backend mapping
+  teamOwnerId: string;
+  teamId: string;
   seasonId: string;
   name: string;
   role: Role;
   avatarUrl: string;
   imageHint: string;
-  stats: {
-    appearances: number;
-    goals: number;
-    assists: number;
-    avgMinutes: number;
-  };
+  stats: PlayerStats;
   createdAt: string;
   updatedAt: string;
 };
@@ -35,22 +39,26 @@ export type Player = {
 export const MATCH_TYPES = ['Campionato', 'Torneo', 'Amichevole'] as const;
 export type MatchType = typeof MATCH_TYPES[number];
 
+export type MatchResult = {
+  home: number;
+  away: number;
+};
+
+export type MatchStatus = 'scheduled' | 'completed' | 'canceled';
+
 export type Match = {
   id: string;
   userId: string;
-  teamOwnerId: string; // Per Security Rules
-  teamId: string;      // Per Backend mapping
+  teamOwnerId: string;
+  teamId: string;
   seasonId: string;
   opponent: string;
   date: string;
   isHome: boolean;
   type: MatchType;
   duration: number;
-  result?: {
-    home: number;
-    away: number;
-  };
-  status: 'scheduled' | 'completed' | 'canceled';
+  result?: MatchResult;
+  status: MatchStatus;
   notes?: string;
   createdAt: string;
   updatedAt: string;

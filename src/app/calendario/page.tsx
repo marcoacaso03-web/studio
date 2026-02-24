@@ -1,14 +1,21 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Eye, PlusCircle, Trash2, Users, Trophy, Calendar } from "lucide-react";
 import Link from "next/link";
-import { Match } from "@/lib/types";
-import { MatchFormDialog } from "@/components/partite/match-form-dialog";
+import type { Match, MatchStatus } from "@/lib/types";
+import { useMatchesStore } from "@/store/useMatchesStore";
+import { usePlayersStore } from "@/store/usePlayersStore";
+import { useStatsStore } from "@/store/useStatsStore";
+import { useSeasonsStore } from "@/store/useSeasonsStore";
+import { Skeleton } from "@/components/ui/skeleton";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,13 +25,12 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useMatchesStore } from "@/store/useMatchesStore";
-import { usePlayersStore } from "@/store/usePlayersStore";
-import { useStatsStore } from "@/store/useStatsStore";
-import { useSeasonsStore } from "@/store/useSeasonsStore";
-import { Skeleton } from "@/components/ui/skeleton";
+
+// Dynamic loading for the form to save bundle size
+const MatchFormDialog = dynamic(() => import("@/components/partite/match-form-dialog").then(mod => mod.MatchFormDialog), {
+  ssr: false
+});
 
 export default function DashboardPage() {
   const { matches, loading: matchesLoading, fetchAll: fetchMatches, add: addMatch, remove: removeMatch } = useMatchesStore();
@@ -45,7 +51,7 @@ export default function DashboardPage() {
     initialize();
   }, [fetchMatches, fetchPlayers, loadStats, fetchSeasons]);
 
-  const getStatusBadge = (status: 'scheduled' | 'completed' | 'canceled') => {
+  const StatusBadge = ({ status }: { status: MatchStatus }) => {
     switch (status) {
       case 'completed':
         return <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary border-primary/20 uppercase">Finita</Badge>;
@@ -56,7 +62,7 @@ export default function DashboardPage() {
       default:
         return null;
     }
-  }
+  };
 
   const handleSaveMatch = async (data: any) => {
     const newMatch = await addMatch(data);
@@ -152,9 +158,9 @@ export default function DashboardPage() {
                     <span className="text-xs md:text-base font-black bg-primary/5 px-2 py-1 rounded border border-primary/10">
                       {match.result ? `${match.result.home}-${match.result.away}` : 'v-v'}
                     </span>
-                    <div className="md:hidden mt-1">{getStatusBadge(match.status)}</div>
+                    <div className="md:hidden mt-1"><StatusBadge status={match.status} /></div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell">{getStatusBadge(match.status)}</TableCell>
+                  <TableCell className="hidden md:table-cell"><StatusBadge status={match.status} /></TableCell>
                   <TableCell className="text-right p-0 md:p-4 md:pr-4 block md:table-cell">
                     <div className="flex items-center justify-end gap-1.5">
                       <Button variant="outline" size="icon" className="h-8 w-8 md:h-9 md:w-9 border-primary/20 text-primary hover:bg-primary/5" asChild>
@@ -213,7 +219,14 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <MatchFormDialog open={isFormOpen} onOpenChange={setIsFormOpen} onSave={handleSaveMatch} match={null} />
+      {isFormOpen && (
+        <MatchFormDialog 
+          open={isFormOpen} 
+          onOpenChange={setIsFormOpen} 
+          onSave={handleSaveMatch} 
+          match={null} 
+        />
+      )}
 
       <AlertDialog open={!!matchToDelete} onOpenChange={(open) => !open && setMatchToDelete(null)}>
         <AlertDialogContent className="max-w-[90vw] rounded-2xl">

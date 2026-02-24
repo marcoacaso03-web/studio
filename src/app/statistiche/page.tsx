@@ -1,17 +1,32 @@
+
 "use client";
 
 import { useEffect } from "react";
+import dynamic from "next/dynamic";
 import { PageHeader } from "@/components/layout/page-header";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStatsStore } from "@/store/useStatsStore";
 import { TeamRecord } from "@/components/statistiche/team-record";
 import { PlayerLeaderboard } from "@/components/statistiche/player-leaderboard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TeamPerformanceChart } from "@/components/statistiche/team-performance-chart";
-import { GoalsIntervalChart } from "@/components/statistiche/goals-interval-chart";
-import { VenueStatsCharts } from "@/components/statistiche/venue-stats-charts";
-import { GoalVenueCharts } from "@/components/statistiche/goal-venue-charts";
+
+// Dynamic imports for charts to optimize LCP and bundle size
+const VenueStatsCharts = dynamic(() => import("@/components/statistiche/venue-stats-charts").then(mod => mod.VenueStatsCharts), {
+  loading: () => <Skeleton className="h-80 w-full" />,
+  ssr: false
+});
+const GoalVenueCharts = dynamic(() => import("@/components/statistiche/goal-venue-charts").then(mod => mod.GoalVenueCharts), {
+  loading: () => <Skeleton className="h-80 w-full" />,
+  ssr: false
+});
+const TeamPerformanceChart = dynamic(() => import("@/components/statistiche/team-performance-chart").then(mod => mod.TeamPerformanceChart), {
+  loading: () => <Skeleton className="h-80 w-full" />,
+  ssr: false
+});
+const GoalsIntervalChart = dynamic(() => import("@/components/statistiche/goals-interval-chart").then(mod => mod.GoalsIntervalChart), {
+  loading: () => <Skeleton className="h-80 w-full" />,
+  ssr: false
+});
 
 export default function StatistichePage() {
   const { loading, loadStats } = useStatsStore();
@@ -25,9 +40,9 @@ export default function StatistichePage() {
       <PageHeader title="Statistiche" />
       <Tabs defaultValue="record" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="record">Record Squadra</TabsTrigger>
-          <TabsTrigger value="leaderboard">Giocatori</TabsTrigger>
-          <TabsTrigger value="grafici">Grafici</TabsTrigger>
+          <TabsTrigger value="record" className="text-xs font-bold uppercase">Record</TabsTrigger>
+          <TabsTrigger value="leaderboard" className="text-xs font-bold uppercase">Giocatori</TabsTrigger>
+          <TabsTrigger value="grafici" className="text-xs font-bold uppercase">Grafici</TabsTrigger>
         </TabsList>
         <TabsContent value="record">
           {loading ? (

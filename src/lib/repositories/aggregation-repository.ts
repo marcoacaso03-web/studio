@@ -1,21 +1,36 @@
 
-import { getFirestore, collection, getDocs, query, where, doc, updateDoc } from 'firebase/firestore';
 import { matchRepository } from './match-repository';
 import { playerRepository } from './player-repository';
 import { eventRepository } from './event-repository';
 import { statsRepository } from './stats-repository';
 import { lineupRepository } from './lineup-repository';
+import type { Match, Player, MatchEvent, PlayerMatchStats } from '../types';
+
+export interface TeamStatsRecord {
+    wins: number;
+    draws: number;
+    losses: number;
+    goalsFor: number;
+    goalsAgainst: number;
+    matchesPlayed: number;
+}
+
+export interface FullTeamRecord {
+    overall: TeamStatsRecord;
+    home: TeamStatsRecord;
+    away: TeamStatsRecord;
+}
 
 export const aggregationRepository = {
-    async getTeamRecord(userId: string, seasonId?: string) {
+    async getTeamRecord(userId: string, seasonId?: string): Promise<FullTeamRecord> {
         if (!userId || !seasonId) return this.processMatchesRecord([]);
         const matches = await matchRepository.getAll(userId, seasonId);
         const completedMatches = matches.filter(m => m.status === 'completed');
         return this.processMatchesRecord(completedMatches);
     },
 
-    processMatchesRecord(completedMatches: any[]) {
-        const createRecord = () => ({
+    processMatchesRecord(completedMatches: Match[]): FullTeamRecord {
+        const createRecord = (): TeamStatsRecord => ({
             wins: 0,
             draws: 0,
             losses: 0,
@@ -24,7 +39,7 @@ export const aggregationRepository = {
             matchesPlayed: 0,
         });
 
-        const record = {
+        const record: FullTeamRecord = {
             overall: createRecord(),
             home: createRecord(),
             away: createRecord()
@@ -37,23 +52,26 @@ export const aggregationRepository = {
             record.overall.matchesPlayed++;
             target.matchesPlayed++;
 
+            const homeGoals = match.result.home;
+            const awayGoals = match.result.away;
+
             if (match.isHome) {
-                record.overall.goalsFor += match.result.home;
-                record.overall.goalsAgainst += match.result.away;
-                target.goalsFor += match.result.home;
-                target.goalsAgainst += match.result.away;
+                record.overall.goalsFor += homeGoals;
+                record.overall.goalsAgainst += awayGoals;
+                target.goalsFor += homeGoals;
+                target.goalsAgainst += awayGoals;
                 
-                if (match.result.home > match.result.away) { record.overall.wins++; target.wins++; }
-                else if (match.result.home < match.result.away) { record.overall.losses++; target.losses++; }
+                if (homeGoals > awayGoals) { record.overall.wins++; target.wins++; }
+                else if (homeGoals < awayGoals) { record.overall.losses++; target.losses++; }
                 else { record.overall.draws++; target.draws++; }
             } else {
-                record.overall.goalsFor += match.result.away;
-                record.overall.goalsAgainst += match.result.home;
-                target.goalsFor += match.result.away;
-                target.goalsAgainst += match.result.home;
+                record.overall.goalsFor += awayGoals;
+                record.overall.goalsAgainst += homeGoals;
+                target.goalsFor += awayGoals;
+                target.goalsAgainst += homeGoals;
                 
-                if (match.result.away > match.result.home) { record.overall.wins++; target.wins++; }
-                else if (match.result.away < match.result.home) { record.overall.losses++; target.losses++; }
+                if (awayGoals > homeGoals) { record.overall.wins++; target.wins++; }
+                else if (awayGoals < homeGoals) { record.overall.losses++; target.losses++; }
                 else { record.overall.draws++; target.draws++; }
             }
         }
@@ -68,19 +86,20 @@ export const aggregationRepository = {
         return completedMatches.map(match => {
             if (!match.result) return null;
             let value = 0;
+            const { home, away } = match.result;
             if (match.isHome) {
-                if (match.result.home > match.result.away) value = 1;
-                else if (match.result.home < match.result.away) value = -1;
+                if (home > away) value = 1;
+                else if (home < away) value = -1;
             } else {
-                if (match.result.away > match.result.home) value = 1;
-                else if (match.result.away < match.result.home) value = -1;
+                if (away > home) value = 1;
+                else if (away < home) value = -1;
             }
             return {
                 date: new Date(match.date).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' }),
                 opponent: match.opponent,
                 value
             };
-        }).filter(Boolean);
+        }).filter((item): item is NonNullable<typeof item> => item !== null);
     },
 
     async getGoalsByInterval(userId: string, seasonId?: string) {
