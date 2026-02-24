@@ -35,9 +35,17 @@ import {
 } from "@/components/ui/dialog";
 import { useSettingsStore } from "@/store/useSettingsStore";
 
-const toDatetimeLocal = (dateSource?: Date | string): string => {
-  if (!dateSource) return '';
-  const date = new Date(dateSource);
+const safeParseDate = (dateSource?: any): Date => {
+  if (!dateSource) return new Date();
+  if (typeof dateSource === 'string') return new Date(dateSource);
+  if (dateSource instanceof Date) return dateSource;
+  if (dateSource && typeof dateSource.toDate === 'function') return dateSource.toDate();
+  const d = new Date(dateSource);
+  return isNaN(d.getTime()) ? new Date() : d;
+};
+
+const toDatetimeLocal = (dateSource?: any): string => {
+  const date = safeParseDate(dateSource);
   date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
   return date.toISOString().slice(0, 16);
 };
@@ -93,7 +101,7 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
   function onSubmit(data: MatchFormValues) {
     onSave({
         ...data,
-        date: new Date(data.date),
+        date: new Date(data.date).toISOString(), // Salviamo sempre come stringa ISO
     }, match?.id);
     onOpenChange(false);
   }

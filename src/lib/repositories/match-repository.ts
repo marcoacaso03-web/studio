@@ -13,6 +13,23 @@ import {
 } from 'firebase/firestore';
 import type { Match } from '@/lib/types';
 
+/**
+ * Utility per garantire che la data sia sempre una stringa ISO valida,
+ * gestendo sia stringhe che oggetti Timestamp di Firestore.
+ */
+const ensureISODate = (date: any): string => {
+  if (!date) return new Date().toISOString();
+  if (typeof date === 'string') return date;
+  if (date instanceof Date) return date.toISOString();
+  if (date && typeof date.toDate === 'function') return date.toDate().toISOString();
+  try {
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+  } catch {
+    return new Date().toISOString();
+  }
+};
+
 export type MatchCreateData = Omit<Match, 'id' | 'result'> & { status?: Match['status'] };
 
 export const matchRepository = {
@@ -22,7 +39,14 @@ export const matchRepository = {
     const matchesRef = collection(db, 'teams', seasonId, 'matches');
     const q = query(matchesRef, where('teamOwnerId', '==', userId));
     const snapshot = await getDocs(q);
-    const matches = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Match));
+    const matches = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return { 
+        ...data, 
+        id: doc.id,
+        date: ensureISODate(data.date)
+      } as Match;
+    });
     return matches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   },
   
@@ -31,12 +55,17 @@ export const matchRepository = {
     const db = getFirestore();
     const docRef = doc(db, 'teams', seasonId, 'matches', id);
     const snapshot = await getDoc(docRef);
-    return snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } as Match : undefined;
+    if (!snapshot.exists()) return undefined;
+    const data = snapshot.data();
+    return { 
+      ...data, 
+      id: snapshot.id,
+      date: ensureISODate(data.date)
+    } as Match;
   },
 
   async add(data: MatchCreateData) {
     const db = getFirestore();
-    // Genera un ID corto e leggibile (es: M-ABC12)
     const shortRandom = Math.random().toString(36).substring(2, 7).toUpperCase();
     const id = `M-${shortRandom}`;
     
@@ -44,6 +73,7 @@ export const matchRepository = {
       status: 'scheduled',
       ...data,
       id,
+      date: ensureISODate(data.date),
       teamOwnerId: data.userId,
       teamId: data.seasonId,
       createdAt: new Date().toISOString(),
@@ -56,10 +86,16 @@ export const matchRepository = {
   async update(id: string, seasonId: string, updates: Partial<Omit<Match, 'id' | 'userId' | 'seasonId'>>) {
     const db = getFirestore();
     const docRef = doc(db, 'teams', seasonId, 'matches', id);
-    const updatesWithTimestamp = { ...updates, updatedAt: new Date().toISOString() };
+    
+    const preparedUpdates = { ...updates };
+    if (preparedUpdates.date) {
+      preparedUpdates.date = ensureISODate(preparedUpdates.date);
+    }
+    
+    const updatesWithTimestamp = { ...preparedUpdates, updatedAt: new Date().toISOString() };
     await updateDoc(docRef, updatesWithTimestamp);
     const snapshot = await getDoc(docRef);
-    return snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } as Match : undefined;
+    return snapshot.exists() ? { ...snapshot.data(), id: snapshot.id, date: ensureISODate(snapshot.data().date) } as Match : undefined;
   },
 
   async delete(id: string, seasonId: string) {
