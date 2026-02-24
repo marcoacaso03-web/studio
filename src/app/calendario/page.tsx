@@ -124,7 +124,7 @@ export default function DashboardPage() {
                 <TableHead className="text-[10px] font-bold uppercase">Data</TableHead>
                 <TableHead className="text-[10px] font-bold uppercase">Avversario</TableHead>
                 <TableHead className="text-[10px] font-bold uppercase">Tipo</TableHead>
-                <TableHead className="text-[10px] font-bold uppercase">Risultato</TableHead>
+                <TableHead className="text-[10px] font-bold uppercase text-center">Risultato</TableHead>
                 <TableHead className="text-[10px] font-bold uppercase">Stato</TableHead>
                 <TableHead className="w-16 text-right pr-6 text-[10px] font-bold uppercase">Elimina</TableHead>
               </TableRow>
@@ -164,17 +164,19 @@ export default function DashboardPage() {
                   >
                     {match.isHome ? 'In Casa' : 'Trasferta'}
                   </TableCell>
-                  <TableCell className="p-4 block md:table-cell text-center md:text-left flex flex-col items-center md:block mr-4 md:mr-0 cursor-pointer" onClick={() => router.push(`/calendario/${match.id}`)}>
+                  <TableCell className="p-4 block md:table-cell text-center md:text-left flex flex-col items-center md:block mr-4 md:mr-0">
                     <span className="text-xs md:text-base font-black bg-primary/5 px-2 py-1 rounded border border-primary/10">
                       {match.result ? `${match.result.home}-${match.result.away}` : 'v-v'}
                     </span>
                     <div className="md:hidden mt-1"><StatusBadge status={match.status} /></div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell cursor-pointer" onClick={() => router.push(`/calendario/${match.id}`)}><StatusBadge status={match.status} /></TableCell>
+                  <TableCell className="hidden md:table-cell"><StatusBadge status={match.status} /></TableCell>
                   <TableCell className="text-right p-4 block md:table-cell">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/5" onClick={(e) => { e.stopPropagation(); setMatchToDelete(match); }}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center justify-end gap-2">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/5" onClick={(e) => { e.stopPropagation(); setMatchToDelete(match); }}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

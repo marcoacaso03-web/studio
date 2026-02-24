@@ -44,62 +44,68 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     load: async (matchId) => {
         set({ loading: true, matchId, match: null, events: [], lineup: null, stats: [] });
         
-        const loadData = async (mId: string, sId: string, userId: string) => {
-            try {
-                const match = await matchRepository.getById(mId, sId);
-                if (!match) {
-                    set({ loading: false });
-                    return;
+        const attemptLoading = async () => {
+            const user = useAuthStore.getState().user;
+            let seasonId = useSeasonsStore.getState().activeSeason?.id;
+
+            if (user) {
+                if (!seasonId) {
+                    await useSeasonsStore.getState().fetchAll();
+                    seasonId = useSeasonsStore.getState().activeSeason?.id;
                 }
 
-                const [allPlayers, matchEvents, matchLineup, matchStats] = await Promise.all([
-                    playerRepository.getAll(userId, sId),
-                    eventRepository.getForMatch(mId, sId),
-                    lineupRepository.getForMatch(mId, sId),
-                    statsRepository.getForMatch(mId, sId)
-                ]);
+                if (seasonId) {
+                    try {
+                        const match = await matchRepository.getById(matchId, seasonId);
+                        if (match) {
+                            const [allPlayers, matchEvents, matchLineup, matchStats] = await Promise.all([
+                                playerRepository.getAll(user.id, seasonId),
+                                eventRepository.getForMatch(matchId, seasonId),
+                                lineupRepository.getForMatch(matchId, seasonId),
+                                statsRepository.getForMatch(matchId, seasonId)
+                            ]);
 
-                set({ 
-                    match, 
-                    allPlayers,
-                    events: matchEvents,
-                    lineup: matchLineup || null,
-                    stats: matchStats,
-                    loading: false 
-                });
+                            set({ 
+                                match, 
+                                allPlayers,
+                                events: matchEvents,
+                                lineup: matchLineup || null,
+                                stats: matchStats,
+                                loading: false 
+                            });
 
-                await get().syncAndPersistMinutes();
-            } catch (error) {
-                console.error("Error loading match detail:", error);
-                set({ loading: false });
+                            await get().syncAndPersistMinutes();
+                            return true;
+                        }
+                    } catch (error) {
+                        console.error("Error fetching match data:", error);
+                    }
+                }
             }
+            return false;
         };
 
-        // Attendiamo che l'utente sia autenticato
-        let user = useAuthStore.getState().user;
-        if (!user) {
-            // Se l'utente non è ancora caricato, attendiamo un istante (gestione hydration/init)
-            await new Promise(resolve => setTimeout(resolve, 500));
-            user = useAuthStore.getState().user;
-        }
+        // Try immediate load
+        if (await attemptLoading()) return;
 
-        if (!user) {
-            set({ loading: false });
-            return;
-        }
-
-        let seasonId = useSeasonsStore.getState().activeSeason?.id;
-        if (!seasonId) {
-            await useSeasonsStore.getState().fetchAll();
-            seasonId = useSeasonsStore.getState().activeSeason?.id;
-        }
-
-        if (!seasonId) {
-            set({ loading: false });
-            return;
-        }
-
-        await loadData(matchId, seasonId, user.id);
+        // If not loaded, wait for Auth and Season initialization (common on page refresh)
+        let attempts = 0;
+        const maxAttempts = 5;
+        const interval = setInterval(async () => {
+            attempts++;
+            const isInitialized = useAuthStore.getState().isInitialized;
+            if (isInitialized) {
+                if (await attemptLoading()) {
+                    clearInterval(interval);
+                    return;
+                }
+            }
+            
+            if (attempts >= maxAttempts) {
+                clearInterval(interval);
+                set({ loading: false });
+            }
+        }, 1000);
     },
 
     syncAndPersistMinutes: async () => {
