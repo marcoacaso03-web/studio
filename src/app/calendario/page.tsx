@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Eye, PlusCircle, Trash2, Users, Trophy, Calendar } from "lucide-react";
-import Link from "next/link";
+import { PlusCircle, Trash2, Users, Trophy, Calendar } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type { Match, MatchStatus } from "@/lib/types";
 import { useMatchesStore } from "@/store/useMatchesStore";
 import { usePlayersStore } from "@/store/usePlayersStore";
@@ -37,6 +37,7 @@ export default function DashboardPage() {
   const { players, loading: playersLoading, fetchAll: fetchPlayers } = usePlayersStore();
   const { teamRecord, loading: statsLoading, loadStats } = useStatsStore();
   const { activeSeason, fetchAll: fetchSeasons } = useSeasonsStore();
+  const router = useRouter();
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [matchToDelete, setMatchToDelete] = useState<Match | null>(null);
@@ -131,7 +132,10 @@ export default function DashboardPage() {
             <TableBody className="block md:table-row-group">
               {matches.map((match) => (
                 <TableRow key={match.id} className="flex flex-row items-center justify-between md:table-row py-3 px-4 md:px-0 border-b hover:bg-muted/5 transition-colors">
-                  <TableCell className="p-0 md:p-4 block md:table-cell flex-1 md:flex-none">
+                  <TableCell 
+                    className="p-0 md:p-4 block md:table-cell flex-1 md:flex-none cursor-pointer"
+                    onClick={() => router.push(`/calendario/${match.id}`)}
+                  >
                     <div className="flex flex-col md:block">
                       <span className="text-[10px] font-bold text-primary flex items-center gap-1 md:hidden">
                         <Calendar className="h-3 w-3" />
@@ -145,13 +149,19 @@ export default function DashboardPage() {
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell font-bold">
+                  <TableCell 
+                    className="hidden md:table-cell font-bold cursor-pointer"
+                    onClick={() => router.push(`/calendario/${match.id}`)}
+                  >
                     <div className="flex flex-col">
                       <span>{match.opponent}</span>
                       <span className="text-[9px] text-muted-foreground uppercase">{match.type}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell text-xs text-muted-foreground uppercase font-bold">
+                  <TableCell 
+                    className="hidden md:table-cell text-xs text-muted-foreground uppercase font-bold cursor-pointer"
+                    onClick={() => router.push(`/calendario/${match.id}`)}
+                  >
                     {match.isHome ? 'In Casa' : 'Trasferta'}
                   </TableCell>
                   <TableCell className="p-0 md:p-4 block md:table-cell text-center md:text-left flex flex-col items-center md:block mr-4 md:mr-0">
@@ -163,9 +173,6 @@ export default function DashboardPage() {
                   <TableCell className="hidden md:table-cell"><StatusBadge status={match.status} /></TableCell>
                   <TableCell className="text-right p-0 md:p-4 md:pr-4 block md:table-cell">
                     <div className="flex items-center justify-end gap-1.5">
-                      <Button variant="outline" size="icon" className="h-8 w-8 md:h-9 md:w-9 border-primary/20 text-primary hover:bg-primary/5" asChild>
-                        <Link href={`/calendario/${match.id}`}><Eye className="h-4 w-4" /></Link>
-                      </Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/5" onClick={() => setMatchToDelete(match)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
