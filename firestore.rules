@@ -10,21 +10,6 @@ service cloud.firestore {
      * It relies on Authorization Independence through denormalization. Every document 
      * within a team's hierarchy contains the necessary metadata to authorize a 
      * request without performing expensive cross-document lookups (get() calls).
-     *
-     * DATA STRUCTURE:
-     * Data is organized hierarchically under a top-level /teams/{teamId} collection.
-     * All sub-entities (Players, Matches, Attendance, Stats, Lineups) are nested 
-     * deep within the team and match paths.
-     *
-     * KEY SECURITY DECISIONS:
-     * 1. Authorization Denormalization: All documents nested under a team MUST 
-     *    include 'teamOwnerId' and 'teamMembers' (a map of UID to role).
-     * 2. Shared Access: Access is granted if the authenticated user is either 
-     *    the owner or exists within the 'members' map of the document.
-     * 3. Prototyping Flexibility: Rules focus strictly on 'who' can access 'what' 
-     *    rather than strict schema enforcement for non-relational fields.
-     * 4. Relational Integrity: On creation, rules enforce that the internal 
-     *    ownerId matches the authenticated user to prevent spoofing.
      */
 
     // --- Helper Functions ---
@@ -54,7 +39,6 @@ service cloud.firestore {
 
     /** 
      * @description Ensures a document exists and the requester has access.
-     * Used for update and delete operations.
      */
     function canModify(currentData) {
       return currentData != null && hasAccess(currentData);
@@ -62,51 +46,23 @@ service cloud.firestore {
 
     // --- Collection Rules ---
 
-    /**
-     * @description Rules for the top-level Team collection.
-     * @path /teams/{teamId}
-     * @allow (create) if authenticated and setting self as owner.
-     * @deny (read) if user is not in the members map or the owner.
-     * @principle Self-creation and Shared Access via member map.
-     */
     match /teams/{teamId} {
       allow get, list: if hasAccess(resource.data);
       allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
       allow update: if canModify(resource.data);
       allow delete: if canModify(resource.data) && isOwner(resource.data.ownerId);
 
-      /**
-       * @description Players belonging to a specific team.
-       * @path /teams/{teamId}/players/{playerId}
-       * @allow (list) if user is a member of the parent team.
-       * @deny (create) if 'teamOwnerId' in the data does not match the requester's UID.
-       * @principle Authorization Independence via denormalized 'teamOwnerId'.
-       */
       match /players/{playerId} {
         allow get, list: if hasAccess(resource.data);
         allow create: if isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
         allow update, delete: if canModify(resource.data);
       }
 
-      /**
-       * @description Matches scheduled or played by a team.
-       * @path /teams/{teamId}/matches/{matchId}
-       * @allow (update) if user is an authorized team member.
-       * @deny (delete) if the document does not exist.
-       * @principle Hierarchical segregation with denormalized access control.
-       */
       match /matches/{matchId} {
         allow get, list: if hasAccess(resource.data);
         allow create: if isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
         allow update, delete: if canModify(resource.data);
 
-        /**
-         * @description Player attendance records for a specific match.
-         * @path /teams/{teamId}/matches/{matchId}/attendance/{playerMatchAttendanceId}
-         * @allow (create) if user provides valid denormalized team ownership.
-         * @deny (update) if attempting to change the teamOwnerId relationship.
-         * @principle Deeply nested access using denormalized context.
-         */
         match /attendance/{playerMatchAttendanceId} {
           allow get, list: if hasAccess(resource.data);
           allow create: if isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
@@ -114,13 +70,6 @@ service cloud.firestore {
           allow delete: if canModify(resource.data);
         }
 
-        /**
-         * @description Player statistics for a specific match.
-         * @path /teams/{teamId}/matches/{matchId}/stats/{playerMatchStatId}
-         * @allow (get) if the user is a team member.
-         * @deny (create) if teamOwnerId is missing or mismatched.
-         * @principle Prototyping flexibility for statistical data shapes.
-         */
         match /stats/{playerMatchStatId} {
           allow get, list: if hasAccess(resource.data);
           allow create: if isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
@@ -128,14 +77,14 @@ service cloud.firestore {
           allow delete: if canModify(resource.data);
         }
 
-        /**
-         * @description Lineup definitions (starters/subs) for a match.
-         * @path /teams/{teamId}/matches/{matchId}/lineup/{matchLineupPlayerId}
-         * @allow (update) if requester is a team member.
-         * @deny (list) if the requester is not authenticated.
-         * @principle Relational integrity via immutable teamOwnerId.
-         */
         match /lineup/{matchLineupPlayerId} {
+          allow get, list: if hasAccess(resource.data);
+          allow create: if isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
+          allow update: if canModify(resource.data) && request.resource.data.teamOwnerId == resource.data.teamOwnerId;
+          allow delete: if canModify(resource.data);
+        }
+
+        match /events/{eventId} {
           allow get, list: if hasAccess(resource.data);
           allow create: if isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
           allow update: if canModify(resource.data) && request.resource.data.teamOwnerId == resource.data.teamOwnerId;

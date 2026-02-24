@@ -1,4 +1,3 @@
-
 import type { NextConfig } from 'next';
 
 /** @type {import('next').NextConfig} */
@@ -24,14 +23,6 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-  },
-  // Disabilita telemetria e altri processi di background pesanti in dev
-  experimental: {
-    turbo: {
-      rules: {
-        // Configurazioni specifiche se necessario
-      }
-    }
   }
 };
 
