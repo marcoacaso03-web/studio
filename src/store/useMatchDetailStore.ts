@@ -9,6 +9,8 @@ import { lineupRepository } from '@/lib/repositories/lineup-repository';
 import { eventRepository } from '@/lib/repositories/event-repository';
 import { statsRepository } from '@/lib/repositories/stats-repository';
 import { useStatsStore } from './useStatsStore';
+import { useSeasonsStore } from './useSeasonsStore';
+import { useAuthStore } from './useAuthStore';
 import type { Match, Player, MatchLineup, MatchEvent, PlayerMatchStats } from '@/lib/types';
 
 interface MatchDetailState {
@@ -42,25 +44,7 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     load: async (matchId) => {
         set({ loading: true, matchId, match: null, events: [], lineup: null, stats: [] });
         
-        const { useSeasonsStore } = await import('./useSeasonsStore');
-        const seasonId = useSeasonsStore.getState().activeSeason?.id;
-        
-        if (!seasonId) {
-            // Se lo store delle stagioni non è pronto, proviamo a caricarlo
-            await useSeasonsStore.getState().fetchAll();
-            const retrySeasonId = useSeasonsStore.getState().activeSeason?.id;
-            if (!retrySeasonId) {
-                set({ loading: false });
-                return;
-            }
-            // Proseguiamo con il retrySeasonId
-            loadData(matchId, retrySeasonId);
-            return;
-        }
-
-        await loadData(matchId, seasonId);
-
-        async function loadData(mId: string, sId: string) {
+        const loadData = async (mId: string, sId: string, userId: string) => {
             try {
                 const match = await matchRepository.getById(mId, sId);
                 if (!match) {
@@ -69,7 +53,7 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
                 }
 
                 const [allPlayers, matchEvents, matchLineup, matchStats] = await Promise.all([
-                    playerRepository.getAll(match.userId, sId),
+                    playerRepository.getAll(userId, sId),
                     eventRepository.getForMatch(mId, sId),
                     lineupRepository.getForMatch(mId, sId),
                     statsRepository.getForMatch(mId, sId)
@@ -89,7 +73,33 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
                 console.error("Error loading match detail:", error);
                 set({ loading: false });
             }
+        };
+
+        // Attendiamo che l'utente sia autenticato
+        let user = useAuthStore.getState().user;
+        if (!user) {
+            // Se l'utente non è ancora caricato, attendiamo un istante (gestione hydration/init)
+            await new Promise(resolve => setTimeout(resolve, 500));
+            user = useAuthStore.getState().user;
         }
+
+        if (!user) {
+            set({ loading: false });
+            return;
+        }
+
+        let seasonId = useSeasonsStore.getState().activeSeason?.id;
+        if (!seasonId) {
+            await useSeasonsStore.getState().fetchAll();
+            seasonId = useSeasonsStore.getState().activeSeason?.id;
+        }
+
+        if (!seasonId) {
+            set({ loading: false });
+            return;
+        }
+
+        await loadData(matchId, seasonId, user.id);
     },
 
     syncAndPersistMinutes: async () => {

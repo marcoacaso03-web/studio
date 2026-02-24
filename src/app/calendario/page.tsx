@@ -126,14 +126,14 @@ export default function DashboardPage() {
                 <TableHead className="text-[10px] font-bold uppercase">Tipo</TableHead>
                 <TableHead className="text-[10px] font-bold uppercase">Risultato</TableHead>
                 <TableHead className="text-[10px] font-bold uppercase">Stato</TableHead>
-                <TableHead className="w-24 text-right pr-6 text-[10px] font-bold uppercase">Azioni</TableHead>
+                <TableHead className="w-16 text-right pr-6 text-[10px] font-bold uppercase">Elimina</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="block md:table-row-group">
               {matches.map((match) => (
-                <TableRow key={match.id} className="flex flex-row items-center justify-between md:table-row py-3 px-4 md:px-0 border-b hover:bg-muted/5 transition-colors">
+                <TableRow key={match.id} className="flex flex-row items-center justify-between md:table-row border-b hover:bg-muted/5 transition-colors group">
                   <TableCell 
-                    className="p-0 md:p-4 block md:table-cell flex-1 md:flex-none cursor-pointer"
+                    className="p-4 block md:table-cell flex-1 md:flex-none cursor-pointer"
                     onClick={() => router.push(`/calendario/${match.id}`)}
                   >
                     <div className="flex flex-col md:block">
@@ -164,19 +164,17 @@ export default function DashboardPage() {
                   >
                     {match.isHome ? 'In Casa' : 'Trasferta'}
                   </TableCell>
-                  <TableCell className="p-0 md:p-4 block md:table-cell text-center md:text-left flex flex-col items-center md:block mr-4 md:mr-0">
+                  <TableCell className="p-4 block md:table-cell text-center md:text-left flex flex-col items-center md:block mr-4 md:mr-0 cursor-pointer" onClick={() => router.push(`/calendario/${match.id}`)}>
                     <span className="text-xs md:text-base font-black bg-primary/5 px-2 py-1 rounded border border-primary/10">
                       {match.result ? `${match.result.home}-${match.result.away}` : 'v-v'}
                     </span>
                     <div className="md:hidden mt-1"><StatusBadge status={match.status} /></div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell"><StatusBadge status={match.status} /></TableCell>
-                  <TableCell className="text-right p-0 md:p-4 md:pr-4 block md:table-cell">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/5" onClick={() => setMatchToDelete(match)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                  <TableCell className="hidden md:table-cell cursor-pointer" onClick={() => router.push(`/calendario/${match.id}`)}><StatusBadge status={match.status} /></TableCell>
+                  <TableCell className="text-right p-4 block md:table-cell">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/5" onClick={(e) => { e.stopPropagation(); setMatchToDelete(match); }}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
