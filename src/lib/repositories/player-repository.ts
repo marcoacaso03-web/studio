@@ -71,7 +71,7 @@ export const playerRepository = {
     const db = getFirestore();
     const batch = writeBatch(db);
     
-    const newPlayers: Player[] = playersData.map((p, index) => {
+    const newPlayers: Player[] = playersData.map((p) => {
       const placeholder = PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)];
       const shortRandom = Math.random().toString(36).substring(2, 7).toUpperCase();
       const id = `P-${shortRandom}`;

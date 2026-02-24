@@ -84,12 +84,12 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
                         await get().syncAndPersistMinutes();
                         return true;
                     } else {
-                        // Partita non trovata dopo che tutti i dati sono pronti
-                        set({ loading: false });
-                        return true;
+                        // Se la query ha risposto ma il match è nullo, potrebbe essere un errore di ID o percorso
+                        return false; 
                     }
                 } catch (error) {
                     console.error("Error fetching match data:", error);
+                    return false;
                 }
             }
             return false;
@@ -97,13 +97,13 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
 
         // Retry loop per gestire l'inizializzazione asincrona dello store (es. refresh pagina)
         let attempts = 0;
-        const maxAttempts = 15;
+        const maxAttempts = 10;
         const checkAndLoad = async () => {
             const success = await attemptLoading();
             if (!success && attempts < maxAttempts) {
                 attempts++;
-                setTimeout(checkAndLoad, 500);
-            } else if (!success) {
+                setTimeout(checkAndLoad, 600);
+            } else {
                 set({ loading: false });
             }
         };
