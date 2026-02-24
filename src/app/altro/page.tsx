@@ -156,6 +156,9 @@ export default function AltroPage() {
 
   if (!mounted) return null;
 
+  // Genera un ID corto leggibile (username + prime 4 cifre del UID)
+  const shortId = user ? `${user.username.toLowerCase()}${user.id.substring(0, 4)}` : '';
+
   return (
     <div className="pb-12 space-y-6">
       <PageHeader title="Impostazioni" />
@@ -179,7 +182,7 @@ export default function AltroPage() {
               </div>
               <div className="flex flex-col">
                 <span className="text-sm font-black uppercase tracking-tight">{user?.username}</span>
-                <span className="text-[10px] text-muted-foreground font-bold uppercase">ID: {user?.id}</span>
+                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">ID: {shortId}</span>
               </div>
             </div>
             <Button variant="outline" size="sm" onClick={handleLogout} className="border-destructive/30 text-destructive hover:bg-destructive/5 font-bold uppercase text-[10px]">
@@ -250,9 +253,12 @@ export default function AltroPage() {
                 onClick={() => !s.isActive && handleSwitchSeason(s.id)}
               >
                 <div className="flex items-center gap-3">
-                  <span className={cn("text-sm font-black uppercase tracking-tight", s.isActive ? "text-primary" : "text-muted-foreground")}>
-                    Stagione {s.name}
-                  </span>
+                  <div className="flex flex-col">
+                    <span className={cn("text-sm font-black uppercase tracking-tight", s.isActive ? "text-primary" : "text-muted-foreground")}>
+                      Stagione {s.name}
+                    </span>
+                    <span className="text-[9px] text-muted-foreground font-bold tracking-widest">{s.id}</span>
+                  </div>
                   {s.isActive && (
                     <Badge className="text-[8px] bg-primary text-white font-black uppercase py-0 px-1.5">Attiva</Badge>
                   )}

@@ -27,7 +27,6 @@ export const playerRepository = {
     if (!userId || !seasonId) return [];
     const db = getFirestore();
     const playersRef = collection(db, 'teams', seasonId, 'players');
-    // Le regole di sicurezza Firestore usano teamOwnerId per l'isolamento
     const q = query(playersRef, where('teamOwnerId', '==', userId));
     const snapshot = await getDocs(q);
     const players = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Player));
@@ -45,13 +44,15 @@ export const playerRepository = {
   async add(data: PlayerCreateData) {
     const db = getFirestore();
     const placeholder = PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)];
-    const id = `p_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    // Genera un ID corto e leggibile (es: P-XYZ78)
+    const shortRandom = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const id = `P-${shortRandom}`;
     
     const newPlayer: Player = {
       id,
       userId: data.userId,
-      teamOwnerId: data.userId, // Allineamento con firestore.rules
-      teamId: data.seasonId,    // Allineamento con backend.json
+      teamOwnerId: data.userId,
+      teamId: data.seasonId,
       seasonId: data.seasonId,
       name: data.name,
       role: data.role,
@@ -69,11 +70,11 @@ export const playerRepository = {
   async bulkAdd(playersData: { name: string, role: Role }[], userId: string, seasonId: string) {
     const db = getFirestore();
     const batch = writeBatch(db);
-    const timestamp = Date.now();
     
     const newPlayers: Player[] = playersData.map((p, index) => {
       const placeholder = PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)];
-      const id = `p_${timestamp}_${index}_${Math.random().toString(36).substr(2, 5)}`;
+      const shortRandom = Math.random().toString(36).substring(2, 7).toUpperCase();
+      const id = `P-${shortRandom}`;
       const newPlayer: Player = {
         id,
         userId,

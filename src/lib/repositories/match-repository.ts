@@ -20,7 +20,6 @@ export const matchRepository = {
     if (!userId || !seasonId) return [];
     const db = getFirestore();
     const matchesRef = collection(db, 'teams', seasonId, 'matches');
-    // Le regole di sicurezza Firestore usano teamOwnerId per l'isolamento
     const q = query(matchesRef, where('teamOwnerId', '==', userId));
     const snapshot = await getDocs(q);
     const matches = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Match));
@@ -37,13 +36,16 @@ export const matchRepository = {
 
   async add(data: MatchCreateData) {
     const db = getFirestore();
-    const id = `m_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    // Genera un ID corto e leggibile (es: M-ABC12)
+    const shortRandom = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const id = `M-${shortRandom}`;
+    
     const newMatch: Match = {
       status: 'scheduled',
       ...data,
       id,
-      teamOwnerId: data.userId, // Allineamento con firestore.rules
-      teamId: data.seasonId,    // Allineamento con backend.json
+      teamOwnerId: data.userId,
+      teamId: data.seasonId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

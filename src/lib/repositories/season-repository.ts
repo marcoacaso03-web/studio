@@ -41,8 +41,10 @@ export const seasonRepository = {
 
     async add(name: string, userId: string) {
         const db = getFirestore();
-        const id = `s_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-        // Usiamo ownerId per allinearci alle regole di sicurezza Firebase
+        // Genera un ID corto e leggibile (es: S-456GH)
+        const shortRandom = Math.random().toString(36).substring(2, 7).toUpperCase();
+        const id = `S-${shortRandom}`;
+        
         const newSeason: Season = { 
             id, 
             userId, 
@@ -61,20 +63,17 @@ export const seasonRepository = {
         const db = getFirestore();
         const batch = writeBatch(db);
         
-        // Disattiva tutte le altre
         const all = await this.getAll(userId);
         all.forEach(s => {
             batch.update(doc(db, 'teams', s.id), { isActive: false, updatedAt: new Date().toISOString() });
         });
         
-        // Attiva quella selezionata
         batch.update(doc(db, 'teams', id), { isActive: true, updatedAt: new Date().toISOString() });
         await batch.commit();
     },
 
     async delete(id: string) {
         const db = getFirestore();
-        // Nota: Le regole di sicurezza verificheranno se l'utente è l'owner
         const docRef = doc(db, 'teams', id);
         return await writeBatch(db).delete(docRef).commit();
     },
