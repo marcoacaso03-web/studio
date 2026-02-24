@@ -27,7 +27,8 @@ export const playerRepository = {
     if (!userId || !seasonId) return [];
     const db = getFirestore();
     const playersRef = collection(db, 'teams', seasonId, 'players');
-    const q = query(playersRef, where('userId', '==', userId));
+    // Le regole di sicurezza Firestore usano teamOwnerId per l'isolamento
+    const q = query(playersRef, where('teamOwnerId', '==', userId));
     const snapshot = await getDocs(q);
     const players = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Player));
     return players.sort((a, b) => a.name.localeCompare(b.name));
@@ -49,12 +50,16 @@ export const playerRepository = {
     const newPlayer: Player = {
       id,
       userId: data.userId,
+      teamOwnerId: data.userId, // Allineamento con firestore.rules
+      teamId: data.seasonId,    // Allineamento con backend.json
       seasonId: data.seasonId,
       name: data.name,
       role: data.role,
       avatarUrl: placeholder.imageUrl,
       imageHint: placeholder.imageHint,
       stats: { appearances: 0, goals: 0, assists: 0, avgMinutes: 0 },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
 
     await setDoc(doc(db, 'teams', data.seasonId, 'players', id), newPlayer);
@@ -72,12 +77,16 @@ export const playerRepository = {
       const newPlayer: Player = {
         id,
         userId,
+        teamOwnerId: userId,
+        teamId: seasonId,
         seasonId,
         name: p.name,
         role: p.role,
         avatarUrl: placeholder.imageUrl,
         imageHint: placeholder.imageHint,
         stats: { appearances: 0, goals: 0, assists: 0, avgMinutes: 0 },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       };
       
       const docRef = doc(db, 'teams', seasonId, 'players', id);
@@ -92,7 +101,8 @@ export const playerRepository = {
   async update(id: string, seasonId: string, updates: Partial<Omit<Player, 'id' | 'userId' | 'seasonId'>>) {
     const db = getFirestore();
     const docRef = doc(db, 'teams', seasonId, 'players', id);
-    await updateDoc(docRef, updates);
+    const updatesWithTimestamp = { ...updates, updatedAt: new Date().toISOString() };
+    await updateDoc(docRef, updatesWithTimestamp);
     const snapshot = await getDoc(docRef);
     return snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } as Player : undefined;
   },

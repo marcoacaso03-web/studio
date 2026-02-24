@@ -7,8 +7,6 @@ import {
   getDoc, 
   doc, 
   setDoc, 
-  updateDoc, 
-  deleteDoc, 
   writeBatch,
   getFirestore
 } from 'firebase/firestore';
@@ -18,8 +16,8 @@ export const seasonRepository = {
     async getAll(userId: string) {
         if (!userId) return [];
         const db = getFirestore();
-        const seasonsRef = collection(db, 'seasons');
-        const q = query(seasonsRef, where('userId', '==', userId));
+        const seasonsRef = collection(db, 'teams');
+        const q = query(seasonsRef, where('ownerId', '==', userId));
         const snapshot = await getDocs(q);
         return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Season));
     },
@@ -27,7 +25,7 @@ export const seasonRepository = {
     async getById(id: string) {
         if (!id) return undefined;
         const db = getFirestore();
-        const docRef = doc(db, 'seasons', id);
+        const docRef = doc(db, 'teams', id);
         const snapshot = await getDoc(docRef);
         return snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } as Season : undefined;
     },
@@ -35,8 +33,8 @@ export const seasonRepository = {
     async getActive(userId: string) {
         if (!userId) return undefined;
         const db = getFirestore();
-        const seasonsRef = collection(db, 'seasons');
-        const q = query(seasonsRef, where('userId', '==', userId), where('isActive', '==', true));
+        const seasonsRef = collection(db, 'teams');
+        const q = query(seasonsRef, where('ownerId', '==', userId), where('isActive', '==', true));
         const snapshot = await getDocs(q);
         return snapshot.docs.length > 0 ? { ...snapshot.docs[0].data(), id: snapshot.docs[0].id } as Season : undefined;
     },
@@ -44,8 +42,17 @@ export const seasonRepository = {
     async add(name: string, userId: string) {
         const db = getFirestore();
         const id = `s_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-        const newSeason: Season = { id, userId, name, isActive: false };
-        await setDoc(doc(db, 'seasons', id), newSeason);
+        // Usiamo ownerId per allinearci alle regole di sicurezza Firebase
+        const newSeason: Season = { 
+            id, 
+            userId, 
+            ownerId: userId, 
+            name, 
+            isActive: false,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+        await setDoc(doc(db, 'teams', id), newSeason);
         return newSeason;
     },
 
@@ -57,18 +64,19 @@ export const seasonRepository = {
         // Disattiva tutte le altre
         const all = await this.getAll(userId);
         all.forEach(s => {
-            batch.update(doc(db, 'seasons', s.id), { isActive: false });
+            batch.update(doc(db, 'teams', s.id), { isActive: false, updatedAt: new Date().toISOString() });
         });
         
         // Attiva quella selezionata
-        batch.update(doc(db, 'seasons', id), { isActive: true });
+        batch.update(doc(db, 'teams', id), { isActive: true, updatedAt: new Date().toISOString() });
         await batch.commit();
     },
 
     async delete(id: string) {
         const db = getFirestore();
-        // Nota: Una vera pulizia richiederebbe una Cloud Function o un batch massivo per i documenti nidificati
-        return await deleteDoc(doc(db, 'seasons', id));
+        // Nota: Le regole di sicurezza verificheranno se l'utente è l'owner
+        const docRef = doc(db, 'teams', id);
+        return await writeBatch(db).delete(docRef).commit();
     },
 
     async ensureDefaultSeason(userId: string) {

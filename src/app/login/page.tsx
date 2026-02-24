@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -7,10 +8,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield, Lock, User, Sparkles } from 'lucide-react';
+import { Shield, Lock, User, Sparkles, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
+  const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -24,48 +26,38 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, router]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const result = await login(username, password);
-    if (result.success) {
-      router.push('/calendario');
+    if (isLogin) {
+      const result = await login(username, password);
+      if (result.success) {
+        router.push('/calendario');
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Accesso negato",
+          description: result.error || "Username o password errati.",
+        });
+        setIsLoading(false);
+      }
     } else {
-      toast({
-        variant: "destructive",
-        title: "Accesso negato",
-        description: result.error || "Username o password errati.",
-      });
-      setIsLoading(false);
-    }
-  };
-
-  const handleInitializeAccount = async () => {
-    if (!username || !password) {
-      toast({
-        variant: "destructive",
-        title: "Dati mancanti",
-        description: "Inserisci username e password per inizializzare l'account.",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    const result = await signUp(username, password);
-    if (result.success) {
-      toast({
-        title: "Account Inizializzato",
-        description: `L'account ${username} è stato creato con successo. Accesso in corso...`,
-      });
-      router.push('/calendario');
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Errore",
-        description: result.error || "Impossibile creare l'account.",
-      });
-      setIsLoading(false);
+      const result = await signUp(username, password);
+      if (result.success) {
+        toast({
+          title: "Account Creato",
+          description: `Benvenuto ${username}! Il tuo spazio cloud è pronto.`,
+        });
+        router.push('/calendario');
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Errore registrazione",
+          description: result.error || "Impossibile creare l'account.",
+        });
+        setIsLoading(false);
+      }
     }
   };
 
@@ -80,10 +72,10 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-3xl font-black tracking-tighter text-primary">PitchMan</CardTitle>
           <CardDescription className="text-xs uppercase font-bold tracking-widest text-muted-foreground/60">
-            Sincronizzazione Cloud Attiva
+            {isLogin ? "Sincronizzazione Cloud Attiva" : "Crea il tuo spazio cloud"}
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username" className="text-[10px] font-black uppercase tracking-wider">Username</Label>
@@ -122,7 +114,8 @@ export default function LoginPage() {
               className="w-full h-12 bg-primary text-white hover:bg-primary/90 font-black uppercase text-sm"
               disabled={isLoading}
             >
-              {isLoading ? "Verifica in corso..." : "Accedi al Pannello"}
+              {isLoading ? "Elaborazione..." : isLogin ? "Accedi al Pannello" : "Registra Account"}
+              {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>
             
             <div className="relative w-full">
@@ -137,12 +130,12 @@ export default function LoginPage() {
             <Button 
               type="button"
               variant="outline"
-              onClick={handleInitializeAccount}
+              onClick={() => setIsLogin(!isLogin)}
               className="w-full h-10 border-accent/30 text-accent hover:bg-accent/5 font-black uppercase text-[10px]"
               disabled={isLoading}
             >
               <Sparkles className="h-3.5 w-3.5 mr-2" />
-              Inizializza nuovo account
+              {isLogin ? "Inizializza nuovo account" : "Torna al login"}
             </Button>
           </CardFooter>
         </form>

@@ -20,7 +20,8 @@ export const matchRepository = {
     if (!userId || !seasonId) return [];
     const db = getFirestore();
     const matchesRef = collection(db, 'teams', seasonId, 'matches');
-    const q = query(matchesRef, where('userId', '==', userId));
+    // Le regole di sicurezza Firestore usano teamOwnerId per l'isolamento
+    const q = query(matchesRef, where('teamOwnerId', '==', userId));
     const snapshot = await getDocs(q);
     const matches = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Match));
     return matches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -41,6 +42,10 @@ export const matchRepository = {
       status: 'scheduled',
       ...data,
       id,
+      teamOwnerId: data.userId, // Allineamento con firestore.rules
+      teamId: data.seasonId,    // Allineamento con backend.json
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     await setDoc(doc(db, 'teams', data.seasonId, 'matches', id), newMatch);
     return newMatch;
@@ -49,7 +54,8 @@ export const matchRepository = {
   async update(id: string, seasonId: string, updates: Partial<Omit<Match, 'id' | 'userId' | 'seasonId'>>) {
     const db = getFirestore();
     const docRef = doc(db, 'teams', seasonId, 'matches', id);
-    await updateDoc(docRef, updates);
+    const updatesWithTimestamp = { ...updates, updatedAt: new Date().toISOString() };
+    await updateDoc(docRef, updatesWithTimestamp);
     const snapshot = await getDoc(docRef);
     return snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } as Match : undefined;
   },
