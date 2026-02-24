@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
-import { notFound, useParams } from "next/navigation";
+import { notFound, useParams, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MatchLineupTab } from "@/components/partite/match-lineup-tab";
@@ -13,21 +13,24 @@ import { useMatchDetailStore } from "@/store/useMatchDetailStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { MatchFormDialog } from "@/components/partite/match-form-dialog";
-import { CalendarDays, Settings2, Users, Zap, FileText, Home, Plane, Shield } from 'lucide-react';
+import { CalendarDays, Settings2, Users, Zap, FileText, Home, Plane } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export default function MatchDetailPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const id = params.id as string;
+  const urlSeasonId = searchParams.get('s');
 
   const { match, loading, load, updateMatch } = useMatchDetailStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
   
   useEffect(() => {
     if (id) {
-        load(id);
+        // Passiamo opzionalmente il seasonId se presente nella URL per accelerare il caricamento
+        load(id, urlSeasonId || undefined);
     }
-  }, [id, load]);
+  }, [id, urlSeasonId, load]);
   
   const handleSaveMatch = async (data: any) => {
     await updateMatch(data);
@@ -44,12 +47,10 @@ export default function MatchDetailPage() {
     );
   }
 
-  // Mostra 404 SOLO se il caricamento è finito e la partita non esiste
   if (!match && !loading) {
     return notFound();
   }
 
-  // Fallback per sicurezza (non dovrebbe essere mai raggiunto grazie al check sopra)
   if (!match) return null;
 
   const matchDate = new Date(match.date);

@@ -89,6 +89,11 @@ export default function DashboardPage() {
     };
   }, [players]);
 
+  // Funzione di navigazione centralizzata
+  const navigateToMatch = (match: Match) => {
+    router.push(`/calendario/${match.id}?s=${match.seasonId}`);
+  };
+
   return (
     <div className="space-y-4 md:space-y-6">
       <Card className="overflow-hidden border shadow-md bg-card">
@@ -132,10 +137,9 @@ export default function DashboardPage() {
             <TableBody className="block md:table-row-group">
               {matches.map((match) => (
                 <TableRow key={match.id} className="flex flex-row items-center justify-between md:table-row border-b hover:bg-muted/5 transition-colors group">
-                  {/* Area Cliccabile Sinistra: Data, Avversario, Tipo */}
                   <TableCell 
                     className="p-4 block md:table-cell flex-1 md:flex-none cursor-pointer"
-                    onClick={() => router.push(`/calendario/${match.id}`)}
+                    onClick={() => navigateToMatch(match)}
                   >
                     <div className="flex flex-col md:block">
                       <span className="text-[10px] font-bold text-primary flex items-center gap-1 md:hidden">
@@ -152,7 +156,7 @@ export default function DashboardPage() {
                   </TableCell>
                   <TableCell 
                     className="hidden md:table-cell font-bold cursor-pointer"
-                    onClick={() => router.push(`/calendario/${match.id}`)}
+                    onClick={() => navigateToMatch(match)}
                   >
                     <div className="flex flex-col">
                       <span>{match.opponent}</span>
@@ -161,12 +165,11 @@ export default function DashboardPage() {
                   </TableCell>
                   <TableCell 
                     className="hidden md:table-cell text-xs text-muted-foreground uppercase font-bold cursor-pointer"
-                    onClick={() => router.push(`/calendario/${match.id}`)}
+                    onClick={() => navigateToMatch(match)}
                   >
                     {match.isHome ? 'In Casa' : 'Trasferta'}
                   </TableCell>
 
-                  {/* Area Risultato e Stato */}
                   <TableCell className="p-4 block md:table-cell text-center md:text-left flex flex-col items-center md:block mr-4 md:mr-0">
                     <span className="text-xs md:text-base font-black bg-primary/5 px-2 py-1 rounded border border-primary/10">
                       {match.result ? `${match.result.home}-${match.result.away}` : 'v-v'}
@@ -175,7 +178,6 @@ export default function DashboardPage() {
                   </TableCell>
                   <TableCell className="hidden md:table-cell"><StatusBadge status={match.status} /></TableCell>
                   
-                  {/* Area Azioni */}
                   <TableCell className="text-right p-4 block md:table-cell">
                     <div className="flex items-center justify-end gap-2">
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/5" onClick={(e) => { e.stopPropagation(); setMatchToDelete(match); }}>

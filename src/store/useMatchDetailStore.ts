@@ -22,7 +22,7 @@ interface MatchDetailState {
     stats: PlayerMatchStats[];
     loading: boolean;
     
-    load: (matchId: string) => Promise<void>;
+    load: (matchId: string, seasonId?: string) => Promise<void>;
     updateMatch: (data: Partial<Omit<Match, 'id'>>) => Promise<void>;
     saveLineup: (lineup: MatchLineup) => Promise<void>;
     saveAllStats: (stats: PlayerMatchStats[]) => Promise<void>;
@@ -41,35 +41,35 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     stats: [],
     loading: true,
 
-    load: async (matchId) => {
+    load: async (matchId, seasonId) => {
         set({ loading: true, matchId, match: null, events: [], lineup: null, stats: [] });
         
         const attemptLoading = async () => {
             const authState = useAuthStore.getState();
             const seasonsState = useSeasonsStore.getState();
             
-            // Aspetta che l'auth sia inizializzata
             if (!authState.isInitialized) return false;
             
             const user = authState.user;
             if (!user) return false;
 
-            // Assicuriamoci che la stagione attiva sia caricata
-            let seasonId = seasonsState.activeSeason?.id;
-            if (!seasonId) {
+            // Priorità al seasonId passato o a quello attivo nello store
+            let targetSeasonId = seasonId || seasonsState.activeSeason?.id;
+            
+            if (!targetSeasonId) {
                 await seasonsState.fetchAll();
-                seasonId = useSeasonsStore.getState().activeSeason?.id;
+                targetSeasonId = useSeasonsStore.getState().activeSeason?.id;
             }
 
-            if (seasonId) {
+            if (targetSeasonId) {
                 try {
-                    const match = await matchRepository.getById(matchId, seasonId);
+                    const match = await matchRepository.getById(matchId, targetSeasonId);
                     if (match) {
                         const [allPlayers, matchEvents, matchLineup, matchStats] = await Promise.all([
-                            playerRepository.getAll(user.id, seasonId),
-                            eventRepository.getForMatch(matchId, seasonId),
-                            lineupRepository.getForMatch(matchId, seasonId),
-                            statsRepository.getForMatch(matchId, seasonId)
+                            playerRepository.getAll(user.id, targetSeasonId),
+                            eventRepository.getForMatch(matchId, targetSeasonId),
+                            lineupRepository.getForMatch(matchId, targetSeasonId),
+                            statsRepository.getForMatch(matchId, targetSeasonId)
                         ]);
 
                         set({ 
@@ -83,10 +83,8 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
 
                         await get().syncAndPersistMinutes();
                         return true;
-                    } else {
-                        // Se la query ha risposto ma il match è nullo, potrebbe essere un errore di ID o percorso
-                        return false; 
                     }
+                    return false;
                 } catch (error) {
                     console.error("Error fetching match data:", error);
                     return false;
@@ -95,14 +93,13 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             return false;
         };
 
-        // Retry loop per gestire l'inizializzazione asincrona dello store (es. refresh pagina)
         let attempts = 0;
-        const maxAttempts = 10;
+        const maxAttempts = 15; // Leggermente più paziente per connessioni lente
         const checkAndLoad = async () => {
             const success = await attemptLoading();
             if (!success && attempts < maxAttempts) {
                 attempts++;
-                setTimeout(checkAndLoad, 600);
+                setTimeout(checkAndLoad, 500);
             } else {
                 set({ loading: false });
             }
