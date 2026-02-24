@@ -7,39 +7,32 @@ service cloud.firestore {
      * 
      * CORE PHILOSOPHY:
      * This ruleset implements a robust, collaborative sports team management model. 
-     * It relies on Authorization Independence through denormalization. Every document 
-     * within a team's hierarchy contains the necessary metadata to authorize a 
-     * request without performing expensive cross-document lookups (get() calls).
+     * It relies on Authorization Independence through denormalization.
      */
 
     // --- Helper Functions ---
 
-    /** @description Checks if the user is authenticated. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** @description Checks if the user's UID matches the provided UID. */
     function isOwner(uid) {
       return isSignedIn() && request.auth.uid == uid;
     }
 
     /** 
-     * @description Checks if the user has access to a document based on 
-     * denormalized ownership or membership data. 
+     * @description Utilizza .get() per evitare errori se il campo è mancante.
+     * Verifica ownerId (per le stagioni) o teamOwnerId (per i figli).
      */
     function hasAccess(data) {
       return isSignedIn() && (
-        data.ownerId == request.auth.uid || 
-        data.teamOwnerId == request.auth.uid || 
-        (data.members != null && data.members[request.auth.uid] != null) ||
-        (data.teamMembers != null && data.teamMembers[request.auth.uid] != null)
+        data.get('ownerId', '') == request.auth.uid || 
+        data.get('teamOwnerId', '') == request.auth.uid || 
+        (data.get('members', {})[request.auth.uid] != null) ||
+        (data.get('teamMembers', {})[request.auth.uid] != null)
       );
     }
 
-    /** 
-     * @description Ensures a document exists and the requester has access.
-     */
     function canModify(currentData) {
       return currentData != null && hasAccess(currentData);
     }
@@ -47,47 +40,41 @@ service cloud.firestore {
     // --- Collection Rules ---
 
     match /teams/{teamId} {
-      allow get, list: if hasAccess(resource.data);
+      // get e list sono permessi se l'utente è il proprietario o membro
+      allow get, list: if isSignedIn() && (resource == null || hasAccess(resource.data));
       allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
       allow update: if canModify(resource.data);
       allow delete: if canModify(resource.data) && isOwner(resource.data.ownerId);
 
       match /players/{playerId} {
-        allow get, list: if hasAccess(resource.data);
+        allow get, list: if isSignedIn() && (resource == null || hasAccess(resource.data));
         allow create: if isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
         allow update, delete: if canModify(resource.data);
       }
 
       match /matches/{matchId} {
-        allow get, list: if hasAccess(resource.data);
+        allow get, list: if isSignedIn() && (resource == null || hasAccess(resource.data));
         allow create: if isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
         allow update, delete: if canModify(resource.data);
 
-        match /attendance/{playerMatchAttendanceId} {
-          allow get, list: if hasAccess(resource.data);
-          allow create: if isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
-          allow update: if canModify(resource.data) && request.resource.data.teamOwnerId == resource.data.teamOwnerId;
-          allow delete: if canModify(resource.data);
-        }
-
         match /stats/{playerMatchStatId} {
-          allow get, list: if hasAccess(resource.data);
+          allow get, list: if isSignedIn() && (resource == null || hasAccess(resource.data));
           allow create: if isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
-          allow update: if canModify(resource.data) && request.resource.data.teamOwnerId == resource.data.teamOwnerId;
+          allow update: if canModify(resource.data);
           allow delete: if canModify(resource.data);
         }
 
-        match /lineup/{matchLineupPlayerId} {
-          allow get, list: if hasAccess(resource.data);
+        match /lineup/{matchLineupId} {
+          allow get, list: if isSignedIn() && (resource == null || hasAccess(resource.data));
           allow create: if isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
-          allow update: if canModify(resource.data) && request.resource.data.teamOwnerId == resource.data.teamOwnerId;
+          allow update: if canModify(resource.data);
           allow delete: if canModify(resource.data);
         }
 
         match /events/{eventId} {
-          allow get, list: if hasAccess(resource.data);
+          allow get, list: if isSignedIn() && (resource == null || hasAccess(resource.data));
           allow create: if isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
-          allow update: if canModify(resource.data) && request.resource.data.teamOwnerId == resource.data.teamOwnerId;
+          allow update: if canModify(resource.data);
           allow delete: if canModify(resource.data);
         }
       }

@@ -1,4 +1,3 @@
-
 import { matchRepository } from './match-repository';
 import { playerRepository } from './player-repository';
 import { eventRepository } from './event-repository';
@@ -110,7 +109,7 @@ export const aggregationRepository = {
         const intervals = { '1-30': 0, '31-60': 0, '61-90+': 0 };
 
         for (const match of completedMatches) {
-            const events = await eventRepository.getForMatch(match.id, seasonId);
+            const events = await eventRepository.getForMatch(match.id, seasonId, userId);
             const goals = events.filter(e => e.type === 'goal');
             
             goals.forEach(event => {
@@ -150,9 +149,9 @@ export const aggregationRepository = {
 
             for (const match of completedMatches) {
                 const [lineup, events, stats] = await Promise.all([
-                    lineupRepository.getForMatch(match.id, seasonId),
-                    eventRepository.getForMatch(match.id, seasonId),
-                    statsRepository.getForMatch(match.id, seasonId)
+                    lineupRepository.getForMatch(match.id, seasonId, userId),
+                    eventRepository.getForMatch(match.id, seasonId, userId),
+                    statsRepository.getForMatch(match.id, seasonId, userId)
                 ]);
 
                 const isInLineup = lineup?.starters.includes(player.id) || lineup?.substitutes.includes(player.id);

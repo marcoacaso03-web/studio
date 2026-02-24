@@ -1,4 +1,3 @@
-
 "use client";
 
 import { create } from 'zustand';
@@ -48,46 +47,35 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         
         try {
             const authState = useAuthStore.getState();
-            // Attendiamo che l'autenticazione sia pronta se necessario
-            if (!authState.isInitialized) {
-                // In un caso reale potremmo sottoscrivere o attendere, qui facciamo un check rapido
-                await new Promise(resolve => setTimeout(resolve, 500));
-            }
-            
-            const currentUser = useAuthStore.getState().user;
-            if (!currentUser) {
+            if (!authState.isAuthenticated || !authState.user) {
                 set({ error: "Accesso negato: devi essere loggato per visualizzare i dettagli.", loading: false });
                 return;
             }
-
-            // Identificazione stagione: priorità al parametro URL, poi alla stagione attiva nello store
+            
+            const currentUser = authState.user;
             let targetSeasonId = seasonId || useSeasonsStore.getState().activeSeason?.id;
             
             if (!targetSeasonId) {
-                // Se non c'è seasonId, proviamo a caricarla se lo store è vuoto
                 await useSeasonsStore.getState().fetchAll();
                 targetSeasonId = useSeasonsStore.getState().activeSeason?.id;
             }
 
             if (!targetSeasonId) {
-                set({ error: "Identificativo stagione mancante. Torna alla dashboard.", loading: false });
+                set({ error: "Identificativo stagione mancante.", loading: false });
                 return;
             }
 
             const match = await matchRepository.getById(matchId, targetSeasonId);
             
             if (!match) {
-                set({ 
-                    error: `Partita non trovata (ID: ${matchId}). Potrebbe essere stata eliminata o appartenere a un'altra stagione.`, 
-                    loading: false 
-                });
+                set({ error: "Partita non trovata o permessi insufficienti.", loading: false });
                 return;
             }
 
             const [allPlayers, matchEvents, matchLineup, matchStats] = await Promise.all([
                 playerRepository.getAll(currentUser.id, targetSeasonId),
                 eventRepository.getForMatch(matchId, targetSeasonId, currentUser.id),
-                lineupRepository.getForMatch(matchId, targetSeasonId),
+                lineupRepository.getForMatch(matchId, targetSeasonId, currentUser.id),
                 statsRepository.getForMatch(matchId, targetSeasonId, currentUser.id)
             ]);
 
@@ -103,9 +91,9 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
 
             await get().syncAndPersistMinutes();
         } catch (e: any) {
-            console.error("Error in match detail load:", e);
+            console.error("Match load error:", e);
             set({ 
-                error: `Errore durante il recupero dei dati: ${e.message || "Permessi insufficienti o errore di rete"}.`, 
+                error: e.message || "Errore durante il recupero dei dati.", 
                 loading: false 
             });
         }
