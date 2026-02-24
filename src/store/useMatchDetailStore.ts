@@ -9,7 +9,7 @@ import { lineupRepository } from '@/lib/repositories/lineup-repository';
 import { eventRepository } from '@/lib/repositories/event-repository';
 import { statsRepository } from '@/lib/repositories/stats-repository';
 import { useStatsStore } from './useStatsStore';
-import type { Match, Player, MatchLineup, MatchEvent, PlayerMatchStats, AttendanceStatus } from '@/lib/types';
+import type { Match, Player, MatchLineup, MatchEvent, PlayerMatchStats } from '@/lib/types';
 
 interface MatchDetailState {
     matchId: string | null;
@@ -42,36 +42,54 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     load: async (matchId) => {
         set({ loading: true, matchId, match: null, events: [], lineup: null, stats: [] });
         
-        // Per recuperare i dati da Firestore serve anche il seasonId.
-        // Lo recuperiamo indirettamente o passandolo. Per semplicità usiamo lo store delle stagioni.
         const { useSeasonsStore } = await import('./useSeasonsStore');
         const seasonId = useSeasonsStore.getState().activeSeason?.id;
+        
         if (!seasonId) {
-            set({ loading: false });
+            // Se lo store delle stagioni non è pronto, proviamo a caricarlo
+            await useSeasonsStore.getState().fetchAll();
+            const retrySeasonId = useSeasonsStore.getState().activeSeason?.id;
+            if (!retrySeasonId) {
+                set({ loading: false });
+                return;
+            }
+            // Proseguiamo con il retrySeasonId
+            loadData(matchId, retrySeasonId);
             return;
         }
 
-        const match = await matchRepository.getById(matchId, seasonId);
-        if (!match) {
-            set({ loading: false });
-            return;
+        await loadData(matchId, seasonId);
+
+        async function loadData(mId: string, sId: string) {
+            try {
+                const match = await matchRepository.getById(mId, sId);
+                if (!match) {
+                    set({ loading: false });
+                    return;
+                }
+
+                const [allPlayers, matchEvents, matchLineup, matchStats] = await Promise.all([
+                    playerRepository.getAll(match.userId, sId),
+                    eventRepository.getForMatch(mId, sId),
+                    lineupRepository.getForMatch(mId, sId),
+                    statsRepository.getForMatch(mId, sId)
+                ]);
+
+                set({ 
+                    match, 
+                    allPlayers,
+                    events: matchEvents,
+                    lineup: matchLineup || null,
+                    stats: matchStats,
+                    loading: false 
+                });
+
+                await get().syncAndPersistMinutes();
+            } catch (error) {
+                console.error("Error loading match detail:", error);
+                set({ loading: false });
+            }
         }
-
-        const allPlayers = await playerRepository.getAll(match.userId, seasonId);
-        const matchEvents = await eventRepository.getForMatch(matchId, seasonId);
-        const matchLineup = await lineupRepository.getForMatch(matchId, seasonId);
-        const matchStats = await statsRepository.getForMatch(matchId, seasonId);
-
-        set({ 
-            match, 
-            allPlayers,
-            events: matchEvents,
-            lineup: matchLineup || null,
-            stats: matchStats,
-            loading: false 
-        });
-
-        await get().syncAndPersistMinutes();
     },
 
     syncAndPersistMinutes: async () => {

@@ -52,16 +52,19 @@ export const useMatchesStore = create<MatchState>((set, get) => ({
         return newMatch;
     },
     update: async (id, updates) => {
-        const match = await matchRepository.getById(id);
-        const updatedMatch = await matchRepository.update(id, updates);
+        const activeSeason = useSeasonsStore.getState().activeSeason;
+        if (!activeSeason) return;
+        
+        const updatedMatch = await matchRepository.update(id, activeSeason.id, updates);
         if (updatedMatch) {
-            await get().fetchAll(match?.seasonId);
+            await get().fetchAll(activeSeason.id);
         }
     },
     remove: async (id) => {
-        const match = await matchRepository.getById(id);
-        const seasonId = match?.seasonId;
-        await matchRepository.delete(id);
-        await get().fetchAll(seasonId);
+        const activeSeason = useSeasonsStore.getState().activeSeason;
+        if (!activeSeason) return;
+        
+        await matchRepository.delete(id, activeSeason.id);
+        await get().fetchAll(activeSeason.id);
     },
 }));
