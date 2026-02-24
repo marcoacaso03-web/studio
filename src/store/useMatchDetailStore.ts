@@ -21,6 +21,7 @@ interface MatchDetailState {
     lineup: MatchLineup | null;
     stats: PlayerMatchStats[];
     loading: boolean;
+    error: string | null;
     
     load: (matchId: string, seasonId?: string) => Promise<void>;
     updateMatch: (data: Partial<Omit<Match, 'id'>>) => Promise<void>;
@@ -40,72 +41,61 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     lineup: null,
     stats: [],
     loading: true,
+    error: null,
 
     load: async (matchId, seasonId) => {
-        set({ loading: true, matchId, match: null, events: [], lineup: null, stats: [] });
+        set({ loading: true, error: null, matchId, match: null });
         
-        const attemptLoading = async () => {
+        try {
             const authState = useAuthStore.getState();
-            const seasonsState = useSeasonsStore.getState();
-            
-            if (!authState.isInitialized) return false;
-            
-            const user = authState.user;
-            if (!user) return false;
+            if (!authState.isAuthenticated || !authState.user) {
+                set({ error: "Utente non autenticato. Effettua il login per visualizzare i dettagli.", loading: false });
+                return;
+            }
 
-            // Priorità al seasonId passato o a quello attivo nello store
-            let targetSeasonId = seasonId || seasonsState.activeSeason?.id;
+            // Identificazione stagione: priorità al parametro URL, poi alla stagione attiva nello store
+            let targetSeasonId = seasonId || useSeasonsStore.getState().activeSeason?.id;
             
             if (!targetSeasonId) {
-                await seasonsState.fetchAll();
-                targetSeasonId = useSeasonsStore.getState().activeSeason?.id;
+                set({ error: "ID Stagione non trovato. Torna alla dashboard e riprova.", loading: false });
+                return;
             }
 
-            if (targetSeasonId) {
-                try {
-                    const match = await matchRepository.getById(matchId, targetSeasonId);
-                    if (match) {
-                        const [allPlayers, matchEvents, matchLineup, matchStats] = await Promise.all([
-                            playerRepository.getAll(user.id, targetSeasonId),
-                            eventRepository.getForMatch(matchId, targetSeasonId),
-                            lineupRepository.getForMatch(matchId, targetSeasonId),
-                            statsRepository.getForMatch(matchId, targetSeasonId)
-                        ]);
-
-                        set({ 
-                            match, 
-                            allPlayers,
-                            events: matchEvents,
-                            lineup: matchLineup || null,
-                            stats: matchStats,
-                            loading: false 
-                        });
-
-                        await get().syncAndPersistMinutes();
-                        return true;
-                    }
-                    return false;
-                } catch (error) {
-                    console.error("Error fetching match data:", error);
-                    return false;
-                }
+            const match = await matchRepository.getById(matchId, targetSeasonId);
+            
+            if (!match) {
+                set({ 
+                    error: `Partita ${matchId} non trovata nella stagione ${targetSeasonId}. Verifica che l'ID sia corretto.`, 
+                    loading: false 
+                });
+                return;
             }
-            return false;
-        };
 
-        let attempts = 0;
-        const maxAttempts = 15; // Leggermente più paziente per connessioni lente
-        const checkAndLoad = async () => {
-            const success = await attemptLoading();
-            if (!success && attempts < maxAttempts) {
-                attempts++;
-                setTimeout(checkAndLoad, 500);
-            } else {
-                set({ loading: false });
-            }
-        };
+            const [allPlayers, matchEvents, matchLineup, matchStats] = await Promise.all([
+                playerRepository.getAll(authState.user.id, targetSeasonId),
+                eventRepository.getForMatch(matchId, targetSeasonId),
+                lineupRepository.getForMatch(matchId, targetSeasonId),
+                statsRepository.getForMatch(matchId, targetSeasonId)
+            ]);
 
-        checkAndLoad();
+            set({ 
+                match, 
+                allPlayers,
+                events: matchEvents,
+                lineup: matchLineup || null,
+                stats: matchStats,
+                loading: false,
+                error: null
+            });
+
+            await get().syncAndPersistMinutes();
+        } catch (e: any) {
+            console.error("Critical error in match detail load:", e);
+            set({ 
+                error: `Errore critico durante il caricamento: ${e.message || "Problema di connessione al database"}.`, 
+                loading: false 
+            });
+        }
     },
 
     syncAndPersistMinutes: async () => {
@@ -113,66 +103,70 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         const user = useAuthStore.getState().user;
         if (!match || !matchId || !user) return;
 
-        const duration = match.duration || 90;
-        const halfTime = duration / 2;
-        const pitchManTeam = match.isHome ? 'home' : 'away';
+        try {
+            const duration = match.duration || 90;
+            const halfTime = duration / 2;
+            const pitchManTeam = match.isHome ? 'home' : 'away';
 
-        const getAbsoluteMinute = (event: MatchEvent) => {
-            if (event.period === '1T') return Math.min(event.minute, halfTime);
-            if (event.period === '2T') return halfTime + Math.min(event.minute, halfTime);
-            return event.minute + duration; 
-        };
+            const getAbsoluteMinute = (event: MatchEvent) => {
+                if (event.period === '1T') return Math.min(event.minute, halfTime);
+                if (event.period === '2T') return halfTime + Math.min(event.minute, halfTime);
+                return event.minute + duration; 
+            };
 
-        const chronologicalEvents = [...events].sort((a, b) => {
-            const periodOrder: Record<string, number> = { '1T': 1, '2T': 2, '1TS': 3, '2TS': 4 };
-            const pA = periodOrder[a.period] || 0;
-            const pB = periodOrder[b.period] || 0;
-            if (pA !== pB) return pA - pB;
-            return a.minute - b.minute;
-        });
+            const chronologicalEvents = [...events].sort((a, b) => {
+                const periodOrder: Record<string, number> = { '1T': 1, '2T': 2, '1TS': 3, '2TS': 4 };
+                const pA = periodOrder[a.period] || 0;
+                const pB = periodOrder[b.period] || 0;
+                if (pA !== pB) return pA - pB;
+                return a.minute - b.minute;
+            });
 
-        const newStats: PlayerMatchStats[] = allPlayers.map(player => {
-            const playerId = player.id;
-            const yellowCards = events.filter(e => e.type === 'yellow_card' && e.playerId === playerId && e.team === pitchManTeam).length;
-            const redCards = events.filter(e => e.type === 'red_card' && e.playerId === playerId && e.team === pitchManTeam).length;
-            const goals = events.filter(e => e.type === 'goal' && e.playerId === playerId && e.team === pitchManTeam).length;
-            const assists = events.filter(e => e.type === 'goal' && e.assistPlayerId === playerId && e.team === pitchManTeam).length;
+            const newStats: PlayerMatchStats[] = allPlayers.map(player => {
+                const playerId = player.id;
+                const yellowCards = events.filter(e => e.type === 'yellow_card' && e.playerId === playerId && e.team === pitchManTeam).length;
+                const redCards = events.filter(e => e.type === 'red_card' && e.playerId === playerId && e.team === pitchManTeam).length;
+                const goals = events.filter(e => e.type === 'goal' && e.playerId === playerId && e.team === pitchManTeam).length;
+                const assists = events.filter(e => e.type === 'goal' && e.assistPlayerId === playerId && e.team === pitchManTeam).length;
 
-            let minutesPlayed = 0;
-            const isStarter = lineup?.starters.includes(playerId);
-            const isSubstitute = lineup?.substitutes.includes(playerId);
+                let minutesPlayed = 0;
+                const isStarter = lineup?.starters.includes(playerId);
+                const isSubstitute = lineup?.substitutes.includes(playerId);
 
-            if (lineup && (isStarter || isSubstitute)) {
-                if (isStarter) {
-                    const subOutEvent = chronologicalEvents.find(e => 
-                        e.type === 'substitution' && e.subOutPlayerId === playerId && e.team === pitchManTeam
-                    );
-                    minutesPlayed = subOutEvent ? getAbsoluteMinute(subOutEvent) : duration;
-                } else {
-                    const subInEvent = chronologicalEvents.find(e => 
-                        e.type === 'substitution' && e.playerId === playerId && e.team === pitchManTeam
-                    );
-                    if (subInEvent) {
-                        const subInMin = getAbsoluteMinute(subInEvent);
-                        const subOutEventLater = chronologicalEvents.find(e => 
-                            e.type === 'substitution' && e.subOutPlayerId === playerId && e.team === pitchManTeam && getAbsoluteMinute(e) > subInMin
+                if (lineup && (isStarter || isSubstitute)) {
+                    if (isStarter) {
+                        const subOutEvent = chronologicalEvents.find(e => 
+                            e.type === 'substitution' && e.subOutPlayerId === playerId && e.team === pitchManTeam
                         );
-                        const endMin = subOutEventLater ? getAbsoluteMinute(subOutEventLater) : duration;
-                        minutesPlayed = Math.max(0, endMin - subInMin);
+                        minutesPlayed = subOutEvent ? getAbsoluteMinute(subOutEvent) : duration;
+                    } else {
+                        const subInEvent = chronologicalEvents.find(e => 
+                            e.type === 'substitution' && e.playerId === playerId && e.team === pitchManTeam
+                        );
+                        if (subInEvent) {
+                            const subInMin = getAbsoluteMinute(subInEvent);
+                            const subOutEventLater = chronologicalEvents.find(e => 
+                                e.type === 'substitution' && e.subOutPlayerId === playerId && e.team === pitchManTeam && getAbsoluteMinute(e) > subInMin
+                            );
+                            const endMin = subOutEventLater ? getAbsoluteMinute(subOutEventLater) : duration;
+                            minutesPlayed = Math.max(0, endMin - subInMin);
+                        }
                     }
                 }
+
+                return { matchId, playerId, minutesPlayed, goals, assists, yellowCards, redCards, teamOwnerId: user.id };
+            }).filter(s => s.minutesPlayed > 0 || s.goals > 0 || s.assists > 0 || s.yellowCards > 0 || s.redCards > 0);
+
+            for (const stat of newStats) {
+                await statsRepository.upsert(matchId, match.seasonId, stat.playerId, stat, user.id);
             }
 
-            return { matchId, playerId, minutesPlayed, goals, assists, yellowCards, redCards, teamOwnerId: user.id };
-        }).filter(s => s.minutesPlayed > 0 || s.goals > 0 || s.assists > 0 || s.yellowCards > 0 || s.redCards > 0);
-
-        for (const stat of newStats) {
-            await statsRepository.upsert(matchId, match.seasonId, stat.playerId, stat, user.id);
+            set({ stats: newStats });
+            await aggregationRepository.syncAllPlayersStats(user.id, match.seasonId);
+            useStatsStore.getState().loadStats();
+        } catch (error) {
+            console.warn("Failed to sync minutes:", error);
         }
-
-        set({ stats: newStats });
-        await aggregationRepository.syncAllPlayersStats(user.id, match.seasonId);
-        useStatsStore.getState().loadStats();
     },
 
     saveAllStats: async (newStats) => {
