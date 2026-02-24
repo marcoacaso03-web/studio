@@ -48,8 +48,15 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         
         try {
             const authState = useAuthStore.getState();
-            if (!authState.isAuthenticated || !authState.user) {
-                set({ error: "Utente non autenticato. Effettua il login per visualizzare i dettagli.", loading: false });
+            // Attendiamo che l'autenticazione sia pronta se necessario
+            if (!authState.isInitialized) {
+                // In un caso reale potremmo sottoscrivere o attendere, qui facciamo un check rapido
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            const currentUser = useAuthStore.getState().user;
+            if (!currentUser) {
+                set({ error: "Accesso negato: devi essere loggato per visualizzare i dettagli.", loading: false });
                 return;
             }
 
@@ -57,7 +64,13 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             let targetSeasonId = seasonId || useSeasonsStore.getState().activeSeason?.id;
             
             if (!targetSeasonId) {
-                set({ error: "ID Stagione non trovato. Torna alla dashboard e riprova.", loading: false });
+                // Se non c'è seasonId, proviamo a caricarla se lo store è vuoto
+                await useSeasonsStore.getState().fetchAll();
+                targetSeasonId = useSeasonsStore.getState().activeSeason?.id;
+            }
+
+            if (!targetSeasonId) {
+                set({ error: "Identificativo stagione mancante. Torna alla dashboard.", loading: false });
                 return;
             }
 
@@ -65,17 +78,17 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             
             if (!match) {
                 set({ 
-                    error: `Partita ${matchId} non trovata nella stagione ${targetSeasonId}. Verifica che l'ID sia corretto.`, 
+                    error: `Partita non trovata (ID: ${matchId}). Potrebbe essere stata eliminata o appartenere a un'altra stagione.`, 
                     loading: false 
                 });
                 return;
             }
 
             const [allPlayers, matchEvents, matchLineup, matchStats] = await Promise.all([
-                playerRepository.getAll(authState.user.id, targetSeasonId),
-                eventRepository.getForMatch(matchId, targetSeasonId),
+                playerRepository.getAll(currentUser.id, targetSeasonId),
+                eventRepository.getForMatch(matchId, targetSeasonId, currentUser.id),
                 lineupRepository.getForMatch(matchId, targetSeasonId),
-                statsRepository.getForMatch(matchId, targetSeasonId)
+                statsRepository.getForMatch(matchId, targetSeasonId, currentUser.id)
             ]);
 
             set({ 
@@ -90,9 +103,9 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
 
             await get().syncAndPersistMinutes();
         } catch (e: any) {
-            console.error("Critical error in match detail load:", e);
+            console.error("Error in match detail load:", e);
             set({ 
-                error: `Errore critico durante il caricamento: ${e.message || "Problema di connessione al database"}.`, 
+                error: `Errore durante il recupero dei dati: ${e.message || "Permessi insufficienti o errore di rete"}.`, 
                 loading: false 
             });
         }
@@ -186,7 +199,7 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         const user = useAuthStore.getState().user;
         if (!matchId || !match || !user) return;
         await eventRepository.add({ ...eventData, matchId }, match.seasonId, user.id);
-        const updatedEvents = await eventRepository.getForMatch(matchId, match.seasonId);
+        const updatedEvents = await eventRepository.getForMatch(matchId, match.seasonId, user.id);
         const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
         const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
         const updatedMatch = await matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
@@ -201,7 +214,7 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         for (const data of eventsData) {
             await eventRepository.add({ ...data, matchId }, match.seasonId, user.id);
         }
-        const updatedEvents = await eventRepository.getForMatch(matchId, match.seasonId);
+        const updatedEvents = await eventRepository.getForMatch(matchId, match.seasonId, user.id);
         const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
         const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
         const updatedMatch = await matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
@@ -211,9 +224,10 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
 
     deleteEvent: async (eventId) => {
         const { matchId, match } = get();
-        if (!matchId || !match) return;
+        const user = useAuthStore.getState().user;
+        if (!matchId || !match || !user) return;
         await eventRepository.delete(eventId, matchId, match.seasonId);
-        const updatedEvents = await eventRepository.getForMatch(matchId, match.seasonId);
+        const updatedEvents = await eventRepository.getForMatch(matchId, match.seasonId, user.id);
         const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
         const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
         const updatedMatch = await matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });

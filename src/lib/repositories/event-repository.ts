@@ -7,7 +7,8 @@ import {
   deleteDoc, 
   doc, 
   query,
-  orderBy
+  orderBy,
+  where
 } from 'firebase/firestore';
 import type { MatchEvent } from '@/lib/types';
 
@@ -19,11 +20,17 @@ const periodOrder: Record<string, number> = {
 };
 
 export const eventRepository = {
-    async getForMatch(matchId: string, seasonId: string) {
-        if (!matchId || !seasonId) return [];
+    async getForMatch(matchId: string, seasonId: string, userId: string) {
+        if (!matchId || !seasonId || !userId) return [];
         const db = getFirestore();
         const eventsRef = collection(db, 'teams', seasonId, 'matches', matchId, 'events');
-        const q = query(eventsRef);
+        
+        // Obbligatorio il filtro teamOwnerId per le Security Rules
+        const q = query(
+          eventsRef, 
+          where('teamOwnerId', '==', userId)
+        );
+        
         const snapshot = await getDocs(q);
         const events = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as MatchEvent));
         
