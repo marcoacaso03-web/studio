@@ -42,20 +42,19 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     loading: true,
 
     load: async (matchId) => {
-        // Reset stato e imposta loading
         set({ loading: true, matchId, match: null, events: [], lineup: null, stats: [] });
         
         const attemptLoading = async () => {
             const authState = useAuthStore.getState();
             const seasonsState = useSeasonsStore.getState();
             
-            // Attendi che l'autenticazione sia inizializzata
+            // Aspetta che l'auth sia inizializzata
             if (!authState.isInitialized) return false;
             
             const user = authState.user;
             if (!user) return false;
 
-            // Se la stagione attiva non è pronta, prova a caricarla
+            // Assicuriamoci che la stagione attiva sia caricata
             let seasonId = seasonsState.activeSeason?.id;
             if (!seasonId) {
                 await seasonsState.fetchAll();
@@ -84,6 +83,10 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
 
                         await get().syncAndPersistMinutes();
                         return true;
+                    } else {
+                        // Partita non trovata dopo che tutti i dati sono pronti
+                        set({ loading: false });
+                        return true;
                     }
                 } catch (error) {
                     console.error("Error fetching match data:", error);
@@ -92,21 +95,20 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             return false;
         };
 
-        // Primo tentativo immediato
-        const firstTry = await attemptLoading();
-        if (firstTry) return;
-
-        // Se fallisce (es: caricamento iniziale store), riprova per qualche secondo
+        // Retry loop per gestire l'inizializzazione asincrona dello store (es. refresh pagina)
         let attempts = 0;
         const maxAttempts = 15;
-        const interval = setInterval(async () => {
-            attempts++;
-            const loaded = await attemptLoading();
-            if (loaded || attempts >= maxAttempts) {
-                clearInterval(interval);
-                if (!loaded) set({ loading: false });
+        const checkAndLoad = async () => {
+            const success = await attemptLoading();
+            if (!success && attempts < maxAttempts) {
+                attempts++;
+                setTimeout(checkAndLoad, 500);
+            } else if (!success) {
+                set({ loading: false });
             }
-        }, 500);
+        };
+
+        checkAndLoad();
     },
 
     syncAndPersistMinutes: async () => {

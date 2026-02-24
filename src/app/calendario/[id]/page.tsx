@@ -44,9 +44,13 @@ export default function MatchDetailPage() {
     );
   }
 
-  if (!match) {
+  // Mostra 404 SOLO se il caricamento è finito e la partita non esiste
+  if (!match && !loading) {
     return notFound();
   }
+
+  // Fallback per sicurezza (non dovrebbe essere mai raggiunto grazie al check sopra)
+  if (!match) return null;
 
   const matchDate = new Date(match.date);
 
