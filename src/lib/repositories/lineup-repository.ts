@@ -16,11 +16,16 @@ export const lineupRepository = {
         return snapshot.exists() ? snapshot.data() as MatchLineup : undefined;
     },
 
-    async save(lineup: MatchLineup, seasonId: string) {
+    async save(lineup: MatchLineup, seasonId: string, userId: string) {
         if (!lineup.matchId || !seasonId) return lineup;
         const db = getFirestore();
         const docRef = doc(db, 'teams', seasonId, 'matches', lineup.matchId, 'lineup', 'primary');
-        await setDoc(docRef, lineup);
-        return lineup;
+        const lineupWithAuth = {
+            ...lineup,
+            teamOwnerId: userId,
+            updatedAt: new Date().toISOString()
+        };
+        await setDoc(docRef, lineupWithAuth);
+        return lineupWithAuth;
     }
 };

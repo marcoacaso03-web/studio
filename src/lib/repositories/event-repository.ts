@@ -28,18 +28,25 @@ export const eventRepository = {
         const events = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as MatchEvent));
         
         return events.sort((a, b) => {
-            if (periodOrder[b.period] !== periodOrder[a.period]) {
-                return periodOrder[b.period] - periodOrder[a.period];
+            const pA = periodOrder[a.period] || 0;
+            const pB = periodOrder[b.period] || 0;
+            if (pA !== pB) {
+                return pA - pB;
             }
-            return b.minute - a.minute;
+            return a.minute - b.minute;
         });
     },
 
-    async add(event: Omit<MatchEvent, 'id'>, seasonId: string) {
+    async add(event: Omit<MatchEvent, 'id'>, seasonId: string, userId: string) {
         const db = getFirestore();
         const eventsRef = collection(db, 'teams', seasonId, 'matches', event.matchId, 'events');
-        const docRef = await addDoc(eventsRef, event);
-        return { ...event, id: docRef.id };
+        const eventWithAuth = {
+            ...event,
+            teamOwnerId: userId,
+            createdAt: new Date().toISOString()
+        };
+        const docRef = await addDoc(eventsRef, eventWithAuth);
+        return { ...eventWithAuth, id: docRef.id };
     },
 
     async delete(id: string, matchId: string, seasonId: string) {

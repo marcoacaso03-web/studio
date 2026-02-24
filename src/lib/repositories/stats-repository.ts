@@ -20,10 +20,15 @@ export const statsRepository = {
         return snapshot.docs.map(doc => ({ ...doc.data(), playerId: doc.id } as PlayerMatchStats));
     },
 
-    async upsert(matchId: string, seasonId: string, playerId: string, stats: PlayerStatsUpdateData) {
+    async upsert(matchId: string, seasonId: string, playerId: string, stats: PlayerStatsUpdateData, userId: string) {
         const db = getFirestore();
         const docRef = doc(db, 'teams', seasonId, 'matches', matchId, 'stats', playerId);
-        const fullStats: PlayerMatchStats = { matchId, playerId, ...stats };
+        const fullStats: PlayerMatchStats = { 
+            matchId, 
+            playerId, 
+            ...stats,
+            teamOwnerId: userId
+        };
         await setDoc(docRef, fullStats);
         return fullStats;
     }
