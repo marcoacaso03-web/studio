@@ -33,7 +33,7 @@ const ensureISODate = (date: any): string => {
 export type MatchCreateData = Omit<Match, 'id' | 'result'> & { status?: Match['status'] };
 
 export const matchRepository = {
-  async getAll(userId: string, seasonId?: string) {
+  async getAll(userId: string, seasonId: string) {
     if (!userId || !seasonId) return [];
     const db = getFirestore();
     const matchesRef = collection(db, 'teams', seasonId, 'matches');
@@ -76,6 +76,7 @@ export const matchRepository = {
       date: ensureISODate(data.date),
       teamOwnerId: data.userId,
       teamId: data.seasonId,
+      seasonId: data.seasonId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -99,6 +100,7 @@ export const matchRepository = {
   },
 
   async delete(id: string, seasonId: string) {
+    if (!id || !seasonId) return;
     const db = getFirestore();
     return await deleteDoc(doc(db, 'teams', seasonId, 'matches', id));
   },
