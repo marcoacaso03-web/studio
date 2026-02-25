@@ -7,7 +7,6 @@ import {
   deleteDoc, 
   doc, 
   query,
-  orderBy,
   where
 } from 'firebase/firestore';
 import type { MatchEvent } from '@/lib/types';
@@ -25,7 +24,6 @@ export const eventRepository = {
         const db = getFirestore();
         const eventsRef = collection(db, 'teams', seasonId, 'matches', matchId, 'events');
         
-        // Obbligatorio il filtro teamOwnerId per le Security Rules
         const q = query(
           eventsRef, 
           where('teamOwnerId', '==', userId)
@@ -47,13 +45,19 @@ export const eventRepository = {
     async add(event: Omit<MatchEvent, 'id'>, seasonId: string, userId: string) {
         const db = getFirestore();
         const eventsRef = collection(db, 'teams', seasonId, 'matches', event.matchId, 'events');
+        
+        // Firestore non accetta 'undefined'. Rimuoviamo i campi nulli o indefiniti.
+        const cleanedEvent = Object.fromEntries(
+            Object.entries(event).filter(([_, v]) => v !== undefined && v !== null)
+        );
+
         const eventWithAuth = {
-            ...event,
+            ...cleanedEvent,
             teamOwnerId: userId,
             createdAt: new Date().toISOString()
         };
         const docRef = await addDoc(eventsRef, eventWithAuth);
-        return { ...eventWithAuth, id: docRef.id };
+        return { ...eventWithAuth, id: docRef.id } as MatchEvent;
     },
 
     async delete(id: string, matchId: string, seasonId: string) {

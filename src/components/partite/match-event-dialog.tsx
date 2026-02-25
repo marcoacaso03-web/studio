@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -18,7 +19,6 @@ import {
 } from "@/components/ui/select";
 import { MatchEventType, MatchEvent } from "@/lib/types";
 
-// Ordine dei periodi per il calcolo cronologico
 const periodOrder: Record<string, number> = {
   '1T': 1,
   '2T': 2,
@@ -56,14 +56,12 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
 
   const isPitchManSide = match?.isHome ? team === 'home' : team === 'away';
 
-  // Calcola i giocatori in campo e in panchina al minuto selezionato
   const playersStatus = React.useMemo(() => {
     if (!isPitchManSide || !lineup) return { onPitch: allPlayers, onBench: [] };
 
     let currentPitch = new Set<string>(lineup.starters.filter(id => id !== ""));
     let currentBench = new Set<string>(lineup.substitutes.filter(id => id !== ""));
 
-    // Ordina eventi per tempo per processarli cronologicamente
     const sortedEvents = [...allEvents].sort((a, b) => {
       if (periodOrder[a.period] !== periodOrder[b.period]) {
         return periodOrder[a.period] - periodOrder[b.period];
@@ -71,7 +69,6 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
       return a.minute - b.minute;
     });
 
-    // Processa sostituzioni avvenute PRIMA del minuto selezionato
     for (const event of sortedEvents) {
       const isBefore = 
         periodOrder[event.period] < periodOrder[period] || 
@@ -113,46 +110,66 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
   };
 
   const handleSave = async () => {
-    const events: Omit<MatchEvent, 'id'>[] = [];
-    const baseEvent = { matchId: "", minute, period, team };
+    const eventsToSave: Omit<MatchEvent, 'id'>[] = [];
+    const baseEvent = { matchId: match?.id || "", minute, period, team };
 
     if (uiType === 'goal') {
       const selectedScorer = allPlayers.find(p => p.id === playerId);
       const selectedAssist = allPlayers.find(p => p.id === assistPlayerId);
       
-      events.push({
+      const goalEvent: any = {
         ...baseEvent,
         type: 'goal',
-        playerId: isPitchManSide ? playerId : undefined,
-        playerName: isPitchManSide ? selectedScorer?.name : (playerName || match?.opponent || "Avversario"),
-        assistPlayerId: (isPitchManSide && assistPlayerId && assistPlayerId !== "none") ? assistPlayerId : undefined,
-        assistPlayerName: isPitchManSide 
-          ? (selectedAssist?.name || undefined) 
-          : (assistPlayerName || undefined),
-      });
+      };
+
+      if (isPitchManSide) {
+        if (playerId) goalEvent.playerId = playerId;
+        goalEvent.playerName = selectedScorer?.name || "Giocatore";
+        if (assistPlayerId && assistPlayerId !== "none") {
+          goalEvent.assistPlayerId = assistPlayerId;
+          if (selectedAssist) goalEvent.assistPlayerName = selectedAssist.name;
+        }
+      } else {
+        goalEvent.playerName = playerName || match?.opponent || "Avversario";
+        if (assistPlayerName) goalEvent.assistPlayerName = assistPlayerName;
+      }
+      eventsToSave.push(goalEvent);
     } else if (uiType === 'substitution') {
       const selectedIn = allPlayers.find(p => p.id === subInPlayerId);
       const selectedOut = allPlayers.find(p => p.id === subOutPlayerId);
 
-      events.push({
+      const subEvent: any = {
         ...baseEvent,
         type: 'substitution',
-        playerId: isPitchManSide ? subInPlayerId : undefined,
-        playerName: isPitchManSide ? selectedIn?.name : (subInPlayerName || "Subentrante"),
-        subOutPlayerId: isPitchManSide ? subOutPlayerId : undefined,
-        subOutPlayerName: isPitchManSide ? selectedOut?.name : (subOutPlayerName || "Uscente"),
-      });
+      };
+
+      if (isPitchManSide) {
+        if (subInPlayerId) subEvent.playerId = subInPlayerId;
+        subEvent.playerName = selectedIn?.name || "Subentrante";
+        if (subOutPlayerId) subEvent.subOutPlayerId = subOutPlayerId;
+        subEvent.subOutPlayerName = selectedOut?.name || "Uscente";
+      } else {
+        subEvent.playerName = subInPlayerName || "Subentrante";
+        subEvent.subOutPlayerName = subOutPlayerName || "Uscente";
+      }
+      eventsToSave.push(subEvent);
     } else {
       const selectedPlayer = allPlayers.find(p => p.id === playerId);
-      events.push({
+      const simpleEvent: any = {
         ...baseEvent,
         type: uiType as MatchEventType,
-        playerId: isPitchManSide ? playerId : undefined,
-        playerName: isPitchManSide ? selectedPlayer?.name : (playerName || match?.opponent || "Avversario"),
-      });
+      };
+
+      if (isPitchManSide) {
+        if (playerId) simpleEvent.playerId = playerId;
+        simpleEvent.playerName = selectedPlayer?.name || "Giocatore";
+      } else {
+        simpleEvent.playerName = playerName || match?.opponent || "Avversario";
+      }
+      eventsToSave.push(simpleEvent);
     }
 
-    await addEvents(events);
+    addEvents(eventsToSave);
     onOpenChange(false);
     resetForm();
   };

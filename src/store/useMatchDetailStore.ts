@@ -33,7 +33,6 @@ interface MatchDetailState {
     syncAndPersistMinutes: () => Promise<void>;
 }
 
-// Ordine dei periodi per il calcolo cronologico
 const periodOrder: Record<string, number> = { '1T': 1, '2T': 2, '1TS': 3, '2TS': 4 };
 
 export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
@@ -93,7 +92,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
                 error: null
             });
 
-            // Sincronizzazione iniziale non bloccante
             get().syncAndPersistMinutes();
         } catch (e: any) {
             console.error("Match load error:", e);
@@ -110,7 +108,7 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         if (!match || !matchId || !user) return;
 
         const duration = match.duration || 90;
-        const halfTime = duration / 2;
+        const halfTime = Math.floor(duration / 2);
         const pitchManTeam = match.isHome ? 'home' : 'away';
 
         const getAbsoluteMinute = (event: MatchEvent) => {
@@ -128,10 +126,12 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
 
         const newStats: PlayerMatchStats[] = allPlayers.map(player => {
             const playerId = player.id;
-            const yellowCards = events.filter(e => e.type === 'yellow_card' && e.playerId === playerId && e.team === pitchManTeam).length;
-            const redCards = events.filter(e => e.type === 'red_card' && e.playerId === playerId && e.team === pitchManTeam).length;
-            const goals = events.filter(e => e.type === 'goal' && e.playerId === playerId && e.team === pitchManTeam).length;
-            const assists = events.filter(e => e.type === 'goal' && e.assistPlayerId === playerId && e.team === pitchManTeam).length;
+            const teamEvents = events.filter(e => e.team === pitchManTeam);
+            
+            const yellowCards = teamEvents.filter(e => e.type === 'yellow_card' && e.playerId === playerId).length;
+            const redCards = teamEvents.filter(e => e.type === 'red_card' && e.playerId === playerId).length;
+            const goals = teamEvents.filter(e => e.type === 'goal' && e.playerId === playerId).length;
+            const assists = teamEvents.filter(e => e.type === 'goal' && e.assistPlayerId === playerId).length;
 
             let minutesPlayed = 0;
             const isStarter = lineup?.starters.includes(playerId);
@@ -161,15 +161,13 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             return { matchId, playerId, minutesPlayed, goals, assists, yellowCards, redCards, teamOwnerId: user.id };
         }).filter(s => s.minutesPlayed > 0 || s.goals > 0 || s.assists > 0 || s.yellowCards > 0 || s.redCards > 0);
 
-        // Aggiorniamo lo stato locale immediatamente
         set({ stats: newStats });
 
-        // Eseguiamo le scritture su Firestore in modo non bloccante
+        // Scritture asincrone
         newStats.forEach(stat => {
             statsRepository.upsert(matchId, match.seasonId, stat.playerId, stat, user.id);
         });
 
-        // Sincronizzazione aggregati in background
         aggregationRepository.syncAllPlayersStats(user.id, match.seasonId).then(() => {
             useStatsStore.getState().loadStats();
         });
@@ -196,7 +194,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         const user = useAuthStore.getState().user;
         if (!matchId || !match || !user) return;
 
-        // 1. Creiamo l'evento ottimistico con un ID temporaneo
         const tempId = `temp-${Date.now()}`;
         const newEvent: MatchEvent = { ...eventData, id: tempId, matchId };
         const updatedEvents = [...currentEvents, newEvent].sort((a, b) => {
@@ -206,25 +203,19 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
             return a.minute - b.minute;
         });
 
-        // 2. Calcoliamo il nuovo risultato localmente
         const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
         const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
         const updatedMatch = { ...match, result: { home: homeGoals, away: awayGoals } };
 
-        // 3. Aggiorniamo lo stato locale immediatamente (Reattività istantanea)
         set({ events: updatedEvents, match: updatedMatch });
 
-        // 4. Eseguiamo le operazioni Firestore in modo non bloccante
         eventRepository.add({ ...eventData, matchId }, match.seasonId, user.id).then((savedEvent) => {
-            // Sostituiamo l'evento temporaneo con quello reale
             set(state => ({
                 events: state.events.map(e => e.id === tempId ? savedEvent : e)
             }));
         });
         
         matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
-        
-        // 5. Ricalcoliamo minuti e statistiche (non bloccante)
         get().syncAndPersistMinutes();
     },
 
@@ -234,10 +225,17 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         if (!matchId || !match || !user) return;
 
         let updatedEvents = [...currentEvents];
+        const tempMappings: Record<string, string> = {};
+
         for (const data of eventsData) {
             const tempId = `temp-${Math.random()}`;
             updatedEvents.push({ ...data, id: tempId, matchId });
-            eventRepository.add({ ...data, matchId }, match.seasonId, user.id);
+            
+            eventRepository.add({ ...data, matchId }, match.seasonId, user.id).then(saved => {
+              set(state => ({
+                events: state.events.map(e => e.id === tempId ? saved : e)
+              }));
+            });
         }
 
         updatedEvents.sort((a, b) => {
@@ -262,7 +260,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         const user = useAuthStore.getState().user;
         if (!matchId || !match || !user) return;
 
-        // 1. Aggiornamento ottimistico
         const updatedEvents = currentEvents.filter(e => e.id !== eventId);
         const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
         const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
@@ -270,7 +267,6 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
 
         set({ events: updatedEvents, match: updatedMatch });
 
-        // 2. Operazioni Firestore non bloccanti
         eventRepository.delete(eventId, matchId, match.seasonId);
         matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
         
@@ -281,14 +277,11 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         const { matchId, match } = get();
         if (!matchId || !match) return;
 
-        // Aggiornamento locale immediato
         const updatedMatch = { ...match, ...data };
         set({ match: updatedMatch });
 
-        // Scrittura Firestore non bloccante
         matchRepository.update(matchId, match.seasonId, data);
         
-        // Se la durata è cambiata, ricalcoliamo i minuti
         if (data.duration) {
             get().syncAndPersistMinutes();
         }
