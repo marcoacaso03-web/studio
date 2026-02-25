@@ -1,3 +1,4 @@
+
 "use client";
 
 import { create } from 'zustand';
@@ -31,6 +32,9 @@ interface MatchDetailState {
     deleteEvent: (eventId: string) => Promise<void>;
     syncAndPersistMinutes: () => Promise<void>;
 }
+
+// Ordine dei periodi per il calcolo cronologico
+const periodOrder: Record<string, number> = { '1T': 1, '2T': 2, '1TS': 3, '2TS': 4 };
 
 export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
     matchId: null,
@@ -89,7 +93,8 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
                 error: null
             });
 
-            await get().syncAndPersistMinutes();
+            // Sincronizzazione iniziale non bloccante
+            get().syncAndPersistMinutes();
         } catch (e: any) {
             console.error("Match load error:", e);
             set({ 
@@ -104,132 +109,188 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         const user = useAuthStore.getState().user;
         if (!match || !matchId || !user) return;
 
-        try {
-            const duration = match.duration || 90;
-            const halfTime = duration / 2;
-            const pitchManTeam = match.isHome ? 'home' : 'away';
+        const duration = match.duration || 90;
+        const halfTime = duration / 2;
+        const pitchManTeam = match.isHome ? 'home' : 'away';
 
-            const getAbsoluteMinute = (event: MatchEvent) => {
-                if (event.period === '1T') return Math.min(event.minute, halfTime);
-                if (event.period === '2T') return halfTime + Math.min(event.minute, halfTime);
-                return event.minute + duration; 
-            };
+        const getAbsoluteMinute = (event: MatchEvent) => {
+            if (event.period === '1T') return Math.min(event.minute, halfTime);
+            if (event.period === '2T') return halfTime + Math.min(event.minute, halfTime);
+            return event.minute + duration; 
+        };
 
-            const chronologicalEvents = [...events].sort((a, b) => {
-                const periodOrder: Record<string, number> = { '1T': 1, '2T': 2, '1TS': 3, '2TS': 4 };
-                const pA = periodOrder[a.period] || 0;
-                const pB = periodOrder[b.period] || 0;
-                if (pA !== pB) return pA - pB;
-                return a.minute - b.minute;
-            });
+        const chronologicalEvents = [...events].sort((a, b) => {
+            const pA = periodOrder[a.period] || 0;
+            const pB = periodOrder[b.period] || 0;
+            if (pA !== pB) return pA - pB;
+            return a.minute - b.minute;
+        });
 
-            const newStats: PlayerMatchStats[] = allPlayers.map(player => {
-                const playerId = player.id;
-                const yellowCards = events.filter(e => e.type === 'yellow_card' && e.playerId === playerId && e.team === pitchManTeam).length;
-                const redCards = events.filter(e => e.type === 'red_card' && e.playerId === playerId && e.team === pitchManTeam).length;
-                const goals = events.filter(e => e.type === 'goal' && e.playerId === playerId && e.team === pitchManTeam).length;
-                const assists = events.filter(e => e.type === 'goal' && e.assistPlayerId === playerId && e.team === pitchManTeam).length;
+        const newStats: PlayerMatchStats[] = allPlayers.map(player => {
+            const playerId = player.id;
+            const yellowCards = events.filter(e => e.type === 'yellow_card' && e.playerId === playerId && e.team === pitchManTeam).length;
+            const redCards = events.filter(e => e.type === 'red_card' && e.playerId === playerId && e.team === pitchManTeam).length;
+            const goals = events.filter(e => e.type === 'goal' && e.playerId === playerId && e.team === pitchManTeam).length;
+            const assists = events.filter(e => e.type === 'goal' && e.assistPlayerId === playerId && e.team === pitchManTeam).length;
 
-                let minutesPlayed = 0;
-                const isStarter = lineup?.starters.includes(playerId);
-                const isSubstitute = lineup?.substitutes.includes(playerId);
+            let minutesPlayed = 0;
+            const isStarter = lineup?.starters.includes(playerId);
+            const isSubstitute = lineup?.substitutes.includes(playerId);
 
-                if (lineup && (isStarter || isSubstitute)) {
-                    if (isStarter) {
-                        const subOutEvent = chronologicalEvents.find(e => 
-                            e.type === 'substitution' && e.subOutPlayerId === playerId && e.team === pitchManTeam
+            if (lineup && (isStarter || isSubstitute)) {
+                if (isStarter) {
+                    const subOutEvent = chronologicalEvents.find(e => 
+                        e.type === 'substitution' && e.subOutPlayerId === playerId && e.team === pitchManTeam
+                    );
+                    minutesPlayed = subOutEvent ? getAbsoluteMinute(subOutEvent) : duration;
+                } else {
+                    const subInEvent = chronologicalEvents.find(e => 
+                        e.type === 'substitution' && e.playerId === playerId && e.team === pitchManTeam
+                    );
+                    if (subInEvent) {
+                        const subInMin = getAbsoluteMinute(subInEvent);
+                        const subOutEventLater = chronologicalEvents.find(e => 
+                            e.type === 'substitution' && e.subOutPlayerId === playerId && e.team === pitchManTeam && getAbsoluteMinute(e) > subInMin
                         );
-                        minutesPlayed = subOutEvent ? getAbsoluteMinute(subOutEvent) : duration;
-                    } else {
-                        const subInEvent = chronologicalEvents.find(e => 
-                            e.type === 'substitution' && e.playerId === playerId && e.team === pitchManTeam
-                        );
-                        if (subInEvent) {
-                            const subInMin = getAbsoluteMinute(subInEvent);
-                            const subOutEventLater = chronologicalEvents.find(e => 
-                                e.type === 'substitution' && e.subOutPlayerId === playerId && e.team === pitchManTeam && getAbsoluteMinute(e) > subInMin
-                            );
-                            const endMin = subOutEventLater ? getAbsoluteMinute(subOutEventLater) : duration;
-                            minutesPlayed = Math.max(0, endMin - subInMin);
-                        }
+                        const endMin = subOutEventLater ? getAbsoluteMinute(subOutEventLater) : duration;
+                        minutesPlayed = Math.max(0, endMin - subInMin);
                     }
                 }
-
-                return { matchId, playerId, minutesPlayed, goals, assists, yellowCards, redCards, teamOwnerId: user.id };
-            }).filter(s => s.minutesPlayed > 0 || s.goals > 0 || s.assists > 0 || s.yellowCards > 0 || s.redCards > 0);
-
-            for (const stat of newStats) {
-                await statsRepository.upsert(matchId, match.seasonId, stat.playerId, stat, user.id);
             }
 
-            set({ stats: newStats });
-            await aggregationRepository.syncAllPlayersStats(user.id, match.seasonId);
+            return { matchId, playerId, minutesPlayed, goals, assists, yellowCards, redCards, teamOwnerId: user.id };
+        }).filter(s => s.minutesPlayed > 0 || s.goals > 0 || s.assists > 0 || s.yellowCards > 0 || s.redCards > 0);
+
+        // Aggiorniamo lo stato locale immediatamente
+        set({ stats: newStats });
+
+        // Eseguiamo le scritture su Firestore in modo non bloccante
+        newStats.forEach(stat => {
+            statsRepository.upsert(matchId, match.seasonId, stat.playerId, stat, user.id);
+        });
+
+        // Sincronizzazione aggregati in background
+        aggregationRepository.syncAllPlayersStats(user.id, match.seasonId).then(() => {
             useStatsStore.getState().loadStats();
-        } catch (error) {
-            console.warn("Failed to sync minutes:", error);
-        }
+        });
     },
 
     saveAllStats: async (newStats) => {
         const { matchId, match } = get();
         const user = useAuthStore.getState().user;
         if (!matchId || !match || !user) return;
-        for (const stat of newStats) {
-            await statsRepository.upsert(matchId, match.seasonId, stat.playerId, stat, user.id);
-        }
+        
         set({ stats: newStats });
-        await aggregationRepository.syncAllPlayersStats(user.id, match.seasonId);
-        useStatsStore.getState().loadStats();
+        
+        newStats.forEach(stat => {
+            statsRepository.upsert(matchId, match.seasonId, stat.playerId, stat, user.id);
+        });
+
+        aggregationRepository.syncAllPlayersStats(user.id, match.seasonId).then(() => {
+            useStatsStore.getState().loadStats();
+        });
     },
 
     addEvent: async (eventData) => {
-        const { matchId, match } = get();
+        const { matchId, match, events: currentEvents } = get();
         const user = useAuthStore.getState().user;
         if (!matchId || !match || !user) return;
-        await eventRepository.add({ ...eventData, matchId }, match.seasonId, user.id);
-        const updatedEvents = await eventRepository.getForMatch(matchId, match.seasonId, user.id);
+
+        // 1. Creiamo l'evento ottimistico con un ID temporaneo
+        const tempId = `temp-${Date.now()}`;
+        const newEvent: MatchEvent = { ...eventData, id: tempId, matchId };
+        const updatedEvents = [...currentEvents, newEvent].sort((a, b) => {
+            const pA = periodOrder[a.period] || 0;
+            const pB = periodOrder[b.period] || 0;
+            if (pA !== pB) return pA - pB;
+            return a.minute - b.minute;
+        });
+
+        // 2. Calcoliamo il nuovo risultato localmente
         const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
         const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
-        const updatedMatch = await matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
-        set({ events: updatedEvents, match: updatedMatch || get().match });
-        await get().syncAndPersistMinutes();
+        const updatedMatch = { ...match, result: { home: homeGoals, away: awayGoals } };
+
+        // 3. Aggiorniamo lo stato locale immediatamente (Reattività istantanea)
+        set({ events: updatedEvents, match: updatedMatch });
+
+        // 4. Eseguiamo le operazioni Firestore in modo non bloccante
+        eventRepository.add({ ...eventData, matchId }, match.seasonId, user.id).then((savedEvent) => {
+            // Sostituiamo l'evento temporaneo con quello reale
+            set(state => ({
+                events: state.events.map(e => e.id === tempId ? savedEvent : e)
+            }));
+        });
+        
+        matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
+        
+        // 5. Ricalcoliamo minuti e statistiche (non bloccante)
+        get().syncAndPersistMinutes();
     },
 
     addEvents: async (eventsData) => {
-        const { matchId, match } = get();
+        const { matchId, match, events: currentEvents } = get();
         const user = useAuthStore.getState().user;
         if (!matchId || !match || !user) return;
+
+        let updatedEvents = [...currentEvents];
         for (const data of eventsData) {
-            await eventRepository.add({ ...data, matchId }, match.seasonId, user.id);
+            const tempId = `temp-${Math.random()}`;
+            updatedEvents.push({ ...data, id: tempId, matchId });
+            eventRepository.add({ ...data, matchId }, match.seasonId, user.id);
         }
-        const updatedEvents = await eventRepository.getForMatch(matchId, match.seasonId, user.id);
+
+        updatedEvents.sort((a, b) => {
+            const pA = periodOrder[a.period] || 0;
+            const pB = periodOrder[b.period] || 0;
+            if (pA !== pB) return pA - pB;
+            return a.minute - b.minute;
+        });
+
         const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
         const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
-        const updatedMatch = await matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
-        set({ events: updatedEvents, match: updatedMatch || get().match });
-        await get().syncAndPersistMinutes();
+        const updatedMatch = { ...match, result: { home: homeGoals, away: awayGoals } };
+
+        set({ events: updatedEvents, match: updatedMatch });
+
+        matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
+        get().syncAndPersistMinutes();
     },
 
     deleteEvent: async (eventId) => {
-        const { matchId, match } = get();
+        const { matchId, match, events: currentEvents } = get();
         const user = useAuthStore.getState().user;
         if (!matchId || !match || !user) return;
-        await eventRepository.delete(eventId, matchId, match.seasonId);
-        const updatedEvents = await eventRepository.getForMatch(matchId, match.seasonId, user.id);
+
+        // 1. Aggiornamento ottimistico
+        const updatedEvents = currentEvents.filter(e => e.id !== eventId);
         const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
         const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
-        const updatedMatch = await matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
-        set({ events: updatedEvents, match: updatedMatch || get().match });
-        await get().syncAndPersistMinutes();
+        const updatedMatch = { ...match, result: { home: homeGoals, away: awayGoals } };
+
+        set({ events: updatedEvents, match: updatedMatch });
+
+        // 2. Operazioni Firestore non bloccanti
+        eventRepository.delete(eventId, matchId, match.seasonId);
+        matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
+        
+        get().syncAndPersistMinutes();
     },
     
     updateMatch: async (data) => {
         const { matchId, match } = get();
         if (!matchId || !match) return;
-        const updatedMatch = await matchRepository.update(matchId, match.seasonId, data);
-        if (updatedMatch) {
-            set({ match: updatedMatch });
-            await get().syncAndPersistMinutes();
+
+        // Aggiornamento locale immediato
+        const updatedMatch = { ...match, ...data };
+        set({ match: updatedMatch });
+
+        // Scrittura Firestore non bloccante
+        matchRepository.update(matchId, match.seasonId, data);
+        
+        // Se la durata è cambiata, ricalcoliamo i minuti
+        if (data.duration) {
+            get().syncAndPersistMinutes();
         }
     },
 
@@ -237,8 +298,10 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         const { matchId, match } = get();
         const user = useAuthStore.getState().user;
         if (!matchId || !match || !user) return;
-        await lineupRepository.save({ ...lineupData, matchId }, match.seasonId, user.id);
+
         set({ lineup: { ...lineupData, matchId } });
-        await get().syncAndPersistMinutes();
+
+        lineupRepository.save({ ...lineupData, matchId }, match.seasonId, user.id);
+        get().syncAndPersistMinutes();
     }
 }));
