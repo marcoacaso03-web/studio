@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -223,7 +222,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 gap-3 md:gap-6">
         <Card className="shadow-md border rounded-2xl bg-card overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between p-4 pb-1">
-            <CardTitle className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Efficacia Rosa</CardTitle>
+            <CardTitle className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">ROSA</CardTitle>
             <div className="p-1.5 bg-primary/5 rounded-lg"><Users className="h-4 w-4 text-primary" /></div>
           </CardHeader>
           <CardContent className="p-4 pt-0">
