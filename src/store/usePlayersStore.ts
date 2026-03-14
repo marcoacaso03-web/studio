@@ -65,18 +65,21 @@ export const usePlayersStore = create<PlayerState>((set, get) => ({
         useStatsStore.getState().loadStats();
     },
     update: async (id, updates) => {
-        const player = await playerRepository.getById(id);
-        const updatedPlayer = await playerRepository.update(id, updates);
+        const activeSeason = useSeasonsStore.getState().activeSeason;
+        if (!activeSeason) return;
+
+        const updatedPlayer = await playerRepository.update(id, activeSeason.id, updates);
         if (updatedPlayer) {
-            await get().fetchAll(player?.seasonId);
+            await get().fetchAll(activeSeason.id);
             useStatsStore.getState().loadStats();
         }
     },
     remove: async (id) => {
-        const player = await playerRepository.getById(id);
-        const seasonId = player?.seasonId;
-        await playerRepository.delete(id);
-        await get().fetchAll(seasonId);
+        const activeSeason = useSeasonsStore.getState().activeSeason;
+        if (!activeSeason) return;
+        
+        await playerRepository.delete(id, activeSeason.id);
+        await get().fetchAll(activeSeason.id);
         useStatsStore.getState().loadStats();
     },
 }));
