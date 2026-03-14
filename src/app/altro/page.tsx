@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, RefreshCw, LogOut, User, Trash2, Clock } from 'lucide-react';
+import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, RefreshCw, LogOut, User, Trash2, Clock, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { playerRepository } from '@/lib/repositories/player-repository';
 import { matchRepository } from '@/lib/repositories/match-repository';
@@ -44,12 +44,13 @@ import {
 
 export default function AltroPage() {
   const [isExporting, setIsExporting] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const [newSeasonName, setNewSeasonName] = useState('');
   const [seasonToDelete, setSeasonToDelete] = useState<{id: string, name: string} | null>(null);
   const { toast } = useToast();
   const router = useRouter();
   const { theme, toggleTheme } = useThemeStore();
-  const { seasons, fetchAll: fetchSeasons, addSeason, setActiveSeason, removeSeason } = useSeasonsStore();
+  const { seasons, activeSeason, fetchAll: fetchSeasons, addSeason, setActiveSeason, removeSeason } = useSeasonsStore();
   const { defaultDuration, setDefaultDuration } = useSettingsStore();
   const { user, logout } = useAuthStore();
   const [mounted, setMounted] = useState(false);
@@ -130,11 +131,11 @@ export default function AltroPage() {
     if (!user) return;
     setIsExporting(true);
     try {
-      const players = await playerRepository.getAll(user.id, useSeasonsStore.getState().activeSeason?.id);
+      const players = await playerRepository.getAll(user.id, activeSeason?.id);
       const playersCSV = convertToCSV(players.map(({avatarUrl, imageHint, ...p}) => p));
       downloadCSV(playersCSV, `pitchman_players_${user.username}.csv`);
       
-      const matches = await matchRepository.getAll(user.id, useSeasonsStore.getState().activeSeason?.id);
+      const matches = await matchRepository.getAll(user.id, activeSeason?.id);
       const matchesCSV = convertToCSV(matches);
       downloadCSV(matchesCSV, `pitchman_matches_${user.username}.csv`);
     } catch (error) {
@@ -144,13 +145,38 @@ export default function AltroPage() {
     }
   }
 
-  const handleFullReset = async () => {
-    if (!user) return;
+  const handleResetSeason = async () => {
+    if (!user || !activeSeason) return;
+    setIsResetting(true);
     try {
-      await seasonRepository.resetUser(user.id);
-      window.location.reload();
+      // Recupera tutti i dati della stagione corrente
+      const players = await playerRepository.getAll(user.id, activeSeason.id);
+      const matches = await matchRepository.getAll(user.id, activeSeason.id);
+      
+      // Elimina tutti i giocatori e le partite (e le relative sotto-collezioni tramite repository)
+      const deletePromises = [
+        ...players.map(p => playerRepository.delete(p.id, activeSeason.id)),
+        ...matches.map(m => matchRepository.delete(m.id, activeSeason.id))
+      ];
+      
+      await Promise.all(deletePromises);
+      
+      // Rinfresca lo stato globale
+      await Promise.all([
+        useMatchesStore.getState().fetchAll(activeSeason.id),
+        usePlayersStore.getState().fetchAll(activeSeason.id),
+        useStatsStore.getState().loadStats()
+      ]);
+
+      toast({ 
+        title: "Stagione Resettata", 
+        description: `Tutti i dati della stagione ${activeSeason.name} sono stati eliminati.` 
+      });
     } catch (e) {
-      toast({ variant: "destructive", title: "Errore nel reset" });
+      console.error("Reset error:", e);
+      toast({ variant: "destructive", title: "Errore nel reset dei dati" });
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -324,27 +350,28 @@ export default function AltroPage() {
             <AlertTriangle className="h-5 w-5" />
             <CardTitle>Zona Pericolo</CardTitle>
           </div>
-          <CardDescription>Azioni irreversibili sul database locale.</CardDescription>
+          <CardDescription>Azioni irreversibili sui dati della stagione attiva.</CardDescription>
         </CardHeader>
         <CardContent>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" className="w-full font-black uppercase text-xs">
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Resetta Applicazione
+                Reset Stagione
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent className="rounded-2xl">
               <AlertDialogHeader>
-                <AlertDialogTitle className="uppercase font-black">Sei assolutamente sicuro?</AlertDialogTitle>
-                <AlertDialogDescription className="text-xs">
-                  Questa azione cancellerà DEFINITIVAMENTE tutti i tuoi dati associati all'account <strong>{user?.username}</strong>.
+                <AlertDialogTitle className="uppercase font-black">Resettare la stagione?</AlertDialogTitle>
+                <AlertDialogDescription className="text-xs leading-relaxed">
+                  Questa azione cancellerà DEFINITIVAMENTE tutti i giocatori, le partite e le statistiche associate alla stagione <strong>{activeSeason?.name}</strong>. 
+                  L'operazione non può essere annullata.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter className="flex-row gap-2 mt-4">
-                <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs">Annulla</AlertDialogCancel>
-                <AlertDialogAction onClick={handleFullReset} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase">
-                  Resetta Tutto
+                <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs" disabled={isResetting}>Annulla</AlertDialogCancel>
+                <AlertDialogAction onClick={handleResetSeason} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase" disabled={isResetting}>
+                  {isResetting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Conferma Reset"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
