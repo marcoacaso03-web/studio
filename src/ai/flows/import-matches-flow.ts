@@ -32,17 +32,17 @@ const prompt = ai.definePrompt({
   name: 'importMatchesPrompt',
   input: { schema: z.object({ html: z.object({ content: z.string() }), url: z.string() }) },
   output: { schema: ImportMatchesOutputSchema },
-  prompt: `Sei un esperto di analisi dati sportivi. Ti è stato fornito l'HTML (pulito) di una pagina Calendario di Tuttocampo (URL: {{url}}).
+  prompt: `Sei un esperto di analisi dati sportivi. Ti è stato fornito l'HTML (estratto dalle tabelle) di una pagina Calendario di Tuttocampo (URL: {{url}}).
   
 Il tuo compito è:
-1. Identificare qual è la squadra principale di cui si sta visualizzando il calendario. Guarda con attenzione l'URL per capire di quale squadra si tratta (solitamente è la parte finale del path prima dell'ID).
-2. Estrarre TUTTE le partite elencate nelle tabelle del calendario (sia passate che future).
-3. Per ogni partita, determina con precisione:
+1. Identificare qual è la squadra principale di cui si sta visualizzando il calendario. Guarda l'URL per capire di quale squadra si tratta.
+2. Estrarre TUTTE le partite elencate nelle tabelle (passate e future).
+3. Per ogni partita, determina:
    - Chi è l'avversario (l'ALTRA squadra rispetto a quella principale).
-   - La data e l'ora. Nota: Spesso le date sono scritte come "Dom 24/02" o simile. Interpreta l'anno correttamente basandoti sulla stagione sportiva corrente (es: 2025).
+   - La data e l'ora. Interpreta l'anno correttamente (es. 2024/2025). Se l'orario non è presente, usa 15:00.
    - Se la squadra principale gioca in casa (prima nella lista) o fuori (seconda nella lista).
 
-Restituisci i dati in modo strutturato. Sii molto preciso sui nomi delle squadre.
+Restituisci i dati in modo strutturato JSON.
 
 HTML della pagina:
 {{{html.content}}}`,
@@ -58,16 +58,23 @@ const cleanHtml = (html: string) => {
     .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')   // Rimuove stili
     .replace(/<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>/gi, '')     // Rimuove SVG
     .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '') // Rimuove iframe
+    .replace(/<link\b[^<]*(?:(?!<\/link>)<[^<]*)*\/>/gi, '') // Rimuove link CSS
     .replace(/<!--[\s\S]*?-->/g, '')                             // Rimuove commenti
     .replace(/\s+/g, ' ')                                        // Comprime spazi
     .trim();
 };
 
 const extractTableHtml = (html: string) => {
-  const tableIndex = html.indexOf('<table');
-  const lastTableIndex = html.lastIndexOf('</table>');
-  if (tableIndex === -1 || lastTableIndex === -1) return html;
-  return html.substring(tableIndex, lastTableIndex + 8);
+  // Cerchiamo le tabelle con classe 'table-calendario' o simili tipiche di Tuttocampo
+  const tableRegex = /<table[^>]*>([\s\S]*?)<\/table>/gi;
+  const matches = html.match(tableRegex);
+  if (!matches) return html.substring(0, 10000); // Fallback se non trova tabelle
+  
+  // Prendiamo solo le tabelle che sembrano contenere dati del calendario (evitiamo sidebar)
+  return matches
+    .filter(t => t.toLowerCase().includes('giornata') || t.toLowerCase().includes('vs'))
+    .join('\n')
+    .substring(0, 25000); // Limite di sicurezza per i token
 };
 
 const importMatchesFlow = ai.defineFlow(
@@ -77,31 +84,47 @@ const importMatchesFlow = ai.defineFlow(
     outputSchema: ImportMatchesOutputSchema,
   },
   async (input) => {
+    // Verifica immediata della chiave API
+    if (!process.env.GOOGLE_GENAI_API_KEY) {
+      throw new Error('Configurazione Mancante: La chiave GOOGLE_GENAI_API_KEY non è stata impostata nel file .env del server.');
+    }
+
     try {
       const response = await fetch(input.url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+          'Accept-Language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'Referer': 'https://www.tuttocampo.it/',
         },
       });
 
       if (!response.ok) {
-        throw new Error(`Impossibile raggiungere il sito: ${response.statusText}`);
+        if (response.status === 403 || response.status === 500) {
+          throw new Error(`Il sito Tuttocampo ha bloccato la richiesta (Codice ${response.status}). Riprova tra qualche minuto.`);
+        }
+        throw new Error(`Impossibile raggiungere il sito: ${response.status} ${response.statusText}`);
       }
 
       const rawHtml = await response.text();
       const cleanedHtml = cleanHtml(extractTableHtml(rawHtml));
 
+      if (cleanedHtml.length < 100) {
+        throw new Error('La pagina non sembra contenere un calendario valido o è protetta da sistemi anti-bot avanzati.');
+      }
+
       const { output } = await prompt({ html: { content: cleanedHtml }, url: input.url });
       
-      if (!output) {
-        throw new Error('L\'AI non è riuscita a estrarre dati validi dalla pagina.');
+      if (!output || !output.matches) {
+        throw new Error('L\'AI non è riuscita a estrarre dati validi. Verifica che il link sia corretto e contenga il calendario.');
       }
 
       return output;
     } catch (error: any) {
       console.error('Import flow error:', error);
-      throw new Error(error.message || 'Errore durante l\'importazione dei dati.');
+      throw new Error(error.message || 'Errore imprevisto durante l\'analisi del link.');
     }
   }
 );
