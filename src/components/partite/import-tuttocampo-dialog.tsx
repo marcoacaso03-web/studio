@@ -15,6 +15,7 @@ import { Loader2, Globe, CheckCircle2, AlertCircle } from 'lucide-react';
 import { importMatchesFromUrl } from '@/ai/flows/import-matches-flow';
 import { useToast } from '@/hooks/use-toast';
 import { useMatchesStore } from '@/store/useMatchesStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 interface ImportTuttocampoDialogProps {
   open: boolean;
@@ -25,10 +26,12 @@ export function ImportTuttocampoDialog({ open, onOpenChange }: ImportTuttocampoD
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { add } = useMatchesStore();
+  const { bulkAdd } = useMatchesStore();
+  const { defaultDuration } = useSettingsStore();
 
   const handleImport = async () => {
-    if (!url.trim() || !url.includes('tuttocampo.it')) {
+    const trimmedUrl = url.trim();
+    if (!trimmedUrl || !trimmedUrl.includes('tuttocampo.it')) {
       toast({
         variant: "destructive",
         title: "URL non valido",
@@ -39,34 +42,32 @@ export function ImportTuttocampoDialog({ open, onOpenChange }: ImportTuttocampoD
 
     setIsLoading(true);
     try {
-      const result = await importMatchesFromUrl({ url: url.trim() });
+      const result = await importMatchesFromUrl({ url: trimmedUrl });
       
       if (result.matches.length === 0) {
         toast({
           variant: "destructive",
           title: "Nessuna gara trovata",
-          description: "L'AI non ha individuato partite nel link fornito.",
+          description: "L'AI non ha individuato partite nel link fornito. Verifica che la pagina contenga effettivamente una tabella calendario.",
         });
         return;
       }
 
-      // Aggiungiamo le partite una per una allo store
-      let count = 0;
-      for (const match of result.matches) {
-        await add({
-          opponent: match.opponent,
-          date: match.date,
-          isHome: match.isHome,
-          type: match.type as any,
-          duration: 90, // Default
-          status: new Date(match.date) < new Date() ? 'completed' : 'scheduled',
-        });
-        count++;
-      }
+      // Prepariamo i dati per il bulk add
+      const matchesToSave = result.matches.map(match => ({
+        opponent: match.opponent,
+        date: match.date,
+        isHome: match.isHome,
+        type: match.type as any,
+        duration: defaultDuration,
+        status: (new Date(match.date) < new Date() ? 'completed' : 'scheduled') as any,
+      }));
+
+      await bulkAdd(matchesToSave);
 
       toast({
         title: "Importazione completata",
-        description: `Individuata squadra: ${result.teamName}. Aggiunte ${count} partite al calendario.`,
+        description: `Individuata squadra: ${result.teamName}. Aggiunte ${result.matches.length} partite al calendario.`,
       });
       onOpenChange(false);
       setUrl('');
@@ -104,14 +105,17 @@ export function ImportTuttocampoDialog({ open, onOpenChange }: ImportTuttocampoD
               className="text-xs font-bold"
             />
             <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">
-              Assicurati che il link termini con &apos;/Calendario&apos;
+              L'AI analizzerà la pagina per estrarre le partite.
             </p>
           </div>
 
           {isLoading && (
             <div className="flex flex-col items-center justify-center p-6 bg-muted/20 rounded-2xl border border-dashed border-primary/20 space-y-3">
               <Loader2 className="h-8 w-8 text-primary animate-spin" />
-              <p className="text-[10px] font-black uppercase text-primary animate-pulse">Analisi AI in corso...</p>
+              <div className="text-center">
+                <p className="text-[10px] font-black uppercase text-primary animate-pulse">Analisi AI in corso...</p>
+                <p className="text-[9px] text-muted-foreground uppercase mt-1">Stiamo estraendo le partite dalla pagina</p>
+              </div>
             </div>
           )}
         </div>

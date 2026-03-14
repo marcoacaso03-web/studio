@@ -1,4 +1,3 @@
-
 import { 
   getFirestore, 
   collection, 
@@ -9,7 +8,8 @@ import {
   updateDoc, 
   deleteDoc, 
   query, 
-  where 
+  where,
+  writeBatch
 } from 'firebase/firestore';
 import type { Match } from '@/lib/types';
 
@@ -82,6 +82,35 @@ export const matchRepository = {
     };
     await setDoc(doc(db, 'teams', data.seasonId, 'matches', id), newMatch);
     return newMatch;
+  },
+
+  async bulkAdd(matchesData: Omit<MatchCreateData, 'userId' | 'seasonId'>[], userId: string, seasonId: string) {
+    const db = getFirestore();
+    const batch = writeBatch(db);
+    const now = new Date().toISOString();
+    
+    const addedMatches: Match[] = matchesData.map(data => {
+      const shortRandom = Math.random().toString(36).substring(2, 7).toUpperCase();
+      const id = `M-${shortRandom}`;
+      const match: Match = {
+        ...data,
+        id,
+        userId,
+        teamOwnerId: userId,
+        teamId: seasonId,
+        seasonId,
+        status: data.status || 'scheduled',
+        date: ensureISODate(data.date),
+        createdAt: now,
+        updatedAt: now
+      };
+      const docRef = doc(db, 'teams', seasonId, 'matches', id);
+      batch.set(docRef, match);
+      return match;
+    });
+
+    await batch.commit();
+    return addedMatches;
   },
 
   async update(id: string, seasonId: string, updates: Partial<Omit<Match, 'id' | 'userId' | 'seasonId'>>) {

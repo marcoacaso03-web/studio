@@ -1,4 +1,3 @@
-
 "use client";
 
 import { create } from 'zustand';
@@ -13,6 +12,7 @@ interface MatchState {
     loading: boolean;
     fetchAll: (seasonId?: string) => Promise<void>;
     add: (data: Omit<MatchCreateData, 'seasonId' | 'userId'>) => Promise<Match | undefined>;
+    bulkAdd: (matchesData: Omit<MatchCreateData, 'userId' | 'seasonId'>[]) => Promise<void>;
     update: (id: string, updates: Partial<Omit<Match, 'id' | 'userId'>>) => Promise<void>;
     remove: (id: string) => Promise<void>;
 }
@@ -50,6 +50,14 @@ export const useMatchesStore = create<MatchState>((set, get) => ({
         
         await get().fetchAll(activeSeason.id);
         return newMatch;
+    },
+    bulkAdd: async (matchesData) => {
+        const user = useAuthStore.getState().user;
+        const activeSeason = useSeasonsStore.getState().activeSeason;
+        if (!activeSeason || !user) return;
+
+        await matchRepository.bulkAdd(matchesData, user.id, activeSeason.id);
+        await get().fetchAll(activeSeason.id);
     },
     update: async (id, updates) => {
         const activeSeason = useSeasonsStore.getState().activeSeason;
