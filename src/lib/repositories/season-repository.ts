@@ -36,12 +36,12 @@ export const seasonRepository = {
         const seasonsRef = collection(db, 'teams');
         const q = query(seasonsRef, where('ownerId', '==', userId), where('isActive', '==', true));
         const snapshot = await getDocs(q);
+        // Restituisce solo la prima, ma il sistema ora garantisce l'unicità tramite ensureDefaultSeason
         return snapshot.docs.length > 0 ? { ...snapshot.docs[0].data(), id: snapshot.docs[0].id } as Season : undefined;
     },
 
     async add(name: string, userId: string) {
         const db = getFirestore();
-        // Genera un ID corto e leggibile
         const shortRandom = Math.random().toString(36).substring(2, 7).toUpperCase();
         const id = `S-${shortRandom}`;
         
@@ -63,14 +63,21 @@ export const seasonRepository = {
         const db = getFirestore();
         const batch = writeBatch(db);
         
-        const all = await this.getAll(userId);
-        all.forEach(s => {
-            if (s.id !== id) {
-                batch.update(doc(db, 'teams', s.id), { isActive: false, updatedAt: new Date().toISOString() });
+        // Trova tutte le stagioni attualmente attive per questo utente
+        const seasonsRef = collection(db, 'teams');
+        const q = query(seasonsRef, where('ownerId', '==', userId), where('isActive', '==', true));
+        const snapshot = await getDocs(q);
+        
+        // Disattiva tutte le stagioni attive tranne quella target (se già presente)
+        snapshot.docs.forEach(docSnap => {
+            if (docSnap.id !== id) {
+                batch.update(docSnap.ref, { isActive: false, updatedAt: new Date().toISOString() });
             }
         });
         
+        // Attiva la stagione target
         batch.update(doc(db, 'teams', id), { isActive: true, updatedAt: new Date().toISOString() });
+        
         await batch.commit();
     },
 
@@ -83,21 +90,24 @@ export const seasonRepository = {
     async ensureDefaultSeason(userId: string) {
         if (!userId) return undefined;
         
-        // Prima verifichiamo se esiste già una stagione attiva
-        const active = await this.getActive(userId);
-        if (active) return active;
-        
-        // Se non c'è una stagione attiva, verifichiamo se ce ne sono di esistenti
+        // Recupera tutte le stagioni per controllare l'integrità dell'attivazione
         const all = await this.getAll(userId);
+        const activeSeasons = all.filter(s => s.isActive);
+        
+        // Caso ideale: esattamente una stagione attiva
+        if (activeSeasons.length === 1) {
+            return activeSeasons[0];
+        }
+
+        // Se ci sono stagioni ma nessuna o troppe sono attive, normalizziamo
         if (all.length > 0) {
-            // Se ne esistono, impostiamo la prima come attiva
-            const firstSeasonId = all[0].id;
-            await this.setActive(firstSeasonId, userId);
-            return { ...all[0], isActive: true };
+            const targetId = activeSeasons.length > 1 ? activeSeasons[0].id : all[0].id;
+            await this.setActive(targetId, userId);
+            // Restituiamo l'oggetto aggiornato
+            return { ...all.find(s => s.id === targetId)!, isActive: true };
         }
         
-        // Se non esiste assolutamente nulla, creiamo la stagione predefinita
-        // Usiamo un ID basato sul userId per evitare duplicazioni da chiamate concorrenti
+        // Se non esistono stagioni, creiamo quella predefinita
         const defaultId = `S-DEFAULT-${userId.substring(0, 6).toUpperCase()}`;
         const db = getFirestore();
         
