@@ -84,9 +84,11 @@ const importMatchesFlow = ai.defineFlow(
     outputSchema: ImportMatchesOutputSchema,
   },
   async (input) => {
-    // Verifica immediata della chiave API
-    if (!process.env.GOOGLE_GENAI_API_KEY) {
-      throw new Error('Configurazione Mancante: La chiave GOOGLE_GENAI_API_KEY non è stata impostata nel file .env del server.');
+    // Verifica flessibile della chiave API (controlla entrambi i nomi possibili)
+    const apiKey = process.env.GOOGLE_GENAI_API_KEY || process.env.GOOGLE_API_KEY;
+    
+    if (!apiKey) {
+      throw new Error('Configurazione Mancante: La chiave API di Google non è stata trovata. Assicurati che nel file .env sia presente GOOGLE_GENAI_API_KEY=LaTuaChiave (senza virgolette). Riavvia il server dopo la modifica.');
     }
 
     try {
@@ -103,7 +105,7 @@ const importMatchesFlow = ai.defineFlow(
 
       if (!response.ok) {
         if (response.status === 403 || response.status === 500) {
-          throw new Error(`Il sito Tuttocampo ha bloccato la richiesta (Codice ${response.status}). Riprova tra qualche minuto.`);
+          throw new Error(`Il sito Tuttocampo ha bloccato la richiesta (Codice ${response.status}). Prova a riavviare il server dell'app.`);
         }
         throw new Error(`Impossibile raggiungere il sito: ${response.status} ${response.statusText}`);
       }
