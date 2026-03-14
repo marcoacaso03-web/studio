@@ -41,7 +41,7 @@ export const seasonRepository = {
 
     async add(name: string, userId: string) {
         const db = getFirestore();
-        // Genera un ID corto e leggibile (es: S-456GH)
+        // Genera un ID corto e leggibile
         const shortRandom = Math.random().toString(36).substring(2, 7).toUpperCase();
         const id = `S-${shortRandom}`;
         
@@ -65,7 +65,9 @@ export const seasonRepository = {
         
         const all = await this.getAll(userId);
         all.forEach(s => {
-            batch.update(doc(db, 'teams', s.id), { isActive: false, updatedAt: new Date().toISOString() });
+            if (s.id !== id) {
+                batch.update(doc(db, 'teams', s.id), { isActive: false, updatedAt: new Date().toISOString() });
+            }
         });
         
         batch.update(doc(db, 'teams', id), { isActive: true, updatedAt: new Date().toISOString() });
@@ -80,18 +82,36 @@ export const seasonRepository = {
 
     async ensureDefaultSeason(userId: string) {
         if (!userId) return undefined;
+        
+        // Prima verifichiamo se esiste già una stagione attiva
         const active = await this.getActive(userId);
         if (active) return active;
         
+        // Se non c'è una stagione attiva, verifichiamo se ce ne sono di esistenti
         const all = await this.getAll(userId);
-        if (all.length === 0) {
-            return await this.add('2025/26', userId).then(async s => {
-                await this.setActive(s.id, userId);
-                return { ...s, isActive: true };
-            });
+        if (all.length > 0) {
+            // Se ne esistono, impostiamo la prima come attiva
+            const firstSeasonId = all[0].id;
+            await this.setActive(firstSeasonId, userId);
+            return { ...all[0], isActive: true };
         }
         
-        await this.setActive(all[0].id, userId);
-        return { ...all[0], isActive: true };
+        // Se non esiste assolutamente nulla, creiamo la stagione predefinita
+        // Usiamo un ID basato sul userId per evitare duplicazioni da chiamate concorrenti
+        const defaultId = `S-DEFAULT-${userId.substring(0, 6).toUpperCase()}`;
+        const db = getFirestore();
+        
+        const initialSeason: Season = { 
+            id: defaultId, 
+            userId, 
+            ownerId: userId, 
+            name: '2025/26', 
+            isActive: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+        
+        await setDoc(doc(db, 'teams', defaultId), initialSeason);
+        return initialSeason;
     }
 };

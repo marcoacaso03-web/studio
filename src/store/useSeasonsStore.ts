@@ -29,9 +29,24 @@ export const useSeasonsStore = create<SeasonsState>((set, get) => ({
         }
         
         set({ loading: true });
-        const active = await seasonRepository.ensureDefaultSeason(user.id);
-        const all = await seasonRepository.getAll(user.id);
-        set({ seasons: all, activeSeason: active || null, loading: false });
+        try {
+            const active = await seasonRepository.ensureDefaultSeason(user.id);
+            const all = await seasonRepository.getAll(user.id);
+            
+            // Ordiniamo le stagioni per data di creazione (dalla più recente alla meno recente)
+            const sortedSeasons = all.sort((a, b) => 
+                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+
+            set({ 
+                seasons: sortedSeasons, 
+                activeSeason: active || (sortedSeasons.length > 0 ? sortedSeasons[0] : null), 
+                loading: false 
+            });
+        } catch (error) {
+            console.error("Error fetching seasons:", error);
+            set({ loading: false });
+        }
     },
 
     addSeason: async (name) => {
