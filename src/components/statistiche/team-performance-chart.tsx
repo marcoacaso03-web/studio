@@ -15,7 +15,7 @@ export function TeamPerformanceChart() {
                     <CardTitle>Andamento Risultati</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-sm text-muted-foreground">Gioca qualche partita per vedere l'andamento.</p>
+                    <p className="text-sm text-muted-foreground">Registra una partita per vedere l'andamento.</p>
                 </CardContent>
             </Card>
         );
