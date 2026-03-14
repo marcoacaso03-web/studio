@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -283,7 +282,6 @@ export default function AltroPage() {
                     <span className={cn("text-sm font-black uppercase tracking-tight", s.isActive ? "text-primary" : "text-muted-foreground")}>
                       Stagione {s.name}
                     </span>
-                    <span className="text-[9px] text-muted-foreground font-bold tracking-widest">{s.id}</span>
                   </div>
                   {s.isActive && (
                     <Badge className="text-[8px] bg-primary text-white font-black uppercase py-0 px-1.5">Attiva</Badge>
