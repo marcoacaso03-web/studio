@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { PlusCircle, Trash2, Users, Trophy, Calendar, ArrowRight } from "lucide-react";
+import { PlusCircle, Trash2, Users, Trophy, Calendar, ArrowRight, Globe } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Match, MatchStatus } from "@/lib/types";
 import { useMatchesStore } from "@/store/useMatchesStore";
@@ -15,6 +15,7 @@ import { useStatsStore } from "@/store/useStatsStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { ImportTuttocampoDialog } from "@/components/partite/import-tuttocampo-dialog";
 
 import {
   AlertDialog,
@@ -40,6 +41,7 @@ export default function DashboardPage() {
   const router = useRouter();
   
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const [matchToDelete, setMatchToDelete] = useState<Match | null>(null);
 
   useEffect(() => {
@@ -103,17 +105,28 @@ export default function DashboardPage() {
     <div className="space-y-4 md:space-y-6">
       <Card className="overflow-hidden border shadow-md bg-card rounded-2xl">
         <CardHeader className="p-4 md:p-6 pb-2 md:pb-4 border-b bg-muted/5">
-          <div className="flex flex-row items-center justify-between gap-2">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <CardTitle className="text-lg md:text-2xl text-primary font-black uppercase tracking-tight">Calendario</CardTitle>
               <CardDescription className="text-[10px] md:text-sm uppercase font-bold text-muted-foreground/60 tracking-widest">
                  {activeSeason ? `Stagione ${activeSeason.name}` : 'Identificazione stagione...'}
               </CardDescription>
             </div>
-            <Button className="bg-accent text-accent-foreground hover:bg-accent/90 h-8 md:h-10 text-[10px] md:text-xs font-black uppercase px-4 rounded-xl shadow-lg" size="sm" onClick={() => setIsFormOpen(true)}>
-                <PlusCircle className="mr-1.5 h-3.5 w-3.5" />
-                Nuova Gara
-            </Button>
+            <div className="flex gap-2 w-full md:w-auto">
+              <Button 
+                variant="outline"
+                className="flex-1 md:flex-none border-primary/20 text-primary hover:bg-primary/5 h-8 md:h-10 text-[10px] md:text-xs font-black uppercase px-4 rounded-xl"
+                size="sm"
+                onClick={() => setIsImportOpen(true)}
+              >
+                <Globe className="mr-1.5 h-3.5 w-3.5" />
+                Importa
+              </Button>
+              <Button className="flex-1 md:flex-none bg-accent text-accent-foreground hover:bg-accent/90 h-8 md:h-10 text-[10px] md:text-xs font-black uppercase px-4 rounded-xl shadow-lg" size="sm" onClick={() => setIsFormOpen(true)}>
+                  <PlusCircle className="mr-1.5 h-3.5 w-3.5" />
+                  Nuova Gara
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -265,6 +278,13 @@ export default function DashboardPage() {
           onOpenChange={setIsFormOpen} 
           onSave={handleSaveMatch} 
           match={null} 
+        />
+      )}
+
+      {isImportOpen && (
+        <ImportTuttocampoDialog
+          open={isImportOpen}
+          onOpenChange={setIsImportOpen}
         />
       )}
 
