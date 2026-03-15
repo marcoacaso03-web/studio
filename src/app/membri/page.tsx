@@ -1,13 +1,12 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, ArrowUpDown, Users } from "lucide-react";
+import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, ArrowUpDown, Sparkles } from "lucide-react";
 import type { Player, Role } from "@/lib/types";
 import { PlayerFormDialog } from "@/components/squadra/player-form-dialog";
-import { BulkPlayerDialog } from "@/components/giocatori/bulk-player-dialog";
+import { SmartPlayerDialog } from "@/components/giocatori/smart-player-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,8 +40,7 @@ const roleInitials: Record<Role, string> = {
   'Portiere': 'POR',
   'Difensore': 'DIF',
   'Centrocampista': 'CEN',
-  'Attaccante': 'ATT',
-  'Sconosciuto': 'N/A'
+  'Attaccante': 'ATT'
 };
 
 export default function RosaPage() {
@@ -50,7 +48,7 @@ export default function RosaPage() {
   const { activeSeason, loading: seasonsLoading, fetchAll: fetchSeasons } = useSeasonsStore();
   
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isBulkFormOpen, setIsBulkFormOpen] = useState(false);
+  const [isSmartFormOpen, setIsSmartFormOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: null });
@@ -78,7 +76,7 @@ export default function RosaPage() {
     }
   };
 
-  const handleBulkSavePlayers = async (playersData: { name: string, role: Role }[]) => {
+  const handleSmartSavePlayers = async (playersData: { name: string, role: Role }[]) => {
     await bulkAdd(playersData);
   };
 
@@ -165,9 +163,9 @@ export default function RosaPage() {
         }
       >
         <div className="flex gap-2">
-            <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 h-9 text-[10px] font-black uppercase rounded-xl" onClick={() => setIsBulkFormOpen(true)} disabled={loading}>
-              <Users className="mr-2 h-4 w-4" />
-              In Blocco
+            <Button size="sm" variant="outline" className="border-accent text-accent hover:bg-accent/5 h-9 text-[10px] font-black uppercase rounded-xl" onClick={() => setIsSmartFormOpen(true)} disabled={loading}>
+              <Sparkles className="mr-2 h-4 w-4" />
+              Smart
             </Button>
             <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 h-9 text-[10px] font-black uppercase rounded-xl" onClick={() => handleOpenForm(null)} disabled={loading}>
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -232,7 +230,7 @@ export default function RosaPage() {
                           </TableCell>
                           <TableCell className="px-2 text-center">
                             <span className="text-[9px] font-black bg-primary/5 text-primary px-2 py-0.5 rounded border border-primary/10 min-w-[36px] inline-block">
-                              {roleInitials[player.role] || roleInitials.Sconosciuto}
+                              {roleInitials[player.role] || 'N/A'}
                             </span>
                           </TableCell>
                           <TableCell className="px-4 text-right">
@@ -272,10 +270,10 @@ export default function RosaPage() {
         player={selectedPlayer}
       />
 
-      <BulkPlayerDialog
-        open={isBulkFormOpen}
-        onOpenChange={setIsBulkFormOpen}
-        onSave={handleBulkSavePlayers}
+      <SmartPlayerDialog
+        open={isSmartFormOpen}
+        onOpenChange={setIsSmartFormOpen}
+        onSave={handleSmartSavePlayers}
       />
       
       <AlertDialog open={!!playerToDelete} onOpenChange={(open) => !open && setPlayerToDelete(null)}>
