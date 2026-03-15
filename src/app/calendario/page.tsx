@@ -116,7 +116,7 @@ export default function DashboardPage() {
                   <span className="text-[8px] font-bold text-primary uppercase">V:{teamRecord?.wins || 0}</span>
                   <span className="text-[8px] font-bold text-muted-foreground uppercase">P:{teamRecord?.draws || 0}</span>
                   <span className="text-[8px] font-bold text-accent uppercase">S:{teamRecord?.losses || 0}</span>
-                  <span className="text-[8px] font-black text-foreground/60 uppercase">G:{teamRecord?.goalsFor || 0}-{teamRecord?.goalsAgainst || 0}</span>
+                  <span className="text-[8px] font-black text-foreground/60 uppercase">DR:{teamRecord?.goalsFor || 0}-{teamRecord?.goalsAgainst || 0}</span>
                 </div>
               </div>
             )}
