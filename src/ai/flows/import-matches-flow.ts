@@ -8,6 +8,8 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
+const cleanKey = (key?: string) => key?.replace(/['"]/g, '').trim();
+
 const ImportMatchesInputSchema = z.object({
   rawContent: z.string().describe('Il contenuto testuale o HTML copiato manualmente dall\'utente dal sito Tuttocampo.'),
 });
@@ -66,8 +68,11 @@ const importMatchesFlow = ai.defineFlow(
     outputSchema: ImportMatchesOutputSchema,
   },
   async (input) => {
-    const apiKey = process.env.GOOGLE_GENAI_API_KEY || process.env.GOOGLE_API_KEY;
-    if (!apiKey) throw new Error('Configurazione Mancante: La chiave API non è stata configurata sul server.');
+    const apiKey = cleanKey(process.env.GOOGLE_GENAI_API_KEY || process.env.GOOGLE_API_KEY);
+    
+    if (!apiKey || apiKey === 'missing-key') {
+      throw new Error('Configurazione AI Mancante: La chiave API non è stata configurata correttamente nel file .env (assicurati che non ci siano virgolette o spazi).');
+    }
 
     if (!input.rawContent || input.rawContent.trim().length < 50) {
       throw new Error('Il contenuto incollato sembra troppo breve o vuoto.');
