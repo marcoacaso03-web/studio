@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
@@ -27,7 +28,6 @@ function MatchDetailContent() {
   
   useEffect(() => {
     if (id) {
-        // Caricamento forzato dei dettagli usando l'ID della rotta e l'ID stagione opzionale
         load(id, urlSeasonId || undefined);
     }
   }, [id, urlSeasonId, load]);
@@ -69,9 +69,6 @@ function MatchDetailContent() {
              Riprova
           </Button>
         </div>
-        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mt-8">
-          ID Partita: {id} | Stagione: {urlSeasonId || "N/A"}
-        </p>
       </div>
     );
   }
@@ -90,12 +87,12 @@ function MatchDetailContent() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-20">
-      <div className="flex flex-col gap-4">
+    <div className="max-w-4xl mx-auto space-y-4 pb-20">
+      <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
            <div className="flex flex-col">
               <PageHeader title={`Vs ${match.opponent}`} />
-              <Badge variant="outline" className="w-fit text-[10px] font-black uppercase tracking-widest -mt-4 mb-2 border-primary/20 text-primary">
+              <Badge variant="outline" className="w-fit text-[9px] font-black uppercase tracking-widest -mt-4 mb-1 border-primary/20 text-primary">
                 {match.type}
               </Badge>
            </div>
@@ -103,42 +100,42 @@ function MatchDetailContent() {
         </div>
 
         <Card className="bg-primary text-primary-foreground shadow-xl border-none overflow-hidden rounded-3xl">
-          <CardContent className="p-8">
-            <div className="flex flex-col items-center justify-center space-y-8">
-              <div className="flex items-center justify-center gap-10 md:gap-20">
+          <CardContent className="p-5 md:p-8">
+            <div className="flex flex-col items-center justify-center space-y-6">
+              <div className="flex items-center justify-center gap-6 md:gap-20">
                 <div className="text-center">
-                  <p className="text-[10px] opacity-60 mb-2 font-black uppercase tracking-widest">{match.isHome ? "PITCHMAN" : match.opponent.toUpperCase()}</p>
-                  <p className="text-7xl font-black tabular-nums">{match.result?.home ?? "-"}</p>
+                  <p className="text-[9px] opacity-60 mb-1 font-black uppercase tracking-widest">{match.isHome ? "PITCHMAN" : match.opponent.toUpperCase()}</p>
+                  <p className="text-5xl md:text-7xl font-black tabular-nums">{match.result?.home ?? "-"}</p>
                 </div>
-                <div className="text-5xl font-thin opacity-20">VS</div>
+                <div className="text-3xl md:text-5xl font-thin opacity-20">VS</div>
                 <div className="text-center">
-                  <p className="text-[10px] opacity-60 mb-2 font-black uppercase tracking-widest">{!match.isHome ? "PITCHMAN" : match.opponent.toUpperCase()}</p>
-                  <p className="text-7xl font-black tabular-nums">{match.result?.away ?? "-"}</p>
+                  <p className="text-[9px] opacity-60 mb-1 font-black uppercase tracking-widest">{!match.isHome ? "PITCHMAN" : match.opponent.toUpperCase()}</p>
+                  <p className="text-5xl md:text-7xl font-black tabular-nums">{match.result?.away ?? "-"}</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6 w-full pt-8 border-t border-white/10">
-                <div className="flex items-center gap-3 text-sm font-bold">
-                  <div className="p-2 bg-white/10 rounded-xl">
-                    <CalendarDays className="h-4 w-4 opacity-70" />
+              <div className="grid grid-cols-2 gap-4 w-full pt-5 border-t border-white/10">
+                <div className="flex items-center gap-2 text-xs font-bold">
+                  <div className="p-1.5 bg-white/10 rounded-lg">
+                    <CalendarDays className="h-3.5 w-3.5 opacity-70" />
                   </div>
                   <span>{matchDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                 </div>
-                <div className="flex items-center gap-3 text-sm font-bold">
-                  <div className="p-2 bg-white/10 rounded-xl">
-                    {match.isHome ? <Home className="h-4 w-4 opacity-70" /> : <Plane className="h-4 w-4 opacity-70" />}
+                <div className="flex items-center gap-2 text-xs font-bold">
+                  <div className="p-1.5 bg-white/10 rounded-lg">
+                    {match.isHome ? <Home className="h-3.5 w-3.5 opacity-70" /> : <Plane className="h-3.5 w-3.5 opacity-70" />}
                   </div>
-                  <span className="truncate uppercase tracking-wider">{match.isHome ? 'In Casa' : 'Trasferta'}</span>
+                  <span className="truncate uppercase tracking-wider">{match.isHome ? 'Casa' : 'Trasferta'}</span>
                 </div>
               </div>
               
               <Button 
                 variant="secondary" 
-                size="lg" 
-                className="w-full bg-white text-primary hover:bg-white/90 font-black uppercase text-xs h-12 rounded-2xl shadow-lg"
+                size="sm" 
+                className="w-full bg-white text-primary hover:bg-white/90 font-black uppercase text-[10px] h-10 rounded-xl shadow-lg"
                 onClick={() => setIsFormOpen(true)}
               >
-                <Settings2 className="mr-2 h-4 w-4" />
+                <Settings2 className="mr-2 h-3.5 w-3.5" />
                 Modifica Gara
               </Button>
             </div>
@@ -147,19 +144,19 @@ function MatchDetailContent() {
       </div>
       
       <Tabs defaultValue="eventi" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6 h-14 bg-muted/50 p-1.5 rounded-2xl border">
-          <TabsTrigger value="eventi" className="flex items-center gap-2 text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md">
-            <Zap className="h-4 w-4" /> Cronaca
+        <TabsList className="grid w-full grid-cols-3 mb-4 h-12 bg-muted/50 p-1 rounded-xl border">
+          <TabsTrigger value="eventi" className="flex items-center gap-1.5 text-[9px] font-black uppercase rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            <Zap className="h-3.5 w-3.5" /> Cronaca
           </TabsTrigger>
-          <TabsTrigger value="squadra" className="flex items-center gap-2 text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md">
-            <Users className="h-4 w-4" /> Formazione
+          <TabsTrigger value="squadra" className="flex items-center gap-1.5 text-[9px] font-black uppercase rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            <Users className="h-3.5 w-3.5" /> Squadra
           </TabsTrigger>
-          <TabsTrigger value="note" className="flex items-center gap-2 text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-md">
-            <FileText className="h-4 w-4" /> Note Tattiche
+          <TabsTrigger value="note" className="flex items-center gap-1.5 text-[9px] font-black uppercase rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            <FileText className="h-3.5 w-3.5" /> Note
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="eventi" className="space-y-4 outline-none">
+        <TabsContent value="eventi" className="outline-none">
            <MatchEventsTab />
         </TabsContent>
 

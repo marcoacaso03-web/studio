@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -36,19 +37,16 @@ export default function DashboardPage() {
   const dashboardMatches = useMemo(() => {
     if (matchesLoading) return [];
     
-    // Ultime 4 completate (dalla più recente alla meno recente)
     const completed = matches
       .filter(m => m.status === 'completed')
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 4);
       
-    // Prossima programmata (la più vicina nel tempo)
     const upcoming = matches
       .filter(m => m.status === 'scheduled')
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .slice(0, 1);
       
-    // Unisci e ordina per data per la visualizzazione cronologica
     return [...completed, ...upcoming].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [matches, matchesLoading]);
 
@@ -81,10 +79,10 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-3 md:space-y-6">
       {/* Mini Stats Cards */}
-      <div className="grid grid-cols-2 gap-3">
-        <Card className="shadow-sm border rounded-2xl bg-card overflow-hidden h-[100px]">
+      <div className="grid grid-cols-2 gap-2">
+        <Card className="shadow-sm border rounded-2xl bg-card overflow-hidden h-[90px] md:h-[100px]">
           <CardHeader className="flex flex-row items-center justify-between p-3 pb-0.5">
             <CardTitle className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">ROSA</CardTitle>
             <Users className="h-3 w-3 text-primary/40" />
@@ -103,7 +101,7 @@ export default function DashboardPage() {
             )}
           </CardContent>
         </Card>
-        <Card className="shadow-sm border rounded-2xl bg-card overflow-hidden h-[100px]">
+        <Card className="shadow-sm border rounded-2xl bg-card overflow-hidden h-[90px] md:h-[100px]">
           <CardHeader className="flex flex-row items-center justify-between p-3 pb-0.5">
             <CardTitle className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Performance</CardTitle>
             <Trophy className="h-3 w-3 text-accent/40" />
@@ -125,24 +123,22 @@ export default function DashboardPage() {
       </div>
 
       <Card className="overflow-hidden border shadow-sm bg-card rounded-2xl">
-        <CardHeader className="p-4 border-b bg-muted/5">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-lg text-primary font-black uppercase tracking-tight">Prossime & Recenti</CardTitle>
-              <CardDescription className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-widest">
-                 {activeSeason ? `Stagione ${activeSeason.name}` : 'Identificazione...'}
-              </CardDescription>
-            </div>
-            <Button 
-              variant="outline"
-              className="border-primary/20 text-primary h-8 text-[9px] font-black uppercase px-3 rounded-xl"
-              size="sm"
-              onClick={() => setIsFullCalendarOpen(true)}
-            >
-              <LayoutList className="mr-1 h-3 w-3" />
-              Vedi Tutto
-            </Button>
+        <CardHeader className="p-3 md:p-4 border-b bg-muted/5 flex flex-row items-center justify-between space-y-0">
+          <div>
+            <CardTitle className="text-base md:text-lg text-primary font-black uppercase tracking-tight">Prossime & Recenti</CardTitle>
+            <CardDescription className="text-[8px] md:text-[9px] uppercase font-bold text-muted-foreground/60 tracking-widest">
+               {activeSeason ? `Stagione ${activeSeason.name}` : 'Identificazione...'}
+            </CardDescription>
           </div>
+          <Button 
+            variant="outline"
+            className="border-primary/20 text-primary h-7 md:h-8 text-[8px] md:text-[9px] font-black uppercase px-2 md:px-3 rounded-xl"
+            size="sm"
+            onClick={() => setIsFullCalendarOpen(true)}
+          >
+            <LayoutList className="mr-1 h-3 w-3" />
+            Vedi Tutto
+          </Button>
         </CardHeader>
         <CardContent className="p-0">
           {matchesLoading ? (
@@ -150,9 +146,9 @@ export default function DashboardPage() {
               {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-10 w-full rounded-xl" />)}
             </div>
           ) : dashboardMatches.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-2xl m-4 bg-muted/10">
-                  <Calendar className="h-10 w-10 mx-auto opacity-20 mb-3" />
-                  <p className="font-black text-xs text-foreground uppercase tracking-widest">Nessuna partita</p>
+              <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-2xl m-3 bg-muted/10">
+                  <Calendar className="h-8 w-8 mx-auto opacity-20 mb-2" />
+                  <p className="font-black text-[10px] text-foreground uppercase tracking-widest">Nessuna partita</p>
               </div>
           ) : (
             <Table>
@@ -163,11 +159,11 @@ export default function DashboardPage() {
                   const month = mDate.toLocaleDateString('it-IT', { month: 'short' }).toUpperCase();
                   
                   return (
-                    <TableRow key={match.id} className="h-12 border-b hover:bg-primary/5 transition-all group cursor-pointer" onClick={() => navigateToMatch(match)}>
-                      <TableCell className="p-0 px-4">
+                    <TableRow key={match.id} className="h-10 border-b hover:bg-primary/5 transition-all group cursor-pointer" onClick={() => navigateToMatch(match)}>
+                      <TableCell className="p-0 px-3">
                         <div className="flex items-center gap-3">
-                          <div className="flex flex-col items-center min-w-[32px]">
-                            <span className="text-[10px] font-black leading-none text-primary">{day}</span>
+                          <div className="flex flex-col items-center min-w-[28px]">
+                            <span className="text-[9px] font-black leading-none text-primary">{day}</span>
                             <span className="text-[7px] font-bold text-muted-foreground">{month}</span>
                           </div>
                           <div className="p-1.5 bg-muted/30 rounded-lg">
@@ -175,14 +171,14 @@ export default function DashboardPage() {
                           </div>
                           <div className="flex-1 flex items-center justify-between gap-2">
                             <div className="flex flex-col">
-                              <span className="text-xs font-black text-foreground uppercase tracking-tight truncate max-w-[150px]">
+                              <span className="text-[11px] font-black text-foreground uppercase tracking-tight truncate max-w-[120px]">
                                 {match.opponent}
                               </span>
-                              <span className="text-[8px] font-bold text-muted-foreground uppercase">{match.type}</span>
+                              <span className="text-[7px] font-bold text-muted-foreground uppercase">{match.type}</span>
                             </div>
-                            <div className="flex items-center gap-3">
-                              <div className="bg-primary/5 border border-primary/10 px-2 py-0.5 rounded-lg min-w-[36px] text-center">
-                                <span className="text-[10px] font-black tabular-nums text-primary">
+                            <div className="flex items-center gap-2">
+                              <div className="bg-primary/5 border border-primary/10 px-1.5 py-0.5 rounded-lg min-w-[32px] text-center">
+                                <span className="text-[9px] font-black tabular-nums text-primary">
                                   {match.result ? `${match.result.home}-${match.result.away}` : '- : -'}
                                 </span>
                               </div>
