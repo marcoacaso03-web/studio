@@ -3,7 +3,7 @@ import { playerRepository } from './player-repository';
 import { eventRepository } from './event-repository';
 import { statsRepository } from './stats-repository';
 import { lineupRepository } from './lineup-repository';
-import type { Match, Player, MatchEvent, PlayerMatchStats } from '../types';
+import type { Match, Player, MatchEvent, PlayerMatchStats, MatchLineup } from '../types';
 
 export interface TeamStatsRecord {
     wins: number;
@@ -20,22 +20,58 @@ export interface FullTeamRecord {
     away: TeamStatsRecord;
 }
 
+/**
+ * Contesto di dati completo per una stagione, caricato una sola volta per ottimizzare i calcoli.
+ */
+interface SeasonDataContext {
+    matches: Match[];
+    players: Player[];
+    matchesDetails: {
+        [matchId: string]: {
+            events: MatchEvent[];
+            lineup?: MatchLineup;
+            stats: PlayerMatchStats[];
+        }
+    };
+}
+
 export const aggregationRepository = {
-    async getTeamRecord(userId: string, seasonId?: string): Promise<FullTeamRecord> {
-        if (!userId || !seasonId) return this.processMatchesRecord([]);
-        const matches = await matchRepository.getAll(userId, seasonId);
+    /**
+     * Carica tutti i dati necessari per i calcoli statistici in un'unica passata parallela.
+     */
+    async getSeasonContext(userId: string, seasonId: string): Promise<SeasonDataContext> {
+        const [matches, players] = await Promise.all([
+            matchRepository.getAll(userId, seasonId),
+            playerRepository.getAll(userId, seasonId)
+        ]);
+
         const completedMatches = matches.filter(m => m.status === 'completed');
-        return this.processMatchesRecord(completedMatches);
+        
+        // Fetch di tutti i dettagli delle partite in parallelo (Batch)
+        const detailsResults = await Promise.all(completedMatches.map(async (match) => {
+            const [events, lineup, stats] = await Promise.all([
+                eventRepository.getForMatch(match.id, seasonId, userId),
+                lineupRepository.getForMatch(match.id, seasonId, userId),
+                statsRepository.getForMatch(match.id, seasonId, userId)
+            ]);
+            return { matchId: match.id, events, lineup, stats };
+        }));
+
+        const matchesDetails: SeasonDataContext['matchesDetails'] = {};
+        detailsResults.forEach(res => {
+            matchesDetails[res.matchId] = {
+                events: res.events,
+                lineup: res.lineup,
+                stats: res.stats
+            };
+        });
+
+        return { matches, players, matchesDetails };
     },
 
-    processMatchesRecord(completedMatches: Match[]): FullTeamRecord {
+    getTeamRecordFromContext(context: SeasonDataContext): FullTeamRecord {
         const createRecord = (): TeamStatsRecord => ({
-            wins: 0,
-            draws: 0,
-            losses: 0,
-            goalsFor: 0,
-            goalsAgainst: 0,
-            matchesPlayed: 0,
+            wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, matchesPlayed: 0,
         });
 
         const record: FullTeamRecord = {
@@ -43,6 +79,8 @@ export const aggregationRepository = {
             home: createRecord(),
             away: createRecord()
         };
+
+        const completedMatches = context.matches.filter(m => m.status === 'completed');
 
         for (const match of completedMatches) {
             if (!match.result) continue;
@@ -77,10 +115,8 @@ export const aggregationRepository = {
         return record;
     },
 
-    async getTeamTrend(userId: string, seasonId?: string) {
-        if (!userId || !seasonId) return [];
-        const matches = await matchRepository.getAll(userId, seasonId);
-        const completedMatches = matches.filter(m => m.status === 'completed');
+    getTeamTrendFromContext(context: SeasonDataContext) {
+        const completedMatches = context.matches.filter(m => m.status === 'completed');
 
         return completedMatches.map(match => {
             if (!match.result) return null;
@@ -101,26 +137,23 @@ export const aggregationRepository = {
         }).filter((item): item is NonNullable<typeof item> => item !== null);
     },
 
-    async getGoalsByInterval(userId: string, seasonId?: string) {
-        if (!userId || !seasonId) return [];
-        const matches = await matchRepository.getAll(userId, seasonId);
-        const completedMatches = matches.filter(m => m.status === 'completed');
-        
+    getGoalsByIntervalFromContext(context: SeasonDataContext) {
         const intervals = { '1-30': 0, '31-60': 0, '61-90+': 0 };
+        const completedMatches = context.matches.filter(m => m.status === 'completed');
 
         for (const match of completedMatches) {
-            const events = await eventRepository.getForMatch(match.id, seasonId, userId);
-            const goals = events.filter(e => e.type === 'goal');
+            const details = context.matchesDetails[match.id];
+            if (!details) continue;
+
+            const isPitchManTeam = match.isHome ? 'home' : 'away';
+            const goals = details.events.filter(e => e.type === 'goal' && e.team === isPitchManTeam);
             
             goals.forEach(event => {
-                const isPitchManGoal = match.isHome ? event.team === 'home' : event.team === 'away';
-                if (isPitchManGoal) {
-                    if (event.period === '1T') {
-                        if (event.minute <= 30) intervals['1-30']++;
-                        else intervals['31-60']++;
-                    } else {
-                        intervals['61-90+']++;
-                    }
+                if (event.period === '1T') {
+                    if (event.minute <= 30) intervals['1-30']++;
+                    else intervals['31-60']++;
+                } else {
+                    intervals['61-90+']++;
                 }
             });
         }
@@ -132,14 +165,11 @@ export const aggregationRepository = {
         ];
     },
 
-    async getAllPlayersAggregatedStats(userId: string, seasonId?: string) {
-        if (!userId || !seasonId) return [];
-        const players = await playerRepository.getAll(userId, seasonId);
-        const matches = await matchRepository.getAll(userId, seasonId);
-        const completedMatches = matches.filter(m => m.status === 'completed');
-
+    getPlayersAggregatedStatsFromContext(context: SeasonDataContext) {
+        const completedMatches = context.matches.filter(m => m.status === 'completed');
         const results = [];
-        for (const player of players) {
+
+        for (const player of context.players) {
             let appearances = 0;
             let goals = 0;
             let assists = 0;
@@ -148,14 +178,11 @@ export const aggregationRepository = {
             let redCards = 0;
 
             for (const match of completedMatches) {
-                const [lineup, events, stats] = await Promise.all([
-                    lineupRepository.getForMatch(match.id, seasonId, userId),
-                    eventRepository.getForMatch(match.id, seasonId, userId),
-                    statsRepository.getForMatch(match.id, seasonId, userId)
-                ]);
+                const details = context.matchesDetails[match.id];
+                if (!details) continue;
 
-                const isInLineup = lineup?.starters.includes(player.id) || lineup?.substitutes.includes(player.id);
-                const playerStats = stats.find(s => s.playerId === player.id);
+                const isInLineup = details.lineup?.starters.includes(player.id) || details.lineup?.substitutes.includes(player.id);
+                const playerStats = details.stats.find(s => s.playerId === player.id);
 
                 if (isInLineup || playerStats) {
                     appearances++;
@@ -165,9 +192,9 @@ export const aggregationRepository = {
                         redCards += playerStats.redCards || 0;
                     }
                     
-                    const isPitchManTeam = match.isHome ? 'home' : 'away';
-                    goals += events.filter(e => e.type === 'goal' && e.playerId === player.id && e.team === isPitchManTeam).length;
-                    assists += events.filter(e => e.type === 'goal' && e.assistPlayerId === player.id && e.team === isPitchManTeam).length;
+                    const isPitchManSide = match.isHome ? 'home' : 'away';
+                    goals += details.events.filter(e => e.type === 'goal' && e.playerId === player.id && e.team === isPitchManSide).length;
+                    assists += details.events.filter(e => e.type === 'goal' && e.assistPlayerId === player.id && e.team === isPitchManSide).length;
                 }
             }
 
@@ -187,9 +214,11 @@ export const aggregationRepository = {
         return results;
     },
 
+    // Compatibilità legacy e sync
     async syncAllPlayersStats(userId: string, seasonId?: string) {
         if (!userId || !seasonId) return;
-        const allStats = await this.getAllPlayersAggregatedStats(userId, seasonId);
+        const context = await this.getSeasonContext(userId, seasonId);
+        const allStats = this.getPlayersAggregatedStatsFromContext(context);
         for (const { playerId, stats } of allStats) {
             await playerRepository.update(playerId, seasonId, { stats });
         }

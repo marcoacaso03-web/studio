@@ -1,4 +1,3 @@
-
 "use client";
 
 import { create } from 'zustand';
@@ -60,41 +59,48 @@ export const useStatsStore = create<StatsState>((set) => ({
     goalsIntervals: [],
     loading: true,
     loadStats: async () => {
-        set({ loading: true });
-        
         const user = useAuthStore.getState().user;
         const activeSeasonId = useSeasonsStore.getState().activeSeason?.id;
 
-        if (!user) {
+        if (!user || !activeSeasonId) {
             set({ loading: false });
             return;
         }
 
-        const [records, playerLeaderboard, teamTrend, goalsIntervals] = await Promise.all([
-            aggregationRepository.getTeamRecord(user.id, activeSeasonId),
-            aggregationRepository.getAllPlayersAggregatedStats(user.id, activeSeasonId),
-            aggregationRepository.getTeamTrend(user.id, activeSeasonId),
-            aggregationRepository.getGoalsByInterval(user.id, activeSeasonId)
-        ]);
+        set({ loading: true });
         
-        const sortedLeaderboard = [...playerLeaderboard].sort((a, b) => {
-            if (b.stats.goals !== a.stats.goals) {
-                return b.stats.goals - a.stats.goals;
-            }
-            if (b.stats.assists !== a.stats.assists) {
-                return b.stats.assists - a.stats.assists;
-            }
-            return b.stats.appearances - a.stats.appearances;
-        });
+        try {
+            // Carica l'intero contesto della stagione in un'unica passata ottimizzata
+            const context = await aggregationRepository.getSeasonContext(user.id, activeSeasonId);
 
-        set({ 
-            teamRecord: records.overall, 
-            homeRecord: records.home,
-            awayRecord: records.away,
-            playerLeaderboard: sortedLeaderboard as PlayerLeaderboardEntry[], 
-            teamTrend: teamTrend as TrendEntry[], 
-            goalsIntervals,
-            loading: false 
-        });
+            // Calcoli in-memory ultra-rapidi
+            const records = aggregationRepository.getTeamRecordFromContext(context);
+            const playerLeaderboard = aggregationRepository.getPlayersAggregatedStatsFromContext(context);
+            const teamTrend = aggregationRepository.getTeamTrendFromContext(context);
+            const goalsIntervals = aggregationRepository.getGoalsByIntervalFromContext(context);
+            
+            const sortedLeaderboard = [...playerLeaderboard].sort((a, b) => {
+                if (b.stats.goals !== a.stats.goals) {
+                    return b.stats.goals - a.stats.goals;
+                }
+                if (b.stats.assists !== a.stats.assists) {
+                    return b.stats.assists - a.stats.assists;
+                }
+                return b.stats.appearances - a.stats.appearances;
+            });
+
+            set({ 
+                teamRecord: records.overall, 
+                homeRecord: records.home,
+                awayRecord: records.away,
+                playerLeaderboard: sortedLeaderboard as PlayerLeaderboardEntry[], 
+                teamTrend: teamTrend as TrendEntry[], 
+                goalsIntervals,
+                loading: false 
+            });
+        } catch (error) {
+            console.error("Errore nel caricamento statistiche:", error);
+            set({ loading: false });
+        }
     },
 }));
