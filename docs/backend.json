@@ -80,7 +80,8 @@
         "matchId": { "type": "string" },
         "teamOwnerId": { "type": "string" },
         "starters": { "type": "array", "items": { "type": "string" } },
-        "substitutes": { "type": "array", "items": { "type": "string" } }
+        "substitutes": { "type": "array", "items": { "type": "string" } },
+        "formation": { "type": "string" }
       },
       "required": ["matchId", "teamOwnerId", "starters", "substitutes"]
     },

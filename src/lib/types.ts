@@ -78,6 +78,7 @@ export type MatchLineup = {
     matchId: string;
     starters: string[];
     substitutes: string[];
+    formation?: string;
     teamOwnerId?: string;
 }
 

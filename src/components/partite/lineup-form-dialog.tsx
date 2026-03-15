@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -42,11 +43,11 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
   React.useEffect(() => {
     if (open) {
       if (lineup) {
-        // Normalize arrays to fixed lengths (11 starters, 9 substitutes for total 20)
         const s = [...Array(11)].map((_, i) => lineup.starters[i] || "");
         const subs = [...Array(9)].map((_, i) => lineup.substitutes[i] || "");
         setStarters(s);
         setSubstitutes(subs);
+        if (lineup.formation) setModulo(lineup.formation);
       } else {
         setStarters(Array(11).fill(""));
         setSubstitutes(Array(9).fill(""));
@@ -56,14 +57,14 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
 
   const handleSave = () => {
     saveLineup({
-      matchId: "", // Will be set by store
+      matchId: "", // Gestito dallo store
       starters,
       substitutes,
+      formation: modulo,
     });
     onOpenChange(false);
   };
 
-  // Get all currently selected player IDs to filter them out of other dropdowns
   const allSelectedIds = React.useMemo(() => {
     return [...starters, ...substitutes].filter(id => id !== "" && id !== "none");
   }, [starters, substitutes]);
@@ -78,8 +79,6 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
     onValueChange: (val: string) => void,
     isStarter: boolean 
   }) => {
-    // Filter players: show all players NOT selected in other slots, 
-    // but keep the one currently selected in THIS slot.
     const availablePlayers = allPlayers.filter(p => 
       !allSelectedIds.includes(p.id) || p.id === value
     );
