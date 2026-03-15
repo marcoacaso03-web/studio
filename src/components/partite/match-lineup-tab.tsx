@@ -3,13 +3,15 @@
 import { useState } from "react";
 import { useMatchDetailStore } from "@/store/useMatchDetailStore";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, ClipboardList } from "lucide-react";
+import { PlusCircle, ClipboardList, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { LineupFormDialog } from "./lineup-form-dialog";
+import { SmartLineupDialog } from "./smart-lineup-dialog";
 
 export function MatchLineupTab() {
   const { lineup, allPlayers } = useMatchDetailStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isSmartOpen, setIsSmartOpen] = useState(false);
 
   // Filtriamo i titolari e le riserve che hanno un ID giocatore valido
   const activeStarters = lineup?.starters
@@ -28,19 +30,31 @@ export function MatchLineupTab() {
             <ClipboardList className="h-12 w-12 text-muted-foreground mb-4 opacity-20" />
             <h3 className="text-lg font-semibold">Nessuna formazione inserita</h3>
             <p className="text-sm text-muted-foreground mb-6">Inizia a definire i titolari e le riserve per questa gara.</p>
-            <Button onClick={() => setIsFormOpen(true)}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Aggiungi Formazione
-            </Button>
+            <div className="flex flex-wrap gap-3 justify-center">
+              <Button onClick={() => setIsFormOpen(true)} className="rounded-xl font-black uppercase text-xs">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Aggiungi Formazione
+              </Button>
+              <Button onClick={() => setIsSmartOpen(true)} variant="outline" className="border-accent text-accent hover:bg-accent/5 rounded-xl font-black uppercase text-xs">
+                <Sparkles className="mr-2 h-4 w-4" />
+                AI Smart Mode
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold">Formazione Salvata</h3>
-            <Button variant="outline" size="sm" onClick={() => setIsFormOpen(true)}>
-              Modifica Formazione
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setIsSmartOpen(true)} className="border-accent text-accent hover:bg-accent/5 h-9 rounded-xl font-black uppercase text-[10px]">
+                <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                Smart
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setIsFormOpen(true)} className="h-9 rounded-xl font-black uppercase text-[10px]">
+                Modifica
+              </Button>
+            </div>
           </div>
           <Card>
             <CardContent className="p-4 space-y-6">
@@ -91,6 +105,11 @@ export function MatchLineupTab() {
       <LineupFormDialog 
         open={isFormOpen} 
         onOpenChange={setIsFormOpen} 
+      />
+
+      <SmartLineupDialog
+        open={isSmartOpen}
+        onOpenChange={setIsSmartOpen}
       />
     </div>
   );
