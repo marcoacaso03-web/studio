@@ -80,7 +80,7 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[95vw] h-[90vh] md:max-w-3xl rounded-3xl p-0 overflow-hidden flex flex-col border-none shadow-2xl">
+        <DialogContent className="max-w-[95vw] h-[90vh] md:max-w-3xl rounded-3xl p-0 overflow-hidden flex flex-col border-none shadow-2xl [&>button]:hidden">
           <DialogHeader className="p-6 bg-primary text-white flex-row items-center justify-between space-y-0 shrink-0">
             <div className="flex items-center gap-3">
               <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 h-8 w-8" onClick={() => onOpenChange(false)}>

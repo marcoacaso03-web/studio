@@ -1,4 +1,6 @@
-# **App Name**: Squadra+
+# **App Name**: PitchMan
+
+
 
 ## Core Features:
 

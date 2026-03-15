@@ -10,7 +10,7 @@ import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
   title: 'PitchMan',
-  description: 'La tua app per la gestione della squadra',
+  description: 'La tua app per la gestione della tua squadra',
 };
 
 export default function RootLayout({
