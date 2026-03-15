@@ -189,9 +189,9 @@ export default function RosaPage() {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader className="bg-muted/30">
-                    <TableRow className="hover:bg-transparent border-none">
+                    <TableRow className="hover:bg-transparent border-none h-10">
                       <TableHead 
-                        className="px-4 cursor-pointer text-[10px] font-black uppercase tracking-widest"
+                        className="px-4 h-10 cursor-pointer text-[10px] font-black uppercase tracking-widest"
                         onClick={() => handleSort('firstName')}
                       >
                         <div className="flex items-center">
@@ -199,7 +199,7 @@ export default function RosaPage() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="px-4 cursor-pointer text-[10px] font-black uppercase tracking-widest"
+                        className="px-4 h-10 cursor-pointer text-[10px] font-black uppercase tracking-widest"
                         onClick={() => handleSort('lastName')}
                       >
                         <div className="flex items-center">
@@ -207,38 +207,38 @@ export default function RosaPage() {
                         </div>
                       </TableHead>
                       <TableHead 
-                        className="w-24 px-2 text-center cursor-pointer text-[10px] font-black uppercase tracking-widest"
+                        className="w-24 h-10 px-2 text-center cursor-pointer text-[10px] font-black uppercase tracking-widest"
                         onClick={() => handleSort('role')}
                       >
                         <div className="flex items-center justify-center">
                           Ruolo <SortIndicator columnKey="role" />
                         </div>
                       </TableHead>
-                      <TableHead className="w-24 px-4 text-right text-[10px] font-black uppercase tracking-widest">Azioni</TableHead>
+                      <TableHead className="w-24 h-10 px-4 text-right text-[10px] font-black uppercase tracking-widest">Azioni</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {sortedPlayers.map((player) => {
                       const { firstName, lastName } = splitName(player.name);
                       return (
-                        <TableRow key={player.id} className="h-14 border-muted/50">
-                          <TableCell className="px-4 font-bold text-sm uppercase tracking-tight">
+                        <TableRow key={player.id} className="h-11 border-muted/50 hover:bg-primary/5 transition-colors">
+                          <TableCell className="px-4 py-0 font-bold text-sm uppercase tracking-tight">
                             {firstName}
                           </TableCell>
-                          <TableCell className="px-4 font-bold text-sm uppercase tracking-tight">
+                          <TableCell className="px-4 py-0 font-bold text-sm uppercase tracking-tight">
                             {lastName}
                           </TableCell>
-                          <TableCell className="px-2 text-center">
+                          <TableCell className="px-2 py-0 text-center">
                             <span className="text-[9px] font-black bg-primary/5 text-primary px-2 py-0.5 rounded border border-primary/10 min-w-[36px] inline-block">
                               {roleInitials[player.role] || 'N/A'}
                             </span>
                           </TableCell>
-                          <TableCell className="px-4 text-right">
+                          <TableCell className="px-4 py-0 text-right">
                             <div className="flex items-center justify-end gap-1">
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                className="h-7 w-7 text-muted-foreground hover:text-primary"
                                 onClick={() => handleOpenForm(player)}
                               >
                                 <Edit className="h-3.5 w-3.5" />
@@ -246,7 +246,7 @@ export default function RosaPage() {
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                className="h-7 w-7 text-muted-foreground hover:text-destructive"
                                 onClick={() => setPlayerToDelete(player)}
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
