@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -19,14 +18,14 @@ import {
 } from "@/components/ui/select";
 import { ChevronLeft } from "lucide-react";
 
-const FORMATION_POSITIONS: Record<string, string[]> = {
-  "4-4-2": ["POR", "TD", "DC", "DC", "DS", "ED", "CC", "CC", "ES", "ATT", "ATT"],
-  "4-3-3": ["POR", "TD", "DC", "DC", "DS", "CC", "MED", "CC", "AD", "ATT", "AS"],
-  "3-5-2": ["POR", "DC", "DC", "DC", "ED", "CC", "MED", "CC", "ES", "ATT", "ATT"],
-  "4-2-3-1": ["POR", "TD", "DC", "DC", "DS", "MED", "MED", "ED", "TRQ", "ES", "ATT"],
-  "3-4-2-1": ["POR", "DC", "DC", "DC", "ED", "CC", "CC", "ES", "TRQ", "TRQ", "ATT"],
-  "3-4-1-2": ["POR", "DC", "DC", "DC", "ED", "CC", "CC", "ES", "TRQ", "ATT", "ATT"],
-  "4-3-1-2": ["POR", "TD", "DC", "DC", "DS", "CC", "MED", "CC", "TRQ", "ATT", "ATT"]
+export const FORMATION_POSITIONS: Record<string, string[]> = {
+  "4-4-2": ["POR", "TS", "DC", "DC", "TD", "ES", "CC", "CC", "ED", "ATT", "ATT"],
+  "4-3-3": ["POR", "TS", "DC", "DC", "TD", "CC", "MED", "CC", "AS", "ATT", "AD"],
+  "3-5-2": ["POR", "DC", "DC", "DC", "ES", "CC", "MED", "CC", "ED", "ATT", "ATT"],
+  "4-2-3-1": ["POR", "TS", "DC", "DC", "TD", "MED", "MED", "ES", "TRQ", "ED", "ATT"],
+  "3-4-2-1": ["POR", "DC", "DC", "DC", "ES", "CC", "CC", "ED", "TRQ", "TRQ", "ATT"],
+  "3-4-1-2": ["POR", "DC", "DC", "DC", "ES", "CC", "CC", "ED", "TRQ", "ATT", "ATT"],
+  "4-3-1-2": ["POR", "TS", "DC", "DC", "TD", "CC", "MED", "CC", "TRQ", "ATT", "ATT"]
 };
 
 interface LineupFormDialogProps {

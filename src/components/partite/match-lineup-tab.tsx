@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -6,18 +5,20 @@ import { useMatchDetailStore } from "@/store/useMatchDetailStore";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, ClipboardList, Sparkles, LayoutGrid } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { LineupFormDialog } from "./lineup-form-dialog";
+import { LineupFormDialog, FORMATION_POSITIONS } from "./lineup-form-dialog";
 import { SmartLineupDialog } from "./smart-lineup-dialog";
 import { cn } from "@/lib/utils";
 
+// Definizione righe (dall'Attacco al Portiere in basso)
+// Indici Left-to-Right basati su FORMATION_POSITIONS
 const FORMATION_ROWS: Record<string, number[][]> = {
-  "4-4-2": [[0], [4, 3, 2, 1], [8, 7, 6, 5], [10, 9]],
-  "4-3-3": [[0], [4, 3, 2, 1], [7, 6, 5], [10, 9, 8]],
-  "3-5-2": [[0], [3, 2, 1], [8, 7, 6, 5, 4], [10, 9]],
-  "4-2-3-1": [[0], [4, 3, 2, 1], [6, 5], [9, 8, 7], [10]],
-  "3-4-2-1": [[0], [3, 2, 1], [7, 6, 5, 4], [9, 8], [10]],
-  "3-4-1-2": [[0], [3, 2, 1], [7, 6, 5, 4], [8], [10, 9]],
-  "4-3-1-2": [[0], [4, 3, 2, 1], [7, 6, 5], [8], [10, 9]]
+  "4-4-2": [[9, 10], [5, 6, 7, 8], [1, 2, 3, 4], [0]],
+  "4-3-3": [[8, 9, 10], [5, 6, 7], [1, 2, 3, 4], [0]],
+  "3-5-2": [[9, 10], [4, 5, 6, 7, 8], [1, 2, 3], [0]],
+  "4-2-3-1": [[10], [7, 8, 9], [5, 6], [1, 2, 3, 4], [0]],
+  "3-4-2-1": [[10], [8, 9], [4, 5, 6, 7], [1, 2, 3], [0]],
+  "3-4-1-2": [[9, 10], [8], [4, 5, 6, 7], [1, 2, 3], [0]],
+  "4-3-1-2": [[9, 10], [8], [5, 6, 7], [1, 2, 3, 4], [0]]
 };
 
 const formatPlayerName = (fullName: string) => {
@@ -51,6 +52,7 @@ export function MatchLineupTab() {
 
   const activeFormation = lineup?.formation || "4-4-2";
   const rows = FORMATION_ROWS[activeFormation] || FORMATION_ROWS["4-4-2"];
+  const currentAcronyms = FORMATION_POSITIONS[activeFormation] || [];
 
   if (!lineup) {
     return (
@@ -115,17 +117,18 @@ export function MatchLineupTab() {
                   {rowIndices.map((starterIdx) => {
                     const playerEntry = activeStarters.find(s => s.originalIdx === starterIdx);
                     const p = playerEntry ? allPlayers.find(player => player.id === playerEntry.id) : null;
+                    const isPOR = starterIdx === 0;
                     
                     return (
                       <div key={starterIdx} className="flex flex-col items-center gap-1.5 min-w-[80px]">
                         <div className={cn(
                           "w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center border-4 shadow-xl transition-transform hover:scale-110",
-                          rowIdx === 0 
+                          isPOR 
                             ? "bg-[#ff8f00] border-[#ffd54f] text-black" 
                             : "bg-primary border-primary-foreground/20 text-white"
                         )}>
                           <span className="text-[10px] md:text-sm font-black uppercase">
-                            {rowIdx === 0 ? "GK" : starterIdx + 1}
+                            {currentAcronyms[starterIdx] || (starterIdx + 1)}
                           </span>
                         </div>
                         <div className="bg-black/40 backdrop-blur-md px-2 py-0.5 rounded border border-white/10 min-w-[60px] text-center">
