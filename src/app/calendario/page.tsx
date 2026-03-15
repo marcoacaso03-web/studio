@@ -112,10 +112,11 @@ export default function DashboardPage() {
             {statsLoading ? <Skeleton className="h-8 w-full rounded-xl" /> : (
               <div className="flex flex-col">
                 <div className="text-2xl font-black text-primary tracking-tighter leading-none">{teamRecord?.matchesPlayed || 0}</div>
-                <div className="flex gap-2 mt-1 border-t pt-1 border-muted">
+                <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1 border-t pt-1 border-muted">
                   <span className="text-[8px] font-bold text-primary uppercase">V:{teamRecord?.wins || 0}</span>
                   <span className="text-[8px] font-bold text-muted-foreground uppercase">P:{teamRecord?.draws || 0}</span>
                   <span className="text-[8px] font-bold text-accent uppercase">S:{teamRecord?.losses || 0}</span>
+                  <span className="text-[8px] font-black text-foreground/60 uppercase">G:{teamRecord?.goalsFor || 0}-{teamRecord?.goalsAgainst || 0}</span>
                 </div>
               </div>
             )}
