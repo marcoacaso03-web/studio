@@ -4,9 +4,8 @@ import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { PlusCircle, Trash2, Users, Trophy, Calendar, ArrowRight, Globe, Home, Plane } from "lucide-react";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { PlusCircle, Trash2, Users, Trophy, Calendar, Home, Plane, Globe } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Match, MatchStatus } from "@/lib/types";
 import { useMatchesStore } from "@/store/useMatchesStore";
@@ -14,7 +13,7 @@ import { usePlayersStore } from "@/store/usePlayersStore";
 import { useStatsStore } from "@/store/useStatsStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { ImportTuttocampoDialog } from "@/components/partite/import-tuttocampo-dialog";
 
 import {
@@ -102,7 +101,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      {/* Mini Stats Cards in cima - Grid orizzontale compatta */}
+      {/* Mini Stats Cards in cima - Layout 2 colonne compatto */}
       <div className="grid grid-cols-2 gap-3">
         <Card className="shadow-sm border rounded-2xl bg-card overflow-hidden h-[100px]">
           <CardHeader className="flex flex-row items-center justify-between p-3 pb-0.5">
@@ -180,7 +179,7 @@ export default function DashboardPage() {
                   <p className="font-black text-xs text-foreground uppercase tracking-widest">Nessuna partita</p>
               </div>
           ) : (
-          <div className="overflow-x-auto">
+          <ScrollArea className="h-[400px]">
             <Table>
               <TableBody>
                 {matches.map((match) => {
@@ -248,7 +247,7 @@ export default function DashboardPage() {
                 })}
               </TableBody>
             </Table>
-          </div>
+          </ScrollArea>
           )}
         </CardContent>
       </Card>
