@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
@@ -123,7 +122,7 @@ function MatchDetailContent() {
                   <div className="p-2 bg-white/10 rounded-xl">
                     <CalendarDays className="h-4 w-4 opacity-70" />
                   </div>
-                  <span>{matchDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                  <span>{matchDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm font-bold">
                   <div className="p-2 bg-white/10 rounded-xl">
