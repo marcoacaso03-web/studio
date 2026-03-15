@@ -91,7 +91,6 @@ export default function DashboardPage() {
     };
   }, [players]);
 
-  // Navigazione esplicita alla rotta dinamica /calendario/[id] passando il seasonId come parametro query
   const navigateToMatch = (match: Match) => {
     if (!match.id) {
         console.error("ERRORE NAVIGAZIONE: ID Partita mancante", match);
@@ -103,6 +102,47 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-4 md:space-y-6">
+      {/* Mini Stats Cards in cima */}
+      <div className="grid grid-cols-2 gap-3 md:gap-6">
+        <Card className="shadow-md border rounded-2xl bg-card overflow-hidden h-[110px] md:h-auto">
+          <CardHeader className="flex flex-row items-center justify-between p-3 md:p-4 pb-1">
+            <CardTitle className="text-[9px] md:text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">ROSA</CardTitle>
+            <div className="p-1 bg-primary/5 rounded-lg"><Users className="h-3.5 w-3.5 text-primary" /></div>
+          </CardHeader>
+          <CardContent className="p-3 md:p-4 pt-0">
+            {playersLoading ? <Skeleton className="h-8 w-full rounded-xl" /> : (
+              <div className="flex flex-col">
+                <div className="text-2xl md:text-5xl font-black text-primary tracking-tighter leading-none">{roleStats.total}</div>
+                <div className="flex flex-wrap gap-x-2 text-[8px] md:text-xs font-black text-muted-foreground uppercase mt-1 md:mt-2 border-t pt-1 md:pt-2 border-muted">
+                  <span className="text-primary">ATT: {roleStats.attaccanti}</span>
+                  <span>CEN: {roleStats.centrocampisti}</span>
+                  <span>DIF: {roleStats.difensori}</span>
+                  <span className="text-accent">POR: {roleStats.portieri}</span>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        <Card className="shadow-md border rounded-2xl bg-card overflow-hidden h-[110px] md:h-auto">
+          <CardHeader className="flex flex-row items-center justify-between p-3 md:p-4 pb-1">
+            <CardTitle className="text-[9px] md:text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Performance</CardTitle>
+            <div className="p-1 bg-accent/5 rounded-lg"><Trophy className="h-3.5 w-3.5 text-accent" /></div>
+          </CardHeader>
+          <CardContent className="p-3 md:p-4 pt-0">
+            {statsLoading ? <Skeleton className="h-8 w-full rounded-xl" /> : (
+              <div className="flex flex-col">
+                <div className="text-2xl md:text-5xl font-black text-primary tracking-tighter leading-none">{teamRecord?.matchesPlayed || 0}</div>
+                <div className="flex gap-2 mt-1 md:mt-2 border-t pt-1 md:pt-2 border-muted">
+                  <span className="text-[8px] md:text-xs font-black text-primary uppercase">V: {teamRecord?.wins || 0}</span>
+                  <span className="text-[8px] md:text-xs font-black text-muted-foreground uppercase">P: {teamRecord?.draws || 0}</span>
+                  <span className="text-[8px] md:text-xs font-black text-accent uppercase">S: {teamRecord?.losses || 0}</span>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       <Card className="overflow-hidden border shadow-md bg-card rounded-2xl">
         <CardHeader className="p-4 md:p-6 pb-2 md:pb-4 border-b bg-muted/5">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -157,7 +197,6 @@ export default function DashboardPage() {
               <TableBody className="block md:table-row-group">
                 {matches.map((match) => (
                   <TableRow key={match.id} className="flex flex-row items-center justify-between md:table-row border-b hover:bg-primary/5 transition-all group cursor-default">
-                    {/* Area Cliccabile Sinistra: Data, Avversario, Tipo */}
                     <TableCell 
                       className="p-4 px-6 block md:table-cell flex-1 md:flex-none cursor-pointer"
                       onClick={() => navigateToMatch(match)}
@@ -231,46 +270,6 @@ export default function DashboardPage() {
           )}
         </CardContent>
       </Card>
-
-      <div className="grid grid-cols-2 gap-3 md:gap-6">
-        <Card className="shadow-md border rounded-2xl bg-card overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between p-4 pb-1">
-            <CardTitle className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">ROSA</CardTitle>
-            <div className="p-1.5 bg-primary/5 rounded-lg"><Users className="h-4 w-4 text-primary" /></div>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
-            {playersLoading ? <Skeleton className="h-10 w-full rounded-xl" /> : (
-              <div className="flex flex-col">
-                <div className="text-3xl md:text-5xl font-black text-primary tracking-tighter">{roleStats.total}</div>
-                <div className="flex flex-wrap gap-x-3 text-[10px] md:text-xs font-black text-muted-foreground uppercase mt-2 border-t pt-2 border-muted">
-                  <span className="text-primary">ATT: {roleStats.attaccanti}</span>
-                  <span>CEN: {roleStats.centrocampisti}</span>
-                  <span>DIF: {roleStats.difensori}</span>
-                  <span className="text-accent">POR: {roleStats.portieri}</span>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        <Card className="shadow-md border rounded-2xl bg-card overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between p-4 pb-1">
-            <CardTitle className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Performance</CardTitle>
-            <div className="p-1.5 bg-accent/5 rounded-lg"><Trophy className="h-4 w-4 text-accent" /></div>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
-            {statsLoading ? <Skeleton className="h-10 w-full rounded-xl" /> : (
-              <div className="flex flex-col">
-                <div className="text-3xl md:text-5xl font-black text-primary tracking-tighter">{teamRecord?.matchesPlayed || 0}</div>
-                <div className="flex gap-3 mt-2 border-t pt-2 border-muted">
-                  <span className="text-[10px] md:text-xs font-black text-primary uppercase">V: {teamRecord?.wins || 0}</span>
-                  <span className="text-[10px] md:text-xs font-black text-muted-foreground uppercase">P: {teamRecord?.draws || 0}</span>
-                  <span className="text-[10px] md:text-xs font-black text-accent uppercase">S: {teamRecord?.losses || 0}</span>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
 
       {isFormOpen && (
         <MatchFormDialog 
