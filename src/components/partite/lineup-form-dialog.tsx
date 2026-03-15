@@ -22,7 +22,10 @@ const FORMATION_POSITIONS: Record<string, string[]> = {
   "4-4-2": ["POR", "TD", "DC", "DC", "DS", "ED", "CC", "CC", "ES", "ATT", "ATT"],
   "4-3-3": ["POR", "TD", "DC", "DC", "DS", "CC", "MED", "CC", "AD", "ATT", "AS"],
   "3-5-2": ["POR", "DC", "DC", "DC", "ED", "CC", "MED", "CC", "ES", "ATT", "ATT"],
-  "4-2-3-1": ["POR", "TD", "DC", "DC", "DS", "MED", "MED", "ED", "TRQ", "ES", "ATT"]
+  "4-2-3-1": ["POR", "TD", "DC", "DC", "DS", "MED", "MED", "ED", "TRQ", "ES", "ATT"],
+  "3-4-2-1": ["POR", "DC", "DC", "DC", "ED", "CC", "CC", "ES", "TRQ", "TRQ", "ATT"],
+  "3-4-1-2": ["POR", "DC", "DC", "DC", "ED", "CC", "CC", "ES", "TRQ", "ATT", "ATT"],
+  "4-3-1-2": ["POR", "TD", "DC", "DC", "DS", "CC", "MED", "CC", "TRQ", "ATT", "ATT"]
 };
 
 interface LineupFormDialogProps {
@@ -131,6 +134,9 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
                     <SelectItem value="4-3-3" className="text-[10px] font-black">4-3-3</SelectItem>
                     <SelectItem value="3-5-2" className="text-[10px] font-black">3-5-2</SelectItem>
                     <SelectItem value="4-2-3-1" className="text-[10px] font-black">4-2-3-1</SelectItem>
+                    <SelectItem value="3-4-2-1" className="text-[10px] font-black">3-4-2-1</SelectItem>
+                    <SelectItem value="3-4-1-2" className="text-[10px] font-black">3-4-1-2</SelectItem>
+                    <SelectItem value="4-3-1-2" className="text-[10px] font-black">4-3-1-2</SelectItem>
                 </SelectContent>
             </Select>
           </div>
