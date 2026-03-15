@@ -238,10 +238,6 @@ export default function DashboardPage() {
             <CardTitle className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">ROSA</CardTitle>
             <div className="p-1.5 bg-primary/5 rounded-lg"><Users className="h-4 w-4 text-primary" /></div>
           </CardHeader>
-          <CardHeader className="flex flex-row items-center justify-between p-4 pb-1">
-            <CardTitle className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">ROSA</CardTitle>
-            <div className="p-1.5 bg-primary/5 rounded-lg"><Users className="h-4 w-4 text-primary" /></div>
-          </CardHeader>
           <CardContent className="p-4 pt-0">
             {playersLoading ? <Skeleton className="h-10 w-full rounded-xl" /> : (
               <div className="flex flex-col">
