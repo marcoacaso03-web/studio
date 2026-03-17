@@ -6,6 +6,7 @@ import { trainingRepository } from '@/lib/repositories/training-repository';
 import type { TrainingSession, TrainingAttendance, TrainingStatus } from '@/lib/types';
 import { useAuthStore } from './useAuthStore';
 import { useSeasonsStore } from './useSeasonsStore';
+import { startOfWeek, addDays, isBefore, isSameDay, endOfWeek } from 'date-fns';
 
 interface TrainingState {
   sessions: TrainingSession[];
@@ -40,24 +41,27 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
 
     set({ loading: true });
     const newSessions: Omit<TrainingSession, 'id'>[] = [];
-    let current = new Date(startDate);
+    
+    // Identifichiamo il lunedì della settimana di inizio
+    let currentWeekStart = startOfWeek(startDate, { weekStartsOn: 1 });
     let sessionCount = get().sessions.length;
 
-    // Distribuiamo le sessioni nei giorni lavorativi (Lun-Ven)
-    const availableDays = [1, 2, 3, 4, 5]; // Lun-Ven
-    
-    while (current <= endDate) {
-      const weekEnd = new Date(current);
-      weekEnd.setDate(current.getDate() + 6);
-      
-      for (let i = 0; i < sessionsPerWeek; i++) {
-        const sessionDate = new Date(current);
-        // Distribuzione semplice: se vogliamo 3 sessioni, le mettiamo Lun, Mer, Ven
-        const dayOffset = Math.floor(i * (5 / sessionsPerWeek));
-        sessionDate.setDate(current.getDate() + dayOffset);
-        
-        if (sessionDate > endDate) break;
+    // Definiamo i giorni preferenziali per 1, 2, 3, 4 o 5 sessioni
+    const dayOffsetsMap: Record<number, number[]> = {
+      1: [2], // Mercoledì
+      2: [1, 3], // Martedì, Giovedì
+      3: [0, 2, 4], // Lunedì, Mercoledì, Venerdì
+      4: [0, 1, 3, 4], // Lun, Mar, Gio, Ven
+      5: [0, 1, 2, 3, 4] // Lun-Ven
+    };
 
+    const offsets = dayOffsetsMap[sessionsPerWeek] || dayOffsetsMap[3];
+
+    // Continuiamo a generare finché non superiamo la settimana che contiene la data di fine
+    while (currentWeekStart <= endDate) {
+      for (const offset of offsets) {
+        const sessionDate = addDays(currentWeekStart, offset);
+        
         sessionCount++;
         newSessions.push({
           userId: user.id,
@@ -67,10 +71,17 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
           notes: ""
         });
       }
-      current.setDate(current.getDate() + 7);
+      // Passiamo alla settimana successiva
+      currentWeekStart = addDays(currentWeekStart, 7);
     }
 
-    await trainingRepository.bulkAdd(newSessions, user.id);
-    await get().fetchAll();
+    try {
+      await trainingRepository.bulkAdd(newSessions, user.id);
+      await get().fetchAll();
+    } catch (e) {
+      console.error("Errore generazione:", e);
+    } finally {
+      set({ loading: false });
+    }
   }
 }));

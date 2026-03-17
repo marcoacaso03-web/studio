@@ -101,12 +101,7 @@ export default function AllenamentoPage() {
                   </div>
                   <div className="flex flex-col">
                     <h4 className="text-sm font-black uppercase tracking-tight text-primary">Allenamento #{session.index.toString().padStart(2, '0')}</h4>
-                    <div className="flex items-center gap-1.5 mt-0.5 text-muted-foreground">
-                      <CalendarIcon className="h-3 w-3" />
-                      <span className="text-[10px] font-bold uppercase tracking-wider">
-                        {format(parseISO(session.date), "EEEE dd MMMM", { locale: it })}
-                      </span>
-                    </div>
+                    <span className="text-[9px] font-bold uppercase text-muted-foreground/60 tracking-widest">Sessione Programmata</span>
                   </div>
                 </div>
                 <ChevronRight className="h-5 w-5 text-muted-foreground/30 group-hover:text-primary transition-colors" />

@@ -12,8 +12,6 @@ import { useTrainingStore } from "@/store/useTrainingStore";
 import { trainingRepository } from "@/lib/repositories/training-repository";
 import { useAuthStore } from "@/store/useAuthStore";
 import { usePlayersStore } from "@/store/usePlayersStore";
-import { format, parseISO } from "date-fns";
-import { it } from "date-fns/locale";
 import { ArrowLeft, Save, ClipboardList, Users, CheckCircle2, Clock, XCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TrainingSession, TrainingAttendance, TrainingStatus } from "@/lib/types";
@@ -85,7 +83,7 @@ export default function TrainingDetailPage() {
         <div className="flex flex-col">
           <h1 className="text-2xl font-black uppercase tracking-tighter text-primary leading-none">Allenamento #{session.index.toString().padStart(2, '0')}</h1>
           <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-1">
-            {format(parseISO(session.date), "EEEE dd MMMM yyyy", { locale: it })}
+            Programma Tecnico & Presenze
           </span>
         </div>
       </div>
