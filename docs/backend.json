@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "ScoutPlayer": {
@@ -66,6 +67,29 @@
         "name",
         "colorHex"
       ]
+    },
+    "TrainingSession": {
+      "title": "TrainingSession",
+      "type": "object",
+      "description": "Represents a single training session.",
+      "properties": {
+        "id": { "type": "string" },
+        "index": { "type": "number" },
+        "date": { "type": "string", "format": "date-time" },
+        "notes": { "type": "string" },
+        "seasonId": { "type": "string" }
+      },
+      "required": ["id", "index", "date", "seasonId"]
+    },
+    "TrainingAttendance": {
+      "title": "TrainingAttendance",
+      "type": "object",
+      "description": "Represents a player's attendance status for a training session.",
+      "properties": {
+        "playerId": { "type": "string" },
+        "status": { "type": "string", "enum": ["presente", "ritardo", "assente"] }
+      },
+      "required": ["playerId", "status"]
     }
   },
   "auth": {
@@ -83,17 +107,7 @@
           "schema": {
             "$ref": "#/backend/entities/ScoutPlayer"
           },
-          "description": "Stores individual scouted player data, uniquely owned by the user specified in the path. Authorization relies solely on the path's userId matching request.auth.uid.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user who owns this scouted player."
-            },
-            {
-              "name": "scoutPlayerId",
-              "description": "The unique identifier for the ScoutPlayer document."
-            }
-          ]
+          "description": "Stores individual scouted player data."
         }
       },
       {
@@ -103,20 +117,30 @@
           "schema": {
             "$ref": "#/backend/entities/ScoutCategory"
           },
-          "description": "Stores custom categories (tags) created by a specific user to classify scouted players. Each category is uniquely owned by the user specified in the path. Authorization relies solely on the path's userId matching request.auth.uid.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user who created this scout category."
-            },
-            {
-              "name": "scoutCategoryId",
-              "description": "The unique identifier for the ScoutCategory document."
-            }
-          ]
+          "description": "Stores custom categories (tags)."
+        }
+      },
+      {
+        "path": "/users/{userId}/trainingSessions/{sessionId}",
+        "definition": {
+          "entityName": "TrainingSession",
+          "schema": {
+            "$ref": "#/backend/entities/TrainingSession"
+          },
+          "description": "Stores individual training sessions."
+        }
+      },
+      {
+        "path": "/users/{userId}/trainingSessions/{sessionId}/attendance/{playerId}",
+        "definition": {
+          "entityName": "TrainingAttendance",
+          "schema": {
+            "$ref": "#/backend/entities/TrainingAttendance"
+          },
+          "description": "Stores attendance for a specific training session."
         }
       }
     ],
-    "reasoning": "The recommended Firestore structure leverages a strict path-based ownership model to ensure maximum security, scalability, and debuggability for the Scout module. Both 'ScoutPlayer' and 'ScoutCategory' entities are nested directly under a specific user's document, following the pattern `/users/{userId}/scoutPlayers/{scoutPlayerId}` and `/users/{userId}/scoutCategories/{scoutCategoryId}`. This design achieves **Authorization Independence** by making the owner's `uid` an explicit part of the document path. Consequently, security rules will not require any `get()` operations to check parent document ownership or attributes, as `request.auth.uid` can be directly compared with the `{userId}` wildcard in the path. This allows for atomic operations (e.g., creating a new player without needing to first fetch user details for authorization). The structure inherently supports **Query Ability Predictability (QAPs)** because all queries for `scoutPlayers` or `scoutCategories` will naturally be scoped to the currently authenticated user (`request.auth.uid`), preventing accidental data exposure across users. Each user effectively has their own isolated set of scouted players and custom categories. This also adheres to **Structural Segregation**, as all documents within `/users/{userId}/scoutPlayers` share the identical security posture (owned by `{userId}`), simplifying security rules to a single `allow read, write: if request.auth.uid == userId;` statement for each subcollection. There is no need for denormalization of ownership fields (like `ownerId` or `members` map) within the `ScoutPlayer` or `ScoutCategory` documents themselves, as the path itself serves as the definitive ownership declaration. The relationship between `ScoutPlayer` and `ScoutCategory` is handled via `categoryIds` in the `ScoutPlayer` document, referencing `ScoutCategory` IDs within the same user's scope."
+    "reasoning": "The training module uses the same isolation pattern as Scout, nesting sessions and their respective attendance records under the user document."
   }
 }

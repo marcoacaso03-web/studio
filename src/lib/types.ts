@@ -111,3 +111,19 @@ export type MatchEvent = {
   period: '1T' | '2T' | '1TS' | '2TS';
   teamOwnerId?: string;
 };
+
+export type TrainingStatus = 'presente' | 'ritardo' | 'assente';
+
+export type TrainingSession = {
+  id: string;
+  index: number;
+  date: string;
+  notes?: string;
+  seasonId: string;
+  userId: string;
+};
+
+export type TrainingAttendance = {
+  playerId: string;
+  status: TrainingStatus;
+};

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -7,11 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, RefreshCw, LogOut, User, Trash2, Clock, Loader2 } from 'lucide-react';
+import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, RefreshCw, LogOut, User, Trash2, Clock, Dumbbell, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { playerRepository } from '@/lib/repositories/player-repository';
 import { matchRepository } from '@/lib/repositories/match-repository';
-import { seasonRepository } from '@/lib/repositories/season-repository';
 import { useThemeStore } from '@/store/useThemeStore';
 import { useSeasonsStore } from '@/store/useSeasonsStore';
 import { useMatchesStore } from '@/store/useMatchesStore';
@@ -50,7 +50,7 @@ export default function AltroPage() {
   const router = useRouter();
   const { theme, toggleTheme } = useThemeStore();
   const { seasons, activeSeason, fetchAll: fetchSeasons, addSeason, setActiveSeason, removeSeason } = useSeasonsStore();
-  const { defaultDuration, setDefaultDuration } = useSettingsStore();
+  const { defaultDuration, setDefaultDuration, sessionsPerWeek, setSessionsPerWeek } = useSettingsStore();
   const { user, logout } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
@@ -148,11 +148,9 @@ export default function AltroPage() {
     if (!user || !activeSeason) return;
     setIsResetting(true);
     try {
-      // Recupera tutti i dati della stagione corrente
       const players = await playerRepository.getAll(user.id, activeSeason.id);
       const matches = await matchRepository.getAll(user.id, activeSeason.id);
       
-      // Elimina tutti i giocatori e le partite (e le relative sotto-collezioni tramite repository)
       const deletePromises = [
         ...players.map(p => playerRepository.delete(p.id, activeSeason.id)),
         ...matches.map(m => matchRepository.delete(m.id, activeSeason.id))
@@ -160,7 +158,6 @@ export default function AltroPage() {
       
       await Promise.all(deletePromises);
       
-      // Rinfresca lo stato globale
       await Promise.all([
         useMatchesStore.getState().fetchAll(activeSeason.id),
         usePlayersStore.getState().fetchAll(activeSeason.id),
@@ -185,7 +182,6 @@ export default function AltroPage() {
     <div className="pb-12 space-y-6">
       <PageHeader title="Impostazioni" />
 
-      {/* Sezione Profilo Utente */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -235,6 +231,35 @@ export default function AltroPage() {
                 <SelectItem value="70">70 minuti</SelectItem>
                 <SelectItem value="80">80 minuti</SelectItem>
                 <SelectItem value="90">90 minuti</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Dumbbell className="h-5 w-5 text-primary" />
+            <CardTitle>Allenamenti settimanali</CardTitle>
+          </div>
+          <CardDescription>
+            Sessioni previste per la generazione automatica.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between p-3 rounded-xl border bg-muted/30">
+            <Label className="text-sm font-black uppercase tracking-tight">Numero Sessioni</Label>
+            <Select value={sessionsPerWeek.toString()} onValueChange={(v) => setSessionsPerWeek(parseInt(v))}>
+              <SelectTrigger className="w-32 h-9 text-xs font-bold uppercase">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">1 volta</SelectItem>
+                <SelectItem value="2">2 volte</SelectItem>
+                <SelectItem value="3">3 volte</SelectItem>
+                <SelectItem value="4">4 volte</SelectItem>
+                <SelectItem value="5">5 volte</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -1,54 +1,20 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * CORE PHILOSOPHY
-     * This ruleset enforces a strict path-based ownership model. Data isolation is achieved by nesting 
-     * all user-specific content under the `/users/{userId}` hierarchy. 
-     * 
-     * DATA STRUCTURE
-     * - /users/{userId}: The root document for a user.
-     * - /users/{userId}/scoutPlayers/{scoutPlayerId}: Individual scouted players owned by the user.
-     * - /users/{userId}/scoutCategories/{scoutCategoryId}: Custom tagging categories created by the user.
-     * 
-     * KEY SECURITY DECISIONS
-     * 1. Path-Based Authorization: We use the {userId} wildcard in the path to determine ownership. 
-     *    A user can only access data where the {userId} matches their 'request.auth.uid'.
-     * 2. Atomic Performance: By relying on the path for authorization, we avoid costly 'get()' 
-     *    lookups to parent documents or external collections.
-     * 3. Structural Segregation: Scouted players and categories are kept in separate subcollections 
-     *    to allow for clean, scoped queries that never leak data between users.
-     * 4. Prototyping Flexibility: While authorization is strictly enforced, the rules do not 
-     *    validate the specific schema of notes or player names, allowing for rapid UI iteration.
-     */
-
-    // --- Helper Functions ---
-
-    /** Checks if the request is made by an authenticated user. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** Checks if the authenticated user matches the provided userId from the path. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** Combines ownership check with a check that the resource exists for updates/deletes. */
     function isExistingOwner(userId) {
       return isOwner(userId) && resource != null;
     }
 
-    // --- Collection Rules ---
-
-    /**
-     * @description Rules for the root user document.
-     * @path /users/{userId}
-     * @allow (get, create) Authenticated user accessing their own document.
-     * @deny (list) Listing users is strictly forbidden for privacy.
-     * @principle Self-creation and ownership.
-     */
     match /users/{userId} {
       allow get: if isOwner(userId);
       allow list: if false;
@@ -56,46 +22,40 @@ service cloud.firestore {
       allow update: if isExistingOwner(userId);
       allow delete: if isExistingOwner(userId);
 
-      /**
-       * @description Rules for players scouted by a specific user.
-       * @path /users/{userId}/scoutPlayers/{scoutPlayerId}
-       * @allow (create) User 'user_123' creates a player under '/users/user_123/scoutPlayers/...'.
-       * @deny (get) User 'user_abc' attempts to read a player inside 'user_123's collection.
-       * @principle Path-based ownership and relational integrity.
-       */
       match /scoutPlayers/{scoutPlayerId} {
         allow get, list: if isOwner(userId);
-        
-        // Ensure the data's internal ID matches the document path ID on creation
         allow create: if isOwner(userId) && request.resource.data.id == scoutPlayerId;
-        
-        // Ensure the ID field remains immutable during updates
         allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-        
         allow delete: if isExistingOwner(userId);
       }
 
-      /**
-       * @description Rules for custom categories/tags created by a specific user.
-       * @path /users/{userId}/scoutCategories/{scoutCategoryId}
-       * @allow (list) User 'user_123' fetches all their custom badges.
-       * @deny (update) User attempts to change a category belonging to a different userId.
-       * @principle Path-based ownership and relational integrity.
-       */
       match /scoutCategories/{scoutCategoryId} {
         allow get, list: if isOwner(userId);
-        
-        // Ensure the data's internal ID matches the document path ID on creation
         allow create: if isOwner(userId) && request.resource.data.id == scoutCategoryId;
-        
-        // Ensure the ID field remains immutable during updates
         allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-        
         allow delete: if isExistingOwner(userId);
+      }
+
+      match /trainingSessions/{sessionId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId);
+        allow update, delete: if isExistingOwner(userId);
+        
+        match /attendance/{playerId} {
+          allow get, list: if isOwner(userId);
+          allow write: if isOwner(userId);
+        }
       }
     }
     
-    // Default deny for any paths not explicitly matched.
+    // Default teams access (Legacy / Shared data)
+    match /teams/{teamId} {
+      allow read, write: if isSignedIn();
+      match /{allPaths=**} {
+        allow read, write: if isSignedIn();
+      }
+    }
+
     match /{path=**} {
       allow read, write: if false;
     }
