@@ -1,134 +1,122 @@
-
 {
   "entities": {
-    "Team": {
-      "title": "Team",
+    "ScoutPlayer": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ScoutPlayer",
       "type": "object",
-      "description": "Represents a sports team or season. Acts as the root container for all data.",
+      "description": "Represents a player identified and tracked by the scouting module, including their details and associated categories. This entity is distinct from the core 'Player' entity, focusing specifically on external talents scouted by the user.",
       "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string" },
-        "ownerId": { "type": "string" },
-        "isActive": { "type": "boolean" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" }
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ScoutPlayer entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The full name of the scouted player."
+        },
+        "role": {
+          "type": "string",
+          "description": "The primary role or position of the scouted player (e.g., 'Attacker', 'Midfielder', 'Defender')."
+        },
+        "currentTeam": {
+          "type": "string",
+          "description": "The name of the team the scouted player currently plays for outside of the user's managed team."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional observations or comments about the scouted player, providing qualitative insights."
+        },
+        "categoryIds": {
+          "type": "array",
+          "description": "References to ScoutCategories this player belongs to, allowing for classification and filtering. (Relationship: ScoutCategory N:N ScoutPlayer)",
+          "items": {
+            "type": "string"
+          }
+        }
       },
-      "required": ["id", "name", "ownerId", "createdAt", "updatedAt"]
+      "required": [
+        "id",
+        "name",
+        "role",
+        "currentTeam",
+        "categoryIds"
+      ]
     },
-    "Player": {
-      "title": "Player",
+    "ScoutCategory": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ScoutCategory",
       "type": "object",
-      "description": "Represents an individual player in a specific season.",
+      "description": "Represents a custom category or tag created by the user to classify and filter scouted players, often displayed as colored badges.",
       "properties": {
-        "id": { "type": "string" },
-        "teamId": { "type": "string" },
-        "teamOwnerId": { "type": "string" },
-        "name": { "type": "string" },
-        "role": { "type": "string" },
-        "avatarUrl": { "type": "string" },
-        "stats": { "type": "object" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" }
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ScoutCategory entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The custom name of the scout category or tag (e.g., 'Promessa', 'Fisico', 'Piede Sinistro')."
+        },
+        "colorHex": {
+          "type": "string",
+          "description": "Hexadecimal color code for the badge associated with this category, used for UI representation (e.g., '#FF8F00')."
+        }
       },
-      "required": ["id", "teamId", "teamOwnerId", "name", "role"]
-    },
-    "Match": {
-      "title": "Match",
-      "type": "object",
-      "description": "Represents a match event.",
-      "properties": {
-        "id": { "type": "string" },
-        "teamId": { "type": "string" },
-        "teamOwnerId": { "type": "string" },
-        "opponent": { "type": "string" },
-        "date": { "type": "string", "format": "date-time" },
-        "isHome": { "type": "boolean" },
-        "type": { "type": "string" },
-        "duration": { "type": "number" },
-        "status": { "type": "string" },
-        "result": { "type": "object" },
-        "notes": { "type": "string" }
-      },
-      "required": ["id", "teamId", "teamOwnerId", "opponent", "date", "status"]
-    },
-    "MatchEvent": {
-      "title": "MatchEvent",
-      "type": "object",
-      "description": "Events occurred during a match (goals, cards, substitutions).",
-      "properties": {
-        "id": { "type": "string" },
-        "matchId": { "type": "string" },
-        "teamOwnerId": { "type": "string" },
-        "type": { "type": "string" },
-        "team": { "type": "string" },
-        "playerId": { "type": "string" },
-        "playerName": { "type": "string" },
-        "subOutPlayerId": { "type": "string" },
-        "subOutPlayerName": { "type": "string" },
-        "assistPlayerId": { "type": "string" },
-        "assistPlayerName": { "type": "string" },
-        "minute": { "type": "number" },
-        "period": { "type": "string" }
-      },
-      "required": ["id", "matchId", "teamOwnerId", "type", "team", "minute", "period"]
-    },
-    "MatchLineup": {
-      "title": "MatchLineup",
-      "type": "object",
-      "description": "The complete lineup for a match.",
-      "properties": {
-        "matchId": { "type": "string" },
-        "teamOwnerId": { "type": "string" },
-        "starters": { "type": "array", "items": { "type": "string" } },
-        "substitutes": { "type": "array", "items": { "type": "string" } },
-        "formation": { "type": "string" }
-      },
-      "required": ["matchId", "teamOwnerId", "starters", "substitutes"]
-    },
-    "PlayerMatchStat": {
-      "title": "PlayerMatchStat",
-      "type": "object",
-      "description": "Individual stats for a player in a specific match.",
-      "properties": {
-        "matchId": { "type": "string" },
-        "playerId": { "type": "string" },
-        "teamOwnerId": { "type": "string" },
-        "minutesPlayed": { "type": "number" },
-        "goals": { "type": "number" },
-        "assists": { "type": "number" },
-        "yellowCards": { "type": "number" },
-        "redCards": { "type": "number" }
-      },
-      "required": ["matchId", "playerId", "teamOwnerId"]
+      "required": [
+        "id",
+        "name",
+        "colorHex"
+      ]
     }
   },
   "auth": {
-    "providers": ["password", "anonymous"]
+    "providers": [
+      "password",
+      "anonymous"
+    ]
   },
   "firestore": {
-    "/teams/{teamId}": {
-      "schema": { "$ref": "#/backend/entities/Team" },
-      "description": "Seasons/Teams collection."
-    },
-    "/teams/{teamId}/players/{playerId}": {
-      "schema": { "$ref": "#/backend/entities/Player" },
-      "description": "Players in a season."
-    },
-    "/teams/{teamId}/matches/{matchId}": {
-      "schema": { "$ref": "#/backend/entities/Match" },
-      "description": "Matches in a season."
-    },
-    "/teams/{teamId}/matches/{matchId}/events/{eventId}": {
-      "schema": { "$ref": "#/backend/entities/MatchEvent" },
-      "description": "Events for a match."
-    },
-    "/teams/{teamId}/matches/{matchId}/lineup/{lineupId}": {
-      "schema": { "$ref": "#/backend/entities/MatchLineup" },
-      "description": "Lineup for a match."
-    },
-    "/teams/{teamId}/matches/{matchId}/stats/{playerId}": {
-      "schema": { "$ref": "#/backend/entities/PlayerMatchStat" },
-      "description": "Individual performance stats."
-    }
+    "structure": [
+      {
+        "path": "/users/{userId}/scoutPlayers/{scoutPlayerId}",
+        "definition": {
+          "entityName": "ScoutPlayer",
+          "schema": {
+            "$ref": "#/backend/entities/ScoutPlayer"
+          },
+          "description": "Stores individual scouted player data, uniquely owned by the user specified in the path. Authorization relies solely on the path's userId matching request.auth.uid.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this scouted player."
+            },
+            {
+              "name": "scoutPlayerId",
+              "description": "The unique identifier for the ScoutPlayer document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/scoutCategories/{scoutCategoryId}",
+        "definition": {
+          "entityName": "ScoutCategory",
+          "schema": {
+            "$ref": "#/backend/entities/ScoutCategory"
+          },
+          "description": "Stores custom categories (tags) created by a specific user to classify scouted players. Each category is uniquely owned by the user specified in the path. Authorization relies solely on the path's userId matching request.auth.uid.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who created this scout category."
+            },
+            {
+              "name": "scoutCategoryId",
+              "description": "The unique identifier for the ScoutCategory document."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The recommended Firestore structure leverages a strict path-based ownership model to ensure maximum security, scalability, and debuggability for the Scout module. Both 'ScoutPlayer' and 'ScoutCategory' entities are nested directly under a specific user's document, following the pattern `/users/{userId}/scoutPlayers/{scoutPlayerId}` and `/users/{userId}/scoutCategories/{scoutCategoryId}`. This design achieves **Authorization Independence** by making the owner's `uid` an explicit part of the document path. Consequently, security rules will not require any `get()` operations to check parent document ownership or attributes, as `request.auth.uid` can be directly compared with the `{userId}` wildcard in the path. This allows for atomic operations (e.g., creating a new player without needing to first fetch user details for authorization). The structure inherently supports **Query Ability Predictability (QAPs)** because all queries for `scoutPlayers` or `scoutCategories` will naturally be scoped to the currently authenticated user (`request.auth.uid`), preventing accidental data exposure across users. Each user effectively has their own isolated set of scouted players and custom categories. This also adheres to **Structural Segregation**, as all documents within `/users/{userId}/scoutPlayers` share the identical security posture (owned by `{userId}`), simplifying security rules to a single `allow read, write: if request.auth.uid == userId;` statement for each subcollection. There is no need for denormalization of ownership fields (like `ownerId` or `members` map) within the `ScoutPlayer` or `ScoutCategory` documents themselves, as the path itself serves as the definitive ownership declaration. The relationship between `ScoutPlayer` and `ScoutCategory` is handled via `categoryIds` in the `ScoutPlayer` document, referencing `ScoutCategory` IDs within the same user's scope."
   }
 }

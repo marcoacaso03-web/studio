@@ -3,81 +3,101 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * SQUADRA+ SECURITY RULES
+     * CORE PHILOSOPHY
+     * This ruleset enforces a strict path-based ownership model. Data isolation is achieved by nesting 
+     * all user-specific content under the `/users/{userId}` hierarchy. 
      * 
-     * CORE PHILOSOPHY:
-     * This ruleset implements a robust, collaborative sports team management model. 
-     * It relies on Authorization Independence through denormalization.
+     * DATA STRUCTURE
+     * - /users/{userId}: The root document for a user.
+     * - /users/{userId}/scoutPlayers/{scoutPlayerId}: Individual scouted players owned by the user.
+     * - /users/{userId}/scoutCategories/{scoutCategoryId}: Custom tagging categories created by the user.
+     * 
+     * KEY SECURITY DECISIONS
+     * 1. Path-Based Authorization: We use the {userId} wildcard in the path to determine ownership. 
+     *    A user can only access data where the {userId} matches their 'request.auth.uid'.
+     * 2. Atomic Performance: By relying on the path for authorization, we avoid costly 'get()' 
+     *    lookups to parent documents or external collections.
+     * 3. Structural Segregation: Scouted players and categories are kept in separate subcollections 
+     *    to allow for clean, scoped queries that never leak data between users.
+     * 4. Prototyping Flexibility: While authorization is strictly enforced, the rules do not 
+     *    validate the specific schema of notes or player names, allowing for rapid UI iteration.
      */
 
     // --- Helper Functions ---
 
+    /** Checks if the request is made by an authenticated user. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    function isOwner(uid) {
-      return isSignedIn() && request.auth.uid == uid;
+    /** Checks if the authenticated user matches the provided userId from the path. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** 
-     * @description Utilizza .get() per evitare errori se il campo è mancante.
-     * Verifica ownerId (per le stagioni) o teamOwnerId (per i figli).
-     */
-    function hasAccess(data) {
-      return isSignedIn() && (
-        data.get('ownerId', '') == request.auth.uid || 
-        data.get('teamOwnerId', '') == request.auth.uid || 
-        (data.get('members', {})[request.auth.uid] != null) ||
-        (data.get('teamMembers', {})[request.auth.uid] != null)
-      );
-    }
-
-    function canModify(currentData) {
-      return currentData != null && hasAccess(currentData);
+    /** Combines ownership check with a check that the resource exists for updates/deletes. */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
     }
 
     // --- Collection Rules ---
 
-    match /teams/{teamId} {
-      // get e list sono permessi se l'utente è il proprietario o membro
-      allow get, list: if isSignedIn() && (resource == null || hasAccess(resource.data));
-      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update: if canModify(resource.data);
-      allow delete: if canModify(resource.data) && isOwner(resource.data.ownerId);
+    /**
+     * @description Rules for the root user document.
+     * @path /users/{userId}
+     * @allow (get, create) Authenticated user accessing their own document.
+     * @deny (list) Listing users is strictly forbidden for privacy.
+     * @principle Self-creation and ownership.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId);
+      allow update: if isExistingOwner(userId);
+      allow delete: if isExistingOwner(userId);
 
-      match /players/{playerId} {
-        allow get, list: if isSignedIn() && (resource == null || hasAccess(resource.data));
-        allow create: if isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
-        allow update, delete: if canModify(resource.data);
+      /**
+       * @description Rules for players scouted by a specific user.
+       * @path /users/{userId}/scoutPlayers/{scoutPlayerId}
+       * @allow (create) User 'user_123' creates a player under '/users/user_123/scoutPlayers/...'.
+       * @deny (get) User 'user_abc' attempts to read a player inside 'user_123's collection.
+       * @principle Path-based ownership and relational integrity.
+       */
+      match /scoutPlayers/{scoutPlayerId} {
+        allow get, list: if isOwner(userId);
+        
+        // Ensure the data's internal ID matches the document path ID on creation
+        allow create: if isOwner(userId) && request.resource.data.id == scoutPlayerId;
+        
+        // Ensure the ID field remains immutable during updates
+        allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+        
+        allow delete: if isExistingOwner(userId);
       }
 
-      match /matches/{matchId} {
-        allow get, list: if isSignedIn() && (resource == null || hasAccess(resource.data));
-        allow create: if isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
-        allow update, delete: if canModify(resource.data);
-
-        match /stats/{playerMatchStatId} {
-          allow get, list: if isSignedIn() && (resource == null || hasAccess(resource.data));
-          allow create: if isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
-          allow update: if canModify(resource.data);
-          allow delete: if canModify(resource.data);
-        }
-
-        match /lineup/{matchLineupId} {
-          allow get, list: if isSignedIn() && (resource == null || hasAccess(resource.data));
-          allow create: if isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
-          allow update: if canModify(resource.data);
-          allow delete: if canModify(resource.data);
-        }
-
-        match /events/{eventId} {
-          allow get, list: if isSignedIn() && (resource == null || hasAccess(resource.data));
-          allow create: if isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
-          allow update: if canModify(resource.data);
-          allow delete: if canModify(resource.data);
-        }
+      /**
+       * @description Rules for custom categories/tags created by a specific user.
+       * @path /users/{userId}/scoutCategories/{scoutCategoryId}
+       * @allow (list) User 'user_123' fetches all their custom badges.
+       * @deny (update) User attempts to change a category belonging to a different userId.
+       * @principle Path-based ownership and relational integrity.
+       */
+      match /scoutCategories/{scoutCategoryId} {
+        allow get, list: if isOwner(userId);
+        
+        // Ensure the data's internal ID matches the document path ID on creation
+        allow create: if isOwner(userId) && request.resource.data.id == scoutCategoryId;
+        
+        // Ensure the ID field remains immutable during updates
+        allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+        
+        allow delete: if isExistingOwner(userId);
       }
+    }
+    
+    // Default deny for any paths not explicitly matched.
+    match /{path=**} {
+      allow read, write: if false;
     }
   }
 }
