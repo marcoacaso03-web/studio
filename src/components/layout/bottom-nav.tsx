@@ -5,8 +5,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Users,
-  BarChart3,
+  Search,
+  Dumbbell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -53,8 +53,8 @@ const WhistleIcon = ({ className }: { className?: string }) => (
 
 const navItems = [
   { href: "/calendario", label: "Dashboard", icon: TacticalBoardIcon },
-  { href: "/membri", label: "Rosa", icon: Users },
-  { href: "/statistiche", label: "Statistiche", icon: BarChart3 },
+  { href: "/allenamento", label: "Allenamento", icon: Dumbbell },
+  { href: "/scout", label: "Scout", icon: Search },
   { href: "/altro", label: "Impostazioni", icon: WhistleIcon },
 ];
 

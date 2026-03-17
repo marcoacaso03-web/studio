@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Users, Trophy, Calendar, Home, Plane, LayoutList } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -82,7 +82,10 @@ export default function DashboardPage() {
     <div className="space-y-3 md:space-y-6">
       {/* Mini Stats Cards */}
       <div className="grid grid-cols-2 gap-2">
-        <Card className="shadow-sm border rounded-2xl bg-card overflow-hidden h-[90px] md:h-[100px]">
+        <Card 
+          className="shadow-sm border rounded-2xl bg-card overflow-hidden h-[90px] md:h-[100px] cursor-pointer hover:bg-primary/5 transition-colors active:scale-95"
+          onClick={() => router.push('/membri')}
+        >
           <CardHeader className="flex flex-row items-center justify-between p-3 pb-0.5">
             <CardTitle className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">ROSA</CardTitle>
             <Users className="h-3 w-3 text-primary/40" />
@@ -101,9 +104,12 @@ export default function DashboardPage() {
             )}
           </CardContent>
         </Card>
-        <Card className="shadow-sm border rounded-2xl bg-card overflow-hidden h-[90px] md:h-[100px]">
+        <Card 
+          className="shadow-sm border rounded-2xl bg-card overflow-hidden h-[90px] md:h-[100px] cursor-pointer hover:bg-primary/5 transition-colors active:scale-95"
+          onClick={() => router.push('/statistiche')}
+        >
           <CardHeader className="flex flex-row items-center justify-between p-3 pb-0.5">
-            <CardTitle className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Performance</CardTitle>
+            <CardTitle className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">Statistiche</CardTitle>
             <Trophy className="h-3 w-3 text-accent/40" />
           </CardHeader>
           <CardContent className="p-3 pt-0">
