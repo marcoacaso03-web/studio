@@ -3,9 +3,9 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { PageHeader } from "@/components/layout/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dumbbell, ChevronLeft, ChevronRight, PlusCircle, Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import { Dumbbell, ChevronLeft, ChevronRight, PlusCircle, Trash2, Loader2, MoreHorizontal, Eraser } from "lucide-react";
 import { useTrainingStore } from "@/store/useTrainingStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
@@ -15,10 +15,26 @@ import { it } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function AllenamentoPage() {
   const router = useRouter();
-  const { sessions, loading, fetchAll, generateSessions } = useTrainingStore();
+  const { sessions, loading, fetchAll, generateSessions, deleteSession, deleteSessions, clearAllSessions } = useTrainingStore();
   const { sessionsPerWeek } = useSettingsStore();
   const { activeSeason } = useSeasonsStore();
   
@@ -26,6 +42,11 @@ export default function AllenamentoPage() {
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
   const [genStart, setGenStart] = useState(format(new Date(), "yyyy-MM-dd"));
   const [genEnd, setGenEnd] = useState(format(addWeeks(new Date(), 4), "yyyy-MM-dd"));
+
+  // States for deletions
+  const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
+  const [isClearAllOpen, setIsClearAllOpen] = useState(false);
+  const [isClearWeekOpen, setIsClearWeekOpen] = useState(false);
 
   useEffect(() => {
     fetchAll();
@@ -40,19 +61,59 @@ export default function AllenamentoPage() {
     setIsGeneratorOpen(false);
   };
 
+  const handleDeleteSingle = async () => {
+    if (sessionToDelete) {
+      await deleteSession(sessionToDelete);
+      setSessionToDelete(null);
+    }
+  };
+
+  const handleDeleteWeek = async () => {
+    const ids = weekSessions.map(s => s.id);
+    await deleteSessions(ids);
+    setIsClearWeekOpen(false);
+  };
+
+  const handleDeleteAll = async () => {
+    await clearAllSessions();
+    setIsClearAllOpen(false);
+  };
+
   const nextWeek = () => setCurrentWeekStart(addWeeks(currentWeekStart, 1));
   const prevWeek = () => setCurrentWeekStart(subWeeks(currentWeekStart, 1));
 
   return (
     <div className="space-y-6 pb-20">
       <PageHeader title="Allenamento">
-        <Button 
-          size="sm" 
-          className="bg-accent text-accent-foreground rounded-xl font-black uppercase text-[10px] h-9 px-4"
-          onClick={() => setIsGeneratorOpen(true)}
-        >
-          <PlusCircle className="mr-1.5 h-3.5 w-3.5" /> Genera
-        </Button>
+        <div className="flex gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="outline"
+                size="sm" 
+                className="rounded-xl font-black uppercase text-[10px] h-9 px-3 border-primary/20 text-primary"
+              >
+                <Eraser className="mr-1.5 h-3.5 w-3.5" /> Pulisci
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="rounded-xl">
+              <DropdownMenuItem className="text-[10px] font-bold uppercase" onClick={() => setIsClearWeekOpen(true)}>
+                Elimina Settimana
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-[10px] font-bold uppercase text-destructive" onClick={() => setIsClearAllOpen(true)}>
+                Elimina Tutto
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button 
+            size="sm" 
+            className="bg-accent text-accent-foreground rounded-xl font-black uppercase text-[10px] h-9 px-4 shadow-lg"
+            onClick={() => setIsGeneratorOpen(true)}
+          >
+            <PlusCircle className="mr-1.5 h-3.5 w-3.5" /> Genera
+          </Button>
+        </div>
       </PageHeader>
 
       <div className="flex items-center justify-between bg-card p-3 rounded-2xl border shadow-sm">
@@ -104,13 +165,24 @@ export default function AllenamentoPage() {
                     <span className="text-[9px] font-bold uppercase text-muted-foreground/60 tracking-widest">Sessione Programmata</span>
                   </div>
                 </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => { e.stopPropagation(); setSessionToDelete(session.id); }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                </div>
               </CardContent>
             </Card>
           ))
         )}
       </div>
 
+      {/* Generator Dialog */}
       <Dialog open={isGeneratorOpen} onOpenChange={setIsGeneratorOpen}>
         <DialogContent className="max-w-[90vw] sm:max-w-md rounded-3xl">
           <DialogHeader>
@@ -135,6 +207,54 @@ export default function AllenamentoPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Single Delete Alert */}
+      <AlertDialog open={!!sessionToDelete} onOpenChange={(open) => !open && setSessionToDelete(null)}>
+        <AlertDialogContent className="rounded-2xl max-w-[90vw]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="uppercase font-black text-primary">Elimina Allenamento?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs">
+              Questa azione cancellerà definitivamente l'allenamento selezionato e le relative presenze.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2 mt-4">
+            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11">Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteSingle} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase h-11">Elimina</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Clear Week Alert */}
+      <AlertDialog open={isClearWeekOpen} onOpenChange={setIsClearWeekOpen}>
+        <AlertDialogContent className="rounded-2xl max-w-[90vw]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="uppercase font-black text-primary">Elimina Settimana?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs">
+              Stai per eliminare tutte le {weekSessions.length} sessioni di questa settimana. Confermi?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2 mt-4">
+            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11">Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteWeek} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase h-11">Sì, elimina</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Clear All Alert */}
+      <AlertDialog open={isClearAllOpen} onOpenChange={setIsClearAllOpen}>
+        <AlertDialogContent className="rounded-2xl max-w-[90vw]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="uppercase font-black text-destructive">RESET TOTALE?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs">
+              Questa azione cancellerà OGNI allenamento registrato in questa stagione. È un'operazione irreversibile.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2 mt-4">
+            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11">Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteAll} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase h-11">RESET TUTTO</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -13,6 +13,9 @@ interface TrainingState {
   loading: boolean;
   fetchAll: () => Promise<void>;
   generateSessions: (startDate: Date, endDate: Date, sessionsPerWeek: number) => Promise<void>;
+  deleteSession: (id: string) => Promise<void>;
+  deleteSessions: (ids: string[]) => Promise<void>;
+  clearAllSessions: () => Promise<void>;
 }
 
 export const useTrainingStore = create<TrainingState>((set, get) => ({
@@ -57,7 +60,6 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
 
     const offsets = dayOffsetsMap[sessionsPerWeek] || dayOffsetsMap[3];
 
-    // Continuiamo a generare finché non superiamo la settimana che contiene la data di fine
     while (currentWeekStart <= endDate) {
       for (const offset of offsets) {
         const sessionDate = addDays(currentWeekStart, offset);
@@ -71,7 +73,6 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
           notes: ""
         });
       }
-      // Passiamo alla settimana successiva
       currentWeekStart = addDays(currentWeekStart, 7);
     }
 
@@ -81,6 +82,44 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
     } catch (e) {
       console.error("Errore generazione:", e);
     } finally {
+      set({ loading: false });
+    }
+  },
+
+  deleteSession: async (id) => {
+    const user = useAuthStore.getState().user;
+    if (!user) return;
+    try {
+      await trainingRepository.delete(user.id, id);
+      set(state => ({ sessions: state.sessions.filter(s => s.id !== id) }));
+    } catch (e) {
+      console.error(e);
+    }
+  },
+
+  deleteSessions: async (ids) => {
+    const user = useAuthStore.getState().user;
+    if (!user) return;
+    try {
+      await trainingRepository.deleteMany(user.id, ids);
+      set(state => ({ sessions: state.sessions.filter(s => !ids.includes(s.id)) }));
+    } catch (e) {
+      console.error(e);
+    }
+  },
+
+  clearAllSessions: async () => {
+    const user = useAuthStore.getState().user;
+    const seasonId = useSeasonsStore.getState().activeSeason?.id;
+    if (!user || !seasonId) return;
+    
+    set({ loading: true });
+    try {
+      const ids = get().sessions.map(s => s.id);
+      await trainingRepository.deleteMany(user.id, ids);
+      set({ sessions: [], loading: false });
+    } catch (e) {
+      console.error(e);
       set({ loading: false });
     }
   }

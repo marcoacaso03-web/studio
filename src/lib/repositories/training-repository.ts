@@ -50,6 +50,22 @@ export const trainingRepository = {
     await updateDoc(docRef, updates);
   },
 
+  async delete(userId: string, sessionId: string) {
+    const db = getFirestore();
+    const docRef = doc(db, 'users', userId, 'trainingSessions', sessionId);
+    await deleteDoc(docRef);
+  },
+
+  async deleteMany(userId: string, sessionIds: string[]) {
+    const db = getFirestore();
+    const batch = writeBatch(db);
+    sessionIds.forEach(id => {
+      const docRef = doc(db, 'users', userId, 'trainingSessions', id);
+      batch.delete(docRef);
+    });
+    await batch.commit();
+  },
+
   async getAttendance(userId: string, sessionId: string) {
     const db = getFirestore();
     const attRef = collection(db, 'users', userId, 'trainingSessions', sessionId, 'attendance');
