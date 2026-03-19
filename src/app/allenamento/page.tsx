@@ -91,21 +91,21 @@ export default function AllenamentoPage() {
         <div className="flex gap-2">
           <Button 
             variant="outline"
-            size="sm" 
-            className="rounded-xl font-black uppercase text-[10px] h-9 px-3 border-primary/20 text-primary"
+            size="icon" 
+            className="rounded-xl h-9 w-9 border-primary/20 text-primary"
             onClick={() => setIsStatsOpen(true)}
           >
-            <ClipboardCheck className="mr-1.5 h-3.5 w-3.5" /> Report
+            <ClipboardCheck className="h-4 w-4" />
           </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="outline"
-                size="sm" 
-                className="rounded-xl font-black uppercase text-[10px] h-9 px-3 border-primary/20 text-primary"
+                size="icon" 
+                className="rounded-xl h-9 w-9 border-primary/20 text-primary"
               >
-                <Eraser className="mr-1.5 h-3.5 w-3.5" /> Pulisci
+                <Eraser className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="rounded-xl">
@@ -119,11 +119,11 @@ export default function AllenamentoPage() {
           </DropdownMenu>
 
           <Button 
-            size="sm" 
-            className="bg-accent text-accent-foreground rounded-xl font-black uppercase text-[10px] h-9 px-4 shadow-lg"
+            size="icon" 
+            className="bg-accent text-accent-foreground rounded-xl h-9 w-9 shadow-lg"
             onClick={() => setIsGeneratorOpen(true)}
           >
-            <PlusCircle className="mr-1.5 h-3.5 w-3.5" /> Genera
+            <PlusCircle className="h-4 w-4" />
           </Button>
         </div>
       </PageHeader>
