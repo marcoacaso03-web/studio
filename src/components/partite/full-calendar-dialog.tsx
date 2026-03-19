@@ -127,29 +127,29 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
                     const month = mDate.toLocaleDateString('it-IT', { month: 'short' }).toUpperCase();
                     
                     return (
-                      <TableRow key={match.id} className="h-12 border-b hover:bg-primary/5 transition-all group">
+                      <TableRow key={match.id} className="h-14 border-b hover:bg-primary/5 transition-all group">
                         <TableCell 
                           className="p-0 px-4 cursor-pointer"
                           onClick={() => navigateToMatch(match)}
                         >
                           <div className="flex items-center gap-3">
-                            <div className="flex flex-col items-center min-w-[32px]">
-                              <span className="text-[10px] font-black leading-none text-primary">{day}</span>
-                              <span className="text-[7px] font-bold text-muted-foreground">{month}</span>
+                            <div className="flex flex-col items-center min-w-[36px]">
+                              <span className="text-xs font-black leading-none text-primary">{day}</span>
+                              <span className="text-[9px] font-bold text-muted-foreground">{month}</span>
                             </div>
                             <div className="p-1.5 bg-muted/30 rounded-lg">
-                              {match.isHome ? <Home className="h-3 w-3 text-primary/60" /> : <Plane className="h-3 w-3 text-accent/60" />}
+                              {match.isHome ? <Home className="h-3.5 w-3.5 text-primary/60" /> : <Plane className="h-3.5 w-3.5 text-accent/60" />}
                             </div>
                             <div className="flex-1 flex items-center justify-between gap-2">
                               <div className="flex flex-col">
-                                <span className="text-xs font-black text-foreground uppercase tracking-tight truncate max-w-[120px] md:max-w-none">
+                                <span className="text-sm font-black text-foreground uppercase tracking-tight truncate max-w-[120px] md:max-w-none">
                                   {match.opponent}
                                 </span>
-                                <span className="text-[8px] font-bold text-muted-foreground uppercase">{match.type}</span>
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase">{match.type}</span>
                               </div>
                               <div className="flex items-center gap-3">
-                                <div className="bg-primary/5 border border-primary/10 px-2 py-0.5 rounded-lg min-w-[36px] text-center">
-                                  <span className="text-[10px] font-black tabular-nums text-primary">
+                                <div className="bg-primary/5 border border-primary/10 px-2 py-0.5 rounded-lg min-w-[40px] text-center">
+                                  <span className="text-xs font-black tabular-nums text-primary">
                                     {match.result ? `${match.result.home}-${match.result.away}` : '- : -'}
                                   </span>
                                 </div>

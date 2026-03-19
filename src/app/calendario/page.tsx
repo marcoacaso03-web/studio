@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -165,26 +164,26 @@ export default function DashboardPage() {
                   const month = mDate.toLocaleDateString('it-IT', { month: 'short' }).toUpperCase();
                   
                   return (
-                    <TableRow key={match.id} className="h-10 border-b hover:bg-primary/5 transition-all group cursor-pointer" onClick={() => navigateToMatch(match)}>
+                    <TableRow key={match.id} className="h-12 border-b hover:bg-primary/5 transition-all group cursor-pointer" onClick={() => navigateToMatch(match)}>
                       <TableCell className="p-0 px-3">
                         <div className="flex items-center gap-3">
-                          <div className="flex flex-col items-center min-w-[28px]">
-                            <span className="text-[9px] font-black leading-none text-primary">{day}</span>
-                            <span className="text-[7px] font-bold text-muted-foreground">{month}</span>
+                          <div className="flex flex-col items-center min-w-[32px]">
+                            <span className="text-[11px] font-black leading-none text-primary">{day}</span>
+                            <span className="text-[8px] font-bold text-muted-foreground">{month}</span>
                           </div>
                           <div className="p-1.5 bg-muted/30 rounded-lg">
                             {match.isHome ? <Home className="h-3 w-3 text-primary/60" /> : <Plane className="h-3 w-3 text-accent/60" />}
                           </div>
                           <div className="flex-1 flex items-center justify-between gap-2">
                             <div className="flex flex-col">
-                              <span className="text-[11px] font-black text-foreground uppercase tracking-tight truncate max-w-[120px]">
+                              <span className="text-sm font-black text-foreground uppercase tracking-tight truncate max-w-[120px]">
                                 {match.opponent}
                               </span>
-                              <span className="text-[7px] font-bold text-muted-foreground uppercase">{match.type}</span>
+                              <span className="text-[9px] font-bold text-muted-foreground uppercase">{match.type}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <div className="bg-primary/5 border border-primary/10 px-1.5 py-0.5 rounded-lg min-w-[32px] text-center">
-                                <span className="text-[9px] font-black tabular-nums text-primary">
+                                <span className="text-[11px] font-black tabular-nums text-primary">
                                   {match.result ? `${match.result.home}-${match.result.away}` : '- : -'}
                                 </span>
                               </div>
