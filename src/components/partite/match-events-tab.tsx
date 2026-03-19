@@ -28,7 +28,9 @@ export function MatchEventsTab() {
 
   const getEventLabel = (event: any) => {
     if (event.type === 'goal') {
-      return event.assistPlayerName ? `GOAL (ASSIST: ${event.assistPlayerName})` : 'GOAL';
+      return event.assistPlayerName 
+        ? `GOAL (ASSIST: ${event.assistPlayerName.toUpperCase()})` 
+        : 'GOAL';
     }
     if (event.type === 'substitution') {
       return 'SOSTITUZIONE';
@@ -50,9 +52,9 @@ export function MatchEventsTab() {
           <div>
             <div className="flex items-center gap-2">
               <Zap className="h-5 w-5 text-accent" />
-              <CardTitle>Cronaca Partita</CardTitle>
+              <CardTitle className="uppercase font-black">Cronaca Partita</CardTitle>
             </div>
-            <CardDescription>Riepilogo degli eventi principali della gara.</CardDescription>
+            <CardDescription className="uppercase text-[10px] font-bold">Riepilogo degli eventi principali della gara.</CardDescription>
           </div>
           <Button 
             size="icon" 
@@ -66,13 +68,14 @@ export function MatchEventsTab() {
           {events.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-lg">
                 <Info className="h-10 w-10 text-muted-foreground mb-3 opacity-20" />
-                <p className="text-sm text-muted-foreground">Nessun evento registrato per questa partita.</p>
-                <p className="text-xs text-muted-foreground mt-2">Usa il tasto + per aggiungere gol, cartellini o sostituzioni.</p>
+                <p className="text-xs font-black uppercase text-muted-foreground">Nessun evento registrato</p>
+                <p className="text-[10px] font-bold text-muted-foreground mt-2 uppercase">Usa il tasto + per aggiungere gol o cartellini.</p>
             </div>
           ) : (
             <div className="space-y-4">
               {events.map((event) => {
                 const isPitchMan = match?.isHome ? event.team === 'home' : event.team === 'away';
+                const mainName = event.playerName || (isPitchMan ? 'GIOCATORE' : (match?.opponent || 'AVVERSARIO'));
                 
                 return (
                   <div key={event.id} className="flex items-center justify-between border-b border-muted pb-3 last:border-0">
@@ -85,28 +88,28 @@ export function MatchEventsTab() {
                               {event.type === 'substitution' ? (
                                 <div className="flex flex-col">
                                    <div className="flex items-center gap-2">
-                                      <span className="text-[10px] font-bold text-green-500 uppercase">Entra:</span>
-                                      <p className="font-bold leading-none">{event.playerName}</p>
+                                      <span className="text-[10px] font-black text-green-500 uppercase">Entra:</span>
+                                      <p className="font-black leading-none uppercase text-sm">{event.playerName}</p>
                                    </div>
                                    <div className="flex items-center gap-2 mt-1">
-                                      <span className="text-[10px] font-bold text-red-500 uppercase">Esce:</span>
-                                      <p className="text-xs opacity-70 leading-none">{event.subOutPlayerName}</p>
+                                      <span className="text-[10px] font-black text-red-500 uppercase">Esce:</span>
+                                      <p className="text-[11px] font-bold opacity-70 leading-none uppercase">{event.subOutPlayerName}</p>
                                    </div>
                                 </div>
                               ) : (
-                                <p className="font-bold leading-none">{event.playerName || (isPitchMan ? 'Giocatore' : (match?.opponent || 'Avversario'))}</p>
+                                <p className="font-black leading-none uppercase text-sm">{mainName.toUpperCase()}</p>
                               )}
-                              <Badge variant="outline" className="text-[10px] py-0 px-1 font-normal opacity-70">
+                              <Badge variant="outline" className="text-[9px] py-0 px-1 font-black opacity-70 border-primary/20">
                                   {isPitchMan ? 'PITCHMAN' : 'AVVERSARIO'}
                               </Badge>
                           </div>
-                          <p className="text-[10px] text-muted-foreground mt-1 font-bold tracking-wider">{getEventLabel(event)}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1 font-black tracking-widest">{getEventLabel(event)}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="text-right">
-                          <span className="text-sm font-bold">{event.minute}&apos;</span>
-                          <span className="text-[10px] text-muted-foreground block leading-none">{event.period}</span>
+                          <span className="text-sm font-black tabular-nums">{event.minute}&apos;</span>
+                          <span className="text-[9px] font-bold text-muted-foreground block leading-none">{event.period}</span>
                       </div>
                       <Button 
                           variant="ghost" 
