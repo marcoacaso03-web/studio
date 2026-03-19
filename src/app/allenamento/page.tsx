@@ -57,26 +57,27 @@ export default function AllenamentoPage() {
   }, [sessions, currentWeekStart]);
 
   const handleGenerate = async () => {
-    await generateSessions(new Date(genStart), new Date(genEnd), sessionsPerWeek);
     setIsGeneratorOpen(false);
+    await generateSessions(new Date(genStart), new Date(genEnd), sessionsPerWeek);
   };
 
   const handleDeleteSingle = async () => {
     if (sessionToDelete) {
-      await deleteSession(sessionToDelete);
-      setSessionToDelete(null);
+      const id = sessionToDelete;
+      setSessionToDelete(null); // Chiudi subito per evitare UI lock
+      await deleteSession(id);
     }
   };
 
   const handleDeleteWeek = async () => {
     const ids = weekSessions.map(s => s.id);
+    setIsClearWeekOpen(false); // Chiudi subito per evitare UI lock
     await deleteSessions(ids);
-    setIsClearWeekOpen(false);
   };
 
   const handleDeleteAll = async () => {
+    setIsClearAllOpen(false); // Chiudi subito per evitare UI lock
     await clearAllSessions();
-    setIsClearAllOpen(false);
   };
 
   const nextWeek = () => setCurrentWeekStart(addWeeks(currentWeekStart, 1));
