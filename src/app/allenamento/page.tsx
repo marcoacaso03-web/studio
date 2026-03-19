@@ -60,26 +60,30 @@ export default function AllenamentoPage() {
 
   const handleGenerate = async () => {
     setIsGeneratorOpen(false);
-    await generateSessions(new Date(genStart), new Date(genEnd), sessionsPerWeek);
+    // Piccolo delay per permettere la chiusura del dialog prima del caricamento
+    setTimeout(() => {
+      generateSessions(new Date(genStart), new Date(genEnd), sessionsPerWeek);
+    }, 100);
   };
 
   const handleDeleteSingle = async () => {
     if (sessionToDelete) {
       const id = sessionToDelete;
       setSessionToDelete(null);
-      await deleteSession(id);
+      setTimeout(() => deleteSession(id), 150);
     }
   };
 
   const handleDeleteWeek = async () => {
     const ids = weekSessions.map(s => s.id);
     setIsClearWeekOpen(false);
-    await deleteSessions(ids);
+    setTimeout(() => deleteSessions(ids), 150);
   };
 
   const handleDeleteAll = async () => {
     setIsClearAllOpen(false);
-    await clearAllSessions();
+    // Cruciale: il timeout assicura che Radix UI rimuova l'overlay prima che lo store blocchi il thread con l'async call
+    setTimeout(() => clearAllSessions(), 150);
   };
 
   const nextWeek = () => setCurrentWeekStart(addWeeks(currentWeekStart, 1));
@@ -109,10 +113,10 @@ export default function AllenamentoPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="rounded-xl">
-              <DropdownMenuItem className="text-[10px] font-bold uppercase" onClick={() => setIsClearWeekOpen(true)}>
+              <DropdownMenuItem className="text-[10px] font-bold uppercase" onClick={() => setTimeout(() => setIsClearWeekOpen(true), 100)}>
                 Elimina Settimana
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-[10px] font-bold uppercase text-destructive" onClick={() => setIsClearAllOpen(true)}>
+              <DropdownMenuItem className="text-[10px] font-bold uppercase text-destructive" onClick={() => setTimeout(() => setIsClearAllOpen(true), 100)}>
                 Elimina Tutto
               </DropdownMenuItem>
             </DropdownMenuContent>
