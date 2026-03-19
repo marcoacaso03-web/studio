@@ -51,19 +51,32 @@ export default function AllenamentoPage() {
   const [isClearWeekOpen, setIsClearWeekOpen] = useState(false);
 
   useEffect(() => {
-    fetchAll();
+    if (activeSeason) {
+      fetchAll();
+    }
   }, [fetchAll, activeSeason]);
 
   const weekSessions = useMemo(() => {
-    return sessions.filter(s => isSameWeek(parseISO(s.date), currentWeekStart, { weekStartsOn: 1 }));
+    return sessions.filter(s => {
+      try {
+        // Gestiamo sia ISO che yyyy-MM-dd
+        const sessionDate = s.date.includes('T') ? parseISO(s.date) : new Date(s.date);
+        return isSameWeek(sessionDate, currentWeekStart, { weekStartsOn: 1 });
+      } catch (e) {
+        return false;
+      }
+    });
   }, [sessions, currentWeekStart]);
 
   const handleGenerate = async () => {
     setIsGeneratorOpen(false);
     // Piccolo delay per permettere la chiusura del dialog prima del caricamento
     setTimeout(() => {
-      generateSessions(new Date(genStart), new Date(genEnd), sessionsPerWeek);
-    }, 100);
+      // Usiamo mezzanotte locale per il parsing per evitare slittamenti di data
+      const [sy, sm, sd] = genStart.split('-').map(Number);
+      const [ey, em, ed] = genEnd.split('-').map(Number);
+      generateSessions(new Date(sy, sm - 1, sd), new Date(ey, em - 1, ed), sessionsPerWeek);
+    }, 150);
   };
 
   const handleDeleteSingle = async () => {
@@ -82,8 +95,7 @@ export default function AllenamentoPage() {
 
   const handleDeleteAll = async () => {
     setIsClearAllOpen(false);
-    // Cruciale: il timeout assicura che Radix UI rimuova l'overlay prima che lo store blocchi il thread con l'async call
-    setTimeout(() => clearAllSessions(), 150);
+    setTimeout(() => clearAllSessions(), 300);
   };
 
   const nextWeek = () => setCurrentWeekStart(addWeeks(currentWeekStart, 1));
