@@ -11,7 +11,8 @@ import {
   deleteDoc, 
   query, 
   where,
-  writeBatch
+  writeBatch,
+  getDoc
 } from 'firebase/firestore';
 import type { TrainingSession, TrainingAttendance, TrainingStatus } from '@/lib/types';
 
@@ -27,7 +28,7 @@ export const trainingRepository = {
   async getById(userId: string, sessionId: string) {
     const db = getFirestore();
     const docRef = doc(db, 'users', userId, 'trainingSessions', sessionId);
-    const snapshot = await (await import('firebase/firestore')).getDoc(docRef);
+    const snapshot = await getDoc(docRef);
     return snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } as TrainingSession : undefined;
   },
 
@@ -71,6 +72,19 @@ export const trainingRepository = {
     const attRef = collection(db, 'users', userId, 'trainingSessions', sessionId, 'attendance');
     const snapshot = await getDocs(attRef);
     return snapshot.docs.map(doc => ({ ...doc.data(), playerId: doc.id } as TrainingAttendance));
+  },
+
+  async getAllAttendanceForSeason(userId: string, sessionIds: string[]) {
+    const db = getFirestore();
+    const allAttendance: { sessionId: string, attendance: TrainingAttendance[] }[] = [];
+    
+    // Per un numero limitato di sessioni carichiamo in parallelo
+    await Promise.all(sessionIds.map(async (sid) => {
+      const att = await this.getAttendance(userId, sid);
+      allAttendance.push({ sessionId: sid, attendance: att });
+    }));
+    
+    return allAttendance;
   },
 
   async setAttendance(userId: string, sessionId: string, playerId: string, status: TrainingStatus) {

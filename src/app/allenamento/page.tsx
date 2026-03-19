@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dumbbell, ChevronLeft, ChevronRight, PlusCircle, Trash2, Loader2, MoreHorizontal, Eraser } from "lucide-react";
+import { Dumbbell, ChevronLeft, ChevronRight, PlusCircle, Trash2, Loader2, Eraser, ClipboardCheck } from "lucide-react";
 import { useTrainingStore } from "@/store/useTrainingStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
@@ -31,6 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { TrainingStatsDialog } from "@/components/allenamento/training-stats-dialog";
 
 export default function AllenamentoPage() {
   const router = useRouter();
@@ -40,6 +41,7 @@ export default function AllenamentoPage() {
   
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [genStart, setGenStart] = useState(format(new Date(), "yyyy-MM-dd"));
   const [genEnd, setGenEnd] = useState(format(addWeeks(new Date(), 4), "yyyy-MM-dd"));
 
@@ -64,19 +66,19 @@ export default function AllenamentoPage() {
   const handleDeleteSingle = async () => {
     if (sessionToDelete) {
       const id = sessionToDelete;
-      setSessionToDelete(null); // Chiudi subito per evitare UI lock
+      setSessionToDelete(null);
       await deleteSession(id);
     }
   };
 
   const handleDeleteWeek = async () => {
     const ids = weekSessions.map(s => s.id);
-    setIsClearWeekOpen(false); // Chiudi subito per evitare UI lock
+    setIsClearWeekOpen(false);
     await deleteSessions(ids);
   };
 
   const handleDeleteAll = async () => {
-    setIsClearAllOpen(false); // Chiudi subito per evitare UI lock
+    setIsClearAllOpen(false);
     await clearAllSessions();
   };
 
@@ -87,6 +89,15 @@ export default function AllenamentoPage() {
     <div className="space-y-6 pb-20">
       <PageHeader title="Allenamento">
         <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            size="sm" 
+            className="rounded-xl font-black uppercase text-[10px] h-9 px-3 border-primary/20 text-primary"
+            onClick={() => setIsStatsOpen(true)}
+          >
+            <ClipboardCheck className="mr-1.5 h-3.5 w-3.5" /> Report
+          </Button>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
@@ -208,6 +219,13 @@ export default function AllenamentoPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Stats Dialog */}
+      <TrainingStatsDialog 
+        open={isStatsOpen} 
+        onOpenChange={setIsStatsOpen} 
+        currentWeekStart={currentWeekStart}
+      />
 
       {/* Single Delete Alert */}
       <AlertDialog open={!!sessionToDelete} onOpenChange={(open) => !open && setSessionToDelete(null)}>
