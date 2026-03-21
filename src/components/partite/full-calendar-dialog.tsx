@@ -150,7 +150,7 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
                               <div className="flex items-center gap-3">
                                 <div className="bg-primary/5 border border-primary/10 px-2 py-0.5 rounded-lg min-w-[40px] text-center">
                                   <span className="text-xs font-black tabular-nums text-primary">
-                                    {match.result ? `${match.result.home}-${match.result.away}` : '- : -'}
+                                    {match.result ? `${match.result.home} - ${match.result.away}` : '0 - 0'}
                                   </span>
                                 </div>
                                 <StatusBadge status={match.status} />

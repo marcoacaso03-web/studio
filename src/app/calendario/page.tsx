@@ -186,7 +186,7 @@ export default function DashboardPage() {
                             <div className="flex items-center gap-2">
                               <div className="bg-primary/5 border border-primary/10 px-1.5 py-0.5 rounded-lg min-w-[32px] text-center">
                                 <span className="text-[11px] font-black tabular-nums text-primary">
-                                  {match.result ? `${match.result.home}-${match.result.away}` : '- : -'}
+                                  {match.result ? `${match.result.home} - ${match.result.away}` : '0 - 0'}
                                 </span>
                               </div>
                               <StatusBadge status={match.status} />

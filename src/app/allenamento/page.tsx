@@ -10,7 +10,7 @@ import { useTrainingStore } from "@/store/useTrainingStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
 import { useRouter } from "next/navigation";
-import { format, startOfWeek, addWeeks, subWeeks, isSameWeek, parseISO } from "date-fns";
+import { format, startOfWeek, addWeeks, subWeeks, isSameWeek, parseISO, addDays } from "date-fns";
 import { it } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,6 +50,7 @@ export default function AllenamentoPage() {
   const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [genStart, setGenStart] = useState(format(new Date(), "yyyy-MM-dd"));
   const [genEnd, setGenEnd] = useState(format(addWeeks(new Date(), 4), "yyyy-MM-dd"));
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   // States for deletions
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
@@ -148,12 +155,39 @@ export default function AllenamentoPage() {
         <Button variant="ghost" size="icon" onClick={prevWeek} className="h-10 w-10 text-primary">
           <ChevronLeft className="h-6 w-6" />
         </Button>
-        <div className="flex flex-col items-center">
-          <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Settimana del</span>
-          <span className="text-sm font-black uppercase text-primary">
-            {format(currentWeekStart, "dd MMMM yyyy", { locale: it })}
-          </span>
-        </div>
+        
+        <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" className="flex flex-col items-center h-auto hover:bg-transparent">
+              <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest leading-tight">Settimana del</span>
+              <span className="text-sm font-black uppercase text-primary tracking-tight">
+                {format(currentWeekStart, "dd MMM yyyy", { locale: it })}
+                <span className="text-muted-foreground mx-1.5 opacity-50">-</span>
+                {format(addDays(currentWeekStart, 6), "dd MMM yyyy", { locale: it })}
+              </span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0 rounded-2xl" align="center">
+            <Calendar
+              mode="single"
+              selected={currentWeekStart}
+              onSelect={(date) => {
+                if (date) {
+                  setCurrentWeekStart(startOfWeek(date, { weekStartsOn: 1 }));
+                  setIsCalendarOpen(false);
+                }
+              }}
+              initialFocus
+              locale={it}
+              className="p-3"
+              classNames={{
+                weekday: "text-muted-foreground rounded-md w-9 font-normal text-[0.7rem] uppercase tracking-tighter text-center",
+                caption_label: "text-sm font-black uppercase tracking-wider text-primary",
+              }}
+            />
+          </PopoverContent>
+        </Popover>
+
         <Button variant="ghost" size="icon" onClick={nextWeek} className="h-10 w-10 text-primary">
           <ChevronRight className="h-6 w-6" />
         </Button>

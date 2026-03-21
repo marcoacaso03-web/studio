@@ -3,6 +3,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ─── Helper Functions ────────────────────────────────────────────────────
+
     function isSignedIn() {
       return request.auth != null;
     }
@@ -15,48 +17,105 @@ service cloud.firestore {
       return isOwner(userId) && resource != null;
     }
 
+    // Checks that the incoming document data sets teamOwnerId to the caller's UID
+    function incomingIsOwnedByMe() {
+      return isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
+    }
+
+    // Checks that the existing document is owned by the caller
+    function existingIsOwnedByMe() {
+      return isSignedIn() && resource.data.teamOwnerId == request.auth.uid;
+    }
+
+    // ─── /users/{userId} ─────────────────────────────────────────────────────
+    // Personal user document and sub-collections (Scout, Training sessions)
+
     match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if false;
+      allow get:    if isOwner(userId);
+      allow list:   if false;
       allow create: if isOwner(userId);
       allow update: if isExistingOwner(userId);
       allow delete: if isExistingOwner(userId);
 
       match /scoutPlayers/{scoutPlayerId} {
         allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.id == scoutPlayerId;
-        allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-        allow delete: if isExistingOwner(userId);
+        allow create:    if isOwner(userId) && request.resource.data.id == scoutPlayerId;
+        allow update:    if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+        allow delete:    if isExistingOwner(userId);
       }
 
       match /scoutCategories/{scoutCategoryId} {
         allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.id == scoutCategoryId;
-        allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-        allow delete: if isExistingOwner(userId);
+        allow create:    if isOwner(userId) && request.resource.data.id == scoutCategoryId;
+        allow update:    if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+        allow delete:    if isExistingOwner(userId);
       }
 
       match /trainingSessions/{sessionId} {
         allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId);
+        allow create:    if isOwner(userId);
         allow update, delete: if isExistingOwner(userId);
-        
+
         match /attendance/{playerId} {
           allow get, list: if isOwner(userId);
-          allow write: if isOwner(userId);
+          allow write:     if isOwner(userId);
         }
       }
     }
-    
-    // Default teams access (Legacy / Shared data)
-    match /teams/{teamId} {
-      allow read, write: if isSignedIn();
-      match /{allPaths=**} {
-        allow read, write: if isSignedIn();
+
+    // ─── /teams/{seasonId} ───────────────────────────────────────────────────
+    // Season document: owned by the user who created it (ownerId field).
+    // Sub-collections (players, matches, events, lineup) gated by teamOwnerId.
+
+    match /teams/{seasonId} {
+      // Only the owning user can read/write their own season document
+      allow get:    if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow list:   if isSignedIn(); // filtered server-side with where('ownerId','==',uid)
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isSignedIn()
+                    && resource.data.ownerId == request.auth.uid
+                    && request.resource.data.ownerId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+
+      // ── Players ────────────────────────────────────────────────────────────
+      match /players/{playerId} {
+        allow get:    if isSignedIn() && resource.data.teamOwnerId == request.auth.uid;
+        allow list:   if isSignedIn(); // filtered server-side with where('teamOwnerId','==',uid)
+        allow create: if incomingIsOwnedByMe();
+        allow update: if existingIsOwnedByMe() && incomingIsOwnedByMe();
+        allow delete: if existingIsOwnedByMe();
+      }
+
+      // ── Matches ───────────────────────────────────────────────────────────
+      match /matches/{matchId} {
+        allow get:    if isSignedIn() && resource.data.teamOwnerId == request.auth.uid;
+        allow list:   if isSignedIn(); // filtered server-side with where('teamOwnerId','==',uid)
+        allow create: if incomingIsOwnedByMe();
+        allow update: if existingIsOwnedByMe() && incomingIsOwnedByMe();
+        allow delete: if existingIsOwnedByMe();
+
+        // ── Match Events ─────────────────────────────────────────────────
+        match /events/{eventId} {
+          allow get:    if isSignedIn() && resource.data.teamOwnerId == request.auth.uid;
+          allow list:   if isSignedIn(); // filtered server-side with where('teamOwnerId','==',uid)
+          allow create: if incomingIsOwnedByMe();
+          allow update: if existingIsOwnedByMe() && incomingIsOwnedByMe();
+          allow delete: if existingIsOwnedByMe();
+        }
+
+        // ── Match Lineup (single doc per match) ──────────────────────────
+        match /lineup/{lineupId} {
+          allow get:    if isSignedIn() && resource.data.teamOwnerId == request.auth.uid;
+          allow list:   if isSignedIn() && resource.data.teamOwnerId == request.auth.uid;
+          allow create: if incomingIsOwnedByMe();
+          allow update: if existingIsOwnedByMe() && incomingIsOwnedByMe();
+          allow delete: if existingIsOwnedByMe();
+        }
       }
     }
 
-    match /{path=**} {
+    // ─── Catch-all: deny everything else ─────────────────────────────────────
+    match /{document=**} {
       allow read, write: if false;
     }
   }

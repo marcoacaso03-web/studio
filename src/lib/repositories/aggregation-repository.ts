@@ -181,10 +181,11 @@ export const aggregationRepository = {
                 const details = context.matchesDetails[match.id];
                 if (!details) continue;
 
-                const isInLineup = details.lineup?.starters.includes(player.id) || details.lineup?.substitutes.includes(player.id);
+                const isStarter = details.lineup?.starters.includes(player.id) ?? false;
                 const playerStats = details.stats.find(s => s.playerId === player.id);
+                const hasPlayed = isStarter || !!playerStats;
 
-                if (isInLineup || playerStats) {
+                if (hasPlayed) {
                     appearances++;
                     if (playerStats) {
                         totalMinutes += playerStats.minutesPlayed || 0;

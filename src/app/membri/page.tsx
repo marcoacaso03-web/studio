@@ -2,9 +2,11 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, ArrowUpDown, Sparkles } from "lucide-react";
+import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, ArrowUpDown, Sparkles, ChevronRight } from "lucide-react";
 import type { Player, Role } from "@/lib/types";
 import dynamic from "next/dynamic";
 
@@ -46,7 +48,15 @@ const roleInitials: Record<Role, string> = {
   'Attaccante': 'ATT'
 };
 
+const roleBg: Record<string, string> = {
+  Portiere: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+  Difensore: "bg-primary/10 text-primary border-primary/20",
+  Centrocampista: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+  Attaccante: "bg-red-500/10 text-red-500 border-red-500/20",
+};
+
 export default function RosaPage() {
+  const router = useRouter();
   const { players, loading: playersLoading, fetchAll, add, update, remove, bulkAdd } = usePlayersStore();
   const { activeSeason, loading: seasonsLoading, fetchAll: fetchSeasons } = useSeasonsStore();
   
@@ -222,7 +232,11 @@ export default function RosaPage() {
                     {sortedPlayers.map((player) => {
                       const { firstName, lastName } = splitName(player.name);
                       return (
-                        <TableRow key={player.id} className="h-10 border-muted/50 hover:bg-primary/5 transition-colors">
+                        <TableRow 
+                          key={player.id} 
+                          className="h-10 border-muted/50 hover:bg-primary/5 transition-colors group cursor-pointer"
+                          onClick={() => router.push(`/membri/${player.id}`)}
+                        >
                           <TableCell className="px-3 py-0 font-bold text-xs uppercase tracking-tight truncate max-w-[80px]">
                             {firstName}
                           </TableCell>
@@ -230,25 +244,30 @@ export default function RosaPage() {
                             {lastName}
                           </TableCell>
                           <TableCell className="px-1 py-0 text-center">
-                            <span className="text-[8px] font-black bg-primary/5 text-primary px-1.5 py-0.5 rounded border border-primary/10 min-w-[32px] inline-block">
+                            <span className={`text-[8px] font-black px-1.5 py-0.5 rounded border min-w-[32px] inline-block ${roleBg[player.role] || 'bg-muted text-muted-foreground'}`}>
                               {roleInitials[player.role] || 'N/A'}
                             </span>
                           </TableCell>
                           <TableCell className="px-3 py-0 text-right">
                             <div className="flex items-center justify-end gap-0.5">
+                              <div
+                                className="h-7 w-7 inline-flex items-center justify-center rounded-md text-muted-foreground opacity-30 group-hover:opacity-100 transition-opacity"
+                              >
+                                <ChevronRight className="h-4 w-4" />
+                              </div>
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-7 w-7 text-muted-foreground hover:text-primary"
-                                onClick={() => handleOpenForm(player)}
+                                className="h-7 w-7 text-muted-foreground hover:text-primary z-10"
+                                onClick={(e) => { e.stopPropagation(); handleOpenForm(player); }}
                               >
                                 <Edit className="h-3 w-3" />
                               </Button>
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                                onClick={() => setPlayerToDelete(player)}
+                                className="h-7 w-7 text-muted-foreground hover:text-destructive z-10"
+                                onClick={(e) => { e.stopPropagation(); setPlayerToDelete(player); }}
                               >
                                 <Trash2 className="h-3 w-3" />
                               </Button>
