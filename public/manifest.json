@@ -4,8 +4,8 @@
   "description": "L'app per la gestione della tua squadra di calcio.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#020a1f",
-  "theme_color": "#21416E",
+  "background_color": "#0f172a",
+  "theme_color": "#1e293b",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",

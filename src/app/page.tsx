@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Shield } from 'lucide-react';
+
 
 export default function Home() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -30,7 +30,7 @@ export default function Home() {
       <div className="flex flex-col items-center gap-6 animate-in fade-in zoom-in duration-500">
         <div className="relative">
           <div className="absolute -inset-4 bg-accent/20 rounded-full blur-2xl animate-pulse" />
-          <Shield className="h-20 w-20 text-white fill-white relative" />
+          <img src="/favicon-16x16.png" alt="App Logo" className="h-20 w-20 object-contain drop-shadow-2xl relative" />
         </div>
         
         <div className="flex flex-col items-center gap-2">

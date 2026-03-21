@@ -16,7 +16,7 @@ const FORMATION_ROWS: Record<string, number[][]> = {
   "4-3-3": [[8, 9, 10], [5, 6, 7], [1, 2, 3, 4], [0]],
   "3-5-2": [[9, 10], [4, 5, 6, 7, 8], [1, 2, 3], [0]],
   "4-2-3-1": [[10], [7, 8, 9], [5, 6], [1, 2, 3, 4], [0]],
-  "3-4-2-1": [[10], [8, 9], [4, 5, 6, 7], [1, 2, 3], [0]],
+  "3-4-2-1": [[9], [8, 10], [4, 5, 6, 7], [1, 2, 3], [0]],
   "3-4-1-2": [[9, 10], [8], [4, 5, 6, 7], [1, 2, 3], [0]],
   "4-3-1-2": [[9, 10], [8], [5, 6, 7], [1, 2, 3, 4], [0]]
 };
@@ -35,12 +35,12 @@ export function MatchLineupTab() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSmartOpen, setIsSmartOpen] = useState(false);
 
-  const activeStarters = useMemo(() => 
+  const activeStarters = useMemo(() =>
     lineup?.starters.map((id, idx) => ({ id, originalIdx: idx })) || [],
     [lineup]
   );
-    
-  const activeSubstitutes = useMemo(() => 
+
+  const activeSubstitutes = useMemo(() =>
     lineup?.substitutes
       .filter(id => id !== "")
       .map(id => {
@@ -101,7 +101,7 @@ export function MatchLineupTab() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Campo da Gioco */}
         <div className="lg:col-span-3">
-          <div className="relative aspect-[3/4] md:aspect-[4/3] w-full rounded-3xl bg-gradient-to-b from-[#1a237e] to-[#0d1240] overflow-hidden border-4 border-white/5 shadow-2xl flex flex-col p-4 md:p-8">
+          <div className="relative aspect-[3/4] md:aspect-[4/3] w-full rounded-3xl bg-gradient-to-b from-[#2a4a42] to-[#1a3330] overflow-hidden border-4 border-white/5 shadow-2xl flex flex-col p-4 md:p-8">
             {/* Linee del campo */}
             <div className="absolute inset-4 border-2 border-white/10 pointer-events-none rounded-sm">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-16 border-b-2 border-x-2 border-white/10" />
@@ -118,14 +118,14 @@ export function MatchLineupTab() {
                     const playerEntry = activeStarters.find(s => s.originalIdx === starterIdx);
                     const p = playerEntry ? allPlayers.find(player => player.id === playerEntry.id) : null;
                     const isPOR = starterIdx === 0;
-                    
+
                     return (
                       <div key={starterIdx} className="flex flex-col items-center gap-1.5 min-w-[80px]">
                         <div className={cn(
                           "w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center border-4 shadow-xl transition-transform hover:scale-110",
-                          isPOR 
-                            ? "bg-[#ff8f00] border-[#ffd54f] text-black" 
-                            : "bg-primary border-primary-foreground/20 text-white"
+                          isPOR
+                            ? "bg-amber-500 border-amber-300 text-black"
+                            : "bg-[#3d8b72] border-[#5BB89A]/40 text-white"
                         )}>
                           <span className="text-[10px] md:text-sm font-black uppercase">
                             {currentAcronyms[starterIdx] || (starterIdx + 1)}

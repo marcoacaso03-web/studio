@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield, Lock, User, Sparkles, ArrowRight } from 'lucide-react';
+import { Lock, User, Sparkles, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
@@ -67,7 +67,7 @@ export default function LoginPage() {
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center mb-2">
             <div className="p-3 bg-primary rounded-2xl">
-              <Shield className="h-10 w-10 text-white fill-white" />
+              <img src="/favicon-16x16.png" alt="App Logo" className="h-10 w-10 object-contain drop-shadow" />
             </div>
           </div>
           <CardTitle className="text-3xl font-black tracking-tighter text-primary">PitchMan</CardTitle>

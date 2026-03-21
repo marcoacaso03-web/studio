@@ -12,7 +12,9 @@ import { usePlayersStore } from "@/store/usePlayersStore";
 import { useStatsStore } from "@/store/useStatsStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FullCalendarDialog } from "@/components/partite/full-calendar-dialog";
+import dynamic from "next/dynamic";
+
+const FullCalendarDialog = dynamic(() => import("@/components/partite/full-calendar-dialog").then(mod => mod.FullCalendarDialog), { ssr: false });
 
 export default function DashboardPage() {
   const { matches, loading: matchesLoading, fetchAll: fetchMatches } = useMatchesStore();

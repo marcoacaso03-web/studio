@@ -29,8 +29,6 @@ export type Player = {
   seasonId: string;
   name: string;
   role: Role;
-  avatarUrl: string;
-  imageHint: string;
   stats: PlayerStats;
   createdAt: string;
   updatedAt: string;
@@ -127,3 +125,18 @@ export type TrainingAttendance = {
   playerId: string;
   status: TrainingStatus;
 };
+
+export interface ScoutCategory {
+  id: string;
+  name: string;
+  colorHex: string;
+}
+
+export interface ScoutPlayer {
+  id: string;
+  name: string;
+  role: string;
+  currentTeam: string;
+  categoryIds?: string[];
+  notes?: string;
+}

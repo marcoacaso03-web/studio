@@ -90,10 +90,10 @@ export default function TrainingDetailPage() {
 
       <Tabs defaultValue="programma" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-6 h-12 bg-muted/50 p-1 rounded-2xl border">
-          <TabsTrigger value="programma" className="flex items-center gap-2 text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm">
+          <TabsTrigger value="programma" className="flex items-center gap-2 text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm">
             <ClipboardList className="h-4 w-4" /> Programma
           </TabsTrigger>
-          <TabsTrigger value="presenze" className="flex items-center gap-2 text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm">
+          <TabsTrigger value="presenze" className="flex items-center gap-2 text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm">
             <Users className="h-4 w-4" /> Presenze
           </TabsTrigger>
         </TabsList>

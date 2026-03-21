@@ -127,14 +127,17 @@ export default function AltroPage() {
   }
 
   const handleExport = async () => {
-    if (!user) return;
+    if (!user || !activeSeason) {
+      toast({ variant: "destructive", title: "Nessuna stagione attiva", description: "Seleziona una stagione prima di esportare." });
+      return;
+    }
     setIsExporting(true);
     try {
-      const players = await playerRepository.getAll(user.id, activeSeason?.id);
-      const playersCSV = convertToCSV(players.map(({avatarUrl, imageHint, ...p}) => p));
+      const players = await playerRepository.getAll(user.id, activeSeason.id);
+      const playersCSV = convertToCSV(players);
       downloadCSV(playersCSV, `pitchman_players_${user.username}.csv`);
       
-      const matches = await matchRepository.getAll(user.id, activeSeason?.id);
+      const matches = await matchRepository.getAll(user.id, activeSeason.id);
       const matchesCSV = convertToCSV(matches);
       downloadCSV(matchesCSV, `pitchman_matches_${user.username}.csv`);
     } catch (error) {

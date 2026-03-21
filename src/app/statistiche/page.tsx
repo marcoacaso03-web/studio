@@ -39,10 +39,10 @@ export default function StatistichePage() {
     <div>
       <PageHeader title="Statistiche" />
       <Tabs defaultValue="record" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="record" className="text-xs font-bold uppercase">Record</TabsTrigger>
-          <TabsTrigger value="leaderboard" className="text-xs font-bold uppercase">Giocatori</TabsTrigger>
-          <TabsTrigger value="grafici" className="text-xs font-bold uppercase">Grafici</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 mb-6 h-12 bg-muted/50 p-1 rounded-2xl border">
+          <TabsTrigger value="record" className="text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm">Record</TabsTrigger>
+          <TabsTrigger value="leaderboard" className="text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm">Giocatori</TabsTrigger>
+          <TabsTrigger value="grafici" className="text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm">Grafici</TabsTrigger>
         </TabsList>
         <TabsContent value="record">
           {loading ? (

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Shield } from 'lucide-react';
+
 import Link from 'next/link';
 import { useAuthStore } from '@/store/useAuthStore';
 import { usePathname } from 'next/navigation';
@@ -23,7 +23,7 @@ export function AppHeader() {
       <div className="flex items-center gap-10">
         <Link href="/" className="flex items-center gap-2.5 text-white hover:opacity-90 transition-opacity">
           <div className="p-1.5 bg-white/10 rounded-xl">
-            <Shield className="h-7 w-7 fill-white text-white" />
+            <img src="/favicon-16x16.png" alt="App Logo" className="h-7 w-7 object-contain drop-shadow" />
           </div>
           <div className="flex flex-col">
             <span className="text-xl font-black tracking-tighter leading-none">PitchMan</span>

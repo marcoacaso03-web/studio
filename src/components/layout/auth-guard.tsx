@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Shield } from 'lucide-react';
+
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -28,7 +28,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   if (!mounted) {
      return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary">
-        <Shield className="h-12 w-12 text-white animate-pulse" />
+        <img src="/favicon-16x16.png" alt="App Logo" className="h-16 w-16 animate-pulse drop-shadow-lg" />
       </div>
     );
   }
@@ -42,7 +42,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   if (!isAuthenticated) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary">
-        <Shield className="h-12 w-12 text-white animate-pulse" />
+        <img src="/favicon-16x16.png" alt="App Logo" className="h-16 w-16 animate-pulse drop-shadow-lg" />
       </div>
     );
   }

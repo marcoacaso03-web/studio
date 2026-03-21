@@ -79,7 +79,7 @@ function MatchDetailContent() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'completed': return <Badge variant="default" className="bg-primary text-white font-black uppercase text-[10px] px-2">Finita</Badge>;
+      case 'completed': return <Badge variant="default" className="bg-primary text-primary-foreground font-black uppercase text-[10px] px-2">Finita</Badge>;
       case 'scheduled': return <Badge variant="secondary" className="font-black uppercase text-[10px] px-2">Programmata</Badge>;
       case 'canceled': return <Badge variant="destructive" className="font-black uppercase text-[10px] px-2">Annullata</Badge>;
       default: return null;
@@ -132,7 +132,7 @@ function MatchDetailContent() {
               <Button 
                 variant="secondary" 
                 size="sm" 
-                className="w-full bg-white text-primary hover:bg-white/90 font-black uppercase text-[10px] h-10 rounded-xl shadow-lg"
+                className="w-full bg-white/90 dark:bg-white/10 text-primary dark:text-primary-foreground hover:bg-white dark:hover:bg-white/15 font-black uppercase text-[10px] h-10 rounded-xl shadow-lg"
                 onClick={() => setIsFormOpen(true)}
               >
                 <Settings2 className="mr-2 h-3.5 w-3.5" />
@@ -145,13 +145,13 @@ function MatchDetailContent() {
       
       <Tabs defaultValue="eventi" className="w-full">
         <TabsList className="grid w-full grid-cols-3 mb-4 h-12 bg-muted/50 p-1 rounded-xl border">
-          <TabsTrigger value="eventi" className="flex items-center gap-1.5 text-[9px] font-black uppercase rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
+          <TabsTrigger value="eventi" className="flex items-center gap-1.5 text-[9px] font-black uppercase rounded-lg data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm">
             <Zap className="h-3.5 w-3.5" /> Cronaca
           </TabsTrigger>
-          <TabsTrigger value="squadra" className="flex items-center gap-1.5 text-[9px] font-black uppercase rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
+          <TabsTrigger value="squadra" className="flex items-center gap-1.5 text-[9px] font-black uppercase rounded-lg data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm">
             <Users className="h-3.5 w-3.5" /> Squadra
           </TabsTrigger>
-          <TabsTrigger value="note" className="flex items-center gap-1.5 text-[9px] font-black uppercase rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
+          <TabsTrigger value="note" className="flex items-center gap-1.5 text-[9px] font-black uppercase rounded-lg data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm">
             <FileText className="h-3.5 w-3.5" /> Note
           </TabsTrigger>
         </TabsList>

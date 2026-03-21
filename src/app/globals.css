@@ -4,63 +4,63 @@
 
 @layer base {
   :root {
-    --background: 0 0% 96%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 210 15% 96%;
+    --foreground: 215 30% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 215 30% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 235 66% 30%;
+    --popover-foreground: 215 30% 10%;
+    --primary: 215 30% 22%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 0 0% 93%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 0 0% 93%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 34 100% 50%;
-    --accent-foreground: 24 9.8% 10%;
+    --secondary: 210 10% 93%;
+    --secondary-foreground: 215 25% 12%;
+    --muted: 210 10% 93%;
+    --muted-foreground: 215 10% 46%;
+    --accent: 160 40% 48%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 235 66% 30%;
-    --chart-1: 34 100% 50%;
-    --chart-2: 235 66% 30%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --border: 210 12% 89%;
+    --input: 210 12% 89%;
+    --ring: 215 30% 22%;
+    --chart-1: 160 40% 48%;
+    --chart-2: 215 30% 22%;
+    --chart-3: 180 30% 35%;
+    --chart-4: 145 35% 58%;
+    --chart-5: 190 35% 52%;
     --radius: 0.5rem;
   }
   .dark {
-    /* Background quasi nero con tonalità blu molto scura */
-    --background: 235 50% 2%;
-    --foreground: 215 20% 80%; /* Grigio chiaro morbido per ridurre l'abbagliamento */
-    
-    --card: 235 50% 4%;
-    --card-foreground: 215 20% 90%;
-    
-    --popover: 235 50% 3%;
-    --popover-foreground: 215 20% 90%;
-    
-    /* Primary blu vibrante */
-    --primary: 235 75% 55%;
-    --primary-foreground: 0 0% 100%; /* Bianco puro solo per testi su sfondi colorati */
-    
-    --secondary: 235 40% 8%;
-    --secondary-foreground: 215 20% 95%;
-    
-    --muted: 235 30% 10%;
-    --muted-foreground: 215 15% 60%;
-    
-    --accent: 34 100% 50%;
-    --accent-foreground: 24 9.8% 10%;
-    
+    /* Sfondo scuro blu-ardesia, come lo sfondo dell'icona */
+    --background: 215 30% 6%;
+    --foreground: 210 15% 82%;
+
+    --card: 215 28% 10%;
+    --card-foreground: 210 15% 88%;
+
+    --popover: 215 28% 8%;
+    --popover-foreground: 210 15% 88%;
+
+    /* Primary teal luminoso — spicca sullo sfondo scuro */
+    --primary: 165 45% 50%;
+    --primary-foreground: 215 30% 8%;
+
+    --secondary: 215 20% 12%;
+    --secondary-foreground: 210 15% 90%;
+
+    --muted: 215 20% 14%;
+    --muted-foreground: 210 10% 55%;
+
+    --accent: 160 40% 42%;
+    --accent-foreground: 0 0% 100%;
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    
-    /* Bordi quasi invisibili per un look moderno e pulito */
-    --border: 235 30% 10%;
-    --input: 235 30% 10%;
-    --ring: 34 100% 50%;
+
+    /* Bordi sottili ardesia */
+    --border: 215 20% 14%;
+    --input: 215 20% 14%;
+    --ring: 160 40% 42%;
   }
 }
 

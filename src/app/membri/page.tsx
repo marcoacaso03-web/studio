@@ -6,8 +6,10 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, ArrowUpDown, Sparkles } from "lucide-react";
 import type { Player, Role } from "@/lib/types";
-import { PlayerFormDialog } from "@/components/squadra/player-form-dialog";
-import { SmartPlayerDialog } from "@/components/giocatori/smart-player-dialog";
+import dynamic from "next/dynamic";
+
+const PlayerFormDialog = dynamic(() => import("@/components/squadra/player-form-dialog").then(mod => mod.PlayerFormDialog), { ssr: false });
+const SmartPlayerDialog = dynamic(() => import("@/components/giocatori/smart-player-dialog").then(mod => mod.SmartPlayerDialog), { ssr: false });
 import {
   AlertDialog,
   AlertDialogAction,

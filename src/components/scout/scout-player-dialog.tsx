@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useUser, useFirestore } from "@/firebase";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { ROLES } from "@/lib/types";
+import type { ScoutPlayer, ScoutCategory } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -19,8 +20,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface ScoutPlayerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  player?: any;
-  categories: any[];
+  player?: ScoutPlayer | null;
+  categories: ScoutCategory[];
 }
 
 export function ScoutPlayerDialog({ open, onOpenChange, player, categories }: ScoutPlayerDialogProps) {

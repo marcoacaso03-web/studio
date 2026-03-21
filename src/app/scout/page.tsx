@@ -14,6 +14,9 @@ import { ScoutCategoryDialog } from "@/components/scout/scout-category-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import * as React from "react";
+import type { ScoutPlayer } from "@/lib/types";
 
 export default function ScoutPage() {
   const { user } = useUser();
@@ -22,7 +25,37 @@ export default function ScoutPage() {
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   const [isPlayerDialogOpen, setIsPlayerDialogOpen] = useState(false);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
-  const [editingPlayer, setEditingPlayer] = useState<any>(null);
+  const [editingPlayer, setEditingPlayer] = useState<ScoutPlayer | null>(null);
+  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [visibleCount, setVisibleCount] = useState(12);
+  const observerTarget = React.useRef<HTMLDivElement>(null);
+
+  // Debounce ricerca
+  React.useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearchTerm(searchTerm), 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Infinite scroll
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(prev => prev + 12);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (observerTarget.current) observer.observe(observerTarget.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Reset paginazione su nuovi filtri
+  React.useEffect(() => {
+    setVisibleCount(12);
+  }, [debouncedSearchTerm, selectedCategoryIds]);
 
   // Queries Firestore
   const categoriesQuery = useMemoFirebase(() => {
@@ -40,11 +73,14 @@ export default function ScoutPage() {
 
   const filteredPlayers = useMemo(() => {
     if (!players) return [];
-    if (selectedCategoryIds.length === 0) return players;
-    return players.filter(p => 
-      selectedCategoryIds.every(catId => p.categoryIds?.includes(catId))
-    );
-  }, [players, selectedCategoryIds]);
+    return players.filter(p => {
+      const matchCat = selectedCategoryIds.length === 0 || selectedCategoryIds.every(catId => p.categoryIds?.includes(catId));
+      const matchSearch = p.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+      return matchCat && matchSearch;
+    });
+  }, [players, selectedCategoryIds, debouncedSearchTerm]);
+
+  const visiblePlayers = filteredPlayers.slice(0, visibleCount);
 
   const toggleFilter = (id: string) => {
     setSelectedCategoryIds(prev => 
@@ -80,7 +116,19 @@ export default function ScoutPage() {
       </PageHeader>
 
       {/* Sezione Filtri */}
-      <div className="space-y-2">
+      <div className="space-y-3">
+        <div className="flex flex-col md:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Cerca giocatore per nome..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 h-10 w-full rounded-2xl border-primary/20 bg-background/50 focus-visible:ring-primary/30"
+            />
+          </div>
+        </div>
+        
         <div className="flex items-center gap-2 px-1">
           <Filter className="h-3 w-3 text-muted-foreground" />
           <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Filtra per etichetta:</span>
@@ -136,62 +184,70 @@ export default function ScoutPage() {
             </CardContent>
           </Card>
         ) : (
-          filteredPlayers.map((player) => (
-            <Card key={player.id} className="overflow-hidden border shadow-sm rounded-2xl hover:border-primary/30 transition-all group">
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex flex-col">
-                    <h4 className="text-sm font-black uppercase tracking-tight text-primary leading-tight">
-                      {player.name}
-                    </h4>
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">
-                      {player.role} • {player.currentTeam}
-                    </span>
-                  </div>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-7 w-7 text-muted-foreground hover:text-primary"
-                      onClick={() => { setEditingPlayer(player); setIsPlayerDialogOpen(true); }}
-                    >
-                      <Edit className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                      onClick={() => handleDeletePlayer(player.id)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
-
-                {player.notes && (
-                  <p className="text-[10px] text-foreground/70 leading-relaxed mb-3 line-clamp-2 italic">
-                    "{player.notes}"
-                  </p>
-                )}
-
-                <div className="flex flex-wrap gap-1 mt-auto">
-                  {player.categoryIds?.map((catId: string) => {
-                    const cat = categories?.find(c => c.id === catId);
-                    if (!cat) return null;
-                    return (
-                      <span 
-                        key={catId} 
-                        style={{ backgroundColor: cat.colorHex + '20', color: cat.colorHex, borderColor: cat.colorHex + '40' }}
-                        className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded border"
-                      >
-                        {cat.name}
+          <>
+            {visiblePlayers.map((player) => (
+              <Card key={player.id} className="overflow-hidden border shadow-sm rounded-2xl hover:border-primary/30 transition-all group">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex flex-col">
+                      <h4 className="text-sm font-black uppercase tracking-tight text-primary leading-tight">
+                        {player.name}
+                      </h4>
+                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">
+                        {player.role} • {player.currentTeam}
                       </span>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                    </div>
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-7 w-7 text-muted-foreground hover:text-primary"
+                        onClick={() => { setEditingPlayer(player); setIsPlayerDialogOpen(true); }}
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                        onClick={() => handleDeletePlayer(player.id)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {player.notes && (
+                    <p className="text-[10px] text-foreground/70 leading-relaxed mb-3 line-clamp-2 italic">
+                      "{player.notes}"
+                    </p>
+                  )}
+
+                  <div className="flex flex-wrap gap-1 mt-auto">
+                    {player.categoryIds?.map((catId: string) => {
+                      const cat = categories?.find(c => c.id === catId);
+                      if (!cat) return null;
+                      return (
+                        <span 
+                          key={catId} 
+                          style={{ backgroundColor: cat.colorHex + '20', color: cat.colorHex, borderColor: cat.colorHex + '40' }}
+                          className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded border"
+                        >
+                          {cat.name}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            {/* Observer Target per Infinite Scroll */}
+            {visiblePlayers.length < filteredPlayers.length && (
+              <div ref={observerTarget} className="col-span-full h-10 flex items-center justify-center">
+                <Skeleton className="h-8 w-8 rounded-full animate-pulse" />
+              </div>
+            )}
+          </>
         )}
       </div>
 
