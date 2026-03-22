@@ -91,5 +91,15 @@ export const trainingRepository = {
     const db = getFirestore();
     const docRef = doc(db, 'users', userId, 'trainingSessions', sessionId, 'attendance', playerId);
     await setDoc(docRef, { playerId, status });
+
+    // Aggiorniamo anche il documento principale della sessione per avere i count rapidi (denormalizzazione)
+    const sessionRef = doc(db, 'users', userId, 'trainingSessions', sessionId);
+    
+    // Rileggiamo tutti gli 'attendance' aggiornati per questa sessione
+    const attRef = collection(db, 'users', userId, 'trainingSessions', sessionId, 'attendance');
+    const snapshot = await getDocs(attRef);
+    const allAtt = snapshot.docs.map(doc => ({ ...doc.data(), playerId: doc.id }));
+    
+    await updateDoc(sessionRef, { attendances: allAtt });
   }
 };

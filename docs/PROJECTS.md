@@ -53,6 +53,28 @@
 
 ---
 
+## 🎨 Re-design App 
+- [x] **Schermata di Login**:
+  - Implementare tema scuro totale (sfondo molto scuro/nero).
+  - Mostrare il nuovo logo "PitchMan" con font font sans-serif bianco.
+  - Input "Email" e "Password" con bordo a gradiente neon (dal giallo, al verde, al blu).
+  - Bottone "ACCEDI" arrotondato (pillola) con gradiente di sfondo e glow effect neon.
+  - Link "Password dimenticata?" posizionato sotto con gradiente neon/ciano su testo.
+- [ ] **Tema Globale (Future modifiche)**:
+  - Estendere il tema neon scuro nell'app intera, modificando `tailwind.config.ts`.
+  - Introdurre gradini di sfondi molto scuri e bordi/elementi attenzionali neon.
+- [x] **Home / Calendario / Dashboard**:
+  - Adattare layout dei panel e card per usare lo sfondo scuro mantenendo un forte contrasto con bordi e icone neon.
+- [x] **Bottom Navigation**:
+  - Implementare tema scuro con icone neon glow per l'elemento attivo.
+- [x] **Altre Pagine (Rosa, Impostazioni, Allenamenti)**:
+  - Convertire tabelle, menu e finestre modali.
+  - Applicare il nuovo stile coerente (accordion illuminati, gradienti neon, ecc.).
+- [ ] **Altre Pagine (Partite, Scouting, ecc.)**:
+  - Applicare il nuovo stile coerente in tutta l'applicazione passo passo.
+
+---
+
 ## 📋 Priorità Consigliate
 
 | Priorità | Attività | Impatto |

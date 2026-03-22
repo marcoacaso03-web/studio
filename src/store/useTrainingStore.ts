@@ -16,6 +16,7 @@ interface TrainingState {
   deleteSession: (id: string) => Promise<void>;
   deleteSessions: (ids: string[]) => Promise<void>;
   clearAllSessions: () => Promise<void>;
+  updateSessionLocally: (id: string, updates: Partial<TrainingSession>) => void;
 }
 
 export const useTrainingStore = create<TrainingState>((set, get) => ({
@@ -140,5 +141,11 @@ export const useTrainingStore = create<TrainingState>((set, get) => ({
       console.error("Clear all sessions error:", e);
       set({ loading: false });
     }
+  },
+
+  updateSessionLocally: (id: string, updates: Partial<TrainingSession>) => {
+    set(state => ({
+      sessions: state.sessions.map(s => s.id === id ? { ...s, ...updates } : s)
+    }));
   }
 }));

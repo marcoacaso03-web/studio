@@ -40,6 +40,7 @@ export default function TrainingDetailPage() {
         setNotes(s.notes || "");
         const att = await trainingRepository.getAttendance(user.id, sessionId);
         setAttendance(att);
+        useTrainingStore.getState().updateSessionLocally(sessionId, { notes: s.notes, ...s });
       }
       await fetchPlayers();
       setLoading(false);
@@ -51,15 +52,16 @@ export default function TrainingDetailPage() {
     if (!user || !session) return;
     setSaving(true);
     await trainingRepository.update(user.id, sessionId, { notes });
+    useTrainingStore.getState().updateSessionLocally(sessionId, { notes });
     setSaving(false);
   };
 
   const updateAttendance = async (playerId: string, status: TrainingStatus) => {
     if (!user || !session) return;
-    setAttendance(prev => {
-      const filtered = prev.filter(a => a.playerId !== playerId);
-      return [...filtered, { playerId, status }];
-    });
+    const nextAtt = attendance.filter(a => a.playerId !== playerId).concat({ playerId, status });
+    setAttendance(nextAtt);
+    // update store sync
+    useTrainingStore.getState().updateSessionLocally(sessionId, { attendances: nextAtt } as any);
     await trainingRepository.setAttendance(user.id, sessionId, playerId, status);
   };
 

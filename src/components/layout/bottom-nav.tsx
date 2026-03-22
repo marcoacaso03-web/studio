@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,12 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Search,
-  Dumbbell,
+  LayoutGrid,
+  Settings
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Icona personalizzata: Lavagna Tattica
-const TacticalBoardIcon = ({ className }: { className?: string }) => (
+// Icona Rugby Ball (Allenamento) come SVG manuale per evitare errori di import
+const RugbyBallIcon = ({ className }: { className?: string }) => (
   <svg 
     className={className} 
     viewBox="0 0 24 24" 
@@ -21,41 +21,19 @@ const TacticalBoardIcon = ({ className }: { className?: string }) => (
     strokeLinecap="round" 
     strokeLinejoin="round"
   >
-    <rect x="3" y="3" width="18" height="18" rx="2" />
-    <path d="M3 12h18" />
-    <circle cx="12" cy="12" r="3" />
-    <path d="M12 3v3" />
-    <path d="M12 18v3" />
-    <path d="M16 16l2 2" />
-    <path d="M18 16l-2 2" />
-    <circle cx="7" cy="7" r="1" />
-  </svg>
-);
-
-// Icona personalizzata: Fischietto
-const WhistleIcon = ({ className }: { className?: string }) => (
-  <svg 
-    className={className} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-  >
-    <path d="M11 14h4" />
-    <path d="M17 10h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-4" />
-    <rect x="2" y="10" width="15" height="10" rx="2" />
-    <path d="M12 10V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v4" />
-    <circle cx="8" cy="14" r="1" />
+    <path d="m15.6 11.6-5.8-5.8" />
+    <path d="m11.6 15.6-5.8-5.8" />
+    <path d="M12 21c3.6 0 9-3.9 9-9s-5.4-9-9-9-9 3.9-9 9 5.4 9 9 9Z" />
+    <path d="M14.8 5.2 5.2 14.8" />
+    <path d="M18.8 9.2 9.2 18.8" />
   </svg>
 );
 
 const navItems = [
-  { href: "/calendario", label: "Dashboard", icon: TacticalBoardIcon },
-  { href: "/allenamento", label: "Allenamento", icon: Dumbbell },
+  { href: "/calendario", label: "Dashboard", icon: LayoutGrid },
+  { href: "/allenamento", label: "Allenamento", icon: RugbyBallIcon },
   { href: "/scout", label: "Scout", icon: Search },
-  { href: "/altro", label: "Impostazioni", icon: WhistleIcon },
+  { href: "/altro", label: "Impostazioni", icon: Settings },
 ];
 
 function NavLink({ href, label, icon: Icon }: { href: string; label: string; icon: React.ElementType }) {
@@ -66,12 +44,22 @@ function NavLink({ href, label, icon: Icon }: { href: string; label: string; ico
     <Link
       href={href}
       className={cn(
-        "flex flex-col items-center justify-center gap-1 p-2 text-muted-foreground transition-all hover:text-primary w-full",
-        isActive && "text-primary"
+        "flex flex-col items-center justify-center gap-1.5 p-2 transition-all w-full",
+        isActive ? "text-emerald-400" : "text-muted-foreground/60"
       )}
     >
-      <Icon className="h-6 w-6" />
-      <span className="text-[10px] font-bold uppercase tracking-tight">{label}</span>
+      <div className={cn(
+        "transition-all duration-300",
+        isActive && "glow-icon-green scale-110"
+      )}>
+        <Icon className="h-6 w-6" />
+      </div>
+      <span className={cn(
+        "text-[9px] font-black uppercase tracking-wider transition-colors",
+        isActive ? "text-emerald-400" : "text-muted-foreground/40"
+      )}>
+        {label}
+      </span>
     </Link>
   );
 }
@@ -85,13 +73,13 @@ export function BottomNav() {
 
   if (!mounted) {
     return (
-      <nav className="fixed bottom-0 left-0 right-0 z-30 flex h-16 items-center justify-around border-t bg-background shadow-[0_-1px_3px_rgba(0,0,0,0.1)] md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-30 flex h-20 items-center justify-around bg-background md:hidden">
       </nav>
     );
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 flex h-16 items-center justify-around border-t bg-background shadow-[0_-2px_10px_rgba(0,0,0,0.05)] md:hidden px-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-30 flex h-20 items-center justify-around bg-background border-t border-white/5 md:hidden px-4 pb-2 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
       {navItems.map((item) => (
         <NavLink key={item.href} {...item} />
       ))}

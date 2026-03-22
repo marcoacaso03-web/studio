@@ -21,18 +21,18 @@ export default function Home() {
         router.push('/login');
       }
     }, 800);
-    
+
     return () => clearTimeout(timer);
   }, [isAuthenticated, router]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-primary overflow-hidden">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background overflow-hidden">
       <div className="flex flex-col items-center gap-6 animate-in fade-in zoom-in duration-500">
         <div className="relative">
           <div className="absolute -inset-4 bg-accent/20 rounded-full blur-2xl animate-pulse" />
           <img src="/favicon-16x16.png" alt="App Logo" className="h-20 w-20 object-contain drop-shadow-2xl relative" />
         </div>
-        
+
         <div className="flex flex-col items-center gap-2">
           <h1 className="text-4xl font-black text-white tracking-tighter">PitchMan</h1>
           <p className="text-[10px] uppercase font-bold tracking-[0.3em] text-white/50">Gestionale Tecnico</p>
@@ -42,9 +42,9 @@ export default function Home() {
           <div className="h-full bg-accent animate-progress-loading w-full origin-left" />
         </div>
       </div>
-      
+
       <div className="absolute bottom-8 text-white/30 text-[10px] font-bold uppercase tracking-widest">
-        Caricamento Database Locale...
+        Caricamento Database...
       </div>
     </div>
   );

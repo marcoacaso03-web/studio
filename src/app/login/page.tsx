@@ -1,14 +1,10 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Lock, User, Sparkles, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
@@ -62,84 +58,78 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-[400px] shadow-2xl border-primary/20">
-        <CardHeader className="text-center space-y-2">
-          <div className="flex justify-center mb-2">
-            <div className="p-3 bg-primary rounded-2xl">
-              <img src="/favicon-16x16.png" alt="App Logo" className="h-10 w-10 object-contain drop-shadow" />
+    <div className="flex min-h-screen items-center justify-center bg-background p-4 text-foreground font-sans">
+      <div className="w-full max-w-[340px] flex flex-col items-center space-y-8">
+        {/* Logo Section */}
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-48 h-48 relative">
+            <img 
+              src="/favicon-16x16.png" 
+              alt="PitchMan Logo" 
+              className="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]" 
+            />
+          </div>
+          <h1 className="text-4xl font-bold tracking-tight">PitchMan</h1>
+        </div>
+
+        {/* Form Section */}
+        <form onSubmit={handleSubmit} className="w-full space-y-6">
+          <div className="space-y-4">
+            <div className="relative group">
+              <Input 
+                id="username"
+                type="text" 
+                placeholder="Username (o Email)"
+                className="h-12 bg-transparent border-neon-gradient rounded-xl px-4 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/50 transition-all font-sans"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
+            <div className="relative group">
+              <Input 
+                id="password"
+                type="password"
+                placeholder="Password"
+                className="h-12 bg-transparent border-neon-gradient rounded-xl px-4 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/50 transition-all"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             </div>
           </div>
-          <CardTitle className="text-3xl font-black tracking-tighter text-primary">PitchMan</CardTitle>
-          <CardDescription className="text-xs uppercase font-bold tracking-widest text-muted-foreground/60">
-            {isLogin ? "Sincronizzazione Cloud Attiva" : "Crea il tuo spazio cloud"}
-          </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="username" className="text-[10px] font-black uppercase tracking-wider">Username</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  id="username"
-                  type="text"
-                  placeholder="username"
-                  className="pl-10 h-11"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-wider">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  className="pl-10 h-11"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-3 pt-2">
+
+          <div className="space-y-4 pt-4">
             <Button 
               type="submit" 
-              className="w-full h-12 bg-primary text-white hover:bg-primary/90 font-black uppercase text-sm"
+              className="w-full h-14 bg-neon-gradient text-primary-foreground font-bold text-lg rounded-full glow-neon hover:opacity-90 transition-all border-none"
               disabled={isLoading}
             >
-              {isLoading ? "Elaborazione..." : isLogin ? "Accedi al Pannello" : "Registra Account"}
-              {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
+              {isLoading ? "ELABORAZIONE..." : isLogin ? "ACCEDI" : "REGISTRATI"}
             </Button>
             
-            <div className="relative w-full">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground font-bold">Oppure</span>
-              </div>
+            <div className="text-center">
+              <button 
+                type="button"
+                className="text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors glow-text-cyan"
+              >
+                Password dimenticata?
+              </button>
             </div>
-
-            <Button 
-              type="button"
-              variant="outline"
-              onClick={() => setIsLogin(!isLogin)}
-              className="w-full h-10 border-accent/30 text-accent hover:bg-accent/5 font-black uppercase text-[10px]"
-              disabled={isLoading}
-            >
-              <Sparkles className="h-3.5 w-3.5 mr-2" />
-              {isLogin ? "Inizializza nuovo account" : "Torna al login"}
-            </Button>
-          </CardFooter>
+          </div>
         </form>
-      </Card>
+
+        {/* Toggle Login/Signup */}
+        <div className="pt-4">
+          <button 
+            type="button"
+            onClick={() => setIsLogin(!isLogin)}
+            className="text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {isLogin ? "Crea un nuovo account" : "Hai già un account? Accedi"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

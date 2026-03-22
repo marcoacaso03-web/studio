@@ -1,14 +1,14 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dumbbell, ChevronLeft, ChevronRight, PlusCircle, Trash2, Loader2, Eraser, ClipboardCheck } from "lucide-react";
+import { Dumbbell, ChevronLeft, ChevronRight, PlusCircle, Trash2, Loader2, Eraser, ClipboardCheck, Target, Users, Filter } from "lucide-react";
 import { useTrainingStore } from "@/store/useTrainingStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
+import { usePlayersStore } from "@/store/usePlayersStore";
 import { useRouter } from "next/navigation";
 import { format, startOfWeek, addWeeks, subWeeks, isSameWeek, parseISO, addDays } from "date-fns";
 import { it } from "date-fns/locale";
@@ -44,6 +44,7 @@ export default function AllenamentoPage() {
   const { sessions, loading, fetchAll, generateSessions, deleteSession, deleteSessions, clearAllSessions } = useTrainingStore();
   const { sessionsPerWeek } = useSettingsStore();
   const { activeSeason } = useSeasonsStore();
+  const { players, fetchAll: fetchPlayers } = usePlayersStore();
   
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
@@ -60,13 +61,13 @@ export default function AllenamentoPage() {
   useEffect(() => {
     if (activeSeason) {
       fetchAll();
+      fetchPlayers();
     }
-  }, [fetchAll, activeSeason]);
+  }, [fetchAll, activeSeason, fetchPlayers]);
 
   const weekSessions = useMemo(() => {
     return sessions.filter(s => {
       try {
-        // Gestiamo sia ISO che yyyy-MM-dd
         const sessionDate = s.date.includes('T') ? parseISO(s.date) : new Date(s.date);
         return isSameWeek(sessionDate, currentWeekStart, { weekStartsOn: 1 });
       } catch (e) {
@@ -77,9 +78,7 @@ export default function AllenamentoPage() {
 
   const handleGenerate = async () => {
     setIsGeneratorOpen(false);
-    // Piccolo delay per permettere la chiusura del dialog prima del caricamento
     setTimeout(() => {
-      // Usiamo mezzanotte locale per il parsing per evitare slittamenti di data
       const [sy, sm, sd] = genStart.split('-').map(Number);
       const [ey, em, ed] = genEnd.split('-').map(Number);
       generateSessions(new Date(sy, sm - 1, sd), new Date(ey, em - 1, ed), sessionsPerWeek);
@@ -110,64 +109,78 @@ export default function AllenamentoPage() {
 
   return (
     <div className="space-y-6 pb-20">
-      <PageHeader title="Allenamento">
+      <PageHeader title="Sessioni Allenamento">
         <div className="flex gap-2">
+          {/* Statistiche - Lavagnetta */}
           <Button 
-            variant="outline"
+            variant="ghost"
             size="icon" 
-            className="rounded-xl h-9 w-9 border-primary/20 text-primary"
+            className="rounded-xl h-10 w-10 text-primary hover:bg-card/20 hover:bg-card/30"
             onClick={() => setIsStatsOpen(true)}
           >
-            <ClipboardCheck className="h-4 w-4" />
+             <ClipboardCheck className="h-6 w-6" />
           </Button>
 
+          {/* Cancella - Gomma */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
-                variant="outline"
+                variant="ghost"
                 size="icon" 
-                className="rounded-xl h-9 w-9 border-primary/20 text-primary"
+                className="rounded-xl h-10 w-10 text-destructive hover:bg-card/20 hover:bg-card/30"
               >
-                <Eraser className="h-4 w-4" />
+                <Eraser className="h-6 w-6" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-xl">
-              <DropdownMenuItem className="text-[10px] font-bold uppercase" onClick={() => setTimeout(() => setIsClearWeekOpen(true), 100)}>
-                Elimina Settimana
+            <DropdownMenuContent align="end" className="rounded-xl bg-background border-white/10 text-foreground">
+              <DropdownMenuItem className="text-[10px] font-bold uppercase focus:bg-card/40 hover:bg-card/50" onClick={() => setTimeout(() => setIsClearWeekOpen(true), 100)}>
+                <Eraser className="mr-2 h-4 w-4 text-accent" /> Elimina Settimana
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-[10px] font-bold uppercase text-destructive" onClick={() => setTimeout(() => setIsClearAllOpen(true), 100)}>
-                Elimina Tutto
+              <DropdownMenuItem className="text-[10px] font-bold uppercase text-destructive focus:bg-destructive/10" onClick={() => setTimeout(() => setIsClearAllOpen(true), 100)}>
+                <Trash2 className="mr-2 h-4 w-4" /> Elimina Tutto
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
+          {/* Genera - Più */}
           <Button 
+            variant="ghost"
             size="icon" 
-            className="bg-accent text-accent-foreground rounded-xl h-9 w-9 shadow-lg"
+            className="rounded-xl h-10 w-10 text-accent hover:bg-card/20 hover:bg-card/30"
             onClick={() => setIsGeneratorOpen(true)}
           >
-            <PlusCircle className="h-4 w-4" />
+             <PlusCircle className="h-6 w-6" />
+          </Button>
+
+          {/* Filtra - Imbuto */}
+          <Button 
+            variant="ghost"
+            size="icon" 
+            className="rounded-xl h-10 w-10 text-brand-cyan hover:bg-card/20 hover:bg-card/30"
+            onClick={() => {}} 
+          >
+             <Filter className="h-6 w-6" />
           </Button>
         </div>
       </PageHeader>
 
-      <div className="flex items-center justify-between bg-card p-3 rounded-2xl border shadow-sm">
-        <Button variant="ghost" size="icon" onClick={prevWeek} className="h-10 w-10 text-primary">
-          <ChevronLeft className="h-6 w-6" />
+      <div className="flex items-center justify-between border-b border-white/5 pb-2">
+        <Button variant="ghost" size="icon" onClick={prevWeek} className="h-10 w-10 text-emerald-400">
+          <ChevronLeft className="h-8 w-8" />
         </Button>
         
         <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
           <PopoverTrigger asChild>
-            <Button variant="ghost" className="flex flex-col items-center h-auto hover:bg-transparent">
-              <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest leading-tight">Settimana del</span>
-              <span className="text-sm font-black uppercase text-primary tracking-tight">
+            <Button variant="ghost" className="flex flex-col items-center h-auto hover:bg-transparent px-2">
+              <span className="text-[10px] font-black uppercase text-muted-foreground/50 tracking-widest leading-tight">Settimana del</span>
+              <span className="text-sm font-black uppercase text-emerald-400 tracking-tight">
                 {format(currentWeekStart, "dd MMM yyyy", { locale: it })}
                 <span className="text-muted-foreground mx-1.5 opacity-50">-</span>
                 {format(addDays(currentWeekStart, 6), "dd MMM yyyy", { locale: it })}
               </span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 rounded-2xl" align="center">
+          <PopoverContent className="w-auto p-0 rounded-2xl bg-background border-white/10 text-foreground" align="center">
             <Calendar
               mode="single"
               selected={currentWeekStart}
@@ -179,148 +192,177 @@ export default function AllenamentoPage() {
               }}
               initialFocus
               locale={it}
-              className="p-3"
+              className="p-3 bg-background"
               classNames={{
-                weekday: "text-muted-foreground rounded-md w-9 font-normal text-[0.7rem] uppercase tracking-tighter text-center",
-                caption_label: "text-sm font-black uppercase tracking-wider text-primary",
+                weekday: "text-muted-foreground/50 rounded-md w-9 font-normal text-[0.7rem] uppercase tracking-tighter text-center",
+                caption_label: "text-sm font-black uppercase tracking-wider text-emerald-400",
+                day: "text-foreground hover:bg-card/40 hover:bg-card/50 rounded-md h-9 w-9 text-center p-0 font-normal aria-selected:opacity-100",
+                day_selected: "bg-emerald-400 text-primary-foreground hover:bg-emerald-400 hover:text-primary-foreground focus:bg-emerald-400 focus:text-primary-foreground",
+                day_today: "bg-card/20 hover:bg-card/30 text-emerald-400",
               }}
             />
           </PopoverContent>
         </Popover>
 
-        <Button variant="ghost" size="icon" onClick={nextWeek} className="h-10 w-10 text-primary">
-          <ChevronRight className="h-6 w-6" />
+        <Button variant="ghost" size="icon" onClick={nextWeek} className="h-10 w-10 text-emerald-400">
+          <ChevronRight className="h-8 w-8" />
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-3">
+      <div className="flex flex-col gap-4">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 animate-pulse">
-            <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Sincronizzazione Cloud...</p>
+            <Loader2 className="h-10 w-10 text-emerald-400 animate-spin mb-4" />
+            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Sincronizzazione Cloud...</p>
           </div>
         ) : weekSessions.length === 0 ? (
-          <Card className="border-dashed bg-muted/10">
-            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-              <Dumbbell className="h-16 w-16 text-muted-foreground mb-6 opacity-20" />
-              <h3 className="text-lg font-black uppercase tracking-tight text-primary">Nessuna sessione</h3>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2">
-                Usa il tasto Genera per pianificare gli allenamenti.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="flex flex-col items-center justify-center py-16 text-center border-dashed border-2 border-white/5 rounded-3xl bg-card/20 hover:bg-card/30">
+            <Dumbbell className="h-16 w-16 text-muted-foreground/20 mb-6" />
+            <h3 className="text-lg font-black uppercase tracking-tight text-emerald-400">Nessuna sessione</h3>
+            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-2 max-w-[200px]">
+              Usa le opzioni in alto per generare allenamenti.
+            </p>
+          </div>
         ) : (
-          weekSessions.map((session) => (
-            <Card 
-              key={session.id} 
-              className="overflow-hidden border shadow-sm rounded-2xl active:scale-[0.98] transition-all cursor-pointer group hover:border-primary/30"
-              onClick={() => router.push(`/allenamento/${session.id}`)}
-            >
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex flex-col items-center justify-center border border-primary/20 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <span className="text-[10px] font-black uppercase leading-none">#</span>
-                    <span className="text-xl font-black leading-none">{session.index.toString().padStart(2, '0')}</span>
+          weekSessions.map((session) => {
+            const sessionDate = session.date.includes('T') ? parseISO(session.date) : new Date(session.date);
+            const dayName = format(sessionDate, "EEE", { locale: it }).toUpperCase();
+            const dayNum = format(sessionDate, "dd", { locale: it });
+            const monthName = format(sessionDate, "MMM", { locale: it }).toUpperCase();
+            
+            const time = session.date.includes('T') ? format(sessionDate, "HH:mm") : "18:00";
+            // Cast per permettere campi non ancora definiti nel tipo TrainingSession ma necessari al redesign visivo
+            const sessionData = session as any;
+            const focus = sessionData.focus && sessionData.focus.trim() !== "" ? sessionData.focus : "Nessuno"; 
+            
+            let FocusIcon = Target;
+            if (focus.toLowerCase().includes('fisic')) FocusIcon = Dumbbell;
+            
+            const totalPlayers = players.length > 0 ? players.length : 20;
+            const presentPlayers = sessionData.attendances && sessionData.attendances.length > 0 
+              ? sessionData.attendances.filter((a: any) => a.status === 'presente' || a.status === 'ritardo' || a.status === 'present' || a.status === true).length 
+              : 0;
+            const progressPercentage = totalPlayers > 0 ? (presentPlayers / totalPlayers) * 100 : 0;
+
+            return (
+              <div 
+                key={session.id} 
+                className="relative overflow-hidden border-green-cyan rounded-3xl active:scale-[0.98] transition-transform cursor-pointer group hover:opacity-90 bg-card/40 backdrop-blur-sm shadow-xl"
+                onClick={() => router.push(`/allenamento/${session.id}`)}
+              >
+                <div className="flex justify-between items-start">
+                  <div className="bg-green-cyan px-5 py-2.5 rounded-br-3xl flex items-center gap-1 shadow-[0_5px_15px_rgba(34,211,238,0.2)]">
+                    <span className="text-primary-foreground font-medium text-lg leading-none">{dayName}</span>
+                    <span className="text-primary-foreground font-black text-lg leading-none">{dayNum}</span>
+                    <span className="text-primary-foreground font-medium text-lg leading-none">{monthName}</span>
                   </div>
-                  <div className="flex flex-col">
-                    <h4 className="text-sm font-black uppercase tracking-tight text-primary">Allenamento #{session.index.toString().padStart(2, '0')}</h4>
-                    <span className="text-[9px] font-bold uppercase text-muted-foreground/60 tracking-widest">Sessione Programmata</span>
+                  <div className="p-4 flex gap-2">
+                     {/* Bottone Elimina rimosso per pulizia UI, spostato dentro al dettaglio sessione o tenuto nascosto */}
+                     <span className="text-foreground font-medium text-lg tracking-wide">{time}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-9 w-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/5 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => { e.stopPropagation(); setSessionToDelete(session.id); }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+
+                <div className="px-5 pt-3 pb-5 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <FocusIcon className="h-5 w-5 text-brand-green" />
+                    <span className="text-foreground text-[15px] font-medium tracking-wide">Focus: {focus}</span>
+                  </div>
+                  
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-5 flex justify-center">
+                        <Users className="h-4 w-4 text-brand-cyan" />
+                      </div>
+                      <span className="text-foreground text-[15px] font-medium tracking-wide">Presenze: {presentPlayers}/{totalPlayers}</span>
+                    </div>
+
+                    <div className="w-full bg-[#1e293b] rounded-full h-1.5 mt-1 opacity-80 overflow-hidden">
+                      <div 
+                        className="bg-green-cyan h-full rounded-full transition-all duration-1000 ease-out" 
+                        style={{ width: `${progressPercentage}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))
+              </div>
+            );
+          })
         )}
       </div>
 
-      {/* Generator Dialog */}
+      {/* Generator Dialog - Mantenuto Funzionale ma stilizzato scuro */}
       <Dialog open={isGeneratorOpen} onOpenChange={setIsGeneratorOpen}>
-        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-3xl">
+        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-3xl bg-background border-white/10 text-foreground">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black uppercase text-primary">Generatore Sessioni</DialogTitle>
-            <DialogDescription className="text-[10px] font-bold uppercase text-muted-foreground">
+            <DialogTitle className="text-xl font-black uppercase text-emerald-400">Generatore Sessioni</DialogTitle>
+            <DialogDescription className="text-[10px] font-bold uppercase text-muted-foreground/60">
               Pianifica automaticamente {sessionsPerWeek} sessioni a settimana.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Data Inizio</Label>
-              <Input type="date" value={genStart} onChange={e => setGenStart(e.target.value)} className="h-11 rounded-xl font-bold uppercase text-xs" />
+              <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-foreground/80">Data Inizio</Label>
+              <Input type="date" value={genStart} onChange={e => setGenStart(e.target.value)} className="h-11 rounded-xl font-bold uppercase text-xs bg-card/20 hover:bg-card/30 border-white/10 text-foreground" />
             </div>
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Data Fine</Label>
-              <Input type="date" value={genEnd} onChange={e => setGenEnd(e.target.value)} className="h-11 rounded-xl font-bold uppercase text-xs" />
+              <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-foreground/80">Data Fine</Label>
+              <Input type="date" value={genEnd} onChange={e => setGenEnd(e.target.value)} className="h-11 rounded-xl font-bold uppercase text-xs bg-card/20 hover:bg-card/30 border-white/10 text-foreground" />
             </div>
           </div>
           <DialogFooter className="flex-row gap-2">
-            <Button variant="ghost" className="flex-1 rounded-xl font-black uppercase text-xs h-12" onClick={() => setIsGeneratorOpen(false)}>Annulla</Button>
-            <Button className="flex-1 rounded-xl bg-primary text-white font-black uppercase text-xs h-12" onClick={handleGenerate}>Genera</Button>
+            <Button variant="ghost" className="flex-1 rounded-xl font-black uppercase text-xs h-12 text-foreground/60 hover:text-foreground" onClick={() => setIsGeneratorOpen(false)}>Annulla</Button>
+            <Button className="flex-1 rounded-xl bg-green-cyan text-primary-foreground font-black uppercase text-xs h-12 glow-neon" onClick={handleGenerate}>Genera</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Stats Dialog */}
       <TrainingStatsDialog 
         open={isStatsOpen} 
         onOpenChange={setIsStatsOpen} 
         currentWeekStart={currentWeekStart}
       />
 
-      {/* Single Delete Alert */}
       <AlertDialog open={!!sessionToDelete} onOpenChange={(open) => !open && setSessionToDelete(null)}>
-        <AlertDialogContent className="rounded-2xl max-w-[90vw]">
+        <AlertDialogContent className="rounded-3xl max-w-[90vw] bg-background border-white/10 text-foreground">
           <AlertDialogHeader>
-            <AlertDialogTitle className="uppercase font-black text-primary">Elimina Allenamento?</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs">
+            <AlertDialogTitle className="uppercase font-black text-emerald-400">Elimina Allenamento?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-muted-foreground/60">
               Questa azione cancellerà definitivamente l'allenamento selezionato e le relative presenze.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4">
-            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11">Annulla</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteSingle} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase h-11">Elimina</AlertDialogAction>
+            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11 bg-card/20 hover:bg-card/30 hover:bg-card/40 hover:bg-card/50 border-none text-foreground">Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteSingle} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase h-11 border-none">Elimina</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Clear Week Alert */}
       <AlertDialog open={isClearWeekOpen} onOpenChange={setIsClearWeekOpen}>
-        <AlertDialogContent className="rounded-2xl max-w-[90vw]">
+        <AlertDialogContent className="rounded-3xl max-w-[90vw] bg-background border-white/10 text-foreground">
           <AlertDialogHeader>
-            <AlertDialogTitle className="uppercase font-black text-primary">Elimina Settimana?</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs">
+            <AlertDialogTitle className="uppercase font-black text-emerald-400">Elimina Settimana?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-muted-foreground/60">
               Stai per eliminare tutte le {weekSessions.length} sessioni di questa settimana. Confermi?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4">
-            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11">Annulla</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteWeek} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase h-11">Sì, elimina</AlertDialogAction>
+            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11 bg-card/20 hover:bg-card/30 hover:bg-card/40 hover:bg-card/50 border-none text-foreground">Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteWeek} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase h-11 border-none">Sì, elimina</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Clear All Alert */}
       <AlertDialog open={isClearAllOpen} onOpenChange={setIsClearAllOpen}>
-        <AlertDialogContent className="rounded-2xl max-w-[90vw]">
+        <AlertDialogContent className="rounded-3xl max-w-[90vw] bg-background border-white/10 text-foreground">
           <AlertDialogHeader>
             <AlertDialogTitle className="uppercase font-black text-destructive">RESET TOTALE?</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs">
+            <AlertDialogDescription className="text-xs text-muted-foreground/60">
               Questa azione cancellerà OGNI allenamento registrato in questa stagione. È un'operazione irreversibile.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4">
-            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11">Annulla</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteAll} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase h-11">RESET TUTTO</AlertDialogAction>
+            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11 bg-card/20 hover:bg-card/30 hover:bg-card/40 hover:bg-card/50 border-none text-foreground">Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteAll} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase h-11 border-none">RESET TUTTO</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

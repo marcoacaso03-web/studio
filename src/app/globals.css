@@ -4,63 +4,144 @@
 
 @layer base {
   :root {
-    --background: 210 15% 96%;
-    --foreground: 215 30% 10%;
+    --background: 210 20% 98%;
+    --foreground: 220 30% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 215 30% 10%;
+    --card-foreground: 220 30% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 215 30% 10%;
-    --primary: 215 30% 22%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 10% 93%;
-    --secondary-foreground: 215 25% 12%;
+    --popover-foreground: 220 30% 10%;
+    --primary: 192 100% 22%;
+    /* #005A71 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 10% 90%;
+    --secondary-foreground: 220 25% 15%;
     --muted: 210 10% 93%;
-    --muted-foreground: 215 10% 46%;
-    --accent: 160 40% 48%;
-    --accent-foreground: 0 0% 100%;
+    --muted-foreground: 215 15% 40%;
+    --accent: 74 96% 46%;
+    /* #ACE504 */
+    --accent-foreground: 220 40% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 210 12% 89%;
-    --input: 210 12% 89%;
-    --ring: 215 30% 22%;
-    --chart-1: 160 40% 48%;
-    --chart-2: 215 30% 22%;
-    --chart-3: 180 30% 35%;
-    --chart-4: 145 35% 58%;
-    --chart-5: 190 35% 52%;
+    --border: 210 15% 85%;
+    --input: 210 15% 85%;
+    --ring: 192 100% 22%;
+    --chart-1: 192 100% 22%;
+    --chart-2: 74 96% 46%;
+    --chart-3: 60 100% 70%;
+    /* #FFFD66ish */
+    --chart-4: 180 50% 50%;
+    --chart-5: 200 50% 50%;
     --radius: 0.5rem;
+    --brand-yellow: 60 100% 50%;
+    --brand-green: 93 100 50%;
+    --brand-cyan: 198 100% 44%;
   }
+
   .dark {
-    /* Sfondo scuro blu-ardesia, come lo sfondo dell'icona */
-    --background: 215 30% 6%;
-    --foreground: 210 15% 82%;
+    --background: 220 35% 4%;
+    /* Near black #05070A */
+    --foreground: 210 20% 98%;
 
-    --card: 215 28% 10%;
-    --card-foreground: 210 15% 88%;
+    --card: 222 30% 8%;
+    /* #111625ish */
+    --card-foreground: 210 20% 98%;
 
-    --popover: 215 28% 8%;
-    --popover-foreground: 210 15% 88%;
+    --popover: 222 30% 8%;
+    --popover-foreground: 210 20% 98%;
 
-    /* Primary teal luminoso — spicca sullo sfondo scuro */
-    --primary: 165 45% 50%;
-    --primary-foreground: 215 30% 8%;
+    --primary: 100 100% 46%;
+    /* #4eeb00 */
+    --primary-foreground: 220 35% 4%;
+    /* Dark text on bright primary */
 
-    --secondary: 215 20% 12%;
-    --secondary-foreground: 210 15% 90%;
+    --secondary: 220 35% 4%;
+    --secondary-foreground: 210 15% 95%;
 
-    --muted: 215 20% 14%;
-    --muted-foreground: 210 10% 55%;
+    --muted: 220 25% 15%;
+    --muted-foreground: 210 15% 65%;
 
-    --accent: 160 40% 42%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 60 100% 70%;
+    /* #FFFD66ish */
+    --accent-foreground: 220 40% 10%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    /* Bordi sottili ardesia */
-    --border: 215 20% 14%;
-    --input: 215 20% 14%;
-    --ring: 160 40% 42%;
+    --border: 220 25% 20%;
+    --input: 220 25% 20%;
+    --ring: 74 96% 46%;
+    --brand-yellow: 60 100% 50%;
+    --brand-green: 93 100% 50%;
+    --brand-cyan: 198 100% 44%;
+  }
+}
+
+@layer utilities {
+  .text-neon-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[hsl(var(--brand-yellow))] via-[hsl(var(--brand-green))] to-[hsl(var(--brand-cyan))];
+  }
+
+  .bg-neon-gradient {
+    @apply bg-gradient-to-r from-[hsl(var(--brand-yellow))] via-[hsl(var(--brand-green))] to-[hsl(var(--brand-cyan))];
+  }
+
+  .bg-cyan-gradient {
+    @apply bg-gradient-to-r from-[hsl(var(--brand-green))] to-[hsl(var(--brand-cyan))];
+  }
+
+  .border-neon-gradient {
+    background: linear-gradient(hsl(var(--background)), hsl(var(--background))) padding-box,
+      linear-gradient(to right, hsl(var(--brand-yellow)), hsl(var(--brand-green)), hsl(var(--brand-cyan))) border-box;
+    border: 2px solid transparent !important;
+  }
+
+  /* Nuovi stili Dashboard */
+  .border-magenta-cyan {
+    background: linear-gradient(hsl(var(--background)), hsl(var(--background))) padding-box,
+      linear-gradient(to bottom right, hsl(var(--brand-yellow)), hsl(var(--brand-green))) border-box;
+    border: 2px solid transparent !important;
+  }
+
+  .border-yellow-cyan {
+    background: linear-gradient(hsl(var(--background)), hsl(var(--background))) padding-box,
+      linear-gradient(to bottom right, hsl(var(--brand-yellow)), hsl(var(--brand-cyan))) border-box;
+    border: 2px solid transparent !important;
+  }
+
+  .border-cyan-gradient {
+    background: linear-gradient(hsl(var(--background)), hsl(var(--background))) padding-box,
+      linear-gradient(to right, hsl(var(--brand-green)), hsl(var(--brand-cyan))) border-box;
+    border: 2px solid transparent !important;
+  }
+
+  .border-green-cyan {
+    background: linear-gradient(hsl(var(--background)), hsl(var(--background))) padding-box,
+      linear-gradient(to right, hsl(var(--brand-green)), hsl(var(--brand-cyan))) border-box;
+    border: 2px solid transparent !important;
+  }
+
+  .bg-green-cyan {
+    @apply bg-gradient-to-r from-[hsl(var(--brand-green))] to-[hsl(var(--brand-cyan))];
+  }
+
+  .glow-neon {
+    box-shadow: 0 0 20px hsl(var(--brand-green));
+  }
+
+  .glow-magenta {
+    box-shadow: 0 0 15px hsl(var(--brand-yellow));
+  }
+
+  .glow-yellow {
+    box-shadow: 0 0 15px hsl(var(--brand-yellow));
+  }
+
+  .glow-text-cyan {
+    text-shadow: 0 0 10px hsl(var(--brand-cyan));
+  }
+
+  .glow-icon-green {
+    filter: drop-shadow(0 0 5px hsl(var(--brand-green)));
   }
 }
 
@@ -68,7 +149,8 @@
   * {
     @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
   }
 }
