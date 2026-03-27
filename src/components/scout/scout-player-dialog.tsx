@@ -95,8 +95,8 @@ export function ScoutPlayerDialog({ open, onOpenChange, player, categories }: Sc
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-md rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
-        <DialogHeader className="p-6 bg-primary text-white shrink-0">
+      <DialogContent className="max-w-[95vw] md:max-w-md rounded-3xl p-0 overflow-hidden bg-background border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)]">
+        <DialogHeader className="p-6 bg-black/60 border-b border-brand-green/30 text-white shrink-0">
           <DialogTitle className="text-xl font-black uppercase tracking-tight">
             {player ? "Modifica Talento" : "Nuovo Talento Scout"}
           </DialogTitle>
@@ -105,20 +105,20 @@ export function ScoutPlayerDialog({ open, onOpenChange, player, categories }: Sc
         <ScrollArea className="max-h-[70vh]">
           <div className="p-6 space-y-4">
             <div className="space-y-1.5">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Nome Giocatore</Label>
+              <Label className="text-[10px] font-black uppercase tracking-widest text-brand-green ml-1">Nome Giocatore</Label>
               <Input 
                 value={formData.name} 
                 onChange={e => setFormData({...formData, name: e.target.value})}
                 placeholder="Mario Rossi"
-                className="h-11 rounded-xl font-bold uppercase text-xs"
+                className="h-11 rounded-xl font-bold uppercase text-xs bg-black border border-brand-green/50 focus-visible:ring-1 focus-visible:ring-brand-green text-white shadow-sm"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Ruolo</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-brand-green ml-1">Ruolo</Label>
                 <Select value={formData.role} onValueChange={v => setFormData({...formData, role: v})}>
-                  <SelectTrigger className="h-11 rounded-xl text-xs font-bold uppercase">
+                  <SelectTrigger className="h-11 rounded-xl text-xs font-bold uppercase bg-black border border-brand-green/50 focus:ring-1 focus:ring-brand-green text-white shadow-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -129,19 +129,19 @@ export function ScoutPlayerDialog({ open, onOpenChange, player, categories }: Sc
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Squadra Attuale</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-brand-green ml-1">Squadra Attuale</Label>
                 <Input 
                   value={formData.currentTeam} 
                   onChange={e => setFormData({...formData, currentTeam: e.target.value})}
                   placeholder="Es: Real Isola"
-                  className="h-11 rounded-xl font-bold uppercase text-xs"
+                  className="h-11 rounded-xl font-bold uppercase text-xs bg-black border border-brand-green/50 focus-visible:ring-1 focus-visible:ring-brand-green text-white shadow-sm"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Etichette (Seleziona)</Label>
-              <div className="flex flex-wrap gap-2 pt-1">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-brand-green ml-1">Etichette (Seleziona)</Label>
+              <div className="flex flex-wrap gap-2 pt-1 border border-brand-green/20 rounded-xl p-3 bg-black/20">
                 {categories.length === 0 ? (
                   <p className="text-[9px] font-bold text-muted-foreground uppercase italic p-2 bg-muted/30 w-full rounded-lg">
                     Nessuna etichetta creata. Creale dal tasto "Etichette" in home scout.
@@ -170,27 +170,27 @@ export function ScoutPlayerDialog({ open, onOpenChange, player, categories }: Sc
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Note Tecniche</Label>
+              <Label className="text-[10px] font-black uppercase tracking-widest text-brand-green ml-1">Note Tecniche</Label>
               <Textarea 
                 value={formData.notes} 
                 onChange={e => setFormData({...formData, notes: e.target.value})}
                 placeholder="Ottimo piede sinistro, veloce nel breve..."
-                className="min-h-[100px] rounded-xl text-xs font-medium"
+                className="min-h-[100px] rounded-xl text-xs font-medium bg-black border border-brand-green/50 focus-visible:ring-1 focus-visible:ring-brand-green text-white shadow-sm"
               />
             </div>
           </div>
         </ScrollArea>
 
         <DialogFooter className="p-6 pt-2 flex-row gap-2">
-          <Button variant="ghost" className="flex-1 rounded-xl font-black uppercase text-xs h-12" onClick={() => onOpenChange(false)}>
+          <Button className="flex-1 rounded-xl font-black uppercase text-xs h-12 bg-black/40 border border-brand-green/30 text-white hover:bg-black/60 shadow-[0_0_10px_rgba(172,229,4,0.05)] transition-all" onClick={() => onOpenChange(false)}>
             Annulla
           </Button>
           <Button 
-            className="flex-1 rounded-xl bg-primary text-white font-black uppercase text-xs h-12 shadow-lg"
+            className="flex-1 rounded-xl bg-black border border-brand-green text-white font-black uppercase text-xs h-12 shadow-[0_0_10px_rgba(172,229,4,0.15)] hover:bg-black/80 hover:scale-105 transition-all"
             onClick={handleSave}
             disabled={loading || !formData.name}
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salva Talento"}
+            {loading ? <Loader2 className="h-4 w-4 animate-spin text-brand-green" /> : "Salva Talento"}
           </Button>
         </DialogFooter>
       </DialogContent>

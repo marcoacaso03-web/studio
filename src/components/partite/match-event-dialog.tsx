@@ -178,7 +178,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[90vw] sm:max-w-md bg-background border-border text-foreground p-6 rounded-2xl overflow-y-auto max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center mb-6 text-primary">Inserimento evento</DialogTitle>
+          <DialogTitle className="text-2xl font-black uppercase text-center mb-6 text-foreground tracking-tight">Inserimento evento</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">

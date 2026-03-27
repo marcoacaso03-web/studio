@@ -2,6 +2,7 @@
 "use client";
 
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { matchRepository } from '@/lib/repositories/match-repository';
 import { playerRepository } from '@/lib/repositories/player-repository';
 import { aggregationRepository } from '@/lib/repositories/aggregation-repository';
@@ -35,7 +36,9 @@ interface MatchDetailState {
 
 const periodOrder: Record<string, number> = { '1T': 1, '2T': 2, '1TS': 3, '2TS': 4 };
 
-export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
+export const useMatchDetailStore = create<MatchDetailState>()(
+  persist(
+    (set, get) => ({
     matchId: null,
     match: null,
     allPlayers: [],
@@ -297,4 +300,9 @@ export const useMatchDetailStore = create<MatchDetailState>((set, get) => ({
         lineupRepository.save({ ...lineupData, matchId }, match.seasonId, user.id);
         get().syncAndPersistMinutes();
     }
-}));
+  }),
+  {
+    name: 'pitchman-match-detail',
+  }
+ )
+);

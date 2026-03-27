@@ -45,7 +45,7 @@ function NavLink({ href, label, icon: Icon }: { href: string; label: string; ico
       href={href}
       className={cn(
         "flex flex-col items-center justify-center gap-1.5 p-2 transition-all w-full",
-        isActive ? "text-emerald-400" : "text-muted-foreground/60"
+        isActive ? "text-foreground font-black" : "text-muted-foreground/60"
       )}
     >
       <div className={cn(
@@ -56,7 +56,7 @@ function NavLink({ href, label, icon: Icon }: { href: string; label: string; ico
       </div>
       <span className={cn(
         "text-[9px] font-black uppercase tracking-wider transition-colors",
-        isActive ? "text-emerald-400" : "text-muted-foreground/40"
+        isActive ? "text-foreground" : "text-muted-foreground/40"
       )}>
         {label}
       </span>

@@ -62,7 +62,7 @@ export function PlayerLeaderboard() {
 
   const SortIcon = ({ column }: { column: SortKey }) => {
     if (sortKey !== column || !sortOrder) return <ArrowUpDown className="ml-1 h-3 w-3 opacity-30" />;
-    return sortOrder === 'asc' ? <ChevronUp className="ml-1 h-3 w-3 text-primary" /> : <ChevronDown className="ml-1 h-3 w-3 text-primary" />;
+    return sortOrder === 'asc' ? <ChevronUp className="ml-1 h-3 w-3 text-foreground" /> : <ChevronDown className="ml-1 h-3 w-3 text-foreground" />;
   };
 
   if (loading) {
@@ -86,7 +86,7 @@ export function PlayerLeaderboard() {
     <Card className="rounded-2xl overflow-hidden shadow-sm">
       <CardHeader className="pb-4">
         <div className="flex items-center gap-2">
-          <Info className="h-4 w-4 text-primary" />
+          <Info className="h-4 w-4 text-foreground" />
           <CardTitle className="text-lg font-black uppercase tracking-tight">Rendimento Giocatori</CardTitle>
         </div>
         <CardDescription className="text-xs font-bold uppercase text-muted-foreground/60">
@@ -139,19 +139,19 @@ export function PlayerLeaderboard() {
             <TableBody>
               {sortedData.map((player) => (
                 <TableRow key={player.playerId} className="h-12 hover:bg-primary/5 transition-all">
-                  <TableCell className="font-black whitespace-nowrap text-sm px-6 uppercase tracking-tight text-primary">
+                  <TableCell className="font-black whitespace-nowrap text-sm px-6 uppercase tracking-tight text-foreground">
                     {player.name}
                   </TableCell>
                   <TableCell className="text-center text-xs font-bold px-2">{player.stats.appearances}</TableCell>
-                  <TableCell className="text-center font-black text-sm text-primary px-2">{player.stats.goals}</TableCell>
-                  <TableCell className="text-center font-bold text-xs text-blue-500 px-2">{player.stats.assists}</TableCell>
+                  <TableCell className="text-center font-black text-sm text-foreground px-2">{player.stats.goals}</TableCell>
+                  <TableCell className="text-center font-bold text-xs text-foreground px-2">{player.stats.assists}</TableCell>
                   <TableCell className="text-center px-2">
-                    <span className="text-[10px] font-black bg-yellow-400/10 text-yellow-700 px-1.5 py-0.5 rounded border border-yellow-400/20 min-w-[24px] inline-block">
+                    <span className="text-[10px] font-black bg-muted/20 text-foreground px-1.5 py-0.5 rounded border border-border/50 min-w-[24px] inline-block">
                         {player.stats.yellowCards}
                     </span>
                   </TableCell>
                   <TableCell className="text-center px-2">
-                    <span className="text-[10px] font-black bg-red-500/10 text-red-700 px-1.5 py-0.5 rounded border border-red-500/20 min-w-[24px] inline-block">
+                    <span className="text-[10px] font-black bg-muted/20 text-foreground px-1.5 py-0.5 rounded border border-border/50 min-w-[24px] inline-block">
                         {player.stats.redCards}
                     </span>
                   </TableCell>

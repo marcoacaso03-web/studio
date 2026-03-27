@@ -12,6 +12,7 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import type { Match } from '@/lib/types';
+import { MatchSchema } from '@/lib/schemas';
 
 /**
  * Utility per garantire che la data sia sempre una stringa ISO valida,
@@ -41,11 +42,17 @@ export const matchRepository = {
     const snapshot = await getDocs(q);
     const matches = snapshot.docs.map(doc => {
       const data = doc.data();
-      return { 
+      const rawMatch = { 
         ...data, 
         id: doc.id,
         date: ensureISODate(data.date)
-      } as Match;
+      };
+      const parsed = MatchSchema.safeParse(rawMatch);
+      if (!parsed.success) {
+        console.error("Schema validation failed for Match:", parsed.error, rawMatch);
+        return rawMatch as Match;
+      }
+      return parsed.data;
     });
     return matches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   },
@@ -70,9 +77,9 @@ export const matchRepository = {
     const id = `M-${shortRandom}`;
     
     const newMatch: Match = {
-      status: 'scheduled',
       ...data,
       id,
+      status: data.status || 'scheduled',
       date: ensureISODate(data.date),
       teamOwnerId: data.userId,
       teamId: data.seasonId,

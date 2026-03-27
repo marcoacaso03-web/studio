@@ -84,7 +84,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
 
     return (
       <div className="flex items-center gap-2 border-b py-1 last:border-0">
-        <div className="bg-primary/20 text-primary w-10 h-8 flex items-center justify-center font-black text-[10px] uppercase rounded">
+        <div className="bg-white/10 text-foreground w-10 h-8 flex items-center justify-center font-black text-[10px] uppercase rounded">
           {label}
         </div>
         <div className="flex-1">

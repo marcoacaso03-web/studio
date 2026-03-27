@@ -13,6 +13,7 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import type { Player, Role } from '@/lib/types';
+import { PlayerSchema } from '@/lib/schemas';
 
 export type PlayerCreateData = {
     name: string;
@@ -28,7 +29,15 @@ export const playerRepository = {
     const playersRef = collection(db, 'teams', seasonId, 'players');
     const q = query(playersRef, where('teamOwnerId', '==', userId));
     const snapshot = await getDocs(q);
-    const players = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Player));
+    const players = snapshot.docs.map(doc => {
+      const data = { ...doc.data(), id: doc.id };
+      const parsed = PlayerSchema.safeParse(data);
+      if (!parsed.success) {
+        console.error("Schema validation failed for Player:", parsed.error);
+        return data as Player;
+      }
+      return parsed.data;
+    });
     return players.sort((a, b) => a.name.localeCompare(b.name));
   },
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import useSWR from 'swr';
+import { z } from 'zod';
 import {
   Query,
   getDocs,
@@ -32,6 +33,7 @@ export interface InternalQuery extends Query<DocumentData> {
 
 export function useCollection<T = any>(
     memoizedTargetRefOrQuery: ((CollectionReference<DocumentData> | Query<DocumentData>) & {__memo?: boolean})  | null | undefined,
+    schema?: z.ZodSchema<T>
 ): UseCollectionResult<T> {
   // Use a string key for SWR deduplication
   const swrKey = memoizedTargetRefOrQuery
@@ -44,7 +46,15 @@ export function useCollection<T = any>(
     if (!memoizedTargetRefOrQuery) return null;
     try {
       const snapshot = await getDocs(memoizedTargetRefOrQuery);
-      return snapshot.docs.map(doc => ({ ...(doc.data() as T), id: doc.id }));
+      return snapshot.docs.map(doc => {
+        const rawData = { ...(doc.data() as T), id: doc.id };
+        if (schema) {
+          const parsed = schema.safeParse(rawData);
+          if (parsed.success) return parsed.data as WithId<T>;
+          console.error("Schema validation failed for collection item:", parsed.error, rawData);
+        }
+        return rawData as WithId<T>;
+      });
     } catch (err: any) {
       const path = memoizedTargetRefOrQuery.type === 'collection'
             ? (memoizedTargetRefOrQuery as CollectionReference).path

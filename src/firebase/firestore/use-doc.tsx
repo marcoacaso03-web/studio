@@ -2,6 +2,7 @@
     
 import { useState, useEffect } from 'react';
 import useSWR from 'swr';
+import { z } from 'zod';
 import {
   DocumentReference,
   getDoc,
@@ -22,6 +23,7 @@ export interface UseDocResult<T> {
 
 export function useDoc<T = any>(
   memoizedDocRef: DocumentReference<DocumentData> | null | undefined,
+  schema?: z.ZodSchema<T>
 ): UseDocResult<T> {
   const swrKey = memoizedDocRef ? memoizedDocRef.path : null;
 
@@ -30,7 +32,13 @@ export function useDoc<T = any>(
     try {
       const snapshot = await getDoc(memoizedDocRef);
       if (snapshot.exists()) {
-        return { ...(snapshot.data() as T), id: snapshot.id };
+        const rawData = { ...(snapshot.data() as T), id: snapshot.id };
+        if (schema) {
+          const parsed = schema.safeParse(rawData);
+          if (parsed.success) return parsed.data as WithId<T>;
+          console.error("Schema validation failed for doc:", parsed.error, rawData);
+        }
+        return rawData as WithId<T>;
       }
       return null;
     } catch (err: any) {

@@ -30,8 +30,8 @@ export type Player = {
   name: string;
   role: Role;
   stats: PlayerStats;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export const MATCH_TYPES = ['Campionato', 'Torneo', 'Amichevole'] as const;
@@ -58,8 +58,8 @@ export type Match = {
   result?: MatchResult;
   status: MatchStatus;
   notes?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export const ATTENDANCE_STATUSES = ['presente', 'assente', 'in dubbio'] as const;
@@ -91,7 +91,7 @@ export type PlayerMatchStats = {
   teamOwnerId?: string;
 };
 
-export const EVENT_TYPES = ['goal', 'yellow_card', 'red_card', 'substitution'] as const;
+export const EVENT_TYPES = ['goal', 'yellow_card', 'red_card', 'substitution', 'assist', 'sub_in', 'sub_out'] as const;
 export type MatchEventType = typeof EVENT_TYPES[number];
 
 export type MatchEvent = {
@@ -117,8 +117,10 @@ export type TrainingSession = {
   index: number;
   date: string;
   notes?: string;
+  focus?: string;
   seasonId: string;
   userId: string;
+  attendances?: TrainingAttendance[];
 };
 
 export type TrainingAttendance = {

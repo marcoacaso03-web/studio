@@ -64,7 +64,7 @@ export function SmartPlayerDialog({ open, onOpenChange, onSave }: SmartPlayerDia
       <DialogContent className="max-w-[95vw] md:max-w-xl rounded-3xl p-0 overflow-hidden border-none shadow-2xl flex flex-col max-h-[90vh]">
         <DialogHeader className="p-6 bg-accent text-accent-foreground shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/20 rounded-xl">
+            <div className="bg-card border-b p-6 text-foreground pb-10 rounded-xl">
               <Sparkles className="h-6 w-6" />
             </div>
             <div>
@@ -79,8 +79,8 @@ export function SmartPlayerDialog({ open, onOpenChange, onSave }: SmartPlayerDia
         <ScrollArea className="flex-1">
           <div className="p-6 space-y-6">
             <Alert className="bg-primary/5 border-primary/20 rounded-2xl">
-              <AlertCircle className="h-4 w-4 text-primary" />
-              <AlertTitle className="text-[10px] font-black uppercase text-primary mb-1">Guida all'uso</AlertTitle>
+              <AlertCircle className="h-4 w-4 text-foreground" />
+              <AlertTitle className="text-[10px] font-black uppercase text-foreground mb-1">Guida all'uso</AlertTitle>
               <AlertDescription className="text-[11px] font-bold text-muted-foreground uppercase leading-relaxed">
                 Incolla la lista dei giocatori dividendo per ruolo. 
                 Esempio: <span className="text-foreground">"Difensori: Rossi, Bianchi. Centrocampisti: Verdi..."</span>

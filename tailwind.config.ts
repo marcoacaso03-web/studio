@@ -19,7 +19,9 @@ export default {
         brand: {
           yellow: 'hsl(var(--brand-yellow))',
           green: 'hsl(var(--brand-green))',
+          lime: 'hsl(var(--brand-lime))',
           cyan: 'hsl(var(--brand-cyan))',
+          pink: 'hsl(var(--brand-pink))',
         },
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
@@ -71,6 +73,18 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))',
         },
+        'bg-deep': '#050505',
+        'bg-ultra': '#020202',
+      },
+      boxShadow: {
+        'neon': '0 0 10px hsla(var(--primary), 0.3), 0 0 20px hsla(var(--primary), 0.1)',
+        'neon-strong': '0 0 15px hsla(var(--primary), 0.5), 0 0 30px hsla(var(--primary), 0.2)',
+        'accent-neon': '0 0 10px hsla(var(--accent), 0.3), 0 0 20px hsla(var(--accent), 0.1)',
+        'inner-dark': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.5)',
+      },
+      dropShadow: {
+        'neon': '0 0 5px hsla(var(--primary), 0.5)',
+        'accent': '0 0 5px hsla(var(--accent), 0.5)',
       },
       borderRadius: {
         lg: 'var(--radius)',

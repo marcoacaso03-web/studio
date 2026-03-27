@@ -11,6 +11,7 @@ import {
   getFirestore
 } from 'firebase/firestore';
 import type { Season } from '@/lib/types';
+import { SeasonSchema } from '@/lib/schemas';
 
 export const seasonRepository = {
     async getAll(userId: string) {
@@ -19,7 +20,15 @@ export const seasonRepository = {
         const seasonsRef = collection(db, 'teams');
         const q = query(seasonsRef, where('ownerId', '==', userId));
         const snapshot = await getDocs(q);
-        return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Season));
+    return snapshot.docs.map(doc => {
+      const data = { ...doc.data(), id: doc.id };
+      const parsed = SeasonSchema.safeParse(data);
+      if (!parsed.success) {
+        console.error("Schema validation failed for Season:", parsed.error);
+        return data as Season;
+      }
+      return parsed.data as Season;
+    });
     },
 
     async getById(id: string) {

@@ -111,7 +111,7 @@ export default function LoginPage() {
             <div className="text-center">
               <button 
                 type="button"
-                className="text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors glow-text-cyan"
+                className="text-sm font-medium text-foreground underline hover:opacity-80 transition-colors"
               >
                 Password dimenticata?
               </button>

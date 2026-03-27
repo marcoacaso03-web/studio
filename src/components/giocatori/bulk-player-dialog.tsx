@@ -84,7 +84,7 @@ export function BulkPlayerDialog({ open, onOpenChange, onSave }: BulkPlayerDialo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] md:max-w-2xl rounded-2xl p-0 overflow-hidden flex flex-col max-h-[90vh]">
         <DialogHeader className="p-6 pb-2">
-          <DialogTitle className="text-primary font-black uppercase">Aggiungi in Blocco</DialogTitle>
+          <DialogTitle className="text-foreground font-black uppercase">Aggiungi in Blocco</DialogTitle>
           <DialogDescription className="text-xs font-medium">
             Inserisci i dati dei giocatori. Nome e Cognome sono obbligatori per il salvataggio.
           </DialogDescription>

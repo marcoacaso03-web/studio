@@ -17,7 +17,7 @@ const ptSans = PT_Sans({
 });
 
 export const viewport: Viewport = {
-  themeColor: '#05070a',
+  themeColor: '#080808',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,

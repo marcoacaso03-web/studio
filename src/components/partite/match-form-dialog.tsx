@@ -121,7 +121,7 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto rounded-3xl">
         <DialogHeader>
-          <DialogTitle className="font-black uppercase text-primary">
+          <DialogTitle className="font-black uppercase text-foreground">
             {match ? "Modifica Gara" : "Nuova Gara"}
           </DialogTitle>
           <DialogDescription className="text-xs uppercase font-bold text-muted-foreground/60">

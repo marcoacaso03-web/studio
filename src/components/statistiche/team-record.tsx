@@ -32,21 +32,21 @@ export function TeamRecord() {
         <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
                 {/* Card Record Partite */}
-                <Card className="shadow-sm">
+                <Card className="shadow-sm border-neon-dim">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-base font-bold flex items-center gap-2">
-                            <Swords className="h-4 w-4 text-primary" />
+                            <Swords className="h-4 w-4 text-foreground" />
                             Andamento Stagione
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                    <div className="text-3xl font-black text-primary mb-4">{teamRecord.matchesPlayed} <span className="text-sm font-normal text-muted-foreground">Gare totali</span></div>
+                    <div className="text-3xl font-black text-foreground mb-4">{teamRecord.matchesPlayed} <span className="text-sm font-normal text-muted-foreground">Gare totali</span></div>
                     <div className="grid grid-cols-3 gap-2">
-                        <div className="flex flex-col items-center p-2 bg-primary/10 rounded-lg border border-primary/20">
-                            <span className="text-[9px] font-black text-primary uppercase tracking-tighter mb-1">VITTORIA</span>
+                        <div className="flex flex-col items-center p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-tighter mb-1">VITTORIA</span>
                             <div className="flex items-baseline gap-0.5">
-                                <span className="text-xl font-black text-primary">{teamRecord.wins}</span>
-                                <span className="text-[10px] font-bold text-primary/70">({winPct}%)</span>
+                                <span className="text-xl font-black text-emerald-500">{teamRecord.wins}</span>
+                                <span className="text-[10px] font-bold text-emerald-500/70">({winPct}%)</span>
                             </div>
                         </div>
                         <div className="flex flex-col items-center p-2 bg-muted/40 rounded-lg border border-muted">
@@ -56,11 +56,11 @@ export function TeamRecord() {
                                 <span className="text-[10px] font-bold text-muted-foreground/70">({drawPct}%)</span>
                             </div>
                         </div>
-                        <div className="flex flex-col items-center p-2 bg-accent/10 rounded-lg border border-accent/20">
-                            <span className="text-[9px] font-black text-accent uppercase tracking-tighter mb-1">SCONFITTA</span>
+                        <div className="flex flex-col items-center p-2 bg-rose-500/10 rounded-lg border border-rose-500/20">
+                            <span className="text-[9px] font-black text-rose-500 uppercase tracking-tighter mb-1">SCONFITTA</span>
                             <div className="flex items-baseline gap-0.5">
-                                <span className="text-xl font-black text-accent">{teamRecord.losses}</span>
-                                <span className="text-[10px] font-bold text-accent/70">({lossPct}%)</span>
+                                <span className="text-xl font-black text-rose-500">{teamRecord.losses}</span>
+                                <span className="text-[10px] font-bold text-rose-500/70">({lossPct}%)</span>
                             </div>
                         </div>
                     </div>
@@ -68,10 +68,10 @@ export function TeamRecord() {
                 </Card>
 
                 {/* Card Bilancio Reti */}
-                <Card className="shadow-sm">
+                <Card className="shadow-sm border-neon-dim">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-base font-bold flex items-center gap-2">
-                            <Goal className="h-4 w-4 text-accent" />
+                            <Goal className="h-4 w-4 text-foreground" />
                             Bilancio Reti
                         </CardTitle>
                     </CardHeader>
@@ -80,10 +80,10 @@ export function TeamRecord() {
                             <div className="space-y-1">
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase">Differenza Reti</p>
                                 <div className="flex items-center gap-2">
-                                    <span className={`text-4xl font-black ${goalDifference > 0 ? 'text-primary' : goalDifference < 0 ? 'text-accent' : 'text-primary'}`}>
+                                    <span className={`text-4xl font-black ${goalDifference > 0 ? 'text-emerald-500' : goalDifference < 0 ? 'text-rose-500' : 'text-foreground'}`}>
                                         {goalDifference > 0 ? `+${goalDifference}` : goalDifference}
                                     </span>
-                                    {goalDifference > 0 ? <TrendingUp className="h-6 w-6 text-primary" /> : goalDifference < 0 ? <TrendingDown className="h-6 w-6 text-accent" /> : null}
+                                    {goalDifference > 0 ? <TrendingUp className="h-6 w-6 text-emerald-500" /> : goalDifference < 0 ? <TrendingDown className="h-6 w-6 text-rose-500" /> : null}
                                 </div>
                             </div>
                         </div>
@@ -91,7 +91,7 @@ export function TeamRecord() {
                         <div className="grid grid-cols-2 gap-4 pt-4 border-t">
                             <div className="flex items-start gap-3">
                                 <div className="p-2 bg-primary/10 rounded-full">
-                                    <Goal className="h-4 w-4 text-primary" />
+                                    <Goal className="h-4 w-4 text-foreground" />
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-bold text-muted-foreground uppercase">Gol Fatti</p>
@@ -99,8 +99,8 @@ export function TeamRecord() {
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
-                                <div className="p-2 bg-accent/10 rounded-full">
-                                    <ShieldAlert className="h-4 w-4 text-accent" />
+                                <div className="p-2 bg-rose-500/10 rounded-full">
+                                    <ShieldAlert className="h-4 w-4 text-rose-500" />
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-bold text-muted-foreground uppercase">Gol Subiti</p>
@@ -113,10 +113,10 @@ export function TeamRecord() {
             </div>
 
             {/* Card Migliori Rendimenti */}
-            <Card className="shadow-sm">
+            <Card className="shadow-sm border-neon-dim">
                 <CardHeader className="pb-2">
                     <CardTitle className="text-base font-bold flex items-center gap-2">
-                        <Trophy className="h-4 w-4 text-primary" />
+                        <Trophy className="h-4 w-4 text-foreground" />
                         Migliori Rendimenti
                     </CardTitle>
                 </CardHeader>
@@ -124,29 +124,29 @@ export function TeamRecord() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-xl border border-muted">
                             <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                <Trophy className="h-5 w-5 text-primary" />
+                                <Trophy className="h-5 w-5 text-foreground" />
                             </div>
                             <div className="flex-1">
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Capocannoniere</p>
                                 <p className="text-sm font-black uppercase">
                                     {topScorer && topScorer.stats.goals > 0 ? (
                                         <>
-                                            {topScorer.name} <span className="text-primary ml-1">({topScorer.stats.goals})</span>
+                                            {topScorer.name} <span className="text-foreground ml-1">({topScorer.stats.goals})</span>
                                         </>
                                     ) : "-"}
                                 </p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-xl border border-muted">
-                            <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center">
-                                <Star className="h-5 w-5 text-accent" />
+                            <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center">
+                                <Star className="h-5 w-5 text-foreground" />
                             </div>
                             <div className="flex-1">
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Assistman</p>
                                 <p className="text-sm font-black uppercase">
                                     {topAssist && topAssist.stats.assists > 0 ? (
                                         <>
-                                            {topAssist.name} <span className="text-accent ml-1">({topAssist.stats.assists})</span>
+                                            {topAssist.name} <span className="text-foreground ml-1">({topAssist.stats.assists})</span>
                                         </>
                                     ) : "-"}
                                 </p>

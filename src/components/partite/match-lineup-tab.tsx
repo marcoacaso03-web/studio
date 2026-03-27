@@ -60,7 +60,7 @@ export function MatchLineupTab() {
         <Card className="border-dashed bg-muted/10">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <ClipboardList className="h-16 w-16 text-muted-foreground mb-6 opacity-20" />
-            <h3 className="text-xl font-black uppercase tracking-tight text-primary">Nessuna formazione inserita</h3>
+            <h3 className="text-xl font-black uppercase tracking-tight text-foreground">Nessuna formazione inserita</h3>
             <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mt-2 mb-8">Inizia a definire i titolari e le riserve per questa gara.</p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Button onClick={() => setIsFormOpen(true)} className="h-12 px-8 bg-primary rounded-2xl font-black uppercase text-xs shadow-lg">
@@ -84,8 +84,8 @@ export function MatchLineupTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <LayoutGrid className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-black uppercase tracking-tight">Layout Tattico <span className="text-primary ml-1">{activeFormation}</span></h3>
+          <LayoutGrid className="h-5 w-5 text-foreground" />
+          <h3 className="text-lg font-black uppercase tracking-tight">Layout Tattico <span className="text-foreground ml-1">{activeFormation}</span></h3>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => setIsSmartOpen(true)} className="border-accent text-accent hover:bg-accent/5 h-9 rounded-xl font-black uppercase text-[10px]">
@@ -101,7 +101,7 @@ export function MatchLineupTab() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Campo da Gioco */}
         <div className="lg:col-span-3">
-          <div className="relative aspect-[3/4] md:aspect-[4/3] w-full rounded-3xl bg-gradient-to-b from-[#2a4a42] to-[#1a3330] overflow-hidden border-4 border-white/5 shadow-2xl flex flex-col p-4 md:p-8">
+          <div className="relative aspect-[3/4] md:aspect-[4/3] w-full rounded-3xl bg-neutral-950 overflow-hidden border-4 border-white/5 shadow-2xl flex flex-col p-4 md:p-8">
             {/* Linee del campo */}
             <div className="absolute inset-4 border-2 border-white/10 pointer-events-none rounded-sm">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-16 border-b-2 border-x-2 border-white/10" />
@@ -124,8 +124,8 @@ export function MatchLineupTab() {
                         <div className={cn(
                           "w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center border-4 shadow-xl transition-transform hover:scale-110",
                           isPOR
-                            ? "bg-amber-500 border-amber-300 text-black"
-                            : "bg-[#3d8b72] border-[#5BB89A]/40 text-white"
+                            ? "bg-amber-700 border-amber-600 text-black"
+                            : "bg-neutral-800 border-neutral-700 text-white"
                         )}>
                           <span className="text-[10px] md:text-sm font-black uppercase">
                             {currentAcronyms[starterIdx] || (starterIdx + 1)}

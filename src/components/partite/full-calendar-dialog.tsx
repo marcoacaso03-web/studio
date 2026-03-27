@@ -81,28 +81,33 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-[95vw] h-[90vh] md:max-w-3xl rounded-3xl p-0 overflow-hidden flex flex-col border-none shadow-2xl [&>button]:hidden">
-          <DialogHeader className="p-6 bg-primary text-white flex-row items-center justify-between space-y-0 shrink-0">
+          <DialogHeader className="p-6 bg-background border-b border-white/5 flex-row items-center justify-between space-y-0 shrink-0">
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 h-8 w-8" onClick={() => onOpenChange(false)}>
-                <ChevronLeft className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="text-foreground hover:bg-white/10 h-8 w-8" onClick={() => onOpenChange(false)}>
+                <ChevronLeft className="h-5 w-5 text-foreground" />
               </Button>
               <div>
-                <DialogTitle className="text-xl font-black uppercase tracking-tight">Calendario</DialogTitle>
-                <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mt-0.5">Stagione {activeSeason?.name}</p>
+                <DialogTitle className="text-xl font-black uppercase tracking-tight text-foreground">Calendario</DialogTitle>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Stagione {activeSeason?.name}</p>
               </div>
             </div>
             <div className="flex gap-2">
               <Button 
                 variant="outline"
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-8 text-[9px] font-black uppercase px-3 rounded-xl"
+                className="bg-black/80 border border-brand-green text-white hover:bg-black hover:scale-105 transition-all h-8 text-[9px] font-black uppercase px-3 rounded-xl shadow-[0_0_10px_rgba(172,229,4,0.15)]"
                 size="sm"
                 onClick={() => setIsImportOpen(true)}
               >
-                <Globe className="mr-1 h-3 w-3" />
+                <Globe className="mr-1 h-3 w-3 text-brand-green" />
                 Importa
               </Button>
-              <Button className="bg-accent text-accent-foreground hover:bg-accent/90 h-8 text-[9px] font-black uppercase px-3 rounded-xl shadow-lg" size="sm" onClick={() => setIsFormOpen(true)}>
-                  <PlusCircle className="mr-1 h-3 w-3" />
+              <Button 
+                variant="outline" 
+                className="bg-black/80 border border-brand-green text-white hover:bg-black hover:scale-105 transition-all h-8 text-[9px] font-black uppercase px-3 rounded-xl shadow-[0_0_10px_rgba(172,229,4,0.15)]" 
+                size="sm" 
+                onClick={() => setIsFormOpen(true)}
+              >
+                  <PlusCircle className="mr-1 h-3 w-3 text-brand-green" />
                   Nuova
               </Button>
             </div>
@@ -115,7 +120,7 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
               </div>
             ) : matches.length === 0 ? (
               <div className="text-center py-20 text-muted-foreground">
-                <Calendar className="h-12 w-12 mx-auto opacity-20 mb-4" />
+                <Calendar className="h-12 w-12 mx-auto opacity-20 mb-4 text-brand-green" />
                 <p className="font-black text-xs uppercase tracking-widest">Nessuna partita registrata</p>
               </div>
             ) : (
@@ -134,11 +139,11 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
                         >
                           <div className="flex items-center gap-3">
                             <div className="flex flex-col items-center min-w-[36px]">
-                              <span className="text-xs font-black leading-none text-primary">{day}</span>
+                              <span className="text-xs font-black leading-none text-foreground">{day}</span>
                               <span className="text-[9px] font-bold text-muted-foreground">{month}</span>
                             </div>
                             <div className="p-1.5 bg-muted/30 rounded-lg">
-                              {match.isHome ? <Home className="h-3.5 w-3.5 text-primary/60" /> : <Plane className="h-3.5 w-3.5 text-accent/60" />}
+                              {match.isHome ? <Home className="h-3.5 w-3.5 text-brand-green" /> : <Plane className="h-3.5 w-3.5 text-brand-cyan" />}
                             </div>
                             <div className="flex-1 flex items-center justify-between gap-2">
                               <div className="flex flex-col">
@@ -149,7 +154,7 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
                               </div>
                               <div className="flex items-center gap-3">
                                 <div className="bg-primary/5 border border-primary/10 px-2 py-0.5 rounded-lg min-w-[40px] text-center">
-                                  <span className="text-xs font-black tabular-nums text-primary">
+                                  <span className="text-xs font-black tabular-nums text-foreground">
                                     {match.result ? `${match.result.home} - ${match.result.away}` : '0 - 0'}
                                   </span>
                                 </div>
@@ -197,7 +202,7 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
       <AlertDialog open={!!matchToDelete} onOpenChange={(open) => !open && setMatchToDelete(null)}>
         <AlertDialogContent className="max-w-[90vw] rounded-3xl border-none shadow-2xl p-8">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-primary text-2xl font-black uppercase tracking-tight">Elimina Gara</AlertDialogTitle>
+            <AlertDialogTitle className="text-foreground text-2xl font-black uppercase tracking-tight">Elimina Gara</AlertDialogTitle>
             <AlertDialogDescription className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
               Questa azione è irreversibile.
             </AlertDialogDescription>

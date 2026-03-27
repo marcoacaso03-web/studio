@@ -97,7 +97,7 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="text-primary font-black uppercase">{player ? "Modifica Giocatore" : "Nuovo Giocatore"}</DialogTitle>
+          <DialogTitle className="text-foreground font-black uppercase text-xl">{player ? "Modifica Giocatore" : "Nuovo Giocatore"}</DialogTitle>
           <DialogDescription className="text-xs">
             Gestisci i dettagli anagrafici e il ruolo tecnico.
           </DialogDescription>

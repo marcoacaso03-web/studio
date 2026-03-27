@@ -40,7 +40,7 @@ export function MatchNotesTab() {
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <div>
           <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-primary" />
+            <FileText className="h-5 w-5 text-foreground" />
             <CardTitle>Note Tattiche</CardTitle>
           </div>
           <CardDescription>Analisi post-partita, note sull'avversario e progressi tecnici.</CardDescription>

@@ -93,20 +93,20 @@ export function ImportTuttocampoDialog({ open, onOpenChange }: ImportTuttocampoD
           <div className="p-6 space-y-6">
             <div className="space-y-4">
               <div className="p-4 bg-muted/40 rounded-2xl border border-dashed space-y-3">
-                <h4 className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
+                <h4 className="text-[10px] font-black uppercase text-foreground tracking-widest flex items-center gap-2">
                    <Info className="h-3 w-3" /> Come fare:
                 </h4>
                 <div className="space-y-2 text-[11px] font-bold leading-relaxed text-muted-foreground uppercase">
                   <div className="flex gap-2">
-                    <span className="text-primary">1.</span>
+                    <span className="text-foreground">1.</span>
                     <p>Vai su <span className="text-foreground">Tuttocampo.it</span> e apri il calendario della tua squadra.</p>
                   </div>
                   <div className="flex gap-2">
-                    <span className="text-primary">2.</span>
+                    <span className="text-foreground">2.</span>
                     <p>Seleziona tutta la tabella (<kbd className="bg-white px-1 border rounded text-[9px]">CTRL+A</kbd> su PC, o <span className="text-foreground">Seleziona Tutto</span> su Mobile).</p>
                   </div>
                   <div className="flex gap-2">
-                    <span className="text-primary">3.</span>
+                    <span className="text-foreground">3.</span>
                     <p>Copia il contenuto e incollalo nel box qui sotto.</p>
                   </div>
                 </div>
@@ -125,9 +125,9 @@ export function ImportTuttocampoDialog({ open, onOpenChange }: ImportTuttocampoD
 
               {isLoading && (
                 <div className="flex flex-col items-center justify-center p-8 bg-primary/5 rounded-2xl border border-dashed border-primary/20 space-y-3 animate-in fade-in zoom-in">
-                  <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                  <Loader2 className="h-10 w-10 text-foreground animate-spin" />
                   <div className="text-center">
-                    <p className="text-[10px] font-black uppercase text-primary animate-pulse tracking-widest">L'AI sta leggendo i dati...</p>
+                    <p className="text-[10px] font-black uppercase text-foreground animate-pulse tracking-widest">L'AI sta leggendo i dati...</p>
                     <p className="text-[9px] text-muted-foreground uppercase font-bold mt-1">Analisi avversari e date in corso</p>
                   </div>
                 </div>

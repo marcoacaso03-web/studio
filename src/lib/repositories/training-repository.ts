@@ -15,6 +15,7 @@ import {
   getDoc
 } from 'firebase/firestore';
 import type { TrainingSession, TrainingAttendance, TrainingStatus } from '@/lib/types';
+import { TrainingSessionSchema } from '@/lib/schemas';
 
 export const trainingRepository = {
   async getAll(userId: string, seasonId: string) {
@@ -22,14 +23,29 @@ export const trainingRepository = {
     const sessionsRef = collection(db, 'users', userId, 'trainingSessions');
     const q = query(sessionsRef, where('seasonId', '==', seasonId));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as TrainingSession));
+    return snapshot.docs.map(doc => {
+      const data = { ...doc.data(), id: doc.id };
+      const parsed = TrainingSessionSchema.safeParse(data);
+      if (!parsed.success) {
+        console.error("Schema validation failed for TrainingSession:", parsed.error);
+        return data as TrainingSession; // Fallback to raw data
+      }
+      return parsed.data as TrainingSession;
+    });
   },
 
   async getById(userId: string, sessionId: string) {
     const db = getFirestore();
     const docRef = doc(db, 'users', userId, 'trainingSessions', sessionId);
     const snapshot = await getDoc(docRef);
-    return snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } as TrainingSession : undefined;
+    if (!snapshot.exists()) return undefined;
+    const data = { ...snapshot.data(), id: snapshot.id };
+    const parsed = TrainingSessionSchema.safeParse(data);
+    if (!parsed.success) {
+      console.error("Schema validation failed for TrainingSession:", parsed.error);
+      return data as TrainingSession;
+    }
+    return parsed.data as TrainingSession;
   },
 
   async bulkAdd(sessions: Omit<TrainingSession, 'id'>[], userId: string) {
@@ -40,6 +56,14 @@ export const trainingRepository = {
       const id = `TR-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
       const docRef = doc(db, 'users', userId, 'trainingSessions', id);
       batch.set(docRef, { ...s, id });
+      
+      // Scrive le sub-collezioni attendance in blocco se presenti
+      if (s.attendances && s.attendances.length > 0) {
+        s.attendances.forEach(att => {
+          const attRef = doc(db, 'users', userId, 'trainingSessions', id, 'attendance', att.playerId);
+          batch.set(attRef, { playerId: att.playerId, status: att.status });
+        });
+      }
     });
 
     await batch.commit();

@@ -88,7 +88,7 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] h-[90vh] md:max-w-2xl rounded-3xl p-0 overflow-hidden flex flex-col border-none shadow-2xl [&>button]:hidden">
-        <DialogHeader className="p-6 bg-primary text-white flex-row items-center gap-4 space-y-0 shrink-0">
+        <DialogHeader className="p-6 bg-card border-b text-foreground flex-row items-center gap-4 space-y-0 shrink-0">
           <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 h-8 w-8" onClick={() => onOpenChange(false)}>
             <ChevronLeft className="h-5 w-5" />
           </Button>
@@ -106,7 +106,7 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
         <div className="flex-1 bg-background overflow-hidden flex flex-col">
           {loading ? (
             <div className="flex-1 flex flex-col items-center justify-center space-y-4">
-              <Loader2 className="h-10 w-10 text-primary animate-spin" />
+              <Loader2 className="h-10 w-10 text-foreground animate-spin" />
               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Calcolo Statistiche...</p>
             </div>
           ) : (
@@ -118,7 +118,7 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
                       <TableHead className="text-[9px] font-black uppercase tracking-widest px-3">Giocatore</TableHead>
                       <TableHead className="text-[9px] font-black uppercase tracking-widest text-center px-1">Sett (P)</TableHead>
                       <TableHead className="text-[9px] font-black uppercase tracking-widest text-center px-1">Sett (R)</TableHead>
-                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-center px-1 text-primary">Totale</TableHead>
+                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-center px-1 text-foreground">Totale</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -135,13 +135,13 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
                           </span>
                         </TableCell>
                         <TableCell className="text-center px-1 py-0">
-                          <span className="text-xs font-bold text-yellow-600">
+                          <span className="text-xs font-bold text-foreground">
                             {row.weeklyLate}
                           </span>
                         </TableCell>
                         <TableCell className="text-center px-1 py-0">
-                          <div className="bg-primary/10 border border-primary/20 px-2 py-1 rounded-lg inline-block min-w-[32px]">
-                            <span className="text-sm font-black text-primary tabular-nums">
+                          <div className="bg-muted px-2 py-1 rounded-lg inline-block min-w-[32px]">
+                            <span className="text-sm font-black text-foreground tabular-nums">
                               {row.totalPresent}
                             </span>
                           </div>

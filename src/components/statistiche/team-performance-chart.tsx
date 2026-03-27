@@ -61,14 +61,14 @@ export function TeamPerformanceChart() {
                                 }}
                                 tickLine={false}
                                 axisLine={false}
-                                tick={{ fontSize: 12, fontWeight: 800, fill: "hsl(var(--primary))" }}
+                                tick={{ fontSize: 12, fontWeight: 800, fill: "hsl(var(--foreground))" }}
                             />
                             <Tooltip 
                                 content={({ active, payload }) => {
                                     if (active && payload && payload.length) {
                                         const data = payload[0].payload;
                                         const resultLabel = data.value === 1 ? 'Vittoria' : data.value === -1 ? 'Sconfitta' : 'Pareggio';
-                                        const resultColor = data.value === 1 ? 'text-green-600' : data.value === -1 ? 'text-red-600' : 'text-yellow-600';
+                                        const resultColor = "text-foreground font-black";
                                         
                                         return (
                                             <div className="bg-background border rounded-lg p-2 shadow-md text-[10px] md:text-xs">

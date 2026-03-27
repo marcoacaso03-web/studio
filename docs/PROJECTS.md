@@ -45,11 +45,38 @@
 - [ ] **Estensione Leggera Smartwatch** — Esplorare lo sviluppo di un mini target layout indossabile per prendere presenze on-the-go o far scattare un cronometro partita live dall'orologio da polso.
 
 ### 🔧 Impostazioni & UX
+- [x] **Redesign Neon High-Viz** — Applicare il nuovo tema scuro/chiaro con i colori ufficiali del brand a tutte le schermate principali.
 - [ ] **Profilo allenatore** — Aggiungere nome squadra, logo, colori sociali personalizzabili nelle impostazioni.
 - [ ] **Multi-lingua** — L'app è tutta in italiano. Aggiungere supporto `i18n` (almeno IT/EN) con `next-intl`.
 - [ ] **Onboarding automatizzato** — Tour interattivo alla prima apertura con micro-animazioni.
 - [ ] **Esportazioni Dati Aggregate** — Pulsante di Export Excel / CSV immediato basato sulle tabelle statistiche, necessario per presidenti / scouting manager che preferiscono la carta.
 - [ ] **Backup automatico (Cloud Scheduling)** — Esportazione periodica programmata dei database critici verso Google Cloud Storage / Drive come disaster recovery di primo livello.
+
+---
+
+## 🚀 Feature Rivoluzionarie (Game Changers)
+
+### 🧩 Automazione & Campo
+- [ ] **Lavagna Tattica Interattiva** — Un campo trascinabile (whiteboard digitale) per spiegare schemi e movimenti durante l'allenamento.
+- [ ] **Cronometro Match con Eventi** — Gestione live della partita con tasti rapidi "Gol/Cartellino" che registrano l'ora esatta automaticamente.
+
+### 🧠 Intelligenza Artificiale
+- [ ] **AI Assistant "Best 11"** — Suggerimento automatico della formazione titolare incrociando presenze agli allenamenti e performance nelle ultime gare.
+- [ ] **Match Flow Timeline** — Generazione automatica di una timeline visiva degli eventi della partita con icone e momenti chiave.
+
+---
+
+## 🛠️ Ottimizzazioni Tecniche e Architetturali
+
+### 🎨 Design System
+- [x] **Standardizzazione Design Tokens** — Centralizzare tutti i colori neon in variabili CSS (`--brand-yellow`, etc.) per evitare duplicazioni di hex code sparsi nei componenti.
+- [x] **Skeleton Loaders Neon** — Implementare caricamenti a impulsi neon coerenti in ogni pagina per migliorare la percezione della velocità.
+- [ ] **Responsive Grid Layouts** — Sostituire le tabelle classiche con layout a griglia/flex per una leggibilità perfetta su smartphone (formato "card-list").
+
+### 🏗️ Codice & Stabilità
+- [x] **Zod Schema Validation** — Proteggere le letture da Firestore con schemi Zod per evitare crash se un campo (es. `focus`) è mancante o malformato.
+- [x] **Offline-First Strategy** — Ottimizzare il Service Worker per garantire che il registro presenze e il live match funzionino perfettamente anche con campo senza segnale.
+- [x] **Refactoring Store Persistence** — Implementare `persist` di Zustand per salvare lo stato locale (es. filtri selezionati) tra un ricaricamento e l'altro.
 
 ---
 

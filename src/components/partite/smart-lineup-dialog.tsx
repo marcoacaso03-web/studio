@@ -81,8 +81,8 @@ export function SmartLineupDialog({ open, onOpenChange }: SmartLineupDialogProps
         <ScrollArea className="flex-1">
           <div className="p-6 space-y-6">
             <Alert className="bg-primary/5 border-primary/20 rounded-2xl">
-              <AlertCircle className="h-4 w-4 text-primary" />
-              <AlertTitle className="text-[10px] font-black uppercase text-primary mb-1">Attenzione</AlertTitle>
+              <AlertCircle className="h-4 w-4 text-foreground" />
+              <AlertTitle className="text-[10px] font-black uppercase text-foreground mb-1">Attenzione</AlertTitle>
               <AlertDescription className="text-[11px] font-bold text-muted-foreground uppercase leading-relaxed">
                 Se l'AI non riconosce un nome, lascerà la posizione vuota. 
                 <span className="text-foreground block mt-1">Verifica sempre la formazione dopo l'inserimento automatico.</span>

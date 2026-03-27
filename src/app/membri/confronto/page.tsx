@@ -243,8 +243,8 @@ function ConfrontoContent() {
       <div className="grid grid-cols-2 gap-4">
          <Card className="bg-primary/5 border-primary/20">
             <CardContent className="p-4 flex flex-col items-center text-center gap-1">
-               <User className="h-8 w-8 text-primary mb-1" />
-               <h3 className="font-black text-lg text-primary">{p1?.name ?? "..."}</h3>
+               <User className="h-8 w-8 text-foreground mb-1" />
+               <h3 className="font-black text-lg text-foreground">{p1?.name ?? "..."}</h3>
                <span className="text-[9px] font-black tracking-widest uppercase text-muted-foreground">{p1?.role}</span>
             </CardContent>
          </Card>
@@ -264,8 +264,8 @@ function ConfrontoContent() {
                   </Select>
                ) : (
                   <>
-                     <User className="h-8 w-8 text-[#E13A71] mb-1" />
-                     <h3 className="font-black text-lg text-[#E13A71]">{p2.name}</h3>
+                     <User className="h-8 w-8 text-brand-pink mb-1" />
+                     <h3 className="font-black text-lg text-brand-pink">{p2.name}</h3>
                      <Button variant="ghost" size="sm" className="h-6 text-[10px]" onClick={() => router.replace(`/membri/confronto?p1=${p1Id}`)}>
                         Cambia Avversario
                      </Button>
@@ -291,9 +291,9 @@ function ConfrontoContent() {
             <Card className="rounded-2xl border shadow-sm">
                 <CardContent className="p-0">
                    <div className="grid grid-cols-3 divide-x border-b items-center py-2 bg-muted/20">
-                      <div className="text-center font-black text-primary text-xs truncate px-1">{splitName(p1.name).lastName}</div>
+                      <div className="text-center font-black text-foreground text-xs truncate px-1">{splitName(p1.name).lastName}</div>
                       <div className="text-center text-[9px] font-black text-muted-foreground uppercase tracking-widest">Metrica</div>
-                      <div className="text-center font-black text-[#E13A71] text-xs truncate px-1">{splitName(p2.name).lastName}</div>
+                      <div className="text-center font-black text-brand-pink text-xs truncate px-1">{splitName(p2.name).lastName}</div>
                    </div>
                    
                    {[
@@ -311,9 +311,9 @@ function ConfrontoContent() {
                       const is2Better = row.better === "high" ? row.val2 > row.val1 : row.val2 < row.val1;
                       return (
                          <div key={i} className="grid grid-cols-3 divide-x border-b last:border-0 items-center py-3 hover:bg-muted/10 transition-colors">
-                            <div className={`text-center font-black ${is1Better ? "text-primary text-lg" : "text-muted-foreground text-sm"}`}>{row.val1}</div>
+                            <div className={`text-center font-black ${is1Better ? "text-foreground text-lg border-b-2 border-primary/40" : "text-muted-foreground text-sm"}`}>{row.val1}</div>
                             <div className="text-center text-[10px] font-bold text-muted-foreground uppercase">{row.label}</div>
-                            <div className={`text-center font-black ${is2Better ? "text-[#E13A71] text-lg" : "text-muted-foreground text-sm"}`}>{row.val2}</div>
+                            <div className={`text-center font-black ${is2Better ? "text-brand-pink text-lg" : "text-muted-foreground text-sm"}`}>{row.val2}</div>
                          </div>
                       )
                    })}

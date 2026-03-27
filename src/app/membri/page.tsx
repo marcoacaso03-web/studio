@@ -30,10 +30,10 @@ import { cn } from "@/lib/utils";
 
 const rolesList: Role[] = ["Portiere", "Difensore", "Centrocampista", "Attaccante"];
 const roleColors: Record<Role, string> = {
-  "Portiere": "from-brand-yellow to-brand-green text-primary-foreground", // Yellow to Green
-  "Difensore": "from-brand-green to-brand-cyan text-primary-foreground", // Green to Cyan
-  "Centrocampista": "from-brand-green to-brand-cyan text-primary-foreground", // Green to Cyan
-  "Attaccante": "from-brand-cyan to-brand-cyan text-primary-foreground", // Cyan to Indigo
+  "Portiere": "bg-amber-900/40 border-amber-500/30 text-amber-500", 
+  "Difensore": "bg-slate-900/40 border-slate-500/30 text-slate-500",
+  "Centrocampista": "bg-blue-900/40 border-blue-500/30 text-blue-500",
+  "Attaccante": "bg-red-900/40 border-red-500/30 text-red-500",
 };
 
 export default function RosaPage() {
@@ -117,25 +117,25 @@ export default function RosaPage() {
   return (
     <div className="pb-24 pt-4 space-y-6">
       <div className="flex flex-col items-center justify-center mb-6">
-        <h1 className="text-xl md:text-2xl font-black text-brand-green tracking-wide relative after:content-[''] after:absolute after:bottom-[-2px] after:left-1/2 after:-translate-x-1/2 after:w-16 after:h-[2px] after:bg-gradient-to-r after:from-transparent after:via-brand-green after:to-transparent">
+        <h1 className="text-xl md:text-2xl font-black text-foreground tracking-wide relative after:content-[''] after:absolute after:bottom-[-2px] after:left-1/2 after:-translate-x-1/2 after:w-16 after:h-[2px] after:bg-gradient-to-r after:from-transparent after:via-foreground after:to-transparent">
           Gestione Rosa Squadra
         </h1>
       </div>
 
       <div className="px-4 flex gap-3 items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-brand-cyan/80" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground/40" />
           <Input 
             type="text" 
             placeholder="Cerca" 
-            className="w-full h-12 pl-12 pr-4 rounded-full bg-card border-border/80 border-brand-cyan/30 text-foreground placeholder:text-brand-cyan/50 font-medium text-lg focus-visible:ring-brand-cyan/50 focus-visible:border-brand-cyan"
+            className="w-full h-12 pl-12 pr-4 rounded-full bg-card border-border/80 text-foreground placeholder:text-muted-foreground/50 font-medium text-lg focus-visible:ring-primary/50"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <Button 
           onClick={() => handleOpenForm(null)}
-          className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-gradient-to-br from-brand-yellow to-brand-green text-primary-foreground shadow-[0_0_15px_rgba(74,222,128,0.5)] transition-all hover:scale-105 active:scale-95 border-none"
+          className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-gradient-to-br from-brand-yellow to-brand-green text-white shadow-[0_0_15px_rgba(74,222,128,0.5)] transition-all hover:scale-105 active:scale-95 border-none"
         >
           <Plus className="h-7 w-7" />
         </Button>
@@ -168,12 +168,12 @@ export default function RosaPage() {
                 <div 
                    onClick={() => toggleRole(roleKey)}
                    className={cn(
-                     "flex items-center justify-between p-4 cursor-pointer select-none transition-all",
-                     `bg-gradient-to-r ${roleColors[roleKey]}`
+                     "flex items-center justify-between p-4 cursor-pointer select-none transition-all rounded-t-2xl border-b border-white/5",
+                     roleColors[roleKey]
                    )}
                 >
                   <span className="font-medium text-[17px] tracking-wide">{roleName}</span>
-                  <div className="h-6 w-6 rounded-full bg-black/10 flex items-center justify-center">
+                  <div className="bg-card rounded-2xl border border-neon-dim shadow-lg overflow-hidden transition-all hover:bg-card/90">
                     {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                   </div>
                 </div>
@@ -190,7 +190,7 @@ export default function RosaPage() {
                           className="flex items-center justify-between p-4 border-b border-white/5 last:border-b-0 group hover:bg-card/20 hover:bg-card/30 transition-colors cursor-pointer"
                           onClick={() => router.push(`/membri/${player.id}`)}
                         >
-                          <span className="text-brand-cyan font-medium text-[17px]">{player.name}</span>
+                          <span className="text-foreground font-medium text-[17px]">{player.name}</span>
                           <div className="flex items-center gap-3">
                             <span className="text-foreground/60 text-sm font-medium">
                                 #{index + 1}
@@ -225,7 +225,7 @@ export default function RosaPage() {
       <AlertDialog open={!!playerToDelete} onOpenChange={(open) => !open && setPlayerToDelete(null)}>
         <AlertDialogContent className="max-w-[90vw] rounded-3xl bg-background border-white/10 text-foreground p-6">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-emerald-400 font-black uppercase text-base">Rimuovi Giocatore</AlertDialogTitle>
+            <AlertDialogTitle className="text-foreground font-black uppercase text-base">Rimuovi Giocatore</AlertDialogTitle>
             <AlertDialogDescription className="text-sm font-medium leading-relaxed text-foreground/60">
               Vuoi eliminare definitivamente <strong>{playerToDelete?.name}</strong> dalla rosa?
             </AlertDialogDescription>

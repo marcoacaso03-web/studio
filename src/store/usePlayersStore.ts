@@ -1,6 +1,8 @@
+
 "use client";
 
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { playerRepository } from '@/lib/repositories/player-repository';
 import type { Player, Role } from '@/lib/types';
 import type { PlayerCreateData } from '@/lib/repositories/player-repository';
@@ -22,76 +24,86 @@ interface PlayerState {
 export const getPlayersSWRKey = (userId?: string, seasonId?: string) => 
     userId && seasonId ? ['players', userId, seasonId] : null;
 
-export const usePlayersStore = create<PlayerState>((set, get) => ({
-    players: [],
-    loading: true,
-    fetchAll: async (seasonId) => {
-        const user = useAuthStore.getState().user;
-        if (!user) return;
+export const usePlayersStore = create<PlayerState>()(
+  persist(
+    (set, get) => ({
+      players: [],
+      loading: true,
+      fetchAll: async (seasonId) => {
+          const user = useAuthStore.getState().user;
+          if (!user) return;
 
-        set({ loading: true });
-        const targetSeasonId = seasonId || useSeasonsStore.getState().activeSeason?.id;
-        
-        if (!targetSeasonId) {
-            set({ players: [], loading: false });
-            return;
-        }
+          set({ loading: true });
+          const targetSeasonId = seasonId || useSeasonsStore.getState().activeSeason?.id;
+          
+          if (!targetSeasonId) {
+              set({ players: [], loading: false });
+              return;
+          }
 
-        const players = await playerRepository.getAll(user.id, targetSeasonId);
-        set({ players, loading: false });
-        // Update SWR cache if anyone is listening
-        mutate(getPlayersSWRKey(user.id, targetSeasonId), players, false);
-    },
-    add: async (data) => {
-        const user = useAuthStore.getState().user;
-        const activeSeason = useSeasonsStore.getState().activeSeason;
-        if (!activeSeason || !user) {
-             return undefined;
-        }
+          try {
+            const players = await playerRepository.getAll(user.id, targetSeasonId);
+            set({ players, loading: false });
+            mutate(getPlayersSWRKey(user.id, targetSeasonId), players, false);
+          } catch (e) {
+            console.error("Fetch players error:", e);
+            set({ loading: false });
+          }
+      },
+      add: async (data) => {
+          const user = useAuthStore.getState().user;
+          const activeSeason = useSeasonsStore.getState().activeSeason;
+          if (!activeSeason || !user) {
+               return undefined;
+          }
 
-        const newPlayer = await playerRepository.add({ 
-            ...data, 
-            userId: user.id,
-            seasonId: activeSeason.id 
-        });
-        
-        // Optimistic update via SWR or just revalidate
-        await mutate(getPlayersSWRKey(user.id, activeSeason.id));
-        await get().fetchAll(activeSeason.id);
-        useStatsStore.getState().loadStats();
-        return newPlayer;
-    },
-    bulkAdd: async (playersData) => {
-        const user = useAuthStore.getState().user;
-        const activeSeason = useSeasonsStore.getState().activeSeason;
-        if (!activeSeason || !user) return;
+          const newPlayer = await playerRepository.add({ 
+              ...data, 
+              userId: user.id,
+              seasonId: activeSeason.id 
+          });
+          
+          await mutate(getPlayersSWRKey(user.id, activeSeason.id));
+          await get().fetchAll(activeSeason.id);
+          useStatsStore.getState().loadStats();
+          return newPlayer;
+      },
+      bulkAdd: async (playersData) => {
+          const user = useAuthStore.getState().user;
+          const activeSeason = useSeasonsStore.getState().activeSeason;
+          if (!activeSeason || !user) return;
 
-        await playerRepository.bulkAdd(playersData, user.id, activeSeason.id);
-        
-        await mutate(getPlayersSWRKey(user.id, activeSeason.id));
-        await get().fetchAll(activeSeason.id);
-        useStatsStore.getState().loadStats();
-    },
-    update: async (id, updates) => {
-        const user = useAuthStore.getState().user;
-        const activeSeason = useSeasonsStore.getState().activeSeason;
-        if (!activeSeason || !user) return;
+          await playerRepository.bulkAdd(playersData, user.id, activeSeason.id);
+          
+          await mutate(getPlayersSWRKey(user.id, activeSeason.id));
+          await get().fetchAll(activeSeason.id);
+          useStatsStore.getState().loadStats();
+      },
+      update: async (id, updates) => {
+          const user = useAuthStore.getState().user;
+          const activeSeason = useSeasonsStore.getState().activeSeason;
+          if (!activeSeason || !user) return;
 
-        const updatedPlayer = await playerRepository.update(id, activeSeason.id, updates);
-        if (updatedPlayer) {
-            await mutate(getPlayersSWRKey(user.id, activeSeason.id));
-            await get().fetchAll(activeSeason.id);
-            useStatsStore.getState().loadStats();
-        }
-    },
-    remove: async (id) => {
-        const user = useAuthStore.getState().user;
-        const activeSeason = useSeasonsStore.getState().activeSeason;
-        if (!activeSeason || !user) return;
-        
-        await playerRepository.delete(id, activeSeason.id);
-        await mutate(getPlayersSWRKey(user.id, activeSeason.id));
-        await get().fetchAll(activeSeason.id);
-        useStatsStore.getState().loadStats();
-    },
-}));
+          const updatedPlayer = await playerRepository.update(id, activeSeason.id, updates);
+          if (updatedPlayer) {
+              await mutate(getPlayersSWRKey(user.id, activeSeason.id));
+              await get().fetchAll(activeSeason.id);
+              useStatsStore.getState().loadStats();
+          }
+      },
+      remove: async (id) => {
+          const user = useAuthStore.getState().user;
+          const activeSeason = useSeasonsStore.getState().activeSeason;
+          if (!activeSeason || !user) return;
+          
+          await playerRepository.delete(id, activeSeason.id);
+          await mutate(getPlayersSWRKey(user.id, activeSeason.id));
+          await get().fetchAll(activeSeason.id);
+          useStatsStore.getState().loadStats();
+      },
+    }),
+    {
+      name: 'pitchman-players',
+    }
+  )
+);

@@ -15,13 +15,13 @@ export function MatchEventsTab() {
 
   const getEventIcon = (type: MatchEventType) => {
     switch(type) {
-      case 'goal': return <Goal className="h-5 w-5 text-green-500" />;
-      case 'assist': return <Zap className="h-5 w-5 text-blue-400" />;
+      case 'goal': return <Goal className="h-5 w-5 text-foreground" />;
+      case 'assist': return <Zap className="h-5 w-5 text-foreground" />;
       case 'yellow_card': return <div className="h-5 w-4 bg-yellow-400 rounded-sm border" />;
       case 'red_card': return <div className="h-5 w-4 bg-red-600 rounded-sm border" />;
       case 'substitution':
       case 'sub_in':
-      case 'sub_out': return <ArrowRightLeft className="h-5 w-5 text-orange-400" />;
+      case 'sub_out': return <ArrowRightLeft className="h-5 w-5 text-foreground" />;
       default: return <Info className="h-5 w-5 text-muted-foreground" />;
     }
   };
@@ -88,11 +88,11 @@ export function MatchEventsTab() {
                               {event.type === 'substitution' ? (
                                 <div className="flex flex-col">
                                    <div className="flex items-center gap-2">
-                                      <span className="text-[10px] font-black text-green-500 uppercase">Entra:</span>
+                                      <span className="text-[10px] font-black text-foreground uppercase">Entra:</span>
                                       <p className="font-black leading-none uppercase text-sm">{event.playerName}</p>
                                    </div>
                                    <div className="flex items-center gap-2 mt-1">
-                                      <span className="text-[10px] font-black text-red-500 uppercase">Esce:</span>
+                                      <span className="text-[10px] font-black text-foreground uppercase">Esce:</span>
                                       <p className="text-[11px] font-bold opacity-70 leading-none uppercase">{event.subOutPlayerName}</p>
                                    </div>
                                 </div>

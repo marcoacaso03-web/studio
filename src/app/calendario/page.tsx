@@ -54,7 +54,7 @@ export default function DashboardPage() {
   const StatusBadge = ({ status }: { status: MatchStatus }) => {
     switch (status) {
       case 'completed':
-        return <div className="h-2 w-2 rounded-full bg-cyan-400 glow-text-cyan" title="Finita" />;
+        return <div className="h-2 w-2 rounded-full bg-primary/30 border border-primary/50" title="Finita" />;
       case 'scheduled':
         return <div className="h-2 w-2 rounded-full bg-muted-foreground/40" title="Programmata" />;
       case 'canceled':
@@ -85,12 +85,12 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 gap-3">
         {/* ROSA CARD */}
         <div 
-          className="relative border-yellow-cyan rounded-3xl p-4 cursor-pointer hover:opacity-90 transition-all active:scale-95 bg-card/40 backdrop-blur-sm shadow-2xl overflow-hidden"
+          className="relative border border-brand-green/30 rounded-3xl p-4 cursor-pointer hover:opacity-90 transition-all active:scale-95 bg-card/40 backdrop-blur-sm shadow-[0_0_15px_rgba(172,229,4,0.1)] overflow-hidden"
           onClick={() => router.push('/membri')}
         >
           <div className="flex justify-between items-center mb-1">
-            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-brand-yellow drop-shadow-[0_0_8px_rgba(255,255,0,0.4)]">ROSA</h3>
-            <Users className="h-4 w-4 text-brand-cyan opacity-80" />
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-foreground">ROSA</h3>
+            <Users className="h-4 w-4 text-brand-green opacity-90" />
           </div>
           {playersLoading ? <Skeleton className="h-8 w-16 rounded-lg bg-card/20 hover:bg-card/30" /> : (
             <div className="flex flex-col">
@@ -107,12 +107,12 @@ export default function DashboardPage() {
 
         {/* STATISTICHE CARD */}
         <div 
-          className="relative border-yellow-cyan rounded-3xl p-4 cursor-pointer hover:opacity-90 transition-all active:scale-95 bg-card/40 backdrop-blur-sm shadow-2xl overflow-hidden"
+          className="relative border border-brand-green/30 rounded-3xl p-4 cursor-pointer hover:opacity-90 transition-all active:scale-95 bg-card/40 backdrop-blur-sm shadow-[0_0_15px_rgba(172,229,4,0.1)] overflow-hidden"
           onClick={() => router.push('/statistiche')}
         >
           <div className="flex justify-between items-center mb-1">
-            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-brand-yellow drop-shadow-[0_0_8px_rgba(255,255,0,0.4)]">STATISTICHE</h3>
-            <Trophy className="h-4 w-4 text-brand-cyan opacity-80" />
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-foreground">STATISTICHE</h3>
+            <Trophy className="h-4 w-4 text-brand-green opacity-90" />
           </div>
           {statsLoading ? <Skeleton className="h-8 w-16 rounded-lg bg-card/20 hover:bg-card/30" /> : (
             <div className="flex flex-col">
@@ -129,14 +129,14 @@ export default function DashboardPage() {
       </div>
 
       {/* PROSSIME & RECENTI */}
-      <div className="relative border-cyan-gradient rounded-[32px] overflow-hidden bg-card/30 backdrop-blur-sm shadow-2xl">
+      <div className="relative border border-brand-green/30 rounded-[32px] overflow-hidden bg-card/30 backdrop-blur-sm shadow-[0_0_15px_rgba(172,229,4,0.1)]">
         <div className="p-5 flex items-center justify-between border-b border-white/5">
           <div className="space-y-0.5">
             <h2 className="text-lg font-black text-foreground uppercase tracking-tight">Prossime & Recenti</h2>
           </div>
           <button 
             onClick={() => setIsFullCalendarOpen(true)}
-            className="bg-cyan-gradient px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-primary-foreground glow-neon hover:scale-105 transition-all"
+            className="bg-black text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase border border-brand-green shadow-[0_0_10px_rgba(172,229,4,0.15)] hover:scale-105 transition-all"
           >
             Vedi Tutto
           </button>
@@ -149,7 +149,7 @@ export default function DashboardPage() {
             </div>
           ) : dashboardMatches.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              <Calendar className="h-10 w-10 mx-auto opacity-20 mb-3" />
+              <Calendar className="h-10 w-10 mx-auto opacity-20 mb-3 text-brand-green" />
               <p className="font-black text-xs uppercase tracking-[0.2em]">Nessuna partita</p>
             </div>
           ) : (
@@ -165,7 +165,7 @@ export default function DashboardPage() {
                       <div className="flex items-center gap-5">
                         <div className="flex items-center gap-3">
                           {match.isHome ? 
-                            <Home className="h-6 w-6 text-brand-yellow" /> : 
+                            <Home className="h-6 w-6 text-brand-green" /> : 
                             <Plane className="h-6 w-6 text-brand-cyan" />
                           }
                         </div>

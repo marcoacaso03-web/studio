@@ -5,23 +5,23 @@
 @layer base {
   :root {
     --background: 210 20% 98%;
-    --foreground: 220 30% 10%;
+    --foreground: 0 0% 0%;
     --card: 0 0% 100%;
-    --card-foreground: 220 30% 10%;
+    --card-foreground: 0 0% 0%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 30% 10%;
+    --popover-foreground: 0 0% 0%;
     --primary: 192 100% 22%;
     /* #005A71 */
     --primary-foreground: 0 0% 100%;
     --secondary: 210 10% 90%;
-    --secondary-foreground: 220 25% 15%;
+    --secondary-foreground: 0 0% 0%;
     --muted: 210 10% 93%;
-    --muted-foreground: 215 15% 40%;
+    --muted-foreground: 0 0% 40%;
     --accent: 74 96% 46%;
     /* #ACE504 */
-    --accent-foreground: 220 40% 10%;
+    --accent-foreground: 0 0% 0%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 0 0% 100%;
     --border: 210 15% 85%;
     --input: 210 15% 85%;
     --ring: 192 100% 22%;
@@ -32,47 +32,53 @@
     --chart-4: 180 50% 50%;
     --chart-5: 200 50% 50%;
     --radius: 0.5rem;
-    --brand-yellow: 60 100% 50%;
-    --brand-green: 93 100 50%;
-    --brand-cyan: 198 100% 44%;
+    --brand-yellow: 59 100% 70%;
+    /* #FFFD66 */
+    --brand-green: 74 96% 46%;
+    /* #ACE504 */
+    --brand-lime: 75 100% 50%;
+    --brand-cyan: 192 100% 22%;
+    /* #005A71 */
+    --brand-pink: 340 73% 55%;
   }
 
   .dark {
-    --background: 220 35% 4%;
-    /* Near black #05070A */
-    --foreground: 210 20% 98%;
+    --background: 0 0% 3%;
+    /* Extra Deep Black #080808 */
+    --foreground: 0 0% 100%;
 
-    --card: 222 30% 8%;
-    /* #111625ish */
-    --card-foreground: 210 20% 98%;
+    --card: 0 0% 5%;
+    /* #0d0d0d */
+    --card-foreground: 0 0% 100%;
 
-    --popover: 222 30% 8%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
 
     --primary: 100 100% 46%;
-    /* #4eeb00 */
-    --primary-foreground: 220 35% 4%;
-    /* Dark text on bright primary */
+    /* #4eeb00 Original Neon */
+    --primary-foreground: 0 0% 100%;
+    /* White text as requested */
 
     --secondary: 220 35% 4%;
-    --secondary-foreground: 210 15% 95%;
+    --secondary-foreground: 0 0% 100%;
 
     --muted: 220 25% 15%;
-    --muted-foreground: 210 15% 65%;
+    --muted-foreground: 0 0% 70%;
 
     --accent: 60 100% 70%;
-    /* #FFFD66ish */
-    --accent-foreground: 220 40% 10%;
+    /* Original Neon */
+    --accent-foreground: 0 0% 0%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 0 0% 100%;
 
     --border: 220 25% 20%;
     --input: 220 25% 20%;
-    --ring: 74 96% 46%;
-    --brand-yellow: 60 100% 50%;
-    --brand-green: 93 100% 50%;
-    --brand-cyan: 198 100% 44%;
+    --ring: 100 100% 46%;
+    --brand-yellow: 59 100% 70%;
+    --brand-green: 74 96% 46%;
+    --brand-cyan: 192 100% 22%;
+    --brand-pink: 340 73% 55%;
   }
 }
 
@@ -125,15 +131,27 @@
   }
 
   .glow-neon {
-    box-shadow: 0 0 20px hsl(var(--brand-green));
+    @apply shadow-neon;
   }
 
-  .glow-magenta {
-    box-shadow: 0 0 15px hsl(var(--brand-yellow));
+  .glow-neon-strong {
+    @apply shadow-neon-strong;
   }
 
-  .glow-yellow {
-    box-shadow: 0 0 15px hsl(var(--brand-yellow));
+  .glow-accent {
+    @apply shadow-accent-neon;
+  }
+
+  .border-neon {
+    @apply border border-primary/30 shadow-neon;
+  }
+
+  .border-neon-dim {
+    @apply border border-primary/10 transition-colors hover:border-primary/40;
+  }
+
+  .bg-ultra-dark {
+    @apply bg-[#030303];
   }
 
   .glow-text-cyan {

@@ -12,21 +12,22 @@ import { collection, doc, deleteDoc } from "firebase/firestore";
 import { ScoutPlayerDialog } from "@/components/scout/scout-player-dialog";
 import { ScoutCategoryDialog } from "@/components/scout/scout-category-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ScoutPlayerSchema, ScoutCategorySchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import * as React from "react";
-import type { ScoutPlayer } from "@/lib/types";
+import type { ScoutPlayer, ScoutCategory } from "@/lib/types";
 
 export default function ScoutPage() {
   const { user } = useUser();
   const firestore = useFirestore();
-  
+
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   const [isPlayerDialogOpen, setIsPlayerDialogOpen] = useState(false);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<ScoutPlayer | null>(null);
-  
+
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [visibleCount, setVisibleCount] = useState(12);
@@ -68,8 +69,8 @@ export default function ScoutPage() {
     return collection(firestore, 'users', user.uid, 'scoutPlayers');
   }, [firestore, user]);
 
-  const { data: categories, isLoading: catLoading } = useCollection(categoriesQuery);
-  const { data: players, isLoading: playersLoading } = useCollection(playersQuery);
+  const { data: categories, isLoading: catLoading } = useCollection<ScoutCategory>(categoriesQuery, ScoutCategorySchema as any);
+  const { data: players, isLoading: playersLoading } = useCollection<ScoutPlayer>(playersQuery, ScoutPlayerSchema as any);
 
   const filteredPlayers = useMemo(() => {
     if (!players) return [];
@@ -83,7 +84,7 @@ export default function ScoutPage() {
   const visiblePlayers = filteredPlayers.slice(0, visibleCount);
 
   const toggleFilter = (id: string) => {
-    setSelectedCategoryIds(prev => 
+    setSelectedCategoryIds(prev =>
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
   };
@@ -97,20 +98,19 @@ export default function ScoutPage() {
     <div className="space-y-4 md:space-y-6">
       <PageHeader title="Scouting">
         <div className="flex gap-2">
-          <Button 
-            size="sm" 
-            variant="outline" 
-            className="h-9 text-[10px] font-black uppercase rounded-xl border-primary/20"
+          <Button
+            size="sm"
+            className="h-9 text-[10px] font-black uppercase rounded-xl bg-black border border-brand-green/30 text-white hover:bg-black/60 hover:text-white shadow-[0_0_10px_rgba(172,229,4,0.1)] transition-all"
             onClick={() => setIsCategoryDialogOpen(true)}
           >
-            <Tag className="mr-1.5 h-3.5 w-3.5" /> Etichette
+            <Tag className="mr-1.5 h-3.5 w-3.5 text-brand-green" /> Etichette
           </Button>
-          <Button 
-            size="sm" 
-            className="h-9 text-[10px] font-black uppercase rounded-xl bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg"
+          <Button
+            size="sm"
+            className="h-9 text-[10px] font-black uppercase rounded-xl bg-black border border-brand-green text-white hover:bg-black/80 hover:text-white shadow-[0_0_10px_rgba(172,229,4,0.15)] hover:scale-105 transition-all"
             onClick={() => { setEditingPlayer(null); setIsPlayerDialogOpen(true); }}
           >
-            <UserPlus className="mr-1.5 h-3.5 w-3.5" /> Nuovo
+            <UserPlus className="mr-1.5 h-3.5 w-3.5 text-brand-green" /> Nuovo
           </Button>
         </div>
       </PageHeader>
@@ -119,36 +119,36 @@ export default function ScoutPage() {
       <div className="space-y-3">
         <div className="flex flex-col md:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Cerca giocatore per nome..." 
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-green" />
+            <Input
+              placeholder="Cerca giocatore per nome..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 h-10 w-full rounded-2xl border-primary/20 bg-background/50 focus-visible:ring-primary/30"
+              className="pl-9 h-10 w-full rounded-2xl border-brand-green/30 bg-black/40 text-foreground font-bold text-sm focus-visible:ring-1 focus-visible:ring-brand-green shadow-[0_0_10px_rgba(172,229,4,0.05)]"
             />
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2 px-1">
-          <Filter className="h-3 w-3 text-muted-foreground" />
+          <Filter className="h-3 w-3 text-brand-green" />
           <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Filtra per etichetta:</span>
         </div>
         <ScrollArea className="w-full whitespace-nowrap pb-2">
           <div className="flex gap-2">
-            <Badge 
+            <Badge
               variant={selectedCategoryIds.length === 0 ? "default" : "outline"}
               className={cn(
-                "cursor-pointer uppercase font-black text-[9px] px-3 py-1 rounded-lg transition-all",
-                selectedCategoryIds.length === 0 ? "bg-primary text-white" : "border-muted-foreground/20 text-muted-foreground"
+                "cursor-pointer uppercase font-black text-[9px] px-3 py-1 rounded-lg transition-all border",
+                selectedCategoryIds.length === 0 ? "bg-black border-brand-green text-brand-green shadow-[0_0_10px_rgba(172,229,4,0.15)]" : "bg-black/40 border-white/10 text-muted-foreground"
               )}
               onClick={() => setSelectedCategoryIds([])}
             >
               Tutti
             </Badge>
             {categories?.map((cat) => (
-              <Badge 
+              <Badge
                 key={cat.id}
-                style={{ 
+                style={{
                   backgroundColor: selectedCategoryIds.includes(cat.id) ? cat.colorHex : 'transparent',
                   borderColor: cat.colorHex,
                   color: selectedCategoryIds.includes(cat.id) ? 'white' : cat.colorHex
@@ -174,10 +174,10 @@ export default function ScoutPage() {
             <Skeleton key={i} className="h-32 w-full rounded-2xl" />
           ))
         ) : filteredPlayers.length === 0 ? (
-          <Card className="col-span-full border-dashed bg-muted/10">
+          <Card className="col-span-full border border-dashed border-brand-green/30 bg-card/20 hover:bg-card/30 rounded-3xl">
             <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-              <Search className="h-12 w-12 text-muted-foreground mb-4 opacity-20" />
-              <h3 className="text-sm font-black uppercase text-primary">Nessun giocatore trovato</h3>
+              <Search className="h-12 w-12 text-brand-green mb-4 opacity-40" />
+              <h3 className="text-sm font-black uppercase text-foreground">Nessun giocatore trovato</h3>
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
                 {players?.length === 0 ? "Inizia aggiungendo il primo talento alla tua lista." : "Prova a cambiare i filtri selezionati."}
               </p>
@@ -186,11 +186,11 @@ export default function ScoutPage() {
         ) : (
           <>
             {visiblePlayers.map((player) => (
-              <Card key={player.id} className="overflow-hidden border shadow-sm rounded-2xl hover:border-primary/30 transition-all group">
+              <Card key={player.id} className="overflow-hidden border border-brand-green/30 bg-card/40 backdrop-blur-sm shadow-[0_0_15px_rgba(172,229,4,0.1)] rounded-3xl transition-all group hover:opacity-90">
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex flex-col">
-                      <h4 className="text-sm font-black uppercase tracking-tight text-primary leading-tight">
+                      <h4 className="text-sm font-black uppercase tracking-tight text-foreground leading-tight">
                         {player.name}
                       </h4>
                       <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">
@@ -198,17 +198,17 @@ export default function ScoutPage() {
                       </span>
                     </div>
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-7 w-7 text-muted-foreground hover:text-primary"
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-brand-green"
                         onClick={() => { setEditingPlayer(player); setIsPlayerDialogOpen(true); }}
                       >
                         <Edit className="h-3.5 w-3.5" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         className="h-7 w-7 text-muted-foreground hover:text-destructive"
                         onClick={() => handleDeletePlayer(player.id)}
                       >
@@ -228,8 +228,8 @@ export default function ScoutPage() {
                       const cat = categories?.find(c => c.id === catId);
                       if (!cat) return null;
                       return (
-                        <span 
-                          key={catId} 
+                        <span
+                          key={catId}
                           style={{ backgroundColor: cat.colorHex + '20', color: cat.colorHex, borderColor: cat.colorHex + '40' }}
                           className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded border"
                         >
@@ -252,15 +252,15 @@ export default function ScoutPage() {
       </div>
 
       {/* Dialogs */}
-      <ScoutPlayerDialog 
-        open={isPlayerDialogOpen} 
-        onOpenChange={setIsPlayerDialogOpen} 
+      <ScoutPlayerDialog
+        open={isPlayerDialogOpen}
+        onOpenChange={setIsPlayerDialogOpen}
         player={editingPlayer}
         categories={categories || []}
       />
-      <ScoutCategoryDialog 
-        open={isCategoryDialogOpen} 
-        onOpenChange={setIsCategoryDialogOpen} 
+      <ScoutCategoryDialog
+        open={isCategoryDialogOpen}
+        onOpenChange={setIsCategoryDialogOpen}
         categories={categories || []}
       />
     </div>

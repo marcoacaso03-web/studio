@@ -103,13 +103,13 @@ const roleLabel: Record<string, string> = {
 
 const roleBg: Record<string, string> = {
   Portiere: "bg-amber-500/10 text-amber-500 border-amber-500/20",
-  Difensore: "bg-primary/10 text-primary border-primary/20",
+  Difensore: "bg-muted text-foreground border-border",
   Centrocampista: "bg-blue-500/10 text-blue-500 border-blue-500/20",
   Attaccante: "bg-red-500/10 text-red-500 border-red-500/20",
 };
 
 // ─── Componente StatCard ───────────────────────────────────────────────────────
-function StatCard({ icon: Icon, label, value, sub, color = "text-primary" }: {
+function StatCard({ icon: Icon, label, value, sub, color = "text-foreground" }: {
   icon: React.ElementType;
   label: string;
   value: string | number;
@@ -154,15 +154,15 @@ function TrainingHeatmap({ records }: { records: TrainingRecord[] }) {
   return (
     <div className="space-y-3">
       {/* Progress bar */}
-      <div className="flex items-center gap-3">
-        <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
-          <div
-            className="h-full bg-emerald-500 rounded-full transition-all duration-700"
-            style={{ width: `${percentuale}%` }}
-          />
+        <div className="flex items-center gap-3">
+          <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+            <div
+              className="h-full bg-slate-400 rounded-full transition-all duration-700"
+              style={{ width: `${percentuale}%` }}
+            />
+          </div>
+          <span className="text-xs font-black text-foreground min-w-[3rem] text-right">{percentuale}%</span>
         </div>
-        <span className="text-xs font-black text-emerald-500 min-w-[3rem] text-right">{percentuale}%</span>
-      </div>
       <p className="text-[10px] text-muted-foreground font-medium">
         {presenti} presenze su {totale} allenamenti
       </p>
@@ -233,11 +233,11 @@ function MatchHeatmap({ records }: { records: MatchRecord[] }) {
       <div className="flex items-center gap-3">
         <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
           <div
-            className="h-full bg-emerald-500 rounded-full transition-all duration-700"
+            className="h-full bg-slate-400 rounded-full transition-all duration-700"
             style={{ width: `${pct}%` }}
           />
         </div>
-        <span className="text-xs font-black text-emerald-500 min-w-[3rem] text-right">{pct}%</span>
+        <span className="text-xs font-black text-foreground min-w-[3rem] text-right">{pct}%</span>
       </div>
       <p className="text-[10px] text-muted-foreground font-medium">
         Presenza in campo nel {pct}% dei match disputati
@@ -515,13 +515,13 @@ export default function PlayerDetailPage() {
       >
         <Link href={`/membri/confronto?p1=${playerId}`}>
           <Button variant="outline" size="sm" className="hidden md:flex gap-2">
-            <ArrowRightLeft className="h-4 w-4 text-primary" />
+            <ArrowRightLeft className="h-4 w-4 text-foreground" />
             <span className="text-xs font-black uppercase tracking-wider">Confronta</span>
           </Button>
         </Link>
         <Link href={`/membri/confronto?p1=${playerId}`} className="md:hidden">
           <Button variant="outline" size="icon" className="h-8 w-8">
-            <ArrowRightLeft className="h-4 w-4 text-primary" />
+            <ArrowRightLeft className="h-4 w-4 text-foreground" />
           </Button>
         </Link>
       </PageHeader>
@@ -536,20 +536,20 @@ export default function PlayerDetailPage() {
           <>
             <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
               <StatCard icon={Calendar}       label="Presenze"   value={playerStats.appearances} />
-              <StatCard icon={Target}         label="Gol"        value={playerStats.goals}        color="text-emerald-500" />
-              <StatCard icon={Zap}            label="Assist"     value={playerStats.assists}       color="text-sky-500" />
+              <StatCard icon={Target}         label="Gol"        value={playerStats.goals} />
+              <StatCard icon={Zap}            label="Assist"     value={playerStats.assists} />
               <StatCard icon={Clock}          label="Min giocati" value={playerStats.totalMinutes} sub="minuti totali" />
-              <StatCard icon={AlertTriangle}  label="Gialli"     value={playerStats.yellowCards}   color="text-amber-500" />
-              <StatCard icon={Shield}         label="Rossi"      value={playerStats.redCards}      color="text-red-500" />
+              <StatCard icon={AlertTriangle}  label="Gialli"     value={playerStats.yellowCards} />
+              <StatCard icon={Shield}         label="Rossi"      value={playerStats.redCards} />
             </div>
             
             {/* Statistiche Avanzate On-Pitch */}
             <div className={`grid grid-cols-2 ${player?.role === 'Portiere' ? 'md:grid-cols-5' : 'md:grid-cols-4'} gap-2`}>
               <StatCard icon={Target} label="Gol x Match" value={playerStats.appearances > 0 ? (playerStats.goals / playerStats.appearances).toFixed(2) : "0"} />
               {playerStats.goals > 0 && <StatCard icon={Clock} label="Minuti x Gol" value={Math.round(playerStats.totalMinutes / playerStats.goals)} sub="un gol ogni" />}
-              <StatCard icon={Sword} label="Gol Fatti" value={playerStats.goalsScoredOnPitch} sub="in campo" color="text-emerald-500" />
-              <StatCard icon={Shield} label="Gol Subiti" value={playerStats.goalsConcededOnPitch} sub="in campo" color="text-red-500" />
-              {player?.role === "Portiere" && <StatCard icon={Zap} label="Clean Sheets" value={playerStats.cleanSheets} sub="reti inviolate" color="text-amber-500" />}
+              <StatCard icon={Sword} label="Gol Fatti" value={playerStats.goalsScoredOnPitch} sub="in campo" />
+              <StatCard icon={Shield} label="Gol Subiti" value={playerStats.goalsConcededOnPitch} sub="in campo" />
+              {player?.role === "Portiere" && <StatCard icon={Zap} label="Clean Sheets" value={playerStats.cleanSheets} sub="reti inviolate" />}
             </div>
           </>
         ) : null}
