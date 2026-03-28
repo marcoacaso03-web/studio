@@ -45,8 +45,8 @@ export default function AltroPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [newSeasonName, setNewSeasonName] = useState('');
-  const [seasonToDelete, setSeasonToDelete] = useState<{id: string, name: string} | null>(null);
-  
+  const [seasonToDelete, setSeasonToDelete] = useState<{ id: string, name: string } | null>(null);
+
   // Dialog states
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isSquadraOpen, setIsSquadraOpen] = useState(false);
@@ -74,9 +74,9 @@ export default function AltroPage() {
   const handleSwitchSeason = async (id: string) => {
     await setActiveSeason(id);
     await Promise.all([
-        useMatchesStore.getState().fetchAll(id),
-        usePlayersStore.getState().fetchAll(id),
-        useStatsStore.getState().loadStats()
+      useMatchesStore.getState().fetchAll(id),
+      usePlayersStore.getState().fetchAll(id),
+      useStatsStore.getState().loadStats()
     ]);
   };
 
@@ -94,28 +94,28 @@ export default function AltroPage() {
   const convertToCSV = (data: any[]) => {
     if (data.length === 0) return '';
     const flattenedData = data.map(item => {
-        const flatItem: {[key: string]: any} = {};
-        for (const key in item) {
-            if (typeof item[key] === 'object' && item[key] !== null && !Array.isArray(item[key])) {
-                for (const subKey in item[key]) {
-                    flatItem[`${key}_${subKey}`] = item[key][subKey];
-                }
-            } else {
-                flatItem[key] = item[key];
-            }
+      const flatItem: { [key: string]: any } = {};
+      for (const key in item) {
+        if (typeof item[key] === 'object' && item[key] !== null && !Array.isArray(item[key])) {
+          for (const subKey in item[key]) {
+            flatItem[`${key}_${subKey}`] = item[key][subKey];
+          }
+        } else {
+          flatItem[key] = item[key];
         }
-        return flatItem;
+      }
+      return flatItem;
     });
     const headers = Object.keys(flattenedData[0]);
     const csvRows = [headers.join(',')];
     for (const row of flattenedData) {
-        const values = headers.map(header => {
-            let value = row[header];
-            if (value === null || value === undefined) value = '';
-            else if (typeof value === 'string') value = `"${value.replace(/"/g, '""')}"`;
-            return value;
-        });
-        csvRows.push(values.join(','));
+      const values = headers.map(header => {
+        let value = row[header];
+        if (value === null || value === undefined) value = '';
+        else if (typeof value === 'string') value = `"${value.replace(/"/g, '""')}"`;
+        return value;
+      });
+      csvRows.push(values.join(','));
     }
     return csvRows.join('\n');
   }
@@ -142,7 +142,7 @@ export default function AltroPage() {
       const players = await playerRepository.getAll(user.id, activeSeason.id);
       const playersCSV = convertToCSV(players);
       downloadCSV(playersCSV, `pitchman_players_${user.username}.csv`);
-      
+
       const matches = await matchRepository.getAll(user.id, activeSeason.id);
       const matchesCSV = convertToCSV(matches);
       downloadCSV(matchesCSV, `pitchman_matches_${user.username}.csv`);
@@ -159,23 +159,23 @@ export default function AltroPage() {
     try {
       const players = await playerRepository.getAll(user.id, activeSeason.id);
       const matches = await matchRepository.getAll(user.id, activeSeason.id);
-      
+
       const deletePromises = [
         ...players.map(p => playerRepository.delete(p.id, activeSeason.id)),
         ...matches.map(m => matchRepository.delete(m.id, activeSeason.id))
       ];
-      
+
       await Promise.all(deletePromises);
-      
+
       await Promise.all([
         useMatchesStore.getState().fetchAll(activeSeason.id),
         usePlayersStore.getState().fetchAll(activeSeason.id),
         useStatsStore.getState().loadStats()
       ]);
 
-      toast({ 
-        title: "Stagione Resettata", 
-        description: `Tutti i dati della stagione ${activeSeason.name} sono stati eliminati.` 
+      toast({
+        title: "Stagione Resettata",
+        description: `Tutti i dati della stagione ${activeSeason.name} sono stati eliminati.`
       });
       setIsPrivacyOpen(false);
     } catch (e) {
@@ -196,9 +196,9 @@ export default function AltroPage() {
 
       <div className="flex flex-col space-y-3 px-2">
         {/* Accordion/Menu Items in the style of the screenshot */}
-        
+
         {/* Profilo Allenatore */}
-        <div 
+        <div
           onClick={() => setIsAccountOpen(true)}
           className="flex items-center gap-4 bg-black/40 border border-brand-green/30 rounded-3xl p-3 cursor-pointer hover:bg-black/60 transition-all shadow-[0_0_10px_rgba(172,229,4,0.05)] active:scale-[0.98]"
         >
@@ -212,7 +212,7 @@ export default function AltroPage() {
         </div>
 
         {/* Gestione Squadra (Archivio Stagioni & Allenamenti come richiesto) */}
-        <div 
+        <div
           onClick={() => setIsSquadraOpen(true)}
           className="flex items-center gap-4 bg-black/40 border border-brand-green/30 rounded-3xl p-3 cursor-pointer hover:bg-black/60 transition-all shadow-[0_0_10px_rgba(172,229,4,0.05)] active:scale-[0.98]"
         >
@@ -226,8 +226,8 @@ export default function AltroPage() {
         </div>
 
         {/* Notifiche */}
-        <div 
-          onClick={() => toast({ title: "Presto disponibile", description: "Le notifiche push arriveranno in futuro."})}
+        <div
+          onClick={() => toast({ title: "Presto disponibile", description: "Le notifiche push arriveranno in futuro." })}
           className="flex items-center gap-4 bg-black/40 border border-brand-green/30 rounded-3xl p-3 cursor-pointer hover:bg-black/60 transition-all shadow-[0_0_10px_rgba(172,229,4,0.05)] active:scale-[0.98]"
         >
           <div className="w-14 h-14 rounded-2xl bg-black border border-brand-green flex items-center justify-center shadow-[0_0_10px_rgba(172,229,4,0.1)]">
@@ -240,7 +240,7 @@ export default function AltroPage() {
         </div>
 
         {/* Tema */}
-        <div 
+        <div
           className="flex items-center gap-4 bg-black/40 border border-brand-green/30 rounded-3xl p-3 shadow-[0_0_10px_rgba(172,229,4,0.05)]"
         >
           <div className="w-14 h-14 rounded-2xl bg-black border border-brand-green flex items-center justify-center shadow-[0_0_10px_rgba(172,229,4,0.1)]">
@@ -250,25 +250,25 @@ export default function AltroPage() {
             <span className="text-foreground font-bold text-lg tracking-wide">Tema</span>
             <span className="text-muted-foreground/60 text-sm">Chiaro/Scuro</span>
           </div>
-          <div className="bg-muted/80 rounded-full flex items-center p-1 mr-2 shadow-inner border border-white/5">
-             {/* Un toggle visivo custom che mimi quello nel mockup */}
-             <div 
-               className={cn("px-4 py-1.5 rounded-full flex items-center justify-center cursor-pointer transition-all", theme !== 'dark' ? "bg-card/40 hover:bg-card/50 text-foreground" : "text-foreground/50")}
-               onClick={() => theme === 'dark' && toggleTheme()}
-             >
-               <Sun className="h-4 w-4" />
-             </div>
-             <div 
-               className={cn("px-4 py-1.5 rounded-full flex items-center justify-center font-bold text-sm cursor-pointer transition-all", theme === 'dark' ? "bg-black border border-brand-green text-white shadow-[0_0_10px_rgba(172,229,4,0.15)]" : "text-foreground/50")}
-               onClick={() => theme !== 'dark' && toggleTheme()}
-             >
-               Scuro
-             </div>
+          <div className="bg-muted/80 rounded-full flex items-center p-1 mr-2 shadow-inner border border-white/10">
+            {/* Un toggle visivo custom che mimi quello nel mockup */}
+            <div
+              className={cn("px-4 py-1.5 rounded-full flex items-center justify-center cursor-pointer transition-all", theme !== 'dark' ? "bg-card/40 hover:bg-card/50 text-foreground" : "text-foreground/50")}
+              onClick={() => theme === 'dark' && toggleTheme()}
+            >
+              <Sun className="h-4 w-4" />
+            </div>
+            <div
+              className={cn("px-4 py-1.5 rounded-full flex items-center justify-center font-bold text-sm cursor-pointer transition-all", theme === 'dark' ? "bg-black border border-brand-green text-white shadow-[0_0_10px_rgba(172,229,4,0.15)]" : "text-foreground/50")}
+              onClick={() => theme !== 'dark' && toggleTheme()}
+            >
+              Scuro
+            </div>
           </div>
         </div>
 
         {/* Privacy & Sicurezza */}
-        <div 
+        <div
           onClick={() => setIsPrivacyOpen(true)}
           className="flex items-center gap-4 bg-black/40 border border-brand-green/30 rounded-3xl p-3 cursor-pointer hover:bg-black/60 transition-all shadow-[0_0_10px_rgba(172,229,4,0.05)] active:scale-[0.98]"
         >
@@ -284,7 +284,7 @@ export default function AltroPage() {
       </div>
 
       {/* DIALOGS */}
-      
+
       {/* Account Dialog */}
       <Dialog open={isAccountOpen} onOpenChange={setIsAccountOpen}>
         <DialogContent className="max-w-[90vw] sm:max-w-md rounded-3xl bg-background border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground">
@@ -292,25 +292,25 @@ export default function AltroPage() {
             <DialogTitle className="text-xl font-black text-foreground">Profilo Allenatore</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-             <div className="flex items-center gap-4 p-4 rounded-2xl bg-card/20 hover:bg-card/30">
-                <div className="h-12 w-12 rounded-full bg-black border border-brand-green flex items-center justify-center text-brand-green font-black uppercase text-xl shadow-[0_0_10px_rgba(172,229,4,0.15)]">
-                  {user?.username.charAt(0)}
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-lg font-black tracking-tight">{user?.username}</span>
-                  <span className="text-sm text-muted-foreground/60">{user?.email}</span>
-                </div>
-             </div>
-             
-             <div className="pt-4">
-               <Button 
-                 onClick={handleLogout}
-                 className="w-full rounded-xl font-black uppercase text-xs h-12 bg-black border border-rose-500/50 text-rose-500 hover:bg-rose-500/10 hover:border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.05)] transition-all"
-               >
-                 <LogOut className="mr-2 h-4 w-4" />
-                 Esci dall'Account
-               </Button>
-             </div>
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-card/20 hover:bg-card/30">
+              <div className="h-12 w-12 rounded-full bg-black border border-brand-green flex items-center justify-center text-brand-green font-black uppercase text-xl shadow-[0_0_10px_rgba(172,229,4,0.15)]">
+                {user?.username.charAt(0)}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-lg font-black tracking-tight">{user?.username}</span>
+                <span className="text-sm text-muted-foreground/60">{user?.email}</span>
+              </div>
+            </div>
+
+            <div className="pt-4">
+              <Button
+                onClick={handleLogout}
+                className="w-full rounded-xl font-black uppercase text-xs h-12 bg-black border border-rose-500/50 text-rose-500 hover:bg-rose-500/10 hover:border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.05)] transition-all"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Esci dall'Account
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
@@ -322,12 +322,12 @@ export default function AltroPage() {
             <DialogTitle className="text-xl font-black text-foreground">Gestione Squadra</DialogTitle>
             <DialogDescription className="text-muted-foreground/60">Configura archivio stagioni e frequenza allenamento.</DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-6 pt-4">
             {/* Allenamenti / Gare */}
             <div className="space-y-3">
               <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Preferenze</h3>
-              
+
               <div className="flex items-center justify-between p-3 rounded-2xl bg-card/20 hover:bg-card/30">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-brand-green" />
@@ -337,7 +337,7 @@ export default function AltroPage() {
                   <SelectTrigger className="w-32 h-9 text-xs font-bold uppercase bg-black border border-brand-green/30 focus:ring-1 focus:ring-brand-green">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-card border-border border-white/10 text-foreground">
+                  <SelectContent className="bg-card border-white/10 text-foreground">
                     <SelectItem value="70">70 min</SelectItem>
                     <SelectItem value="80">80 min</SelectItem>
                     <SelectItem value="90">90 min</SelectItem>
@@ -373,8 +373,8 @@ export default function AltroPage() {
                         }}
                         className={cn(
                           "w-10 h-10 rounded-xl flex items-center justify-center font-black transition-all",
-                          isSelected 
-                            ? "bg-black border border-brand-green text-white shadow-[0_0_10px_rgba(172,229,4,0.15)] scale-110" 
+                          isSelected
+                            ? "bg-black border border-brand-green text-white shadow-[0_0_10px_rgba(172,229,4,0.15)] scale-110"
                             : "bg-black/20 text-muted-foreground hover:bg-black/40"
                         )}
                       >
@@ -391,9 +391,9 @@ export default function AltroPage() {
                     <CheckCircle2 className="w-4 h-4 text-brand-green" />
                     <Label className="text-sm font-bold">Auto-Compila Presenze</Label>
                   </div>
-                  <Switch 
-                    checked={autoSetPresenceOnGenerate} 
-                    onCheckedChange={setAutoSetPresenceOnGenerate} 
+                  <Switch
+                    checked={autoSetPresenceOnGenerate}
+                    onCheckedChange={setAutoSetPresenceOnGenerate}
                     className="data-[state=checked]:bg-brand-green"
                   />
                 </div>
@@ -404,11 +404,11 @@ export default function AltroPage() {
             {/* Stagioni */}
             <div className="space-y-3">
               <h3 className="text-sm font-black uppercase tracking-widest text-brand-green">Archivio Stagioni</h3>
-              
+
               <div className="flex gap-2">
-                <Input 
-                  placeholder="Es: 2025/26" 
-                  value={newSeasonName} 
+                <Input
+                  placeholder="Es: 2025/26"
+                  value={newSeasonName}
                   onChange={(e) => setNewSeasonName(e.target.value)}
                   className="font-bold uppercase text-xs bg-black border border-brand-green/30 focus-visible:ring-1 focus-visible:ring-brand-green h-10 rounded-xl text-white"
                 />
@@ -419,11 +419,11 @@ export default function AltroPage() {
 
               <div className="space-y-2 max-h-[30vh] overflow-y-auto pr-1">
                 {seasons.map((s) => (
-                  <div 
-                    key={s.id} 
+                  <div
+                    key={s.id}
                     className={cn(
                       "flex items-center justify-between p-3 rounded-2xl border transition-all",
-                      s.isActive ? "bg-black border-brand-green shadow-[0_0_10px_rgba(172,229,4,0.1)]" : "bg-card/20 hover:bg-card/30 border-transparent cursor-pointer hover:bg-card/40 hover:bg-card/50"
+                      s.isActive ? "bg-black border-brand-green shadow-[0_0_10px_rgba(172,229,4,0.1)]" : "bg-card/20 border-transparent cursor-pointer hover:bg-card/50"
                     )}
                     onClick={() => !s.isActive && handleSwitchSeason(s.id)}
                   >
@@ -437,12 +437,12 @@ export default function AltroPage() {
                         <Badge className="text-[9px] bg-black border border-brand-green text-brand-green shadow-[0_0_10px_rgba(172,229,4,0.1)] font-black uppercase py-0.5 px-2">Attiva</Badge>
                       )}
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       {!s.isActive && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="h-8 w-8 text-foreground/40 hover:text-destructive hover:bg-destructive/10"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -469,7 +469,7 @@ export default function AltroPage() {
             <DialogDescription className="text-muted-foreground/60">Esporta i tuoi dati o formatta l'account.</DialogDescription>
           </DialogHeader>
           <div className="space-y-6 pt-2">
-            
+
             <div className="space-y-2">
               <Button onClick={handleExport} disabled={isExporting} className="w-full font-black uppercase text-xs h-12 bg-black border border-brand-green/30 text-brand-green hover:bg-black/80 hover:border-brand-green shadow-[0_0_10px_rgba(172,229,4,0.05)] transition-all rounded-xl">
                 <Download className="mr-2 h-4 w-4 text-brand-green" />
@@ -484,7 +484,7 @@ export default function AltroPage() {
                 <h4 className="font-black uppercase text-sm -mt-0.5">Zona Pericolo</h4>
               </div>
               <p className="text-[11px] text-foreground/60">Cancellare tutti i dati della stagione {activeSeason?.name}? Questa azione è irreversibile.</p>
-              
+
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" className="w-full font-black uppercase text-xs rounded-xl h-10 mt-2">

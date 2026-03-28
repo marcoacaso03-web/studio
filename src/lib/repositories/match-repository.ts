@@ -31,7 +31,11 @@ const ensureISODate = (date: any): string => {
   }
 };
 
-export type MatchCreateData = Omit<Match, 'id' | 'result'> & { status?: Match['status'] };
+export type MatchCreateData = Omit<Match, 'id' | 'result' | 'teamOwnerId' | 'teamId'> & { 
+  teamOwnerId?: string;
+  teamId?: string;
+  status?: Match['status']; 
+};
 
 export const matchRepository = {
   async getAll(userId: string, seasonId: string) {
@@ -91,7 +95,7 @@ export const matchRepository = {
     return newMatch;
   },
 
-  async bulkAdd(matchesData: Omit<MatchCreateData, 'userId' | 'seasonId'>[], userId: string, seasonId: string) {
+  async bulkAdd(matchesData: Omit<MatchCreateData, 'userId' | 'seasonId' | 'teamOwnerId' | 'teamId'>[], userId: string, seasonId: string) {
     const db = getFirestore();
     const batch = writeBatch(db);
     const now = new Date().toISOString();

@@ -132,7 +132,7 @@ export default function AllenamentoPage() {
           <Button 
             variant="ghost"
             size="icon" 
-            className="rounded-xl h-10 w-10 hover:bg-card/20 hover:bg-card/30"
+            className="rounded-xl h-10 w-10 hover:bg-card/30"
             onClick={() => setIsStatsOpen(true)}
           >
              <ClipboardCheck className="h-6 w-6 text-brand-green" />
@@ -144,7 +144,7 @@ export default function AllenamentoPage() {
               <Button 
                 variant="ghost"
                 size="icon" 
-                className="rounded-xl h-10 w-10 text-destructive hover:bg-card/20 hover:bg-card/30"
+                className="rounded-xl h-10 w-10 text-destructive hover:bg-card/30"
               >
                 <Eraser className="h-6 w-6" />
               </Button>
@@ -163,7 +163,7 @@ export default function AllenamentoPage() {
           <Button 
             variant="ghost"
             size="icon" 
-            className="rounded-xl h-10 w-10 hover:bg-card/20 hover:bg-card/30"
+            className="rounded-xl h-10 w-10 hover:bg-card/30"
             onClick={() => setIsGeneratorOpen(true)}
           >
              <PlusCircle className="h-6 w-6 text-brand-green" />
@@ -177,7 +177,7 @@ export default function AllenamentoPage() {
                 size="icon" 
                 className={cn(
                   "rounded-xl h-10 w-10 transition-all",
-                  focusFilter ? "bg-brand-green/10 shadow-[0_0_10px_rgba(172,229,4,0.2)]" : "hover:bg-card/20 hover:bg-card/30"
+                  focusFilter ? "bg-brand-green/10 shadow-[0_0_10px_rgba(172,229,4,0.2)]" : "hover:bg-card/30"
                 )}
               >
                  <Filter className="h-6 w-6 text-brand-green" />
@@ -377,7 +377,7 @@ export default function AllenamentoPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4">
-            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11 bg-card/20 hover:bg-card/30 hover:bg-card/40 hover:bg-card/50 border-none text-foreground">Annulla</AlertDialogCancel>
+            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11 bg-card/20 hover:bg-card/50 border-none text-foreground">Annulla</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteSingle} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase h-11 border-none">Elimina</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -392,7 +392,7 @@ export default function AllenamentoPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4">
-            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11 bg-card/20 hover:bg-card/30 hover:bg-card/40 hover:bg-card/50 border-none text-foreground">Annulla</AlertDialogCancel>
+            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11 bg-card/20 hover:bg-card/50 border-none text-foreground">Annulla</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteWeek} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase h-11 border-none">Sì, elimina</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -407,7 +407,7 @@ export default function AllenamentoPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4">
-            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11 bg-card/20 hover:bg-card/30 hover:bg-card/40 hover:bg-card/50 border-none text-foreground">Annulla</AlertDialogCancel>
+            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11 bg-card/20 hover:bg-card/50 border-none text-foreground">Annulla</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteAll} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase h-11 border-none">RESET TUTTO</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

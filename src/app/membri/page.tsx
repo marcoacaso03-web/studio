@@ -144,9 +144,9 @@ export default function RosaPage() {
       <div className="space-y-4 px-3">
         {loading ? (
           <div className="space-y-4 px-2">
-            <Skeleton className="h-14 w-full rounded-2xl bg-card/20 hover:bg-card/30" />
-            <Skeleton className="h-14 w-full rounded-2xl bg-card/20 hover:bg-card/30" />
-            <Skeleton className="h-14 w-full rounded-2xl bg-card/20 hover:bg-card/30" />
+            <Skeleton className="h-14 w-full rounded-2xl bg-card/20" />
+            <Skeleton className="h-14 w-full rounded-2xl bg-card/20" />
+            <Skeleton className="h-14 w-full rounded-2xl bg-card/20" />
           </div>
         ) : (
           rolesList.map(roleKey => {
@@ -187,7 +187,7 @@ export default function RosaPage() {
                       playersInRole.map((player, index) => (
                         <div 
                           key={player.id} 
-                          className="flex items-center justify-between p-4 border-b border-white/5 last:border-b-0 group hover:bg-card/20 hover:bg-card/30 transition-colors cursor-pointer"
+                          className="flex items-center justify-between p-4 border-b border-white/5 last:border-b-0 group hover:bg-card/30 transition-colors cursor-pointer"
                           onClick={() => router.push(`/membri/${player.id}`)}
                         >
                           <span className="text-foreground font-medium text-[17px]">{player.name}</span>
@@ -231,7 +231,7 @@ export default function RosaPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row justify-end gap-3 mt-4">
-            <AlertDialogCancel className="mt-0 text-[11px] font-bold uppercase rounded-xl flex-1 h-11 bg-card/20 hover:bg-card/30 text-foreground border-none hover:bg-card/40 hover:bg-card/50">Annulla</AlertDialogCancel>
+            <AlertDialogCancel className="mt-0 text-[11px] font-bold uppercase rounded-xl flex-1 h-11 bg-card/20 hover:bg-card/50">Annulla</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeletePlayer} className="bg-destructive hover:bg-destructive/90 text-[11px] font-bold uppercase rounded-xl flex-1 h-11 border-none shadow-[0_0_15px_rgba(248,113,113,0.3)]">
               Elimina
             </AlertDialogAction>

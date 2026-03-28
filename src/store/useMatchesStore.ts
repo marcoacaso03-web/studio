@@ -11,8 +11,8 @@ interface MatchState {
     matches: Match[];
     loading: boolean;
     fetchAll: (seasonId?: string) => Promise<void>;
-    add: (data: Omit<MatchCreateData, 'seasonId' | 'userId'>) => Promise<Match | undefined>;
-    bulkAdd: (matchesData: Omit<MatchCreateData, 'userId' | 'seasonId'>[]) => Promise<void>;
+    add: (data: Omit<MatchCreateData, 'seasonId' | 'userId' | 'teamOwnerId' | 'teamId'>) => Promise<Match | undefined>;
+    bulkAdd: (matchesData: Omit<MatchCreateData, 'userId' | 'seasonId' | 'teamOwnerId' | 'teamId'>[]) => Promise<void>;
     update: (id: string, updates: Partial<Omit<Match, 'id' | 'userId'>>) => Promise<void>;
     remove: (id: string) => Promise<void>;
 }

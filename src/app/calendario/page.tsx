@@ -22,7 +22,7 @@ export default function DashboardPage() {
   const { teamRecord, loading: statsLoading, loadStats } = useStatsStore();
   const { activeSeason, fetchAll: fetchSeasons } = useSeasonsStore();
   const router = useRouter();
-  
+
   const [isFullCalendarOpen, setIsFullCalendarOpen] = useState(false);
 
   useEffect(() => {
@@ -37,17 +37,17 @@ export default function DashboardPage() {
 
   const dashboardMatches = useMemo(() => {
     if (matchesLoading) return [];
-    
+
     const completed = matches
       .filter(m => m.status === 'completed')
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 4);
-      
+
     const upcoming = matches
       .filter(m => m.status === 'scheduled')
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .slice(0, 1);
-      
+
     return [...completed, ...upcoming].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [matches, matchesLoading]);
 
@@ -84,7 +84,7 @@ export default function DashboardPage() {
       {/* Mini Stats Cards */}
       <div className="grid grid-cols-2 gap-3">
         {/* ROSA CARD */}
-        <div 
+        <div
           className="relative border border-brand-green/30 rounded-3xl p-4 cursor-pointer hover:opacity-90 transition-all active:scale-95 bg-card/40 backdrop-blur-sm shadow-[0_0_15px_rgba(172,229,4,0.1)] overflow-hidden"
           onClick={() => router.push('/membri')}
         >
@@ -106,7 +106,7 @@ export default function DashboardPage() {
         </div>
 
         {/* STATISTICHE CARD */}
-        <div 
+        <div
           className="relative border border-brand-green/30 rounded-3xl p-4 cursor-pointer hover:opacity-90 transition-all active:scale-95 bg-card/40 backdrop-blur-sm shadow-[0_0_15px_rgba(172,229,4,0.1)] overflow-hidden"
           onClick={() => router.push('/statistiche')}
         >
@@ -134,7 +134,7 @@ export default function DashboardPage() {
           <div className="space-y-0.5">
             <h2 className="text-lg font-black text-foreground uppercase tracking-tight">Prossime & Recenti</h2>
           </div>
-          <button 
+          <button
             onClick={() => setIsFullCalendarOpen(true)}
             className="bg-black text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase border border-brand-green shadow-[0_0_10px_rgba(172,229,4,0.15)] hover:scale-105 transition-all"
           >
@@ -156,16 +156,16 @@ export default function DashboardPage() {
             <Table>
               <TableBody>
                 {dashboardMatches.map((match) => (
-                  <TableRow 
-                    key={match.id} 
-                    className="h-16 border-b border-white/5 hover:bg-card/20 hover:bg-card/30 transition-all group cursor-pointer" 
+                  <TableRow
+                    key={match.id}
+                    className="h-16 border-b border-white/5 hover:bg-card/30 transition-all group cursor-pointer"
                     onClick={() => navigateToMatch(match)}
                   >
                     <TableCell className="px-5">
                       <div className="flex items-center gap-5">
                         <div className="flex items-center gap-3">
-                          {match.isHome ? 
-                            <Home className="h-6 w-6 text-brand-green" /> : 
+                          {match.isHome ?
+                            <Home className="h-6 w-6 text-brand-green" /> :
                             <Plane className="h-6 w-6 text-brand-cyan" />
                           }
                         </div>
@@ -195,9 +195,9 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <FullCalendarDialog 
-        open={isFullCalendarOpen} 
-        onOpenChange={setIsFullCalendarOpen} 
+      <FullCalendarDialog
+        open={isFullCalendarOpen}
+        onOpenChange={setIsFullCalendarOpen}
       />
     </div>
   );
