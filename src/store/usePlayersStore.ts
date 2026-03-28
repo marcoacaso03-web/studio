@@ -65,7 +65,7 @@ export const usePlayersStore = create<PlayerState>()(
           
           await mutate(getPlayersSWRKey(user.id, activeSeason.id));
           await get().fetchAll(activeSeason.id);
-          useStatsStore.getState().loadStats();
+          useStatsStore.getState().loadSummaryStats();
           return newPlayer;
       },
       bulkAdd: async (playersData) => {
@@ -77,7 +77,7 @@ export const usePlayersStore = create<PlayerState>()(
           
           await mutate(getPlayersSWRKey(user.id, activeSeason.id));
           await get().fetchAll(activeSeason.id);
-          useStatsStore.getState().loadStats();
+          useStatsStore.getState().loadSummaryStats();
       },
       update: async (id, updates) => {
           const user = useAuthStore.getState().user;
@@ -88,7 +88,7 @@ export const usePlayersStore = create<PlayerState>()(
           if (updatedPlayer) {
               await mutate(getPlayersSWRKey(user.id, activeSeason.id));
               await get().fetchAll(activeSeason.id);
-              useStatsStore.getState().loadStats();
+              useStatsStore.getState().loadSummaryStats();
           }
       },
       remove: async (id) => {
@@ -99,7 +99,7 @@ export const usePlayersStore = create<PlayerState>()(
           await playerRepository.delete(id, activeSeason.id);
           await mutate(getPlayersSWRKey(user.id, activeSeason.id));
           await get().fetchAll(activeSeason.id);
-          useStatsStore.getState().loadStats();
+          useStatsStore.getState().loadSummaryStats();
       },
     }),
     {

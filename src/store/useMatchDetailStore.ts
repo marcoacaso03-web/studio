@@ -172,7 +172,7 @@ export const useMatchDetailStore = create<MatchDetailState>()(
         });
 
         aggregationRepository.syncAllPlayersStats(user.id, match.seasonId).then(() => {
-            useStatsStore.getState().loadStats();
+            useStatsStore.getState().loadSummaryStats();
         });
     },
 
@@ -188,7 +188,7 @@ export const useMatchDetailStore = create<MatchDetailState>()(
         });
 
         aggregationRepository.syncAllPlayersStats(user.id, match.seasonId).then(() => {
-            useStatsStore.getState().loadStats();
+            useStatsStore.getState().loadSummaryStats();
         });
     },
 

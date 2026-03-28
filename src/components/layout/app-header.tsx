@@ -19,15 +19,15 @@ export function AppHeader() {
   const pathname = usePathname();
   
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between bg-background border-b border-border px-4 md:px-8 shadow-lg">
+    <header className="sticky top-0 z-40 flex h-16 items-center justify-between bg-black border-b border-brand-green/20 px-4 md:px-8 shadow-[0_1px_20px_rgba(172,229,4,0.05)]">
       <div className="flex items-center gap-10">
-        <Link href="/" className="flex items-center gap-2.5 text-foreground hover:opacity-90 transition-opacity">
-          <div className="p-1.5 bg-card rounded-xl">
+        <Link href="/" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
+          <div className="p-1.5 bg-black border border-brand-green/20 rounded-xl">
             <img src="/favicon-16x16.png" alt="App Logo" className="h-7 w-7 object-contain drop-shadow" />
           </div>
           <div className="flex flex-col">
-            <span className="text-xl font-black tracking-tighter leading-none">PitchMan</span>
-            <span className="text-[7px] uppercase font-bold tracking-[0.3em] text-muted-foreground mt-0.5">Tactical Manager</span>
+            <span className="text-xl font-black tracking-tighter leading-none text-white">PitchMan</span>
+            <span className="text-[7px] uppercase font-bold tracking-[0.3em] text-white/30 mt-0.5">Tactical Manager</span>
           </div>
         </Link>
 
@@ -40,10 +40,10 @@ export function AppHeader() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-transparent",
+                  "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border",
                   isActive 
-                    ? "bg-accent text-accent-foreground shadow-md border-accent-foreground/10" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-card/50"
+                    ? "bg-black text-white border-brand-green shadow-[0_0_12px_rgba(172,229,4,0.25)]" 
+                    : "text-white/40 border-transparent hover:text-white hover:bg-white/5"
                 )}
               >
                 {item.label}
@@ -56,14 +56,14 @@ export function AppHeader() {
       {user && (
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex flex-col text-right">
-            <span className="text-[10px] font-black text-foreground uppercase leading-none">
+            <span className="text-[10px] font-black text-white uppercase leading-none">
               {user.username}
             </span>
-            <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-tighter mt-1">
+            <span className="text-[8px] font-bold text-brand-green uppercase tracking-tighter mt-1">
               Online
             </span>
           </div>
-          <div className="h-9 w-9 rounded-xl bg-card border border-border flex items-center justify-center text-foreground font-black text-xs shadow-sm">
+          <div className="h-9 w-9 rounded-xl bg-black border border-brand-green/30 flex items-center justify-center text-white font-black text-xs shadow-[0_0_8px_rgba(172,229,4,0.1)]">
             {user.username.charAt(0).toUpperCase()}
           </div>
         </div>

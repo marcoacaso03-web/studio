@@ -84,6 +84,12 @@ export default function AltroPage() {
     if (!seasonToDelete) return;
     await removeSeason(seasonToDelete.id);
     setSeasonToDelete(null);
+    setIsSquadraOpen(false);
+    // Radix UI nested dialogs bug: body gets stuck with pointer-events:none
+    // Force cleanup after both dialogs close
+    setTimeout(() => {
+      document.body.style.pointerEvents = '';
+    }, 300);
   };
 
   const handleLogout = () => {
@@ -190,8 +196,8 @@ export default function AltroPage() {
 
   return (
     <div className="pb-24 pt-4 space-y-6">
-      <div className="flex items-center gap-2 px-4 mb-2">
-        <h1 className="text-2xl font-black text-foreground px-2">Impostazioni</h1>
+      <div className="flex items-center gap-2 px-6 mb-2">
+        <h1 className="text-2xl font-black text-white uppercase tracking-tight">Impostazioni</h1>
       </div>
 
       <div className="flex flex-col space-y-3 px-2">
@@ -206,8 +212,8 @@ export default function AltroPage() {
             <User className="h-6 w-6 text-brand-green" />
           </div>
           <div className="flex flex-col flex-1">
-            <span className="text-foreground font-bold text-lg tracking-wide">Profilo Allenatore</span>
-            <span className="text-muted-foreground/60 text-sm">Dettagli account</span>
+            <span className="text-white font-bold text-lg tracking-wide">Profilo Allenatore</span>
+            <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest">Dettagli account</span>
           </div>
         </div>
 
@@ -220,8 +226,8 @@ export default function AltroPage() {
             <Shirt className="h-6 w-6 text-brand-green" />
           </div>
           <div className="flex flex-col flex-1">
-            <span className="text-foreground font-bold text-lg tracking-wide">Gestione Squadra</span>
-            <span className="text-muted-foreground/60 text-sm">Archivio Stagioni, Allenamenti settimanali</span>
+            <span className="text-white font-bold text-lg tracking-wide">Gestione Squadra</span>
+            <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest">Archivio Stagioni & Allenamenti</span>
           </div>
         </div>
 
@@ -234,8 +240,8 @@ export default function AltroPage() {
             <Bell className="h-6 w-6 text-brand-green" />
           </div>
           <div className="flex flex-col flex-1">
-            <span className="text-foreground font-bold text-lg tracking-wide">Notifiche</span>
-            <span className="text-muted-foreground/60 text-sm">Preferenze push</span>
+            <span className="text-white font-bold text-lg tracking-wide">Notifiche</span>
+            <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest">Preferenze push</span>
           </div>
         </div>
 
@@ -247,8 +253,8 @@ export default function AltroPage() {
             <Moon className="h-6 w-6 text-brand-green" />
           </div>
           <div className="flex flex-col flex-1">
-            <span className="text-foreground font-bold text-lg tracking-wide">Tema</span>
-            <span className="text-muted-foreground/60 text-sm">Chiaro/Scuro</span>
+            <span className="text-white font-bold text-lg tracking-wide">Tema</span>
+            <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest">Chiaro/Scuro</span>
           </div>
           <div className="bg-muted/80 rounded-full flex items-center p-1 mr-2 shadow-inner border border-white/10">
             {/* Un toggle visivo custom che mimi quello nel mockup */}
@@ -276,8 +282,8 @@ export default function AltroPage() {
             <Shield className="h-6 w-6 text-brand-green" />
           </div>
           <div className="flex flex-col flex-1">
-            <span className="text-foreground font-bold text-lg tracking-wide">Privacy & Sicurezza</span>
-            <span className="text-muted-foreground/60 text-sm">Permessi, Dati</span>
+            <span className="text-white font-bold text-lg tracking-wide">Privacy & Sicurezza</span>
+            <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest">Permessi & Dati</span>
           </div>
         </div>
 
@@ -287,7 +293,7 @@ export default function AltroPage() {
 
       {/* Account Dialog */}
       <Dialog open={isAccountOpen} onOpenChange={setIsAccountOpen}>
-        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-3xl bg-background border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground">
+        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-3xl bg-black border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)] text-white">
           <DialogHeader>
             <DialogTitle className="text-xl font-black text-foreground">Profilo Allenatore</DialogTitle>
           </DialogHeader>
@@ -317,10 +323,10 @@ export default function AltroPage() {
 
       {/* Gestione Squadra (Archivio Stagioni & Allenamenti) Dialog */}
       <Dialog open={isSquadraOpen} onOpenChange={setIsSquadraOpen}>
-        <DialogContent className="max-w-[95vw] sm:max-w-lg rounded-3xl bg-background border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-lg rounded-3xl bg-black border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)] text-white max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black text-foreground">Gestione Squadra</DialogTitle>
-            <DialogDescription className="text-muted-foreground/60">Configura archivio stagioni e frequenza allenamento.</DialogDescription>
+            <DialogTitle className="text-xl font-black text-white">Gestione Squadra</DialogTitle>
+            <DialogDescription className="text-white/30">Configura archivio stagioni e frequenza allenamento.</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-6 pt-4">
@@ -403,7 +409,7 @@ export default function AltroPage() {
 
             {/* Stagioni */}
             <div className="space-y-3">
-              <h3 className="text-sm font-black uppercase tracking-widest text-brand-green">Archivio Stagioni</h3>
+              <h3 className="text-sm font-black uppercase tracking-widest text-white">Archivio Stagioni</h3>
 
               <div className="flex gap-2">
                 <Input
@@ -429,12 +435,12 @@ export default function AltroPage() {
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex flex-col">
-                        <span className={cn("text-sm font-black uppercase tracking-tight", s.isActive ? "text-brand-green" : "text-foreground")}>
+                        <span className={cn("text-sm font-black uppercase tracking-tight", s.isActive ? "text-white" : "text-foreground")}>
                           Stagione {s.name}
                         </span>
                       </div>
                       {s.isActive && (
-                        <Badge className="text-[9px] bg-black border border-brand-green text-brand-green shadow-[0_0_10px_rgba(172,229,4,0.1)] font-black uppercase py-0.5 px-2">Attiva</Badge>
+                        <Badge className="text-[9px] bg-black border border-brand-green text-white shadow-[0_0_10px_rgba(172,229,4,0.1)] font-black uppercase py-0.5 px-2">Attiva</Badge>
                       )}
                     </div>
 
@@ -463,7 +469,7 @@ export default function AltroPage() {
 
       {/* Privacy & Sicurezza (Esporta / Reset) Dialog */}
       <Dialog open={isPrivacyOpen} onOpenChange={setIsPrivacyOpen}>
-        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-3xl bg-background border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground">
+        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-3xl bg-black border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)] text-white">
           <DialogHeader>
             <DialogTitle className="text-xl font-black text-foreground">Privacy & Dati</DialogTitle>
             <DialogDescription className="text-muted-foreground/60">Esporta i tuoi dati o formatta l'account.</DialogDescription>
@@ -471,7 +477,7 @@ export default function AltroPage() {
           <div className="space-y-6 pt-2">
 
             <div className="space-y-2">
-              <Button onClick={handleExport} disabled={isExporting} className="w-full font-black uppercase text-xs h-12 bg-black border border-brand-green/30 text-brand-green hover:bg-black/80 hover:border-brand-green shadow-[0_0_10px_rgba(172,229,4,0.05)] transition-all rounded-xl">
+              <Button onClick={handleExport} disabled={isExporting} className="w-full font-black uppercase text-xs h-12 bg-black border border-brand-green/30 text-white hover:bg-black/80 hover:border-brand-green shadow-[0_0_10px_rgba(172,229,4,0.05)] transition-all rounded-xl">
                 <Download className="mr-2 h-4 w-4 text-brand-green" />
                 {isExporting ? "Esportazione..." : "Esporta tutto (CSV)"}
               </Button>
@@ -491,10 +497,10 @@ export default function AltroPage() {
                     <RefreshCw className="mr-2 h-4 w-4" /> Reset Stagione
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="rounded-3xl bg-background border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground max-w-[90vw]">
+                <AlertDialogContent className="rounded-3xl bg-black border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)] text-white max-w-[90vw]">
                   <AlertDialogHeader>
                     <AlertDialogTitle className="uppercase font-black text-destructive">Resettare la stagione?</AlertDialogTitle>
-                    <AlertDialogDescription className="text-xs leading-relaxed text-foreground/50">
+                    <AlertDialogDescription className="text-xs leading-relaxed text-white/40 font-bold">
                       Cancellazione DEFINITIVA giocatori, partite e statistiche della stagione <strong>{activeSeason?.name}</strong>.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
@@ -513,10 +519,10 @@ export default function AltroPage() {
 
       {/* Season Deletion Confirmation */}
       <AlertDialog open={!!seasonToDelete} onOpenChange={(open) => !open && setSeasonToDelete(null)}>
-        <AlertDialogContent className="rounded-3xl bg-background border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground max-w-[90vw]">
+        <AlertDialogContent className="rounded-3xl bg-black border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)] text-white max-w-[90vw]">
           <AlertDialogHeader>
             <AlertDialogTitle className="uppercase font-black text-destructive">Elimina Stagione?</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-foreground/50">
+            <AlertDialogDescription className="text-xs text-white/40 font-bold">
               Questa azione cancellerà DEFINITIVAMENTE la stagione <strong>{seasonToDelete?.name}</strong> e tutti i relativi dati.
             </AlertDialogDescription>
           </AlertDialogHeader>
