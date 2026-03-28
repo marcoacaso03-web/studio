@@ -124,18 +124,18 @@ export default function RosaPage() {
 
       <div className="px-4 flex gap-3 items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-foreground/40" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-brand-green" />
           <Input 
             type="text" 
             placeholder="Cerca" 
-            className="w-full h-12 pl-12 pr-4 rounded-full bg-card border-border/80 text-foreground placeholder:text-muted-foreground/50 font-medium text-lg focus-visible:ring-primary/50"
+            className="w-full h-12 pl-12 pr-4 rounded-full bg-black border border-brand-green/30 text-foreground placeholder:text-muted-foreground/50 font-medium text-lg focus-visible:ring-1 focus-visible:ring-brand-green shadow-[0_0_10px_rgba(172,229,4,0.05)]"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <Button 
           onClick={() => handleOpenForm(null)}
-          className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-gradient-to-br from-brand-yellow to-brand-green text-white shadow-[0_0_15px_rgba(74,222,128,0.5)] transition-all hover:scale-105 active:scale-95 border-none"
+          className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-black border-2 border-brand-green text-brand-green shadow-[0_0_15px_rgba(172,229,4,0.3)] transition-all hover:scale-105 active:scale-95 hover:bg-black/80"
         >
           <Plus className="h-7 w-7" />
         </Button>
@@ -163,31 +163,31 @@ export default function RosaPage() {
             if (playersInRole.length === 0 && searchTerm) return null; // Hide if searching and none found
 
             return (
-              <div key={roleKey} className="overflow-hidden bg-card/50 rounded-2xl">
+              <div key={roleKey} className="overflow-hidden bg-black/40 border border-brand-green/20 rounded-2xl shadow-[0_0_10px_rgba(172,229,4,0.05)]">
                 {/* Accordion Header */}
                 <div 
                    onClick={() => toggleRole(roleKey)}
                    className={cn(
-                     "flex items-center justify-between p-4 cursor-pointer select-none transition-all rounded-t-2xl border-b border-white/5",
+                     "flex items-center justify-between p-4 cursor-pointer select-none transition-all rounded-t-2xl border-b border-brand-green/20",
                      roleColors[roleKey]
                    )}
                 >
                   <span className="font-medium text-[17px] tracking-wide">{roleName}</span>
-                  <div className="bg-card rounded-2xl border border-neon-dim shadow-lg overflow-hidden transition-all hover:bg-card/90">
-                    {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                  <div className="bg-black rounded-xl border border-brand-green/30 p-1 shadow overflow-hidden transition-all hover:border-brand-green">
+                    {isOpen ? <ChevronUp className="h-5 w-5 text-brand-green" /> : <ChevronDown className="h-5 w-5 text-brand-green" />}
                   </div>
                 </div>
 
                 {/* Accordion Content */}
                 {isOpen && (
-                  <div className="flex flex-col py-2 border-x border-b border-white/5 rounded-b-2xl">
+                  <div className="flex flex-col py-2 rounded-b-2xl">
                     {playersInRole.length === 0 ? (
                       <div className="py-6 text-center text-foreground/30 text-sm italic">Nessun giocatore in questo ruolo</div>
                     ) : (
                       playersInRole.map((player, index) => (
                         <div 
                           key={player.id} 
-                          className="flex items-center justify-between p-4 border-b border-white/5 last:border-b-0 group hover:bg-card/30 transition-colors cursor-pointer"
+                          className="flex items-center justify-between p-4 border-b border-brand-green/10 last:border-b-0 group hover:bg-black/60 transition-colors cursor-pointer"
                           onClick={() => router.push(`/membri/${player.id}`)}
                         >
                           <span className="text-foreground font-medium text-[17px]">{player.name}</span>
@@ -195,8 +195,7 @@ export default function RosaPage() {
                             <span className="text-foreground/60 text-sm font-medium">
                                 #{index + 1}
                             </span>
-                            {/* Un indicatore online o puntino verde per design */}
-                            <div className="w-4 h-4 rounded-full bg-brand-green shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
+                            <div className="w-3 h-3 rounded-full bg-brand-green shadow-[0_0_8px_rgba(172,229,4,0.6)]" />
                           </div>
                         </div>
                       ))

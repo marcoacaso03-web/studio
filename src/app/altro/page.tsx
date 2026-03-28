@@ -76,7 +76,7 @@ export default function AltroPage() {
     await Promise.all([
       useMatchesStore.getState().fetchAll(id),
       usePlayersStore.getState().fetchAll(id),
-      useStatsStore.getState().loadStats()
+      useStatsStore.getState().loadSummaryStats(id)
     ]);
   };
 
@@ -170,7 +170,7 @@ export default function AltroPage() {
       await Promise.all([
         useMatchesStore.getState().fetchAll(activeSeason.id),
         usePlayersStore.getState().fetchAll(activeSeason.id),
-        useStatsStore.getState().loadStats()
+        useStatsStore.getState().loadSummaryStats(activeSeason.id)
       ]);
 
       toast({

@@ -10,6 +10,7 @@ import { usePlayersStore } from "@/store/usePlayersStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { aggregationRepository } from "@/lib/repositories/aggregation-repository";
+import { cn } from "@/lib/utils";
 import type { Player } from "@/lib/types";
 
 import { PageHeader } from "@/components/layout/page-header";
@@ -24,19 +25,21 @@ const RadarChart = dynamic(
     const Chart = ({ data, name1, name2 }: { data: any[], name1: string, name2: string }) => (
       <ResponsiveContainer width="100%" height={280}>
         <RC data={data} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
-          <PolarGrid stroke="hsl(var(--border))" />
-          <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 700 }} />
+          <PolarGrid stroke="rgba(255,255,255,0.05)" />
+          <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: "rgba(255,255,255,0.3)", fontWeight: 900 }} />
           <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
-          <Radar name={name1} dataKey="score1" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.2} strokeWidth={2} />
-          <Radar name={name2} dataKey="score2" stroke="hsl(330, 80%, 60%)" fill="hsl(330, 80%, 60%)" fillOpacity={0.2} strokeWidth={2} />
+          <Radar name={name1} dataKey="score1" stroke="#ace504" fill="#ace504" fillOpacity={0.15} strokeWidth={2} />
+          <Radar name={name2} dataKey="score2" stroke="#ff00ff" fill="#ff00ff" fillOpacity={0.15} strokeWidth={2} />
           <Tooltip
-            contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11 }}
+            contentStyle={{ backgroundColor: "black", border: "1px solid rgba(172,229,4,0.3)", borderRadius: 16, fontSize: 11, color: "white" }}
+            itemStyle={{ color: "white" }}
+            cursor={{ fill: 'rgba(172, 229, 4, 0.05)' }}
             formatter={(val: number, name: string, props: any) => {
-               const raw = name === name1 ? props.payload.raw1 : props.payload.raw2;
-               return [raw, name];
+              const raw = name === name1 ? props.payload.raw1 : props.payload.raw2;
+              return [raw, name];
             }}
           />
-          <Legend wrapperStyle={{ fontSize: 11, fontWeight: 700, paddingTop: 10 }} />
+          <Legend wrapperStyle={{ fontSize: 10, fontWeight: 900, paddingTop: 15, textTransform: 'uppercase', letterSpacing: '0.1em' }} />
         </RC>
       </ResponsiveContainer>
     );
@@ -56,32 +59,32 @@ function calculatePlayerStats(playerId: string, context: any, player: Player, pS
     const isStarter = details.lineup?.starters.includes(playerId) ?? false;
     const stat = details.stats.find((s: any) => s.playerId === playerId);
     const hasPlayed = isStarter || !!stat;
-    
+
     if (hasPlayed) {
       totalMinutes += stat?.minutesPlayed ?? 0;
-      
-      const chronologicalEvents = [...details.events].sort((a: any,b: any) => a.minute - b.minute);
+
+      const chronologicalEvents = [...details.events].sort((a: any, b: any) => a.minute - b.minute);
       const myTeam = match.isHome ? 'home' : 'away';
       const oppTeam = match.isHome ? 'away' : 'home';
-      
+
       let enterMin = 0;
       let exitMin = match.duration || 90;
-      
+
       if (!isStarter && stat && stat.minutesPlayed > 0) {
-         const subIn = chronologicalEvents.find((e: any) => e.type === 'substitution' && e.playerId === playerId);
-         enterMin = subIn ? subIn.minute : 0;
+        const subIn = chronologicalEvents.find((e: any) => e.type === 'substitution' && e.playerId === playerId);
+        enterMin = subIn ? subIn.minute : 0;
       }
       const subOut = chronologicalEvents.find((e: any) => e.type === 'substitution' && e.subOutPlayerId === playerId);
       if (subOut) exitMin = subOut.minute;
-      
+
       let matchGoalsConcededCount = 0;
       chronologicalEvents.forEach((e: any) => {
-          if (e.minute >= enterMin && e.minute <= exitMin && e.type === 'goal') {
-             if (e.team === myTeam) goalsScoredOnPitch++;
-             if (e.team === oppTeam) { goalsConcededOnPitch++; matchGoalsConcededCount++; }
-          }
+        if (e.minute >= enterMin && e.minute <= exitMin && e.type === 'goal') {
+          if (e.team === myTeam) goalsScoredOnPitch++;
+          if (e.team === oppTeam) { goalsConcededOnPitch++; matchGoalsConcededCount++; }
+        }
       });
-      
+
       if (player.role === "Portiere" && matchGoalsConcededCount === 0) cleanSheets++;
 
       if (!match.result) continue;
@@ -92,7 +95,7 @@ function calculatePlayerStats(playerId: string, context: any, player: Player, pS
       else draws++;
     }
   }
-  
+
   return pStats ? {
     appearances: pStats.stats.appearances, goals: pStats.stats.goals, assists: pStats.stats.assists,
     avgMinutes: pStats.stats.avgMinutes, yellowCards: pStats.stats.yellowCards ?? 0, redCards: pStats.stats.redCards ?? 0,
@@ -119,6 +122,7 @@ function ConfrontoContent() {
   const [loading, setLoading] = useState(true);
   const [statsP1, setStatsP1] = useState<any>(null);
   const [statsP2, setStatsP2] = useState<any>(null);
+  const [selectOpen, setSelectOpen] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -137,19 +141,19 @@ function ConfrontoContent() {
     const loadData = async () => {
       setLoading(true);
       try {
-        const context = await aggregationRepository.getSeasonContext(user.id, activeSeason.id);
-        const allStats = aggregationRepository.getPlayersAggregatedStatsFromContext(context);
-        
+        const context = await aggregationRepository.getDetailedContext(user.id, activeSeason.id);
+        const playerStats = aggregationRepository.getPlayersAggregatedStatsFromContext(context);
+
         if (p1Id) {
           const pCurrent = players.find(p => p.id === p1Id);
           if (pCurrent) {
-             setStatsP1(calculatePlayerStats(p1Id, context, pCurrent, allStats.find(s => s.playerId === p1Id)));
+            setStatsP1(calculatePlayerStats(p1Id, context, pCurrent, playerStats.find(s => s.playerId === p1Id)));
           }
         }
         if (p2Id) {
-          const pCurrent2 = players.find(p => p.id === p2Id);
-          if (pCurrent2) {
-             setStatsP2(calculatePlayerStats(p2Id, context, pCurrent2, allStats.find(s => s.playerId === p2Id)));
+          const pCurrent = players.find(p => p.id === p2Id);
+          if (pCurrent) {
+            setStatsP2(calculatePlayerStats(p2Id, context, pCurrent, playerStats.find(s => s.playerId === p2Id)));
           }
         }
       } catch (e) {
@@ -166,9 +170,9 @@ function ConfrontoContent() {
   const eligibleP2s = useMemo(() => {
     if (!p1) return [];
     return players.filter(p => {
-       if (p.id === p1.id) return false;
-       if (isP1Goalkeeper) return p.role === "Portiere";
-       return p.role !== "Portiere"; // Outfield players compared with outfield
+      if (p.id === p1.id) return false;
+      if (isP1Goalkeeper) return p.role === "Portiere";
+      return p.role !== "Portiere"; // Outfield players compared with outfield
     });
   }, [players, p1, isP1Goalkeeper]);
 
@@ -185,44 +189,44 @@ function ConfrontoContent() {
     const maxMins = 90;
 
     return [
-      { 
-        subject: "Presenze", 
-        score1: (statsP1.appearances / maxApps) * 100, raw1: statsP1.appearances, 
-        score2: (statsP2.appearances / maxApps) * 100, raw2: statsP2.appearances 
+      {
+        subject: "Presenze",
+        score1: (statsP1.appearances / maxApps) * 100, raw1: statsP1.appearances,
+        score2: (statsP2.appearances / maxApps) * 100, raw2: statsP2.appearances
       },
-      { 
-        subject: "Gol", 
+      {
+        subject: "Gol",
         score1: (statsP1.goals / maxGoals) * 100, raw1: statsP1.goals,
-        score2: (statsP2.goals / maxGoals) * 100, raw2: statsP2.goals 
+        score2: (statsP2.goals / maxGoals) * 100, raw2: statsP2.goals
       },
-      { 
-        subject: "Assist", 
+      {
+        subject: "Assist",
         score1: (statsP1.assists / maxAssists) * 100, raw1: statsP1.assists,
-        score2: (statsP2.assists / maxAssists) * 100, raw2: statsP2.assists 
+        score2: (statsP2.assists / maxAssists) * 100, raw2: statsP2.assists
       },
-      { 
-        subject: "Vittorie", 
+      {
+        subject: "Vittorie",
         score1: (statsP1.wins / maxWins) * 100, raw1: statsP1.wins,
-        score2: (statsP2.wins / maxWins) * 100, raw2: statsP2.wins 
+        score2: (statsP2.wins / maxWins) * 100, raw2: statsP2.wins
       },
-      { 
-        subject: "Min/Medi", 
+      {
+        subject: "Min/Medi",
         score1: (statsP1.avgMinutes / maxMins) * 100, raw1: statsP1.avgMinutes,
-        score2: (statsP2.avgMinutes / maxMins) * 100, raw2: statsP2.avgMinutes 
+        score2: (statsP2.avgMinutes / maxMins) * 100, raw2: statsP2.avgMinutes
       },
     ];
   }, [statsP1, statsP2]);
 
   if (!p1Id || (!p1 && !loading)) {
-     return (
-        <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-          <ArrowRightLeft className="h-12 w-12 text-muted-foreground" />
-          <p className="text-sm font-medium text-muted-foreground">Seleziona un giocatore da confrontare.</p>
-          <Button variant="outline" onClick={() => router.push("/membri")}>
-            <ArrowLeft className="h-4 w-4 mr-2" /> Torna alla Rosa
-          </Button>
-        </div>
-     );
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+        <ArrowRightLeft className="h-12 w-12 text-muted-foreground" />
+        <p className="text-sm font-medium text-muted-foreground">Seleziona un giocatore da confrontare.</p>
+        <Button variant="outline" onClick={() => router.push("/membri")}>
+          <ArrowLeft className="h-4 w-4 mr-2" /> Torna alla Rosa
+        </Button>
+      </div>
+    );
   }
 
   return (
@@ -230,96 +234,114 @@ function ConfrontoContent() {
       <PageHeader
         title={
           <div className="flex items-center gap-2">
-            <Link href={`/membri/${p1Id}`} className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link href={`/membri/${p1Id}`} className="h-8 w-8 flex items-center justify-center rounded-xl bg-black border border-brand-green/20 text-brand-green hover:bg-brand-green/10 transition-colors">
               <ArrowLeft className="h-4 w-4" />
             </Link>
-            <span className="font-light">Confronto</span>
-            <span className="font-black">Giocatori</span>
+            <span className="font-light text-white">Confronto</span>
+            <span className="font-black text-white">Giocatori</span>
           </div>
         }
       />
 
       {/* Selectors */}
       <div className="grid grid-cols-2 gap-4">
-         <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="p-4 flex flex-col items-center text-center gap-1">
-               <User className="h-8 w-8 text-foreground mb-1" />
-               <h3 className="font-black text-lg text-foreground">{p1?.name ?? "..."}</h3>
-               <span className="text-[9px] font-black tracking-widest uppercase text-muted-foreground">{p1?.role}</span>
-            </CardContent>
-         </Card>
-         
-         <Card className="bg-muted/30">
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
-               {!p2 ? (
-                  <Select onValueChange={handleChangeP2}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={`Confronta con...`} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {eligibleP2s.map(plyr => (
-                         <SelectItem key={plyr.id} value={plyr.id}>{plyr.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-               ) : (
-                  <>
-                     <User className="h-8 w-8 text-brand-pink mb-1" />
-                     <h3 className="font-black text-lg text-brand-pink">{p2.name}</h3>
-                     <Button variant="ghost" size="sm" className="h-6 text-[10px]" onClick={() => router.replace(`/membri/confronto?p1=${p1Id}`)}>
-                        Cambia Avversario
-                     </Button>
-                  </>
-               )}
-            </CardContent>
-         </Card>
+        <Card className="bg-black/40 backdrop-blur-sm border-brand-green/30 rounded-3xl shadow-[0_0_20px_rgba(172,229,4,0.05)]">
+          <CardContent className="p-5 flex flex-col items-center text-center gap-1">
+            <div className="p-3 bg-brand-green/10 rounded-2xl mb-2">
+              <User className="h-6 w-6 text-brand-green" />
+            </div>
+            <h3 className="font-black text-lg text-white leading-tight">{p1?.name ?? "..."}</h3>
+            <span className="text-[9px] font-black tracking-[0.2em] uppercase text-white/30">{p1?.role}</span>
+          </CardContent>
+        </Card>
+
+        <Card className={cn(
+          "backdrop-blur-sm rounded-3xl transition-all duration-500",
+          p2 ? "bg-black/40 border-pink-500/30 shadow-[0_0_20px_rgba(236,72,153,0.05)]" : "bg-black/20 border-white/5 border-dashed"
+        )}>
+          <CardContent className="p-5 flex flex-col items-center justify-center text-center gap-2 h-full">
+            <Select
+              value={p2?.id ?? ""}
+              onValueChange={handleChangeP2}
+              open={selectOpen}
+              onOpenChange={setSelectOpen}
+            >
+              {p2 ? (
+                <>
+                  <div className="p-3 bg-pink-500/10 rounded-2xl mb-2">
+                    <User className="h-6 w-6 text-pink-500" />
+                  </div>
+                  <h3 className="font-black text-lg text-white leading-tight">{p2.name}</h3>
+                  <SelectTrigger className="h-6 text-[8px] font-black uppercase tracking-widest text-pink-500 bg-transparent border border-pink-500/40 hover:bg-pink-500/10 mt-1 shadow-none rounded-xl px-3">
+                    <span>CAMBIA GIOCATORE</span>
+                  </SelectTrigger>
+                </>
+              ) : (
+                <SelectTrigger className="w-full h-12 bg-black/60 border-white/10 text-white rounded-xl font-black uppercase text-[10px] tracking-widest">
+                  <SelectValue placeholder="CONFRONTA CON..." />
+                </SelectTrigger>
+              )}
+              <SelectContent className="bg-black border-white/10 text-white rounded-xl">
+                {eligibleP2s.map(plyr => (
+                  <SelectItem key={plyr.id} value={plyr.id} className="font-bold text-[10px] uppercase focus:bg-brand-green/20 focus:text-brand-green rounded-xl transition-colors">{plyr.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
       </div>
 
       {p1 && p2 && statsP1 && statsP2 && (
-         <div className="space-y-4 animate-in fade-in zoom-in-95 duration-500">
-            <Card className="rounded-2xl border shadow-sm">
-                <CardHeader className="pb-0 px-4 pt-4">
-                  <CardTitle className="text-[11px] font-black uppercase tracking-wider text-muted-foreground flex items-center justify-center gap-1.5">
-                    <BarChart2 className="h-3 w-3" /> Bilanciamento Tecnico
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-2 px-2">
-                   <RadarChart data={radarData} name1={p1.name} name2={p2.name} />
-                </CardContent>
-            </Card>
+        <div className="space-y-4 animate-in fade-in zoom-in-95 duration-500">
+          <Card className="rounded-3xl bg-black/40 backdrop-blur-sm border-white/5 shadow-[0_0_20px_rgba(0,0,0,0.2)] overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <CardHeader className="pb-0 px-6 pt-6 bg-black/20">
+              <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 flex items-center justify-center gap-2">
+                <BarChart2 className="h-4 w-4 text-brand-green" /> Bilanciamento Tecnico Comparativo
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-2 px-6">
+              <RadarChart data={radarData} name1={p1.name} name2={p2.name} />
+            </CardContent>
+          </Card>
 
-            <Card className="rounded-2xl border shadow-sm">
-                <CardContent className="p-0">
-                   <div className="grid grid-cols-3 divide-x border-b items-center py-2 bg-muted/20">
-                      <div className="text-center font-black text-foreground text-xs truncate px-1">{splitName(p1.name).lastName}</div>
-                      <div className="text-center text-[9px] font-black text-muted-foreground uppercase tracking-widest">Metrica</div>
-                      <div className="text-center font-black text-brand-pink text-xs truncate px-1">{splitName(p2.name).lastName}</div>
-                   </div>
-                   
-                   {[
-                      { label: "Presenze", val1: statsP1.appearances, val2: statsP2.appearances, better: "high" },
-                      { label: "Valore Gol", val1: statsP1.goals, val2: statsP2.goals, better: "high" },
-                      { label: "Assist", val1: statsP1.assists, val2: statsP2.assists, better: "high" },
-                      { label: "Min totali", val1: statsP1.totalMinutes, val2: statsP2.totalMinutes, better: "high" },
-                      { label: "Min medi", val1: statsP1.avgMinutes, val2: statsP2.avgMinutes, better: "high" },
-                      { label: "Vittorie", val1: statsP1.wins, val2: statsP2.wins, better: "high" },
-                      { label: "Gol On-Pitch", val1: statsP1.goalsScoredOnPitch, val2: statsP2.goalsScoredOnPitch, better: "high" },
-                      { label: "Gol Subiti On-Pitch", val1: statsP1.goalsConcededOnPitch, val2: statsP2.goalsConcededOnPitch, better: "low" },
-                      ...(isP1Goalkeeper ? [{ label: "Clean Sheets", val1: statsP1.cleanSheets, val2: statsP2.cleanSheets, better: "high" }] : []),
-                   ].map((row, i) => {
-                      const is1Better = row.better === "high" ? row.val1 > row.val2 : row.val1 < row.val2;
-                      const is2Better = row.better === "high" ? row.val2 > row.val1 : row.val2 < row.val1;
-                      return (
-                         <div key={i} className="grid grid-cols-3 divide-x border-b last:border-0 items-center py-3 hover:bg-muted/10 transition-colors">
-                            <div className={`text-center font-black ${is1Better ? "text-foreground text-lg border-b-2 border-primary/40" : "text-muted-foreground text-sm"}`}>{row.val1}</div>
-                            <div className="text-center text-[10px] font-bold text-muted-foreground uppercase">{row.label}</div>
-                            <div className={`text-center font-black ${is2Better ? "text-brand-pink text-lg" : "text-muted-foreground text-sm"}`}>{row.val2}</div>
-                         </div>
-                      )
-                   })}
-                </CardContent>
-            </Card>
-         </div>
+          <Card className="rounded-3xl bg-black/40 backdrop-blur-sm border-white/5 shadow-[0_0_25px_rgba(0,0,0,0.4)] overflow-hidden">
+            <CardContent className="p-0">
+              <div className="grid grid-cols-3 divide-x divide-white/5 border-b border-white/5 items-center py-4 bg-black/60">
+                <div className="text-center font-black text-white text-xs truncate px-2 uppercase tracking-tight">{splitName(p1.name).lastName}</div>
+                <div className="text-center text-[8px] font-black text-white/30 uppercase tracking-[0.2em]">Metrica Analisi</div>
+                <div className="text-center font-black text-pink-500 text-xs truncate px-2 uppercase tracking-tight">{splitName(p2.name).lastName}</div>
+              </div>
+
+              {[
+                { label: "Presenze", val1: statsP1.appearances, val2: statsP2.appearances, better: "high" },
+                { label: "Valore Gol", val1: statsP1.goals, val2: statsP2.goals, better: "high" },
+                { label: "Assist", val1: statsP1.assists, val2: statsP2.assists, better: "high" },
+                { label: "Min totali", val1: statsP1.totalMinutes, val2: statsP2.totalMinutes, better: "high" },
+                { label: "Min medi", val1: statsP1.avgMinutes, val2: statsP2.avgMinutes, better: "high" },
+                { label: "Vittorie", val1: statsP1.wins, val2: statsP2.wins, better: "high" },
+                { label: "Gol On-Pitch", val1: statsP1.goalsScoredOnPitch, val2: statsP2.goalsScoredOnPitch, better: "high" },
+                { label: "Gol Subiti On-Pitch", val1: statsP1.goalsConcededOnPitch, val2: statsP2.goalsConcededOnPitch, better: "low" },
+                ...(isP1Goalkeeper ? [{ label: "Clean Sheets", val1: statsP1.cleanSheets, val2: statsP2.cleanSheets, better: "high" }] : []),
+              ].map((row, i) => {
+                const is1Better = row.better === "high" ? row.val1 > row.val2 : row.val1 < row.val2;
+                const is2Better = row.better === "high" ? row.val2 > row.val1 : row.val2 < row.val1;
+                return (
+                  <div key={i} className="grid grid-cols-3 divide-x divide-white/5 border-b border-white/5 last:border-0 items-center py-4 hover:bg-white/5 transition-colors group">
+                    <div className={cn(
+                      "text-center font-black transition-all",
+                      is1Better ? "text-brand-green text-xl shadow-[inset_0_-2px_0_rgba(172,229,4,0.4)]" : "text-white/20 text-sm"
+                    )}>{row.val1}</div>
+                    <div className="text-center text-[9px] font-black text-white/40 uppercase tracking-widest group-hover:text-brand-green transition-colors">{row.label}</div>
+                    <div className={cn(
+                      "text-center font-black transition-all",
+                      is2Better ? "text-pink-500 text-xl shadow-[inset_0_-2px_0_rgba(236,72,153,0.4)]" : "text-white/20 text-sm"
+                    )}>{row.val2}</div>
+                  </div>
+                )
+              })}
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );

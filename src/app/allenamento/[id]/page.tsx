@@ -110,7 +110,7 @@ export default function TrainingDetailPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <Loader2 className="h-10 w-10 text-foreground animate-spin" />
+        <Loader2 className="h-10 w-10 text-brand-green animate-spin" />
         <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Caricamento Sessione...</p>
       </div>
     );

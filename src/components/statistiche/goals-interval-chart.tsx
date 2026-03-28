@@ -12,12 +12,12 @@ export function GoalsIntervalChart() {
 
     if (!hasData) {
         return (
-            <Card>
+            <Card className="bg-black/40 border-brand-green/30 shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
                 <CardHeader>
-                    <CardTitle>Distribuzione Gol</CardTitle>
+                    <CardTitle className="text-base font-black uppercase tracking-tight text-brand-green">Distribuzione Gol</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-sm text-muted-foreground">Nessun gol segnato finora.</p>
+                    <p className="text-sm font-bold text-muted-foreground/60 uppercase tracking-widest text-center py-10 opacity-50">Nessun gol segnato finora.</p>
                 </CardContent>
             </Card>
         );
@@ -30,10 +30,10 @@ export function GoalsIntervalChart() {
     };
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Gol per Intervallo</CardTitle>
-                <CardDescription>Distribuzione dei gol segnati nei diversi momenti della gara.</CardDescription>
+        <Card className="bg-black/40 border-brand-green/30 shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
+            <CardHeader className="pb-2">
+                <CardTitle className="text-base font-black uppercase tracking-tight text-brand-green">Gol per Intervallo</CardTitle>
+                <CardDescription className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Distribuzione dei gol segnati nei diversi momenti della gara.</CardDescription>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
@@ -47,15 +47,23 @@ export function GoalsIntervalChart() {
                                 cy="50%"
                                 innerRadius={60}
                                 outerRadius={80}
-                                paddingAngle={5}
+                                paddingAngle={8}
+                                stroke="none"
                                 label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                                labelLine={false}
                             >
                                 {goalsIntervals.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                                    <Cell key={`cell-${index}`} fill={entry.fill} className="hover:opacity-80 transition-opacity cursor-pointer" />
                                 ))}
                             </Pie>
-                            <Tooltip content={<ChartTooltipContent hideLabel />} />
-                            <Legend />
+                            <Tooltip 
+                                contentStyle={{ backgroundColor: 'rgba(0,0,0,0.9)', borderRadius: '16px', border: '1px solid rgba(172,229,4,0.3)', color: '#fff', fontSize: '12px', fontWeight: '900' }}
+                                itemStyle={{ color: '#ace504' }}
+                            />
+                            <Legend 
+                                iconType="circle" 
+                                wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em' }} 
+                            />
                         </PieChart>
                     </ResponsiveContainer>
                 </ChartContainer>

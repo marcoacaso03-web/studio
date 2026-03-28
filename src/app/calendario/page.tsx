@@ -19,7 +19,7 @@ const FullCalendarDialog = dynamic(() => import("@/components/partite/full-calen
 export default function DashboardPage() {
   const { matches, loading: matchesLoading, fetchAll: fetchMatches } = useMatchesStore();
   const { players, loading: playersLoading, fetchAll: fetchPlayers } = usePlayersStore();
-  const { teamRecord, loading: statsLoading, loadStats } = useStatsStore();
+  const { teamRecord, loading: statsLoading, loadSummaryStats } = useStatsStore();
   const { activeSeason, fetchAll: fetchSeasons } = useSeasonsStore();
   const router = useRouter();
 
@@ -27,13 +27,17 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const initialize = async () => {
-      await fetchSeasons();
-      fetchMatches();
-      fetchPlayers();
-      loadStats();
+      const season = await fetchSeasons();
+      const activeId = useSeasonsStore.getState().activeSeason?.id;
+      // Avvia le fetch parallele passando subito il seasonId 
+      await Promise.all([
+        fetchMatches(),
+        fetchPlayers(),
+        loadSummaryStats(activeId),
+      ]);
     };
     initialize();
-  }, [fetchMatches, fetchPlayers, loadStats, fetchSeasons]);
+  }, [fetchMatches, fetchPlayers, loadSummaryStats, fetchSeasons]);
 
   const dashboardMatches = useMemo(() => {
     if (matchesLoading) return [];

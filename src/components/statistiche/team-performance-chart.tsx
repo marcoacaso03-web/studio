@@ -24,15 +24,15 @@ export function TeamPerformanceChart() {
     const chartConfig = {
         value: {
             label: "Esito",
-            color: "hsl(var(--primary))",
+            color: "#ace504",
         }
     };
 
     return (
-        <Card className="shadow-sm">
+        <Card className="bg-black/40 border-brand-green/30 shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
             <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-bold">Andamento Risultati</CardTitle>
-                <CardDescription className="text-xs">
+                <CardTitle className="text-base font-black uppercase tracking-tight text-brand-green">Andamento Risultati</CardTitle>
+                <CardDescription className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">
                     Sequenza cronologica di Vittorie (V), Pareggi (P) e Sconfitte (S).
                 </CardDescription>
             </CardHeader>
@@ -41,15 +41,15 @@ export function TeamPerformanceChart() {
                     <ResponsiveContainer width="100%" height={250}>
                         <LineChart 
                             data={teamTrend} 
-                            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                            margin={{ top: 20, right: 20, left: -20, bottom: 0 }}
                         >
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
-                            <XAxis 
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255, 255, 255, 0.05)" />
+                             <XAxis 
                                 dataKey="date" 
                                 tickLine={false}
                                 axisLine={false}
-                                tickMargin={10}
-                                tick={{ fontSize: 10, fontWeight: 600 }}
+                                tickMargin={12}
+                                tick={{ fontSize: 9, fontWeight: 900, fill: "rgba(255, 255, 255, 0.3)" }}
                             />
                             <YAxis 
                                 domain={[-1.2, 1.2]} 
@@ -61,34 +61,36 @@ export function TeamPerformanceChart() {
                                 }}
                                 tickLine={false}
                                 axisLine={false}
-                                tick={{ fontSize: 12, fontWeight: 800, fill: "hsl(var(--foreground))" }}
+                                tick={{ fontSize: 11, fontStyle: 'italic', fontWeight: 900, fill: "rgba(255, 255, 255, 0.5)" }}
                             />
                             <Tooltip 
                                 content={({ active, payload }) => {
                                     if (active && payload && payload.length) {
                                         const data = payload[0].payload;
                                         const resultLabel = data.value === 1 ? 'Vittoria' : data.value === -1 ? 'Sconfitta' : 'Pareggio';
-                                        const resultColor = "text-foreground font-black";
+                                        const resultColor = data.value === 1 ? "text-brand-green" : data.value === -1 ? "text-rose-500" : "text-white/60";
                                         
                                         return (
-                                            <div className="bg-background border rounded-lg p-2 shadow-md text-[10px] md:text-xs">
-                                                <p className="font-bold border-b pb-1 mb-1">{data.date}</p>
-                                                <p className="text-muted-foreground">Avversario: <span className="text-foreground font-semibold">{data.opponent}</span></p>
-                                                <p className="mt-1">Risultato: <span className={`font-black ${resultColor}`}>{resultLabel}</span></p>
+                                            <div className="bg-black/90 border border-brand-green/30 backdrop-blur-md rounded-2xl p-3 shadow-2xl text-[10px] min-w-[140px]">
+                                                <p className="font-black text-white/40 uppercase tracking-widest border-b border-white/5 pb-2 mb-2">{data.date}</p>
+                                                <p className="text-white/60 font-black uppercase tracking-tighter mb-1 select-none">Avversario</p>
+                                                <p className="text-sm font-black text-white mb-2 uppercase tracking-tight">{data.opponent}</p>
+                                                <p className="font-black pt-2 border-t border-white/5 uppercase tracking-widest text-[9px] opacity-40 mb-1">Risultato</p>
+                                                <p className={`text-base font-black uppercase italic ${resultColor}`}>{resultLabel}</p>
                                             </div>
                                         );
                                     }
                                     return null;
                                 }} 
                             />
-                            <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeOpacity={0.3} />
+                            <ReferenceLine y={0} stroke="rgba(255, 255, 255, 0.1)" />
                             <Line 
                                 type="monotone" 
                                 dataKey="value" 
-                                stroke="hsl(var(--primary))" 
+                                stroke="#ace504" 
                                 strokeWidth={4}
-                                dot={{ r: 5, fill: "hsl(var(--primary))", strokeWidth: 2, stroke: "hsl(var(--background))" }}
-                                activeDot={{ r: 7, strokeWidth: 0 }}
+                                dot={{ r: 4, fill: "#ace504", strokeWidth: 0 }}
+                                activeDot={{ r: 6, fill: "#ace504", strokeWidth: 4, stroke: "rgba(172, 229, 4, 0.2)" }}
                                 animationDuration={1000}
                             />
                         </LineChart>

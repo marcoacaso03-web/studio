@@ -87,18 +87,18 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] h-[90vh] md:max-w-2xl rounded-3xl p-0 overflow-hidden flex flex-col border-none shadow-2xl [&>button]:hidden">
-        <DialogHeader className="p-6 bg-card border-b text-foreground flex-row items-center gap-4 space-y-0 shrink-0">
-          <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 h-8 w-8" onClick={() => onOpenChange(false)}>
+      <DialogContent className="max-w-[95vw] h-[90vh] md:max-w-2xl rounded-3xl p-0 overflow-hidden flex flex-col border border-brand-green/30 shadow-[0_0_25px_rgba(172,229,4,0.15)] [&>button]:hidden">
+        <DialogHeader className="p-6 bg-black border-b border-brand-green/30 text-foreground flex-row items-center gap-4 space-y-0 shrink-0">
+          <Button variant="ghost" size="icon" className="text-brand-green hover:bg-black/60 h-8 w-8" onClick={() => onOpenChange(false)}>
             <ChevronLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/10 rounded-xl">
-              <ClipboardCheck className="h-5 w-5" />
+            <div className="p-2 bg-black border border-brand-green/30 rounded-xl shadow-[0_0_10px_rgba(172,229,4,0.1)]">
+              <ClipboardCheck className="h-5 w-5 text-brand-green" />
             </div>
             <div>
               <DialogTitle className="text-xl font-black uppercase tracking-tight">Report Presenze</DialogTitle>
-              <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mt-0.5">Analisi Rendimento Allenamenti</p>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Analisi Rendimento Allenamenti</p>
             </div>
           </div>
         </DialogHeader>
@@ -113,17 +113,17 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
             <ScrollArea className="flex-1">
               <div className="p-4">
                 <Table>
-                  <TableHeader className="bg-muted/30">
-                    <TableRow className="hover:bg-transparent border-none h-10">
-                      <TableHead className="text-[9px] font-black uppercase tracking-widest px-3">Giocatore</TableHead>
-                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-center px-1">Sett (P)</TableHead>
-                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-center px-1">Sett (R)</TableHead>
-                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-center px-1 text-foreground">Totale</TableHead>
+                  <TableHeader className="bg-black/60">
+                    <TableRow className="hover:bg-transparent border-b border-brand-green/20 h-10">
+                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-brand-green px-3">Giocatore</TableHead>
+                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-center text-brand-green px-1">Sett (P)</TableHead>
+                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-center text-brand-green px-1">Sett (R)</TableHead>
+                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-center px-1 text-brand-green">Totale</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {stats.map((row) => (
-                      <TableRow key={row.id} className="h-12 border-b hover:bg-primary/5 transition-all">
+                      <TableRow key={row.id} className="h-12 border-b border-brand-green/10 hover:bg-black/40 transition-all">
                         <TableCell className="px-3 py-0">
                           <span className="text-xs font-black uppercase text-foreground leading-tight block truncate max-w-[120px]">
                             {row.name}
@@ -140,8 +140,8 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
                           </span>
                         </TableCell>
                         <TableCell className="text-center px-1 py-0">
-                          <div className="bg-muted px-2 py-1 rounded-lg inline-block min-w-[32px]">
-                            <span className="text-sm font-black text-foreground tabular-nums">
+                          <div className="bg-black border border-brand-green/30 px-2 py-1 rounded-lg inline-block min-w-[32px]">
+                            <span className="text-sm font-black text-brand-green tabular-nums">
                               {row.totalPresent}
                             </span>
                           </div>
@@ -155,9 +155,9 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
           )}
         </div>
 
-        <div className="p-4 bg-muted/10 border-t flex items-center justify-center gap-6">
+        <div className="p-4 bg-black border-t border-brand-green/20 flex items-center justify-center gap-6">
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-muted-foreground" />
+            <div className="w-2 h-2 rounded-full bg-brand-green shadow-[0_0_6px_rgba(172,229,4,0.5)]" />
             <span className="text-[8px] font-black text-muted-foreground uppercase">Sett (P): Presenze Settimana</span>
           </div>
           <div className="flex items-center gap-1.5">

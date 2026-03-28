@@ -44,19 +44,19 @@ function NavLink({ href, label, icon: Icon }: { href: string; label: string; ico
     <Link
       href={href}
       className={cn(
-        "flex flex-col items-center justify-center gap-1.5 p-2 transition-all w-full",
-        isActive ? "text-foreground font-black" : "text-muted-foreground/60"
+        "flex flex-col items-center justify-center gap-1 p-2 transition-all w-full",
+        isActive ? "text-brand-green" : "text-muted-foreground/50"
       )}
     >
       <div className={cn(
-        "transition-all duration-300",
-        isActive && "glow-icon-green scale-110"
+        "transition-all duration-300 p-1.5 rounded-xl",
+        isActive && "text-brand-green drop-shadow-[0_0_6px_rgba(172,229,4,0.8)] scale-110"
       )}>
         <Icon className="h-6 w-6" />
       </div>
       <span className={cn(
         "text-[9px] font-black uppercase tracking-wider transition-colors",
-        isActive ? "text-foreground" : "text-muted-foreground/40"
+        isActive ? "text-brand-green" : "text-muted-foreground/40"
       )}>
         {label}
       </span>
@@ -79,7 +79,7 @@ export function BottomNav() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 flex h-20 items-center justify-around bg-background border-t border-white/5 md:hidden px-4 pb-2 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-30 flex h-20 items-center justify-around bg-black border-t border-brand-green/20 md:hidden px-4 pb-2 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
       {navItems.map((item) => (
         <NavLink key={item.href} {...item} />
       ))}

@@ -11,9 +11,9 @@ export function VenueStatsCharts() {
     if (!teamRecord || teamRecord.matchesPlayed === 0) return null;
 
     const prepareData = (record: any) => [
-        { name: 'VITTORIE', value: record.wins, fill: "hsl(var(--primary))" },
-        { name: 'PAREGGI', value: record.draws, fill: "hsl(var(--muted-foreground))" },
-        { name: 'SCONFITTE', value: record.losses, fill: "hsl(var(--accent))" }
+        { name: 'VITTORIE', value: record.wins, fill: "#ace504" },
+        { name: 'PAREGGI', value: record.draws, fill: "rgba(255, 255, 255, 0.4)" },
+        { name: 'SCONFITTE', value: record.losses, fill: "#f43f5e" }
     ].filter(d => d.value > 0);
 
     const chartConfig = {
@@ -46,18 +46,18 @@ export function VenueStatsCharts() {
                     </ResponsiveContainer>
                 </ChartContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-lg font-black leading-none">{total}</span>
-                    <span className="text-[8px] font-bold opacity-50 uppercase">Gare</span>
+                    <span className="text-xl font-black leading-none text-white">{total}</span>
+                    <span className="text-[8px] font-black opacity-40 uppercase tracking-widest">Gare</span>
                 </div>
             </div>
         </div>
     );
 
     return (
-        <Card className="shadow-sm">
+        <Card className="bg-black/40 border-brand-green/30 shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
             <CardHeader className="pb-2">
-                <CardTitle className="text-base font-bold">Risultati:</CardTitle>
-                <CardDescription className="text-xs">Distribuzione esiti Totale, In Casa e In Trasferta.</CardDescription>
+                <CardTitle className="text-base font-black uppercase tracking-tight text-brand-green">Statistiche Risultati</CardTitle>
+                <CardDescription className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Distribuzione esiti Totale, In Casa e In Trasferta.</CardDescription>
             </CardHeader>
             <CardContent className="pt-4">
                 <div className="grid grid-cols-3 gap-2">
@@ -67,16 +67,16 @@ export function VenueStatsCharts() {
                 </div>
                 <div className="flex justify-center gap-4 mt-6">
                     <div className="flex items-center gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                        <span className="text-[9px] font-black uppercase">Vittoria</span>
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#ace504]" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">Vittoria</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground" />
-                        <span className="text-[9px] font-black uppercase">Pareggio</span>
+                        <div className="w-2.5 h-2.5 rounded-full bg-white/40" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">Pareggio</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-accent" />
-                        <span className="text-[9px] font-black uppercase">Sconfitta</span>
+                        <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">Sconfitta</span>
                     </div>
                 </div>
             </CardContent>

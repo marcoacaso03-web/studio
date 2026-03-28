@@ -26,12 +26,13 @@ const RadarChart = dynamic(
     const Chart = ({ data }: { data: { subject: string; score: number; rawValue: number }[] }) => (
       <ResponsiveContainer width="100%" height={240}>
         <RC data={data} margin={{ top: 10, right: 20, bottom: 10, left: 20 }}>
-          <PolarGrid stroke="hsl(var(--border))" />
-          <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 700 }} />
+          <PolarGrid stroke="rgba(255,255,255,0.05)" />
+          <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: "rgba(255,255,255,0.3)", fontWeight: 900 }} />
           <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
-          <Radar dataKey="score" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.25} />
+          <Radar dataKey="score" stroke="#ace504" fill="#ace504" fillOpacity={0.15} strokeWidth={2} />
           <Tooltip
-            contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11 }}
+            contentStyle={{ backgroundColor: "black", border: "1px solid rgba(172,229,4,0.3)", borderRadius: 16, fontSize: 11, color: "white" }}
+            itemStyle={{ color: "white" }}
             formatter={(val: number, name: string, props: any) => [props.payload.rawValue, ""]}
           />
         </RC>
@@ -48,10 +49,12 @@ const BarChartComponent = dynamic(
     const Chart = ({ data }: { data: { name: string; value: number; color: string }[] }) => (
       <ResponsiveContainer width="100%" height={160}>
         <BarChart data={data} barSize={28}>
-          <XAxis dataKey="name" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))", fontWeight: 700 }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} allowDecimals={false} />
+          <XAxis dataKey="name" tick={{ fontSize: 9, fill: "rgba(255,255,255,0.3)", fontWeight: 900 }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 9, fill: "rgba(255,255,255,0.3)" }} axisLine={false} tickLine={false} allowDecimals={false} />
           <Tooltip
-            contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11 }}
+            contentStyle={{ backgroundColor: "black", border: "1px solid rgba(172,229,4,0.3)", borderRadius: 16, fontSize: 11, color: "white" }}
+            itemStyle={{ color: "white" }}
+            cursor={{ fill: 'rgba(172, 229, 4, 0.05)' }}
             formatter={(v: number) => [v, ""]}
           />
           {data.map((entry, i) => (
@@ -102,14 +105,14 @@ const roleLabel: Record<string, string> = {
 };
 
 const roleBg: Record<string, string> = {
-  Portiere: "bg-amber-500/10 text-amber-500 border-amber-500/20",
-  Difensore: "bg-muted text-foreground border-border",
-  Centrocampista: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-  Attaccante: "bg-red-500/10 text-red-500 border-red-500/20",
+  Portiere: "bg-amber-500/10 text-amber-500 border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.1)]",
+  Difensore: "bg-slate-500/10 text-slate-300 border-slate-500/30",
+  Centrocampista: "bg-brand-green/10 text-brand-green border-brand-green/30 shadow-[0_0_10px_rgba(172,229,4,0.1)]",
+  Attaccante: "bg-red-500/10 text-red-500 border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.1)]",
 };
 
 // ─── Componente StatCard ───────────────────────────────────────────────────────
-function StatCard({ icon: Icon, label, value, sub, color = "text-foreground" }: {
+function StatCard({ icon: Icon, label, value, sub, color = "text-brand-green" }: {
   icon: React.ElementType;
   label: string;
   value: string | number;
@@ -117,11 +120,11 @@ function StatCard({ icon: Icon, label, value, sub, color = "text-foreground" }: 
   color?: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-1 bg-muted/30 border rounded-xl p-3 text-center">
-      <Icon className={`h-4 w-4 ${color} mb-0.5`} />
-      <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{label}</span>
-      <span className={`text-2xl font-black ${color}`}>{value}</span>
-      {sub && <span className="text-[9px] text-muted-foreground font-medium">{sub}</span>}
+    <div className="flex flex-col items-center justify-center gap-1 bg-black/40 backdrop-blur-sm border border-brand-green/20 rounded-2xl p-4 text-center shadow-[0_0_15px_rgba(172,229,4,0.05)] hover:border-brand-green/40 transition-all">
+      <Icon className={`h-5 w-5 ${color} mb-1 opacity-80`} />
+      <span className="text-[9px] font-black uppercase tracking-[0.1em] text-white/30">{label}</span>
+      <span className={`text-2xl font-black text-white`}>{value}</span>
+      {sub && <span className="text-[8px] text-white/40 font-black uppercase tracking-tighter">{sub}</span>}
     </div>
   );
 }
@@ -154,16 +157,16 @@ function TrainingHeatmap({ records }: { records: TrainingRecord[] }) {
   return (
     <div className="space-y-3">
       {/* Progress bar */}
-        <div className="flex items-center gap-3">
-          <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
-            <div
-              className="h-full bg-slate-400 rounded-full transition-all duration-700"
-              style={{ width: `${percentuale}%` }}
-            />
-          </div>
-          <span className="text-xs font-black text-foreground min-w-[3rem] text-right">{percentuale}%</span>
+      <div className="flex items-center gap-3">
+        <div className="flex-1 bg-black/40 rounded-full h-2.5 overflow-hidden border border-white/5">
+          <div
+            className="h-full bg-brand-green rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(172,229,4,0.5)]"
+            style={{ width: `${percentuale}%` }}
+          />
         </div>
-      <p className="text-[10px] text-muted-foreground font-medium">
+        <span className="text-xs font-black text-brand-green min-w-[3rem] text-right">{percentuale}%</span>
+      </div>
+      <p className="text-[9px] text-white/30 font-black uppercase tracking-widest mt-1">
         {presenti} presenze su {totale} allenamenti
       </p>
 
@@ -231,15 +234,15 @@ function MatchHeatmap({ records }: { records: MatchRecord[] }) {
     <div className="space-y-3">
       {/* Progress bar */}
       <div className="flex items-center gap-3">
-        <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+        <div className="flex-1 bg-black/40 rounded-full h-2.5 overflow-hidden border border-white/5">
           <div
-            className="h-full bg-slate-400 rounded-full transition-all duration-700"
+            className="h-full bg-brand-green rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(172,229,4,0.5)]"
             style={{ width: `${pct}%` }}
           />
         </div>
-        <span className="text-xs font-black text-foreground min-w-[3rem] text-right">{pct}%</span>
+        <span className="text-xs font-black text-brand-green min-w-[3rem] text-right">{pct}%</span>
       </div>
-      <p className="text-[10px] text-muted-foreground font-medium">
+      <p className="text-[9px] text-white/30 font-black uppercase tracking-widest mt-1">
         Presenza in campo nel {pct}% dei match disputati
       </p>
 
@@ -309,7 +312,7 @@ export default function PlayerDetailPage() {
       setLoadingData(true);
       try {
         // Aggregazione completa stagionale (già ottimizzata con Batch)
-        const context = await aggregationRepository.getSeasonContext(user.id, activeSeason.id);
+        const context = await aggregationRepository.getDetailedContext(user.id, activeSeason.id);
         const allStats = aggregationRepository.getPlayersAggregatedStatsFromContext(context);
         const pStats = allStats.find((s) => s.playerId === playerId);
 
@@ -327,36 +330,36 @@ export default function PlayerDetailPage() {
           const isStarter = details.lineup?.starters.includes(playerId) ?? false;
           const stat = details.stats.find((s) => s.playerId === playerId);
           const hasPlayed = isStarter || !!stat;
-          
+
           if (hasPlayed) {
             totalMinutes += stat?.minutesPlayed ?? 0;
-            
+
             // Calcolo On-Pitch Goals
-            const chronologicalEvents = [...details.events].sort((a,b) => a.minute - b.minute);
+            const chronologicalEvents = [...details.events].sort((a, b) => a.minute - b.minute);
             const myTeam = match.isHome ? 'home' : 'away';
             const oppTeam = match.isHome ? 'away' : 'home';
-            
+
             let enterMin = 0;
             let exitMin = match.duration || 90;
-            
+
             if (!isStarter && stat && stat.minutesPlayed > 0) {
-               const subIn = chronologicalEvents.find(e => e.type === 'substitution' && e.playerId === playerId);
-               enterMin = subIn ? subIn.minute : 0;
+              const subIn = chronologicalEvents.find(e => e.type === 'substitution' && e.playerId === playerId);
+              enterMin = subIn ? subIn.minute : 0;
             }
             const subOut = chronologicalEvents.find(e => e.type === 'substitution' && e.subOutPlayerId === playerId);
             if (subOut) exitMin = subOut.minute;
-            
+
             let matchGoalsConcededCount = 0;
             chronologicalEvents.forEach(e => {
-                if (e.minute >= enterMin && e.minute <= exitMin && e.type === 'goal') {
-                   if (e.team === myTeam) goalsScoredOnPitch++;
-                   if (e.team === oppTeam) {
-                      goalsConcededOnPitch++;
-                      matchGoalsConcededCount++;
-                   }
+              if (e.minute >= enterMin && e.minute <= exitMin && e.type === 'goal') {
+                if (e.team === myTeam) goalsScoredOnPitch++;
+                if (e.team === oppTeam) {
+                  goalsConcededOnPitch++;
+                  matchGoalsConcededCount++;
                 }
+              }
             });
-            
+
             // Applica clean sheet logic
             if (player?.role === "Portiere" && matchGoalsConcededCount === 0) cleanSheets++;
 
@@ -372,20 +375,20 @@ export default function PlayerDetailPage() {
         setPlayerStats(
           pStats
             ? {
-                appearances: pStats.stats.appearances,
-                goals: pStats.stats.goals,
-                assists: pStats.stats.assists,
-                avgMinutes: pStats.stats.avgMinutes,
-                yellowCards: pStats.stats.yellowCards ?? 0,
-                redCards: pStats.stats.redCards ?? 0,
-                totalMinutes,
-                wins,
-                losses,
-                draws,
-                cleanSheets,
-                goalsConcededOnPitch,
-                goalsScoredOnPitch
-              }
+              appearances: pStats.stats.appearances,
+              goals: pStats.stats.goals,
+              assists: pStats.stats.assists,
+              avgMinutes: pStats.stats.avgMinutes,
+              yellowCards: pStats.stats.yellowCards ?? 0,
+              redCards: pStats.stats.redCards ?? 0,
+              totalMinutes,
+              wins,
+              losses,
+              draws,
+              cleanSheets,
+              goalsConcededOnPitch,
+              goalsScoredOnPitch
+            }
             : { appearances: 0, goals: 0, assists: 0, avgMinutes: 0, yellowCards: 0, redCards: 0, totalMinutes: 0, wins: 0, losses: 0, draws: 0, cleanSheets: 0, goalsConcededOnPitch: 0, goalsScoredOnPitch: 0 }
         );
 
@@ -441,20 +444,20 @@ export default function PlayerDetailPage() {
     const maxMins = 90;
 
     return [
-      { subject: "Presenze",  score: (playerStats.appearances / maxApps) * 100,  rawValue: playerStats.appearances },
-      { subject: "Gol",       score: (playerStats.goals / maxGoals) * 100,       rawValue: playerStats.goals },
-      { subject: "Assist",    score: (playerStats.assists / maxAssists) * 100,    rawValue: playerStats.assists },
-      { subject: "Vittorie",  score: (playerStats.wins / maxWins) * 100,         rawValue: playerStats.wins },
-      { subject: "Min/Medi",  score: (playerStats.avgMinutes / maxMins) * 100,    rawValue: playerStats.avgMinutes },
+      { subject: "Presenze", score: (playerStats.appearances / maxApps) * 100, rawValue: playerStats.appearances },
+      { subject: "Gol", score: (playerStats.goals / maxGoals) * 100, rawValue: playerStats.goals },
+      { subject: "Assist", score: (playerStats.assists / maxAssists) * 100, rawValue: playerStats.assists },
+      { subject: "Vittorie", score: (playerStats.wins / maxWins) * 100, rawValue: playerStats.wins },
+      { subject: "Min/Medi", score: (playerStats.avgMinutes / maxMins) * 100, rawValue: playerStats.avgMinutes },
     ];
   }, [playerStats]);
 
   const barData = useMemo(() => {
     if (!playerStats) return [];
     return [
-      { name: "Vittorie",  value: playerStats.wins,   color: "hsl(145 60% 45%)" },
-      { name: "Pareggi",   value: playerStats.draws,  color: "hsl(220 60% 60%)" },
-      { name: "Sconfitte", value: playerStats.losses, color: "hsl(0 70% 55%)" },
+      { name: "Vittorie", value: playerStats.wins, color: "#ace504" },
+      { name: "Pareggi", value: playerStats.draws, color: "rgba(255,255,255,0.2)" },
+      { name: "Sconfitte", value: playerStats.losses, color: "#ef4444" },
     ];
   }, [playerStats]);
 
@@ -486,12 +489,12 @@ export default function PlayerDetailPage() {
         title={
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
-              <Link href="/membri" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="/membri" className="h-8 w-8 flex items-center justify-center rounded-xl bg-black border border-brand-green/20 text-brand-green hover:bg-brand-green/10 transition-colors">
                 <ArrowLeft className="h-4 w-4" />
               </Link>
-              <span className="text-xl md:text-3xl">
+              <span className="text-xl md:text-3xl text-white">
                 {loadingData && !player ? (
-                  <Skeleton className="h-7 w-40" />
+                  <Skeleton className="h-7 w-40 bg-white/5" />
                 ) : (
                   <>
                     <span className="font-light">{firstName}</span>
@@ -501,27 +504,27 @@ export default function PlayerDetailPage() {
               </span>
               {player && (
                 <span
-                  className={`text-[9px] font-black px-2 py-0.5 rounded border ${roleBg[player.role] ?? "bg-muted text-muted-foreground"}`}
+                  className={`text-[8px] font-black px-2 py-0.5 rounded-full border shadow-sm ${roleBg[player.role] ?? "bg-white/5 text-white/40 border-white/10"}`}
                 >
                   {roleLabel[player.role] ?? player.role}
                 </span>
               )}
             </div>
-            <span className="text-[8px] md:text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider ml-6">
+            <span className="text-[8px] md:text-[10px] uppercase font-black text-white/30 tracking-[0.2em] ml-10">
               {activeSeason?.name ?? "…"}
             </span>
           </div>
         }
       >
         <Link href={`/membri/confronto?p1=${playerId}`}>
-          <Button variant="outline" size="sm" className="hidden md:flex gap-2">
-            <ArrowRightLeft className="h-4 w-4 text-foreground" />
+          <Button variant="outline" size="sm" className="hidden md:flex gap-2 rounded-xl bg-black border-brand-green/30 text-white hover:bg-brand-green/10 border-2">
+            <ArrowRightLeft className="h-4 w-4 text-brand-green" />
             <span className="text-xs font-black uppercase tracking-wider">Confronta</span>
           </Button>
         </Link>
         <Link href={`/membri/confronto?p1=${playerId}`} className="md:hidden">
-          <Button variant="outline" size="icon" className="h-8 w-8">
-            <ArrowRightLeft className="h-4 w-4 text-foreground" />
+          <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl bg-black border-brand-green/30 text-white hover:bg-brand-green/10 border-2">
+            <ArrowRightLeft className="h-5 w-5 text-brand-green" />
           </Button>
         </Link>
       </PageHeader>
@@ -535,14 +538,14 @@ export default function PlayerDetailPage() {
         ) : playerStats ? (
           <>
             <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-              <StatCard icon={Calendar}       label="Presenze"   value={playerStats.appearances} />
-              <StatCard icon={Target}         label="Gol"        value={playerStats.goals} />
-              <StatCard icon={Zap}            label="Assist"     value={playerStats.assists} />
-              <StatCard icon={Clock}          label="Min giocati" value={playerStats.totalMinutes} sub="minuti totali" />
-              <StatCard icon={AlertTriangle}  label="Gialli"     value={playerStats.yellowCards} />
-              <StatCard icon={Shield}         label="Rossi"      value={playerStats.redCards} />
+              <StatCard icon={Calendar} label="Presenze" value={playerStats.appearances} />
+              <StatCard icon={Target} label="Gol" value={playerStats.goals} />
+              <StatCard icon={Zap} label="Assist" value={playerStats.assists} />
+              <StatCard icon={Clock} label="Min giocati" value={playerStats.totalMinutes} sub="minuti totali" />
+              <StatCard icon={AlertTriangle} label="Gialli" value={playerStats.yellowCards} />
+              <StatCard icon={Shield} label="Rossi" value={playerStats.redCards} />
             </div>
-            
+
             {/* Statistiche Avanzate On-Pitch */}
             <div className={`grid grid-cols-2 ${player?.role === 'Portiere' ? 'md:grid-cols-5' : 'md:grid-cols-4'} gap-2`}>
               <StatCard icon={Target} label="Gol x Match" value={playerStats.appearances > 0 ? (playerStats.goals / playerStats.appearances).toFixed(2) : "0"} />
@@ -558,30 +561,30 @@ export default function PlayerDetailPage() {
       {/* Grafici rendimento */}
       <div className="grid md:grid-cols-2 gap-4">
         {/* Radar */}
-        <Card className="rounded-2xl border shadow-sm">
-          <CardHeader className="pb-0 px-4 pt-4">
-            <CardTitle className="text-[11px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <TrendingUp className="h-3 w-3" /> Profilo Tecnico
+        <Card className="rounded-3xl bg-black/40 backdrop-blur-sm border-brand-green/20 shadow-[0_0_20px_rgba(172,229,4,0.05)] overflow-hidden">
+          <CardHeader className="pb-0 px-6 pt-6">
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 flex items-center gap-2">
+              <TrendingUp className="h-3.5 w-3.5 text-brand-green" /> Profilo Tecnico
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-2 px-2">
-            {loadingData ? <Skeleton className="h-60 w-full" /> : <RadarChart data={radarData} />}
+          <CardContent className="pt-2 px-6">
+            {loadingData ? <Skeleton className="h-60 w-full bg-white/5" /> : <RadarChart data={radarData} />}
           </CardContent>
         </Card>
 
         {/* Barchart W/D/L */}
-        <Card className="rounded-2xl border shadow-sm">
-          <CardHeader className="pb-0 px-4 pt-4">
-            <CardTitle className="text-[11px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <Sword className="h-3 w-3" /> Risultati Personali
+        <Card className="rounded-3xl bg-black/40 backdrop-blur-sm border-brand-green/20 shadow-[0_0_20px_rgba(172,229,4,0.05)] overflow-hidden">
+          <CardHeader className="pb-0 px-6 pt-6">
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 flex items-center gap-2">
+              <Sword className="h-3.5 w-3.5 text-brand-green" /> Risultati Personali
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-2 px-2">
-            {loadingData ? <Skeleton className="h-40 w-full" /> : (
+          <CardContent className="pt-4 px-6 pb-6">
+            {loadingData ? <Skeleton className="h-40 w-full bg-white/5" /> : (
               <>
                 <BarChartComponent data={barData} />
-                <p className="text-[9px] text-center text-muted-foreground mt-1 font-medium">
-                  Partite giocate: <strong>{playerStats?.appearances ?? 0}</strong> · Minuti totali: <strong>{playerStats?.totalMinutes ?? 0}'</strong>
+                <p className="text-[9px] text-center text-white/20 mt-2 font-black uppercase tracking-widest">
+                  Partite giocate: <strong className="text-white/60">{playerStats?.appearances ?? 0}</strong> · Minuti totali: <strong className="text-white/60">{playerStats?.totalMinutes ?? 0}'</strong>
                 </p>
               </>
             )}
@@ -591,17 +594,17 @@ export default function PlayerDetailPage() {
 
       {/* Heatmap presenze */}
       <div className="grid md:grid-cols-2 gap-4">
-        <Card className="rounded-2xl border shadow-sm">
-          <CardHeader className="pb-0 px-4 pt-4">
-            <CardTitle className="text-[11px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <Sword className="h-3 w-3" /> Storico Presenze Partite
+        <Card className="rounded-3xl bg-black/40 backdrop-blur-sm border-brand-green/20 shadow-[0_0_20px_rgba(172,229,4,0.05)] overflow-hidden">
+          <CardHeader className="pb-0 px-6 pt-6">
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 flex items-center gap-2">
+              <Sword className="h-3.5 w-3.5 text-brand-green" /> Storico Presenze Partite
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-3 px-4 pb-5">
+          <CardContent className="pt-4 px-6 pb-6">
             {loadingData ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-16 w-full" />
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-full bg-white/5" />
+                <Skeleton className="h-16 w-full bg-white/5" />
               </div>
             ) : (
               <MatchHeatmap records={matchRecords} />
@@ -609,17 +612,17 @@ export default function PlayerDetailPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border shadow-sm">
-          <CardHeader className="pb-0 px-4 pt-4">
-            <CardTitle className="text-[11px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <Calendar className="h-3 w-3" /> Storico Presenze Allenamenti
+        <Card className="rounded-3xl bg-black/40 backdrop-blur-sm border-brand-green/20 shadow-[0_0_20px_rgba(172,229,4,0.05)] overflow-hidden">
+          <CardHeader className="pb-0 px-6 pt-6">
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 flex items-center gap-2">
+              <Calendar className="h-3.5 w-3.5 text-brand-green" /> Storico Presenze Allenamenti
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-3 px-4 pb-5">
+          <CardContent className="pt-4 px-6 pb-6">
             {loadingData ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-16 w-full" />
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-full bg-white/5" />
+                <Skeleton className="h-16 w-full bg-white/5" />
               </div>
             ) : (
               <TrainingHeatmap records={trainingRecords} />

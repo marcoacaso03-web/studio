@@ -41,7 +41,7 @@ interface FullCalendarDialogProps {
 
 export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogProps) {
   const { matches, loading: matchesLoading, add: addMatch, remove: removeMatch } = useMatchesStore();
-  const { loadStats } = useStatsStore();
+  const { loadSummaryStats } = useStatsStore();
   const { activeSeason } = useSeasonsStore();
   const router = useRouter();
   
@@ -52,7 +52,7 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
   const handleSaveMatch = async (data: any) => {
     const newMatch = await addMatch(data);
     if (newMatch) {
-      loadStats();
+      loadSummaryStats(activeSeason?.id);
     }
   };
 
@@ -60,7 +60,7 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
     if (!matchToDelete) return;
     await removeMatch(matchToDelete.id);
     setMatchToDelete(null);
-    loadStats();
+    loadSummaryStats(activeSeason?.id);
   };
 
   const navigateToMatch = (match: Match) => {

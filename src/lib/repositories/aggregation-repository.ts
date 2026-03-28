@@ -37,9 +37,23 @@ interface SeasonDataContext {
 
 export const aggregationRepository = {
     /**
-     * Carica tutti i dati necessari per i calcoli statistici in un'unica passata parallela.
+     * Carica solo i dati necessari per il riepilogo (vittorie/sconfitte).
+     * Molto veloce perché non scarica i dettagli delle singole partite.
      */
-    async getSeasonContext(userId: string, seasonId: string): Promise<SeasonDataContext> {
+    async getSummaryContext(userId: string, seasonId: string): Promise<SeasonDataContext> {
+        const [matches, players] = await Promise.all([
+            matchRepository.getAll(userId, seasonId),
+            playerRepository.getAll(userId, seasonId)
+        ]);
+
+        return { matches, players, matchesDetails: {} };
+    },
+
+    /**
+     * Carica tutti i dati, inclusi eventi, formazioni e statistiche di ogni partita.
+     * Usato per i grafici e le leaderboard.
+     */
+    async getDetailedContext(userId: string, seasonId: string): Promise<SeasonDataContext> {
         const [matches, players] = await Promise.all([
             matchRepository.getAll(userId, seasonId),
             playerRepository.getAll(userId, seasonId)
@@ -159,9 +173,9 @@ export const aggregationRepository = {
         }
 
         return [
-            { name: '1-30\'', value: intervals['1-30'], fill: "hsl(var(--chart-1))" },
-            { name: '31-60\'', value: intervals['31-60'], fill: "hsl(var(--chart-2))" },
-            { name: '61-90\'+', value: intervals['61-90+'], fill: "hsl(var(--chart-3))" }
+            { name: "1-30'", value: intervals['1-30'], fill: "#ace504" },
+            { name: "31-60'", value: intervals['31-60'], fill: "rgba(172, 229, 4, 0.6)" },
+            { name: "61-90'+", value: intervals['61-90+'], fill: "rgba(172, 229, 4, 0.3)" }
         ];
     },
 
@@ -218,7 +232,7 @@ export const aggregationRepository = {
     // Compatibilità legacy e sync
     async syncAllPlayersStats(userId: string, seasonId?: string) {
         if (!userId || !seasonId) return;
-        const context = await this.getSeasonContext(userId, seasonId);
+        const context = await this.getDetailedContext(userId, seasonId);
         const allStats = this.getPlayersAggregatedStatsFromContext(context);
         for (const { playerId, stats } of allStats) {
             await playerRepository.update(playerId, seasonId, { stats });

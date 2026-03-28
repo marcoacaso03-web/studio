@@ -46,7 +46,7 @@ export default function AllenamentoPage() {
   const { sessionsPerWeek } = useSettingsStore();
   const { activeSeason } = useSeasonsStore();
   const { players, fetchAll: fetchPlayers } = usePlayersStore();
-  
+
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
@@ -72,10 +72,10 @@ export default function AllenamentoPage() {
       try {
         const sessionDate = s.date.includes('T') ? parseISO(s.date) : new Date(s.date);
         const isInWeek = isSameWeek(sessionDate, currentWeekStart, { weekStartsOn: 1 });
-        
+
         if (!isInWeek) return false;
         if (focusFilter && s.focus !== focusFilter) return false;
-        
+
         return true;
       } catch (e) {
         return false;
@@ -129,95 +129,95 @@ export default function AllenamentoPage() {
       <PageHeader title="Sessioni Allenamento">
         <div className="flex gap-2">
           {/* Statistiche - Lavagnetta */}
-          <Button 
+          <Button
             variant="ghost"
-            size="icon" 
+            size="icon"
             className="rounded-xl h-10 w-10 hover:bg-card/30"
             onClick={() => setIsStatsOpen(true)}
           >
-             <ClipboardCheck className="h-6 w-6 text-brand-green" />
+            <ClipboardCheck className="h-6 w-6 text-brand-green" />
           </Button>
 
-          {/* Cancella - Gomma */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost"
-                size="icon" 
-                className="rounded-xl h-10 w-10 text-destructive hover:bg-card/30"
-              >
-                <Eraser className="h-6 w-6" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-xl bg-background border-white/10 text-foreground">
-              <DropdownMenuItem className="text-[10px] font-bold uppercase focus:bg-card/40 hover:bg-card/50" onClick={() => setTimeout(() => setIsClearWeekOpen(true), 100)}>
-                <Eraser className="mr-2 h-4 w-4 text-accent" /> Elimina Settimana
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-[10px] font-bold uppercase text-destructive focus:bg-destructive/10" onClick={() => setTimeout(() => setIsClearAllOpen(true), 100)}>
-                <Trash2 className="mr-2 h-4 w-4" /> Elimina Tutto
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           {/* Genera - Più */}
-          <Button 
+          <Button
             variant="ghost"
-            size="icon" 
+            size="icon"
             className="rounded-xl h-10 w-10 hover:bg-card/30"
             onClick={() => setIsGeneratorOpen(true)}
           >
-             <PlusCircle className="h-6 w-6 text-brand-green" />
+            <PlusCircle className="h-6 w-6 text-brand-green" />
           </Button>
 
           {/* Filtra - Imbuto */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
+              <Button
                 variant="ghost"
-                size="icon" 
+                size="icon"
                 className={cn(
                   "rounded-xl h-10 w-10 transition-all",
                   focusFilter ? "bg-brand-green/10 shadow-[0_0_10px_rgba(172,229,4,0.2)]" : "hover:bg-card/30"
                 )}
               >
-                 <Filter className="h-6 w-6 text-brand-green" />
+                <Filter className="h-6 w-6 text-brand-green" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 rounded-2xl bg-background border-white/10 text-foreground p-2">
+            <DropdownMenuContent align="end" className="w-56 rounded-2xl bg-background border-brand-green/30 backdrop-blur-xl text-white p-2">
               <div className="px-2 py-1.5 mb-1 border-b border-white/5">
                 <span className="text-[10px] font-black uppercase text-muted-foreground/50 tracking-widest">Filtra per Focus</span>
               </div>
-              <DropdownMenuItem 
-                className={cn("text-[10px] font-bold uppercase rounded-xl mb-1 focus:bg-card/40", !focusFilter && "bg-card/40")}
+              <DropdownMenuItem
+                className={cn("text-[10px] font-bold uppercase rounded-xl mb-1 focus:bg-brand-green/20", !focusFilter && "bg-brand-green/10")}
                 onClick={() => setFocusFilter(null)}
               >
                 Mostra Tutti
               </DropdownMenuItem>
               {uniqueFocuses.map(f => (
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   key={f}
-                  className={cn("text-[10px] font-bold uppercase rounded-xl mb-1 focus:bg-card/40", focusFilter === f && "bg-card/40 text-primary")}
+                  className={cn("text-[10px] font-bold uppercase rounded-xl mb-1 focus:bg-brand-green/20", focusFilter === f && "bg-brand-green/10 text-brand-green")}
                   onClick={() => setFocusFilter(f)}
                 >
                   <Target className="h-3 w-3 mr-2 opacity-50" />
                   {f}
                 </DropdownMenuItem>
               ))}
-              {uniqueFocuses.length === 0 && (
-                <div className="px-2 py-4 text-center">
-                  <p className="text-[9px] font-medium text-muted-foreground uppercase opacity-50 italic">Nessun focus salvato</p>
-                </div>
-              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Cancella - Gomma (Spostato in 4a posizione) */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-500/10"
+              >
+                <Eraser className="h-6 w-6" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="rounded-2xl bg-black border-brand-green/30 backdrop-blur-xl text-white p-2">
+              <DropdownMenuItem className="text-[10px] font-black uppercase rounded-xl mb-1 focus:bg-brand-green/20 hover:bg-brand-green/10 transition-colors" onClick={() => setTimeout(() => setIsClearWeekOpen(true), 100)}>
+                <Eraser className="mr-2 h-4 w-4 text-brand-green" /> Elimina Settimana
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-[10px] font-black uppercase rounded-xl text-rose-500 focus:bg-rose-500/20 hover:bg-rose-500/10 transition-colors" onClick={() => setTimeout(() => setIsClearAllOpen(true), 100)}>
+                <Trash2 className="mr-2 h-4 w-4" /> Elimina Tutto
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </PageHeader>
 
-      <div className="flex items-center justify-between border-b border-white/5 pb-2">
-        <Button variant="ghost" size="icon" onClick={prevWeek} className="h-10 w-10 text-foreground">
-          <ChevronLeft className="h-8 w-8" />
+      <div className="flex items-center justify-between border-b border-white/5 pb-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={prevWeek}
+          className="h-10 w-10 text-white/50 hover:bg-brand-green/10 hover:text-brand-green rounded-xl transition-all"
+        >
+          <ChevronLeft className="h-6 w-6" />
         </Button>
-        
+
         <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
           <PopoverTrigger asChild>
             <Button variant="ghost" className="flex flex-col items-center h-auto hover:bg-transparent px-2">
@@ -243,18 +243,26 @@ export default function AllenamentoPage() {
               locale={it}
               className="p-3 bg-background"
               classNames={{
-                weekday: "text-muted-foreground/50 rounded-md w-9 font-normal text-[0.7rem] uppercase tracking-tighter text-center",
-                caption_label: "text-sm font-black uppercase tracking-wider text-foreground",
-                day: "text-foreground hover:bg-card/40 hover:bg-card/50 rounded-md h-9 w-9 text-center p-0 font-normal aria-selected:opacity-100",
-                day_selected: "bg-primary text-primary-foreground hover:bg-primary/90",
-                day_today: "bg-card/20 hover:bg-card/30 text-foreground",
+                weekday: "text-muted-foreground/30 rounded-md w-9 font-black text-[0.6rem] uppercase tracking-tighter text-center",
+                caption_label: "text-sm font-black uppercase tracking-[0.2em] text-white",
+                day: "h-10 w-10 p-0 m-0 flex items-center justify-center relative",
+                day_button: "text-white/60 hover:bg-black hover:text-white hover:border hover:border-brand-green/30 hover:shadow-[0_0_15px_rgba(172,229,4,0.4)] rounded-xl h-10 w-10 flex items-center justify-center p-0 font-black transition-all cursor-pointer relative z-10",
+                selected: "!bg-transparent border-2 border-brand-green text-brand-green shadow-[0_0_15px_rgba(172,229,4,0.2)] hover:!bg-black hover:!text-white rounded-xl",
+                today: "bg-white/5 text-white/40 rounded-xl",
+                button_previous: "hover:bg-brand-green/10 hover:text-brand-green rounded-lg transition-colors p-1",
+                button_next: "hover:bg-brand-green/10 hover:text-brand-green rounded-lg transition-colors p-1",
               }}
             />
           </PopoverContent>
         </Popover>
 
-        <Button variant="ghost" size="icon" onClick={nextWeek} className="h-10 w-10 text-foreground">
-          <ChevronRight className="h-8 w-8" />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={nextWeek}
+          className="h-10 w-10 text-white/50 hover:bg-brand-green/10 hover:text-brand-green rounded-xl transition-all"
+        >
+          <ChevronRight className="h-6 w-6" />
         </Button>
       </div>
 
@@ -278,22 +286,22 @@ export default function AllenamentoPage() {
             const dayName = format(sessionDate, "EEE", { locale: it }).toUpperCase();
             const dayNum = format(sessionDate, "dd", { locale: it });
             const monthName = format(sessionDate, "MMM", { locale: it }).toUpperCase();
-            
+
             const sessionData = session as any;
-            const focus = sessionData.focus && sessionData.focus.trim() !== "" ? sessionData.focus : "Nessuno"; 
-            
+            const focus = sessionData.focus && sessionData.focus.trim() !== "" ? sessionData.focus : "Nessuno";
+
             let FocusIcon = Target;
             if (focus.toLowerCase().includes('fisic')) FocusIcon = Dumbbell;
-            
+
             const totalPlayers = players.length > 0 ? players.length : 20;
-            const presentPlayers = sessionData.attendances && sessionData.attendances.length > 0 
-              ? sessionData.attendances.filter((a: any) => a.status === 'presente' || a.status === 'ritardo' || a.status === 'present' || a.status === true).length 
+            const presentPlayers = sessionData.attendances && sessionData.attendances.length > 0
+              ? sessionData.attendances.filter((a: any) => a.status === 'presente' || a.status === 'ritardo' || a.status === 'present' || a.status === true).length
               : 0;
             const progressPercentage = totalPlayers > 0 ? (presentPlayers / totalPlayers) * 100 : 0;
 
             return (
-              <div 
-                key={session.id} 
+              <div
+                key={session.id}
                 className="relative overflow-hidden border border-brand-green/30 rounded-3xl active:scale-[0.98] transition-transform cursor-pointer group hover:opacity-90 bg-card/40 backdrop-blur-sm shadow-[0_0_15px_rgba(172,229,4,0.1)]"
                 onClick={() => router.push(`/allenamento/${session.id}`)}
               >
@@ -304,27 +312,27 @@ export default function AllenamentoPage() {
                     <span className="text-foreground font-medium text-lg leading-none">{monthName}</span>
                   </div>
                   <div className="p-4 flex gap-2">
-                     {/* Bottone Elimina rimosso per pulizia UI */}
+                    {/* Bottone Elimina rimosso per pulizia UI */}
                   </div>
                 </div>
 
                 <div className="px-5 pt-3 pb-5 space-y-4">
-                   <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3">
                     <FocusIcon className="h-5 w-5 text-brand-green" />
                     <span className="text-foreground text-[15px] font-medium tracking-wide">Focus: {focus}</span>
                   </div>
-                  
+
                   <div className="flex flex-col gap-2">
-                     <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3">
                       <div className="w-5 flex justify-center">
                         <Users className="h-4 w-4 text-brand-green" />
                       </div>
                       <span className="text-foreground text-[15px] font-medium tracking-wide">Presenze: {presentPlayers}/{totalPlayers}</span>
                     </div>
 
-                     <div className="w-full bg-black border border-white/10 rounded-full h-1.5 mt-1 overflow-hidden">
-                      <div 
-                        className="bg-brand-green h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(172,229,4,0.5)]" 
+                    <div className="w-full bg-black border border-white/10 rounded-full h-1.5 mt-1 overflow-hidden">
+                      <div
+                        className="bg-brand-green h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(172,229,4,0.5)]"
                         style={{ width: `${progressPercentage}%` }}
                       />
                     </div>
@@ -362,9 +370,9 @@ export default function AllenamentoPage() {
         </DialogContent>
       </Dialog>
 
-      <TrainingStatsDialog 
-        open={isStatsOpen} 
-        onOpenChange={setIsStatsOpen} 
+      <TrainingStatsDialog
+        open={isStatsOpen}
+        onOpenChange={setIsStatsOpen}
         currentWeekStart={currentWeekStart}
       />
 

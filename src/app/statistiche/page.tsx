@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStatsStore } from "@/store/useStatsStore";
 import { TeamRecord } from "@/components/statistiche/team-record";
 import { PlayerLeaderboard } from "@/components/statistiche/player-leaderboard";
+import { useSeasonsStore } from "@/store/useSeasonsStore";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Dynamic imports for charts to optimize LCP and bundle size
@@ -29,20 +30,26 @@ const GoalsIntervalChart = dynamic(() => import("@/components/statistiche/goals-
 });
 
 export default function StatistichePage() {
-  const { loading, loadStats } = useStatsStore();
+  const { loading, loadDetailedStats } = useStatsStore();
+  const { fetchAll: fetchSeasons } = useSeasonsStore();
 
   useEffect(() => {
-    loadStats();
-  }, [loadStats]);
+    const initialize = async () => {
+      const season = await fetchSeasons();
+      const activeId = useSeasonsStore.getState().activeSeason?.id;
+      loadDetailedStats(activeId);
+    };
+    initialize();
+  }, [loadDetailedStats, fetchSeasons]);
 
   return (
     <div>
       <PageHeader title="Statistiche" />
       <Tabs defaultValue="record" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6 h-12 bg-muted/50 p-1 rounded-2xl border">
-          <TabsTrigger value="record" className="text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm">Record</TabsTrigger>
-          <TabsTrigger value="leaderboard" className="text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm">Giocatori</TabsTrigger>
-          <TabsTrigger value="grafici" className="text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm">Grafici</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 mb-6 h-12 bg-black/40 border border-brand-green/20 p-1 rounded-2xl">
+          <TabsTrigger value="record" className="text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-black data-[state=active]:text-brand-green data-[state=active]:border data-[state=active]:border-brand-green data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] text-muted-foreground transition-all">Record</TabsTrigger>
+          <TabsTrigger value="leaderboard" className="text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-black data-[state=active]:text-brand-green data-[state=active]:border data-[state=active]:border-brand-green data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] text-muted-foreground transition-all">Giocatori</TabsTrigger>
+          <TabsTrigger value="grafici" className="text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-black data-[state=active]:text-brand-green data-[state=active]:border data-[state=active]:border-brand-green data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] text-muted-foreground transition-all">Grafici</TabsTrigger>
         </TabsList>
         <TabsContent value="record">
           {loading ? (

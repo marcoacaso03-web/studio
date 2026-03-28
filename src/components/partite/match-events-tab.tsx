@@ -15,13 +15,13 @@ export function MatchEventsTab() {
 
   const getEventIcon = (type: MatchEventType) => {
     switch(type) {
-      case 'goal': return <Goal className="h-5 w-5 text-foreground" />;
-      case 'assist': return <Zap className="h-5 w-5 text-foreground" />;
-      case 'yellow_card': return <div className="h-5 w-4 bg-yellow-400 rounded-sm border" />;
-      case 'red_card': return <div className="h-5 w-4 bg-red-600 rounded-sm border" />;
+      case 'goal': return <Goal className="h-5 w-5 text-brand-green" />;
+      case 'assist': return <Zap className="h-5 w-5 text-brand-green" />;
+      case 'yellow_card': return <div className="h-5 w-4 bg-yellow-400 rounded-sm border border-yellow-300" />;
+      case 'red_card': return <div className="h-5 w-4 bg-red-600 rounded-sm border border-red-400" />;
       case 'substitution':
       case 'sub_in':
-      case 'sub_out': return <ArrowRightLeft className="h-5 w-5 text-foreground" />;
+      case 'sub_out': return <ArrowRightLeft className="h-5 w-5 text-brand-green" />;
       default: return <Info className="h-5 w-5 text-muted-foreground" />;
     }
   };
@@ -47,18 +47,18 @@ export function MatchEventsTab() {
 
   return (
     <div className="space-y-6 relative">
-      <Card>
+      <Card className="bg-black/40 border border-brand-green/30 rounded-3xl shadow-[0_0_15px_rgba(172,229,4,0.08)]">
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <div>
             <div className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-accent" />
+              <Zap className="h-5 w-5 text-brand-green" />
               <CardTitle className="uppercase font-black">Cronaca Partita</CardTitle>
             </div>
             <CardDescription className="uppercase text-[10px] font-bold">Riepilogo degli eventi principali della gara.</CardDescription>
           </div>
           <Button 
             size="icon" 
-            className="rounded-full bg-accent text-accent-foreground hover:bg-accent/90"
+            className="rounded-full bg-black border border-brand-green text-brand-green hover:bg-black/80 shadow-[0_0_10px_rgba(172,229,4,0.2)]"
             onClick={() => setIsEventDialogOpen(true)}
           >
             <Plus className="h-6 w-6" />
@@ -66,8 +66,8 @@ export function MatchEventsTab() {
         </CardHeader>
         <CardContent>
           {events.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-lg">
-                <Info className="h-10 w-10 text-muted-foreground mb-3 opacity-20" />
+            <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-brand-green/20 rounded-xl">
+                <Info className="h-10 w-10 text-brand-green mb-3 opacity-30" />
                 <p className="text-xs font-black uppercase text-muted-foreground">Nessun evento registrato</p>
                 <p className="text-[10px] font-bold text-muted-foreground mt-2 uppercase">Usa il tasto + per aggiungere gol o cartellini.</p>
             </div>
@@ -78,7 +78,7 @@ export function MatchEventsTab() {
                 const mainName = event.playerName || (isPitchMan ? 'GIOCATORE' : (match?.opponent || 'AVVERSARIO'));
                 
                 return (
-                  <div key={event.id} className="flex items-center justify-between border-b border-muted pb-3 last:border-0">
+                  <div key={event.id} className="flex items-center justify-between border-b border-brand-green/10 pb-3 last:border-0">
                     <div className="flex items-center gap-4">
                       <div className="flex items-center justify-center w-8">
                           {getEventIcon(event.type)}

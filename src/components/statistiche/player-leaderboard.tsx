@@ -61,8 +61,8 @@ export function PlayerLeaderboard() {
   };
 
   const SortIcon = ({ column }: { column: SortKey }) => {
-    if (sortKey !== column || !sortOrder) return <ArrowUpDown className="ml-1 h-3 w-3 opacity-30" />;
-    return sortOrder === 'asc' ? <ChevronUp className="ml-1 h-3 w-3 text-foreground" /> : <ChevronDown className="ml-1 h-3 w-3 text-foreground" />;
+    if (sortKey !== column || !sortOrder) return <ArrowUpDown className="ml-1 h-3 w-3 opacity-20" />;
+    return sortOrder === 'asc' ? <ChevronUp className="ml-1 h-3 w-3 text-brand-green" /> : <ChevronDown className="ml-1 h-3 w-3 text-brand-green" />;
   };
 
   if (loading) {
@@ -83,53 +83,57 @@ export function PlayerLeaderboard() {
   }
 
   return (
-    <Card className="rounded-2xl overflow-hidden shadow-sm">
+    <Card className="bg-black/40 border-brand-green/30 shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
       <CardHeader className="pb-4">
-        <div className="flex items-center gap-2">
-          <Info className="h-4 w-4 text-foreground" />
-          <CardTitle className="text-lg font-black uppercase tracking-tight">Rendimento Giocatori</CardTitle>
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-2xl bg-black border border-brand-green flex items-center justify-center shadow-[0_0_10px_rgba(172,229,4,0.15)]">
+            <Info className="h-5 w-5 text-brand-green" />
+          </div>
+          <div>
+            <CardTitle className="text-lg font-black uppercase tracking-tight text-white">Rendimento Giocatori</CardTitle>
+            <CardDescription className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">
+              Statistiche individuali della stagione corrente.
+            </CardDescription>
+          </div>
         </div>
-        <CardDescription className="text-xs font-bold uppercase text-muted-foreground/60">
-          Statistiche individuali della stagione corrente.
-        </CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-muted/30">
+            <TableHeader className="bg-black/40 border-y border-white/5">
               <TableRow className="hover:bg-transparent border-none">
                 <TableHead 
-                  className="cursor-pointer hover:bg-muted/50 transition-colors text-[10px] font-black uppercase tracking-widest px-6" 
+                  className="cursor-pointer hover:bg-brand-green/5 transition-colors text-[10px] font-black uppercase tracking-widest px-6 text-muted-foreground" 
                   onClick={() => handleSort('name')}
                 >
                   <div className="flex items-center">Giocatore <SortIcon column="name" /></div>
                 </TableHead>
                 <TableHead 
-                  className="w-12 text-center cursor-pointer hover:bg-muted/50 transition-colors text-[10px] font-black uppercase tracking-widest px-2" 
+                  className="w-12 text-center cursor-pointer hover:bg-brand-green/5 transition-colors text-[10px] font-black uppercase tracking-widest px-2 text-muted-foreground" 
                   onClick={() => handleSort('appearances')}
                 >
                   <div className="flex items-center justify-center">P <SortIcon column="appearances" /></div>
                 </TableHead>
                 <TableHead 
-                  className="w-12 text-center cursor-pointer hover:bg-muted/50 transition-colors text-[10px] font-black uppercase tracking-widest px-2" 
+                  className="w-12 text-center cursor-pointer hover:bg-brand-green/5 transition-colors text-[10px] font-black uppercase tracking-widest px-2 text-muted-foreground" 
                   onClick={() => handleSort('goals')}
                 >
                   <div className="flex items-center justify-center">G <SortIcon column="goals" /></div>
                 </TableHead>
                 <TableHead 
-                  className="w-12 text-center cursor-pointer hover:bg-muted/50 transition-colors text-[10px] font-black uppercase tracking-widest px-2" 
+                  className="w-12 text-center cursor-pointer hover:bg-brand-green/5 transition-colors text-[10px] font-black uppercase tracking-widest px-2 text-muted-foreground" 
                   onClick={() => handleSort('assists')}
                 >
                   <div className="flex items-center justify-center">A <SortIcon column="assists" /></div>
                 </TableHead>
                 <TableHead 
-                  className="w-14 text-center cursor-pointer hover:bg-muted/50 transition-colors text-[10px] font-black uppercase tracking-widest px-2" 
+                  className="w-14 text-center cursor-pointer hover:bg-brand-green/5 transition-colors text-[10px] font-black uppercase tracking-widest px-2 text-muted-foreground" 
                   onClick={() => handleSort('yellowCards')}
                 >
                   <div className="flex items-center justify-center">AMM <SortIcon column="yellowCards" /></div>
                 </TableHead>
                 <TableHead 
-                  className="w-14 text-center cursor-pointer hover:bg-muted/50 transition-colors text-[10px] font-black uppercase tracking-widest px-2" 
+                  className="w-14 text-center cursor-pointer hover:bg-brand-green/5 transition-colors text-[10px] font-black uppercase tracking-widest px-2 text-muted-foreground" 
                   onClick={() => handleSort('redCards')}
                 >
                   <div className="flex items-center justify-center">ESP <SortIcon column="redCards" /></div>
@@ -138,20 +142,20 @@ export function PlayerLeaderboard() {
             </TableHeader>
             <TableBody>
               {sortedData.map((player) => (
-                <TableRow key={player.playerId} className="h-12 hover:bg-primary/5 transition-all">
-                  <TableCell className="font-black whitespace-nowrap text-sm px-6 uppercase tracking-tight text-foreground">
+                <TableRow key={player.playerId} className="h-14 hover:bg-brand-green/5 transition-all border-b border-white/5 last:border-none group">
+                  <TableCell className="font-black whitespace-nowrap text-sm px-6 uppercase tracking-tight text-white group-hover:text-brand-green transition-colors">
                     {player.name}
                   </TableCell>
-                  <TableCell className="text-center text-xs font-bold px-2">{player.stats.appearances}</TableCell>
-                  <TableCell className="text-center font-black text-sm text-foreground px-2">{player.stats.goals}</TableCell>
-                  <TableCell className="text-center font-bold text-xs text-foreground px-2">{player.stats.assists}</TableCell>
+                  <TableCell className="text-center text-xs font-bold px-2 text-white/80">{player.stats.appearances}</TableCell>
+                  <TableCell className="text-center font-black text-sm text-brand-green px-2">{player.stats.goals}</TableCell>
+                  <TableCell className="text-center font-bold text-xs text-brand-green px-2">{player.stats.assists}</TableCell>
                   <TableCell className="text-center px-2">
-                    <span className="text-[10px] font-black bg-muted/20 text-foreground px-1.5 py-0.5 rounded border border-border/50 min-w-[24px] inline-block">
+                    <span className="text-[10px] font-black bg-black text-white px-2 py-0.5 rounded border border-brand-green/20 min-w-[28px] inline-block shadow-[0_0_8px_rgba(172,229,4,0.05)]">
                         {player.stats.yellowCards}
                     </span>
                   </TableCell>
                   <TableCell className="text-center px-2">
-                    <span className="text-[10px] font-black bg-muted/20 text-foreground px-1.5 py-0.5 rounded border border-border/50 min-w-[24px] inline-block">
+                    <span className="text-[10px] font-black bg-black text-white px-2 py-0.5 rounded border border-brand-green/20 min-w-[28px] inline-block shadow-[0_0_8px_rgba(172,229,4,0.05)]">
                         {player.stats.redCards}
                     </span>
                   </TableCell>
@@ -161,27 +165,27 @@ export function PlayerLeaderboard() {
           </Table>
         </div>
       </CardContent>
-      <CardFooter className="bg-muted/10 p-4 border-t">
+      <CardFooter className="bg-black/20 p-4 border-t border-white/5">
         <div className="flex flex-wrap gap-x-5 gap-y-2">
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-black text-muted-foreground uppercase">P:</span>
-            <span className="text-[10px] font-bold uppercase tracking-tight">Presenze</span>
+            <span className="text-[10px] font-black text-brand-green uppercase">P:</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Presenze</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-black text-muted-foreground uppercase">G:</span>
-            <span className="text-[10px] font-bold uppercase tracking-tight">Gol</span>
+            <span className="text-[10px] font-black text-brand-green uppercase">G:</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Gol</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-black text-muted-foreground uppercase">A:</span>
-            <span className="text-[10px] font-bold uppercase tracking-tight">Assist</span>
+            <span className="text-[10px] font-black text-brand-green uppercase">A:</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Assist</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-black text-muted-foreground uppercase">AMM:</span>
-            <span className="text-[10px] font-bold uppercase tracking-tight">Ammonizioni</span>
+            <span className="text-[10px] font-black text-brand-green uppercase">AMM:</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Ammonizioni</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-black text-muted-foreground uppercase">ESP:</span>
-            <span className="text-[10px] font-bold uppercase tracking-tight">Espulsioni</span>
+            <span className="text-[10px] font-black text-brand-green uppercase">ESP:</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Espulsioni</span>
           </div>
         </div>
       </CardFooter>

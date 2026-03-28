@@ -47,7 +47,8 @@ interface StatsState {
     teamTrend: TrendEntry[];
     goalsIntervals: IntervalEntry[];
     loading: boolean;
-    loadStats: () => Promise<void>;
+    loadSummaryStats: (seasonId?: string) => Promise<void>;
+    loadDetailedStats: (seasonId?: string) => Promise<void>;
 }
 
 export const useStatsStore = create<StatsState>((set) => ({
@@ -58,9 +59,9 @@ export const useStatsStore = create<StatsState>((set) => ({
     teamTrend: [],
     goalsIntervals: [],
     loading: true,
-    loadStats: async () => {
+    loadSummaryStats: async (seasonId?: string) => {
         const user = useAuthStore.getState().user;
-        const activeSeasonId = useSeasonsStore.getState().activeSeason?.id;
+        const activeSeasonId = seasonId ?? useSeasonsStore.getState().activeSeason?.id;
 
         if (!user || !activeSeasonId) {
             set({ loading: false });
@@ -70,10 +71,36 @@ export const useStatsStore = create<StatsState>((set) => ({
         set({ loading: true });
         
         try {
-            // Carica l'intero contesto della stagione in un'unica passata ottimizzata
-            const context = await aggregationRepository.getSeasonContext(user.id, activeSeasonId);
+            // Carica solo i dati necessari per il riepilogo (velocissimo)
+            const context = await aggregationRepository.getSummaryContext(user.id, activeSeasonId);
+            const records = aggregationRepository.getTeamRecordFromContext(context);
+            
+            set({ 
+                teamRecord: records.overall, 
+                homeRecord: records.home,
+                awayRecord: records.away,
+                loading: false 
+            });
+        } catch (error) {
+            console.error("Errore nel caricamento summary stats:", error);
+            set({ loading: false });
+        }
+    },
+    loadDetailedStats: async (seasonId?: string) => {
+        const user = useAuthStore.getState().user;
+        const activeSeasonId = seasonId ?? useSeasonsStore.getState().activeSeason?.id;
 
-            // Calcoli in-memory ultra-rapidi
+        if (!user || !activeSeasonId) {
+            set({ loading: false });
+            return;
+        }
+
+        set({ loading: true });
+        
+        try {
+            // Carica l'intero contesto (più lento, per pagina statistiche)
+            const context = await aggregationRepository.getDetailedContext(user.id, activeSeasonId);
+
             const records = aggregationRepository.getTeamRecordFromContext(context);
             const playerLeaderboard = aggregationRepository.getPlayersAggregatedStatsFromContext(context);
             const teamTrend = aggregationRepository.getTeamTrendFromContext(context);
@@ -99,7 +126,7 @@ export const useStatsStore = create<StatsState>((set) => ({
                 loading: false 
             });
         } catch (error) {
-            console.error("Errore nel caricamento statistiche:", error);
+            console.error("Errore nel caricamento detailed stats:", error);
             set({ loading: false });
         }
     },
