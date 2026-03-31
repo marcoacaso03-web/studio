@@ -87,14 +87,14 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] h-[90vh] md:max-w-2xl rounded-3xl p-0 overflow-hidden flex flex-col border border-brand-green/30 shadow-[0_0_25px_rgba(172,229,4,0.15)] [&>button]:hidden">
-        <DialogHeader className="p-6 bg-black border-b border-brand-green/30 text-foreground flex-row items-center gap-4 space-y-0 shrink-0">
-          <Button variant="ghost" size="icon" className="text-brand-green hover:bg-black/60 h-8 w-8" onClick={() => onOpenChange(false)}>
+      <DialogContent className="max-w-[95vw] h-[90vh] md:max-w-2xl rounded-3xl p-0 overflow-hidden flex flex-col border border-border dark:border-brand-green/30 shadow-md dark:shadow-[0_0_25px_rgba(172,229,4,0.15)] [&>button]:hidden">
+        <DialogHeader className="p-6 bg-card dark:bg-black border-b border-border dark:border-brand-green/30 text-foreground flex-row items-center gap-4 space-y-0 shrink-0">
+          <Button variant="ghost" size="icon" className="text-primary dark:text-brand-green hover:bg-muted dark:hover:bg-black/60 h-8 w-8" onClick={() => onOpenChange(false)}>
             <ChevronLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-black border border-brand-green/30 rounded-xl shadow-[0_0_10px_rgba(172,229,4,0.1)]">
-              <ClipboardCheck className="h-5 w-5 text-brand-green" />
+            <div className="p-2 bg-muted dark:bg-black border border-border dark:border-brand-green/30 rounded-xl shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.1)]">
+              <ClipboardCheck className="h-5 w-5 text-primary dark:text-brand-green" />
             </div>
             <div>
               <DialogTitle className="text-xl font-black uppercase tracking-tight">Report Presenze</DialogTitle>
@@ -113,17 +113,17 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
             <ScrollArea className="flex-1">
               <div className="p-4">
                 <Table>
-                  <TableHeader className="bg-black/60">
-                    <TableRow className="hover:bg-transparent border-b border-brand-green/20 h-10">
-                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-brand-green px-3">Giocatore</TableHead>
-                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-center text-brand-green px-1">Sett (P)</TableHead>
-                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-center text-brand-green px-1">Sett (R)</TableHead>
-                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-center px-1 text-brand-green">Totale</TableHead>
+                  <TableHeader className="bg-muted/50 dark:bg-black/60">
+                    <TableRow className="hover:bg-transparent border-b border-border dark:border-brand-green/20 h-10">
+                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-primary dark:text-brand-green px-3">Giocatore</TableHead>
+                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-center text-primary dark:text-brand-green px-1">Sett (P)</TableHead>
+                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-center text-primary dark:text-brand-green px-1">Sett (R)</TableHead>
+                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-center px-1 text-primary dark:text-brand-green">Totale</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {stats.map((row) => (
-                      <TableRow key={row.id} className="h-12 border-b border-brand-green/10 hover:bg-black/40 transition-all">
+                      <TableRow key={row.id} className="h-12 border-b border-border dark:border-brand-green/10 hover:bg-muted dark:hover:bg-black/40 transition-all">
                         <TableCell className="px-3 py-0">
                           <span className="text-xs font-black uppercase text-foreground leading-tight block truncate max-w-[120px]">
                             {row.name}
@@ -140,8 +140,8 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
                           </span>
                         </TableCell>
                         <TableCell className="text-center px-1 py-0">
-                          <div className="bg-black border border-brand-green/30 px-2 py-1 rounded-lg inline-block min-w-[32px]">
-                            <span className="text-sm font-black text-brand-green tabular-nums">
+                          <div className="bg-primary/10 dark:bg-black border border-primary/20 dark:border-brand-green/30 px-2 py-1 rounded-lg inline-block min-w-[32px]">
+                            <span className="text-sm font-black text-primary dark:text-brand-green tabular-nums">
                               {row.totalPresent}
                             </span>
                           </div>
@@ -155,9 +155,9 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
           )}
         </div>
 
-        <div className="p-4 bg-black border-t border-brand-green/20 flex items-center justify-center gap-6">
+        <div className="p-4 bg-card dark:bg-black border-t border-border dark:border-brand-green/20 flex items-center justify-center gap-6">
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-brand-green shadow-[0_0_6px_rgba(172,229,4,0.5)]" />
+            <div className="w-2 h-2 rounded-full bg-primary dark:bg-brand-green shadow-sm dark:shadow-[0_0_6px_rgba(172,229,4,0.5)]" />
             <span className="text-[8px] font-black text-muted-foreground uppercase">Sett (P): Presenze Settimana</span>
           </div>
           <div className="flex items-center gap-1.5">

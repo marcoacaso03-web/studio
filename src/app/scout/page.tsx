@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useSWRConfig } from "swr";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,15 +19,19 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import * as React from "react";
 import type { ScoutPlayer, ScoutCategory } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ScoutPage() {
   const { user } = useUser();
   const firestore = useFirestore();
+  const { mutate } = useSWRConfig();
 
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   const [isPlayerDialogOpen, setIsPlayerDialogOpen] = useState(false);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<ScoutPlayer | null>(null);
+  const [playerToDelete, setPlayerToDelete] = useState<ScoutPlayer | null>(null);
+  const { toast } = useToast();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -89,9 +94,18 @@ export default function ScoutPage() {
     );
   };
 
-  const handleDeletePlayer = async (id: string) => {
-    if (!user || !firestore) return;
-    await deleteDoc(doc(firestore, 'users', user.uid, 'scoutPlayers', id));
+  const handleDeletePlayer = async (player: ScoutPlayer) => {
+    if (window.confirm(`Sei sicuro di voler eliminare il talento ${player.name}?`)) {
+      if (!user || !firestore) return;
+      try {
+        await deleteDoc(doc(firestore, 'users', user.uid, 'scoutPlayers', player.id));
+        await mutate(`users/${user.uid}/scoutPlayers`);
+        toast({ title: "Talento eliminato", description: `${player.name} è stato rimosso.` });
+      } catch (err: any) {
+        toast({ variant: "destructive", title: "Errore", description: "Impossibile eliminare il talento." });
+        console.error("Delete Error:", err);
+      }
+    }
   };
 
   return (
@@ -100,17 +114,17 @@ export default function ScoutPage() {
         <div className="flex gap-2">
           <Button
             size="sm"
-            className="h-9 text-[10px] font-black uppercase rounded-xl bg-black border border-brand-green/30 text-white hover:bg-black/60 hover:text-white shadow-[0_0_10px_rgba(172,229,4,0.1)] transition-all"
+            className="h-9 text-[10px] font-black uppercase rounded-xl bg-card border border-border dark:bg-black dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted dark:hover:bg-black/60 shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.1)] transition-all"
             onClick={() => setIsCategoryDialogOpen(true)}
           >
-            <Tag className="mr-1.5 h-3.5 w-3.5 text-brand-green" /> Etichette
+            <Tag className="mr-1.5 h-3.5 w-3.5 text-primary dark:text-brand-green" /> Etichette
           </Button>
           <Button
             size="sm"
-            className="h-9 text-[10px] font-black uppercase rounded-xl bg-black border border-brand-green text-white hover:bg-black/80 hover:text-white shadow-[0_0_10px_rgba(172,229,4,0.15)] hover:scale-105 transition-all"
+            className="h-9 text-[10px] font-black uppercase rounded-xl bg-primary dark:bg-black border border-primary dark:border-brand-green text-white dark:text-white hover:opacity-90 dark:hover:bg-black/80 shadow-md dark:shadow-[0_0_10px_rgba(172,229,4,0.15)] hover:scale-105 transition-all"
             onClick={() => { setEditingPlayer(null); setIsPlayerDialogOpen(true); }}
           >
-            <UserPlus className="mr-1.5 h-3.5 w-3.5 text-brand-green" /> Nuovo
+            <UserPlus className="mr-1.5 h-3.5 w-3.5 text-white dark:text-brand-green" /> Nuovo
           </Button>
         </div>
       </PageHeader>
@@ -119,18 +133,18 @@ export default function ScoutPage() {
       <div className="space-y-3">
         <div className="flex flex-col md:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-green" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary dark:text-brand-green" />
             <Input
               placeholder="Cerca talento per nome..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 h-10 w-full rounded-2xl border-brand-green/30 bg-black/40 text-white font-bold text-sm focus-visible:ring-1 focus-visible:ring-brand-green shadow-[0_0_10px_rgba(172,229,4,0.05)] placeholder:text-white/20"
+              className="pl-9 h-10 w-full rounded-2xl border-border dark:border-brand-green/30 bg-card dark:bg-black/40 text-foreground dark:text-white font-bold text-sm focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)] placeholder:text-muted-foreground/30 dark:placeholder:text-white/20"
             />
           </div>
         </div>
 
         <div className="flex items-center gap-2 px-1">
-          <Filter className="h-3 w-3 text-brand-green" />
+          <Filter className="h-3 w-3 text-primary dark:text-brand-green" />
           <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Filtra per etichetta:</span>
         </div>
         <ScrollArea className="w-full whitespace-nowrap pb-2">
@@ -139,7 +153,9 @@ export default function ScoutPage() {
               variant={selectedCategoryIds.length === 0 ? "default" : "outline"}
               className={cn(
                 "cursor-pointer uppercase font-black text-[9px] px-3 py-1 rounded-lg transition-all border",
-                selectedCategoryIds.length === 0 ? "bg-black border-brand-green text-brand-green shadow-[0_0_10px_rgba(172,229,4,0.15)]" : "bg-black/40 border-white/10 text-muted-foreground"
+                selectedCategoryIds.length === 0
+                  ? "bg-muted dark:bg-black border-primary dark:border-brand-green text-foreground dark:text-brand-green shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.15)]"
+                  : "bg-card dark:bg-black/40 border-border dark:border-white/10 text-muted-foreground"
               )}
               onClick={() => setSelectedCategoryIds([])}
             >
@@ -174,11 +190,11 @@ export default function ScoutPage() {
             <Skeleton key={i} className="h-32 w-full rounded-2xl" />
           ))
         ) : filteredPlayers.length === 0 ? (
-          <Card className="col-span-full border border-dashed border-brand-green/30 bg-black/20 hover:bg-black/30 rounded-3xl">
+          <Card className="col-span-full border border-dashed border-border dark:border-brand-green/30 bg-muted/20 dark:bg-black/20 hover:bg-muted/30 dark:hover:bg-black/30 rounded-3xl">
             <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-              <Search className="h-12 w-12 text-brand-green mb-4 opacity-40" />
-              <h3 className="text-sm font-black uppercase text-white">Nessun talento trovato</h3>
-              <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">
+              <Search className="h-12 w-12 text-primary dark:text-brand-green mb-4 opacity-40" />
+              <h3 className="text-sm font-black uppercase text-foreground dark:text-white">Nessun talento trovato</h3>
+              <p className="text-[10px] font-bold text-muted-foreground/60 dark:text-white/30 uppercase tracking-widest mt-1">
                 {players?.length === 0 ? "Inizia aggiungendo il primo talento alla tua lista." : "Prova a cambiare i filtri selezionati."}
               </p>
             </CardContent>
@@ -186,14 +202,14 @@ export default function ScoutPage() {
         ) : (
           <>
             {visiblePlayers.map((player) => (
-              <Card key={player.id} className="overflow-hidden border border-brand-green/30 bg-black/40 backdrop-blur-sm shadow-[0_0_15px_rgba(172,229,4,0.1)] rounded-3xl transition-all group hover:opacity-90">
+              <Card key={player.id} className="overflow-hidden border border-border dark:border-brand-green/30 bg-card dark:bg-black/40 backdrop-blur-sm shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.1)] rounded-3xl transition-all group hover:opacity-90">
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex flex-col">
-                      <h4 className="text-sm font-black uppercase tracking-tight text-white leading-tight">
+                      <h4 className="text-sm font-black uppercase tracking-tight text-foreground dark:text-white leading-tight">
                         {player.name}
                       </h4>
-                      <span className="text-[9px] font-bold text-white/30 uppercase tracking-wider mt-0.5">
+                      <span className="text-[9px] font-bold text-muted-foreground/60 dark:text-white/30 uppercase tracking-wider mt-0.5">
                         {player.role} • {player.currentTeam}
                       </span>
                     </div>
@@ -201,16 +217,16 @@ export default function ScoutPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-muted-foreground hover:text-brand-green"
-                        onClick={() => { setEditingPlayer(player); setIsPlayerDialogOpen(true); }}
+                        className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-primary/10 dark:hover:text-brand-green dark:hover:bg-brand-green/10 transition-all"
+                        onClick={(e) => { e.stopPropagation(); setEditingPlayer(player); setIsPlayerDialogOpen(true); }}
                       >
                         <Edit className="h-3.5 w-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                        onClick={() => handleDeletePlayer(player.id)}
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 dark:hover:text-red-500 dark:hover:bg-red-500/10 transition-all"
+                        onClick={(e) => { e.stopPropagation(); handleDeletePlayer(player); }}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -218,7 +234,7 @@ export default function ScoutPage() {
                   </div>
 
                   {player.notes && (
-                    <p className="text-[10px] text-white/70 leading-relaxed mb-3 line-clamp-2 italic">
+                    <p className="text-[10px] text-foreground/70 dark:text-white/70 leading-relaxed mb-3 line-clamp-2 italic">
                       "{player.notes}"
                     </p>
                   )}

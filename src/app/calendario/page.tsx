@@ -58,11 +58,11 @@ export default function DashboardPage() {
   const StatusBadge = ({ status }: { status: MatchStatus }) => {
     switch (status) {
       case 'completed':
-        return <div className="h-2 w-2 rounded-full bg-brand-green shadow-[0_0_6px_rgba(172,229,4,0.5)]" title="Finita" />;
+        return <div className="h-2 w-2 rounded-full bg-primary dark:bg-brand-green shadow-sm dark:shadow-[0_0_6px_rgba(172,229,4,0.5)]" title="Finita" />;
       case 'scheduled':
-        return <div className="h-2 w-2 rounded-full bg-white/20" title="Programmata" />;
+        return <div className="h-2 w-2 rounded-full bg-muted-foreground/30 dark:bg-white/20" title="Programmata" />;
       case 'canceled':
-        return <div className="h-2 w-2 rounded-full bg-destructive shadow-[0_0_6px_rgba(239,68,68,0.5)]" title="Annullata" />;
+        return <div className="h-2 w-2 rounded-full bg-destructive shadow-sm dark:shadow-[0_0_6px_rgba(239,68,68,0.5)]" title="Annullata" />;
       default:
         return null;
     }
@@ -89,17 +89,17 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 gap-3">
         {/* ROSA CARD */}
         <div
-          className="relative border border-brand-green/30 rounded-3xl p-4 cursor-pointer hover:opacity-90 transition-all active:scale-95 bg-black/40 backdrop-blur-sm shadow-[0_0_15px_rgba(172,229,4,0.1)] overflow-hidden"
+          className="relative border border-border dark:border-brand-green/30 rounded-3xl p-4 cursor-pointer hover:bg-muted/50 dark:hover:opacity-90 transition-all active:scale-95 bg-card dark:bg-black/40 backdrop-blur-sm shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.1)] overflow-hidden"
           onClick={() => router.push('/membri')}
         >
           <div className="flex justify-between items-center mb-1">
-            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">ROSA</h3>
-            <Users className="h-4 w-4 text-brand-green opacity-90" />
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-foreground dark:text-white/40">ROSA</h3>
+            <Users className="h-4 w-4 text-primary dark:text-brand-green opacity-90" />
           </div>
-          {playersLoading ? <Skeleton className="h-8 w-16 rounded-lg bg-card/20 hover:bg-card/30" /> : (
+          {playersLoading ? <Skeleton className="h-8 w-16 rounded-lg bg-muted/20 hover:bg-muted/30 dark:bg-card/20 dark:hover:bg-card/30" /> : (
             <div className="flex flex-col">
-              <div className="text-5xl font-black text-white tracking-tighter mb-2">{roleStats.total}</div>
-              <div className="text-[9px] font-bold text-muted-foreground uppercase opacity-80 flex flex-wrap gap-2">
+              <div className="text-5xl font-black text-foreground dark:text-white tracking-tighter mb-2">{roleStats.total}</div>
+              <div className="text-[9px] font-bold text-foreground/60 dark:text-muted-foreground uppercase opacity-80 flex flex-wrap gap-2">
                 <span>ATT:{roleStats.attaccanti}</span>
                 <span>CEN:{roleStats.centrocampisti}</span>
                 <span>DIF:{roleStats.difensori}</span>
@@ -111,17 +111,17 @@ export default function DashboardPage() {
 
         {/* STATISTICHE CARD */}
         <div
-          className="relative border border-brand-green/30 rounded-3xl p-4 cursor-pointer hover:opacity-90 transition-all active:scale-95 bg-black/40 backdrop-blur-sm shadow-[0_0_15px_rgba(172,229,4,0.1)] overflow-hidden"
+          className="relative border border-border dark:border-brand-green/30 rounded-3xl p-4 cursor-pointer hover:bg-muted/50 dark:hover:opacity-90 transition-all active:scale-95 bg-card dark:bg-black/40 backdrop-blur-sm shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.1)] overflow-hidden"
           onClick={() => router.push('/statistiche')}
         >
           <div className="flex justify-between items-center mb-1">
-            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/40">STATISTICHE</h3>
-            <Trophy className="h-4 w-4 text-brand-green opacity-90" />
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-foreground dark:text-white/40">STATISTICHE</h3>
+            <Trophy className="h-4 w-4 text-primary dark:text-brand-green opacity-90" />
           </div>
-          {statsLoading ? <Skeleton className="h-8 w-16 rounded-lg bg-card/20 hover:bg-card/30" /> : (
+          {statsLoading ? <Skeleton className="h-8 w-16 rounded-lg bg-muted/20 hover:bg-muted/30 dark:bg-card/20 dark:hover:bg-card/30" /> : (
             <div className="flex flex-col">
-              <div className="text-5xl font-black text-white tracking-tighter mb-2">{teamRecord?.wins || 0}</div>
-              <div className="text-[9px] font-bold text-muted-foreground uppercase opacity-80 flex flex-wrap gap-2">
+              <div className="text-5xl font-black text-foreground dark:text-white tracking-tighter mb-2">{teamRecord?.wins || 0}</div>
+              <div className="text-[9px] font-bold text-foreground/60 dark:text-muted-foreground uppercase opacity-80 flex flex-wrap gap-2">
                 <span>V:{teamRecord?.wins || 0}</span>
                 <span>P:{teamRecord?.draws || 0}</span>
                 <span>S:{teamRecord?.losses || 0}</span>
@@ -133,14 +133,14 @@ export default function DashboardPage() {
       </div>
 
       {/* PROSSIME & RECENTI */}
-      <div className="relative border border-brand-green/30 rounded-[32px] overflow-hidden bg-black/40 backdrop-blur-sm shadow-[0_0_15px_rgba(172,229,4,0.1)]">
-        <div className="p-5 flex items-center justify-between border-b border-white/5">
+      <div className="relative border border-border dark:border-brand-green/30 rounded-[32px] overflow-hidden bg-card dark:bg-black/40 backdrop-blur-sm shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.1)]">
+        <div className="p-5 flex items-center justify-between border-b border-border dark:border-white/5">
           <div className="space-y-0.5">
-            <h2 className="text-lg font-black text-white uppercase tracking-tight">Prossime & Recenti</h2>
+            <h2 className="text-lg font-black text-foreground dark:text-white uppercase tracking-tight">Prossime & Recenti</h2>
           </div>
           <button
             onClick={() => setIsFullCalendarOpen(true)}
-            className="bg-black text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase border border-brand-green/40 shadow-[0_0_10px_rgba(172,229,4,0.15)] hover:scale-105 transition-all outline-none"
+            className="bg-primary dark:bg-black text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase border border-primary dark:border-brand-green/40 shadow-md dark:shadow-[0_0_10px_rgba(172,229,4,0.15)] hover:scale-105 transition-all outline-none"
           >
             Vedi Tutto
           </button>
@@ -162,28 +162,28 @@ export default function DashboardPage() {
                 {dashboardMatches.map((match) => (
                     <TableRow
                     key={match.id}
-                    className="h-16 border-b border-white/5 hover:bg-white/5 transition-all group cursor-pointer"
+                    className="h-16 border-b border-border dark:border-white/5 hover:bg-muted dark:hover:bg-white/5 transition-all group cursor-pointer"
                     onClick={() => navigateToMatch(match)}
                   >
                     <TableCell className="px-5">
                       <div className="flex items-center gap-5">
                         <div className="flex items-center gap-3">
                           {match.isHome ?
-                            <Home className="h-6 w-6 text-brand-green" /> :
-                            <Plane className="h-6 w-6 text-brand-cyan" />
+                            <Home className="h-6 w-6 text-primary dark:text-brand-green" /> :
+                            <Plane className="h-6 w-6 text-sky-500 dark:text-brand-cyan" />
                           }
                         </div>
                         <div className="flex-1 flex items-center justify-between gap-4">
                           <div className="flex flex-col">
-                            <span className="text-sm font-black text-white uppercase tracking-tight text-ellipsis truncate max-w-[140px]">
+                            <span className="text-sm font-black text-foreground dark:text-white uppercase tracking-tight text-ellipsis truncate max-w-[140px]">
                               {match.opponent}
                             </span>
-                            <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest leading-none">
+                            <span className="text-[10px] font-bold text-foreground/40 dark:text-muted-foreground/60 uppercase tracking-widest leading-none">
                               {match.type}
                             </span>
                           </div>
                           <div className="flex items-center gap-4">
-                            <span className="text-lg font-black text-white tabular-nums">
+                            <span className="text-lg font-black text-foreground dark:text-white tabular-nums">
                               {match.result ? `${match.result.home} - ${match.result.away}` : '0 - 0'}
                             </span>
                             <StatusBadge status={match.status} />

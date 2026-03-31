@@ -110,7 +110,7 @@ export default function TrainingDetailPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <Loader2 className="h-10 w-10 text-brand-green animate-spin" />
+        <Loader2 className="h-10 w-10 text-primary dark:text-brand-green animate-spin" />
         <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Caricamento Sessione...</p>
       </div>
     );
@@ -121,8 +121,8 @@ export default function TrainingDetailPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-20">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-10 w-10 rounded-xl bg-black/40 border border-brand-green/30 hover:bg-black/60 shadow-[0_0_10px_rgba(172,229,4,0.05)] transition-all">
-          <ArrowLeft className="h-5 w-5 text-brand-green" />
+        <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-10 w-10 rounded-xl bg-muted dark:bg-black/40 border border-border dark:border-brand-green/30 hover:bg-muted/80 dark:hover:bg-black/60 shadow-none dark:shadow-[0_0_10px_rgba(172,229,4,0.05)] transition-all">
+          <ArrowLeft className="h-5 w-5 text-primary dark:text-brand-green" />
         </Button>
         <div className="flex flex-col">
           <h1 className="text-2xl font-black uppercase tracking-tighter text-foreground leading-none">Allenamento #{session.index.toString().padStart(2, '0')}</h1>
@@ -133,30 +133,30 @@ export default function TrainingDetailPage() {
       </div>
 
       <Tabs defaultValue="programma" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6 h-12 bg-black/40 p-1 rounded-2xl border border-brand-green/30 shadow-[0_0_10px_rgba(172,229,4,0.1)]">
-          <TabsTrigger value="programma" className="flex items-center gap-2 text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-black data-[state=active]:border data-[state=active]:border-brand-green data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] transition-all">
-            <ClipboardList className="h-4 w-4 text-brand-green" /> Programma
+        <TabsList className="grid w-full grid-cols-2 mb-6 h-12 bg-muted dark:bg-black/40 p-1 rounded-2xl border border-border dark:border-brand-green/30 shadow-none dark:shadow-[0_0_10px_rgba(172,229,4,0.1)]">
+          <TabsTrigger value="programma" className="flex items-center gap-2 text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-card dark:data-[state=active]:bg-black data-[state=active]:border data-[state=active]:border-primary/30 dark:data-[state=active]:border-brand-green data-[state=active]:text-foreground dark:data-[state=active]:text-white data-[state=active]:shadow-sm dark:data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] transition-all">
+            <ClipboardList className="h-4 w-4 text-primary dark:text-brand-green" /> Programma
           </TabsTrigger>
-          <TabsTrigger value="presenze" className="flex items-center gap-2 text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-black data-[state=active]:border data-[state=active]:border-brand-green data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] transition-all">
-            <Users className="h-4 w-4 text-brand-green" /> Presenze
+          <TabsTrigger value="presenze" className="flex items-center gap-2 text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-card dark:data-[state=active]:bg-black data-[state=active]:border data-[state=active]:border-primary/30 dark:data-[state=active]:border-brand-green data-[state=active]:text-foreground dark:data-[state=active]:text-white data-[state=active]:shadow-sm dark:data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] transition-all">
+            <Users className="h-4 w-4 text-primary dark:text-brand-green" /> Presenze
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="programma" className="space-y-4 outline-none">
-          <Card className="rounded-3xl border border-brand-green/30 shadow-[0_0_15px_rgba(172,229,4,0.1)] overflow-hidden">
-            <CardHeader className="bg-black/60 border-b border-brand-green/30 p-6 pb-8">
+          <Card className="rounded-3xl border border-border dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.1)] overflow-hidden">
+            <CardHeader className="bg-muted dark:bg-black/60 border-b border-border dark:border-brand-green/30 p-6 pb-8">
               <CardTitle className="text-lg font-black uppercase tracking-tight text-foreground">Esercitazioni e Obiettivi</CardTitle>
               <CardDescription className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">Definisci il piano tecnico della seduta.</CardDescription>
             </CardHeader>
-            <CardContent className="p-6 -mt-4 bg-background rounded-t-3xl border-t border-brand-green/30 space-y-6">
-              <div className="space-y-3 pb-6 border-b border-brand-green/20">
+            <CardContent className="p-6 -mt-4 bg-card dark:bg-background rounded-t-3xl border-t border-border dark:border-brand-green/30 space-y-6">
+              <div className="space-y-3 pb-6 border-b border-border dark:border-brand-green/20">
                 <div className="flex items-center gap-2">
-                  <Target className="h-4 w-4 text-brand-green" />
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-brand-green">Focus:</Label>
+                  <Target className="h-4 w-4 text-primary dark:text-brand-green" />
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-primary dark:text-brand-green">Focus:</Label>
                 </div>
                 <Input 
                   placeholder="Es. Tecnico, Tattico, Fisico..."
-                  className="h-11 rounded-xl bg-black border border-brand-green shadow-[0_0_10px_rgba(172,229,4,0.15)] text-foreground font-bold text-sm"
+                  className="h-11 rounded-xl bg-background dark:bg-black border border-primary/50 dark:border-brand-green shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.15)] text-foreground font-bold text-sm focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green"
                   value={focus}
                   onChange={(e) => setFocus(e.target.value)}
                 />
@@ -167,7 +167,7 @@ export default function TrainingDetailPage() {
                       onClick={() => setFocus(f)}
                       className={cn(
                         "px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-wider transition-all",
-                        focus === f ? "bg-black border border-brand-green text-white shadow-[0_0_10px_rgba(172,229,4,0.15)]" : "bg-muted/30 text-muted-foreground hover:bg-muted/50 border border-transparent"
+                        focus === f ? "bg-primary dark:bg-black border border-primary dark:border-brand-green text-white shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.15)]" : "bg-muted/30 text-muted-foreground hover:bg-muted/50 border border-transparent"
                       )}
                     >
                       {f}
@@ -178,13 +178,13 @@ export default function TrainingDetailPage() {
 
               <Textarea 
                 placeholder="Inserisci qui gli esercizi (es. Riscaldamento tecnico, Possesso palla 4vs4+3, Partitella finale...)"
-                className="min-h-[400px] text-sm leading-relaxed bg-black/40 border border-brand-green/30 rounded-2xl p-4 focus-visible:ring-1 focus-visible:ring-brand-green resize-none shadow-[0_0_10px_rgba(172,229,4,0.05)]"
+                className="min-h-[400px] text-sm leading-relaxed bg-background dark:bg-black/40 border border-border dark:border-brand-green/30 rounded-2xl p-4 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green resize-none shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)] text-foreground dark:text-white"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
               />
-              <div className="pt-6 border-t border-brand-green/20 mt-6">
+              <div className="pt-6 border-t border-border dark:border-brand-green/20 mt-6">
                 <Button 
-                  className="w-full h-12 bg-black border border-brand-green text-white rounded-2xl font-black uppercase text-xs shadow-[0_0_10px_rgba(172,229,4,0.15)] hover:bg-black/80 transition-all"
+                  className="w-full h-12 bg-primary dark:bg-black border border-primary dark:border-brand-green text-white rounded-2xl font-black uppercase text-xs shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.15)] hover:opacity-90 dark:hover:bg-black/80 transition-all"
                   onClick={handleSaveNotes}
                   disabled={saving}
                 >
@@ -201,11 +201,11 @@ export default function TrainingDetailPage() {
              <h3 className="text-[12px] font-black uppercase text-foreground/80 tracking-widest pl-2">Lista Convocati</h3>
              <Button 
                size="sm" 
-               className="h-9 rounded-xl font-black uppercase text-[10px] bg-black border border-brand-green text-white hover:bg-black/80 shadow-[0_0_10px_rgba(172,229,4,0.15)] hover:scale-105 transition-all"
+               className="h-9 rounded-xl font-black uppercase text-[10px] bg-primary dark:bg-black border border-primary dark:border-brand-green text-white hover:opacity-90 dark:hover:bg-black/80 shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.15)] hover:scale-105 transition-all"
                onClick={markAllAsPresent}
                disabled={saving || players.length === 0}
              >
-               {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1.5 text-brand-green" /> : <CheckCircle2 className="h-3.5 w-3.5 mr-1.5 text-brand-green" />}
+               {saving ? <Loader2 className="h-3 w-3 animate-spin mr-1.5 text-white dark:text-brand-green" /> : <CheckCircle2 className="h-3.5 w-3.5 mr-1.5 text-white dark:text-brand-green" />}
                Tutti Presenti
              </Button>
           </div>
@@ -214,10 +214,10 @@ export default function TrainingDetailPage() {
               const currentStatus = attendance.find(a => a.playerId === player.id)?.status;
               
               return (
-                <Card key={player.id} className="rounded-2xl border border-brand-green/20 overflow-hidden bg-card/40 backdrop-blur-sm shadow-[0_0_10px_rgba(172,229,4,0.05)]">
+                <Card key={player.id} className="rounded-2xl border border-border dark:border-brand-green/20 overflow-hidden bg-card dark:bg-card/40 backdrop-blur-sm shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)]">
                   <CardContent className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="hidden sm:flex h-10 w-10 rounded-xl bg-card border flex-shrink-0 items-center justify-center font-black text-xs text-muted-foreground/60">
+                      <div className="hidden sm:flex h-10 w-10 rounded-xl bg-background dark:bg-card border border-border dark:border-white/10 flex-shrink-0 items-center justify-center font-black text-xs text-muted-foreground/60">
                         {player.name.charAt(0)}
                       </div>
                       <div className="flex flex-col">

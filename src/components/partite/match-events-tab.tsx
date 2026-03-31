@@ -15,13 +15,13 @@ export function MatchEventsTab() {
 
   const getEventIcon = (type: MatchEventType) => {
     switch(type) {
-      case 'goal': return <Goal className="h-5 w-5 text-brand-green" />;
-      case 'assist': return <Zap className="h-5 w-5 text-brand-green" />;
-      case 'yellow_card': return <div className="h-5 w-4 bg-yellow-400 rounded-sm border border-yellow-300" />;
-      case 'red_card': return <div className="h-5 w-4 bg-red-600 rounded-sm border border-red-400" />;
+      case 'goal': return <Goal className="h-5 w-5 text-primary dark:text-brand-green" />;
+      case 'assist': return <Zap className="h-5 w-5 text-primary dark:text-brand-green" />;
+      case 'yellow_card': return <div className="h-5 w-4 bg-yellow-400 rounded-sm border border-yellow-300 shadow-sm" />;
+      case 'red_card': return <div className="h-5 w-4 bg-red-600 rounded-sm border border-red-400 shadow-sm" />;
       case 'substitution':
       case 'sub_in':
-      case 'sub_out': return <ArrowRightLeft className="h-5 w-5 text-brand-green" />;
+      case 'sub_out': return <ArrowRightLeft className="h-5 w-5 text-primary dark:text-brand-green" />;
       default: return <Info className="h-5 w-5 text-muted-foreground" />;
     }
   };
@@ -47,18 +47,18 @@ export function MatchEventsTab() {
 
   return (
     <div className="space-y-6 relative">
-      <Card className="bg-black/40 border border-brand-green/30 rounded-3xl shadow-[0_0_15px_rgba(172,229,4,0.08)]">
+      <Card className="bg-card dark:bg-black/40 border border-border dark:border-brand-green/30 rounded-3xl shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.08)]">
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <div>
             <div className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-brand-green" />
-              <CardTitle className="uppercase font-black">Cronaca Partita</CardTitle>
+              <Zap className="h-5 w-5 text-primary dark:text-brand-green" />
+              <CardTitle className="uppercase font-black text-foreground">Cronaca Partita</CardTitle>
             </div>
-            <CardDescription className="uppercase text-[10px] font-bold">Riepilogo degli eventi principali della gara.</CardDescription>
+            <CardDescription className="uppercase text-[10px] font-bold text-muted-foreground">Riepilogo degli eventi principali della gara.</CardDescription>
           </div>
           <Button 
             size="icon" 
-            className="rounded-full bg-black border border-brand-green text-brand-green hover:bg-black/80 shadow-[0_0_10px_rgba(172,229,4,0.2)]"
+            className="rounded-full bg-primary dark:bg-black border border-primary dark:border-brand-green text-white dark:text-brand-green hover:opacity-90 dark:hover:bg-black/80 shadow-md dark:shadow-[0_0_10px_rgba(172,229,4,0.2)]"
             onClick={() => setIsEventDialogOpen(true)}
           >
             <Plus className="h-6 w-6" />
@@ -66,10 +66,10 @@ export function MatchEventsTab() {
         </CardHeader>
         <CardContent>
           {events.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-brand-green/20 rounded-xl">
-                <Info className="h-10 w-10 text-brand-green mb-3 opacity-30" />
-                <p className="text-xs font-black uppercase text-muted-foreground">Nessun evento registrato</p>
-                <p className="text-[10px] font-bold text-muted-foreground mt-2 uppercase">Usa il tasto + per aggiungere gol o cartellini.</p>
+            <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-border dark:border-brand-green/20 rounded-xl bg-muted/20 dark:bg-transparent">
+                <Info className="h-10 w-10 text-primary dark:text-brand-green mb-3 opacity-30" />
+                <p className="text-xs font-black uppercase text-foreground/40 dark:text-muted-foreground">Nessun evento registrato</p>
+                <p className="text-[10px] font-bold text-foreground/30 dark:text-muted-foreground mt-2 uppercase">Usa il tasto + per aggiungere gol o cartellini.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -108,7 +108,7 @@ export function MatchEventsTab() {
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="text-right">
-                          <span className="text-sm font-black tabular-nums">{event.minute}&apos;</span>
+                          <span className="text-sm font-black tabular-nums text-foreground">{event.minute}&apos;</span>
                           <span className="text-[9px] font-bold text-muted-foreground block leading-none">{event.period}</span>
                       </div>
                       <Button 

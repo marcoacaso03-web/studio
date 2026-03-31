@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSWRConfig } from "swr";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ interface ScoutCategoryDialogProps {
 export function ScoutCategoryDialog({ open, onOpenChange, categories }: ScoutCategoryDialogProps) {
   const { user } = useUser();
   const firestore = useFirestore();
+  const { mutate } = useSWRConfig();
   
   const [loading, setLoading] = useState(false);
   const [newCatName, setNewCatName] = useState("");
@@ -48,6 +50,7 @@ export function ScoutCategoryDialog({ open, onOpenChange, categories }: ScoutCat
         colorHex: selectedColor,
         userId: user.uid
       });
+      await mutate(`users/${user.uid}/scoutCategories`);
       setNewCatName("");
     } catch (e) {
       console.error(e);
@@ -59,12 +62,13 @@ export function ScoutCategoryDialog({ open, onOpenChange, categories }: ScoutCat
   const handleDeleteCategory = async (id: string) => {
     if (!user || !firestore) return;
     await deleteDoc(doc(firestore, 'users', user.uid, 'scoutCategories', id));
+    await mutate(`users/${user.uid}/scoutCategories`);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-md rounded-3xl p-0 overflow-hidden bg-background border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)]">
-        <DialogHeader className="p-6 bg-black/60 border-b border-brand-green/30 text-white shrink-0">
+      <DialogContent className="max-w-[95vw] md:max-w-md rounded-3xl p-0 overflow-hidden bg-card dark:bg-background border border-primary/30 dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.15)]">
+        <DialogHeader className="p-6 bg-muted dark:bg-black/60 border-b border-primary/30 dark:border-brand-green/30 text-foreground dark:text-white shrink-0">
           <DialogTitle className="text-xl font-black uppercase tracking-tight">
             Gestisci Etichette
           </DialogTitle>
@@ -72,19 +76,19 @@ export function ScoutCategoryDialog({ open, onOpenChange, categories }: ScoutCat
 
         <div className="p-6 space-y-6">
           {/* Form nuova categoria */}
-          <div className="space-y-4 p-4 rounded-2xl bg-black/40 border border-brand-green/20">
+          <div className="space-y-4 p-4 rounded-2xl bg-muted dark:bg-black/40 border border-primary/20 dark:border-brand-green/20">
             <div className="space-y-1.5">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-brand-green ml-1">Nuova Etichetta</Label>
+              <Label className="text-[10px] font-black uppercase tracking-widest text-primary dark:text-brand-green ml-1">Nuova Etichetta</Label>
               <div className="flex gap-2">
                 <Input 
                   value={newCatName} 
                   onChange={e => setNewCatName(e.target.value)}
                   placeholder="Es: Piede Sinistro"
-                  className="h-10 rounded-xl font-bold uppercase text-xs bg-black border border-brand-green/50 focus-visible:ring-1 focus-visible:ring-brand-green text-white shadow-sm"
+                  className="h-10 rounded-xl font-bold uppercase text-xs bg-background dark:bg-black border border-primary/50 dark:border-brand-green/50 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green text-foreground dark:text-white shadow-sm"
                 />
                 <Button 
                   size="sm" 
-                  className="bg-black border border-brand-green text-brand-green hover:bg-brand-green hover:text-black shadow-[0_0_10px_rgba(172,229,4,0.15)] h-10 rounded-xl font-black uppercase px-4 transition-all"
+                  className="bg-primary border border-primary text-white hover:bg-primary/90 hover:text-white dark:bg-black dark:border-brand-green dark:text-brand-green dark:hover:bg-brand-green dark:hover:text-black shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.15)] h-10 rounded-xl font-black uppercase px-4 transition-all"
                   onClick={handleAddCategory}
                   disabled={loading || !newCatName.trim()}
                 >
@@ -94,7 +98,7 @@ export function ScoutCategoryDialog({ open, onOpenChange, categories }: ScoutCat
             </div>
             
             <div className="space-y-1.5">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-brand-green ml-1">Scegli Colore</Label>
+              <Label className="text-[10px] font-black uppercase tracking-widest text-primary dark:text-brand-green ml-1">Scegli Colore</Label>
               <div className="flex flex-wrap gap-2">
                 {PRESET_COLORS.map(color => (
                   <div 
@@ -112,22 +116,22 @@ export function ScoutCategoryDialog({ open, onOpenChange, categories }: ScoutCat
 
           {/* Lista categorie esistenti */}
           <div className="space-y-2">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-brand-green ml-1">Etichette Esistenti</Label>
-            <ScrollArea className="h-[200px] w-full rounded-xl bg-black/40 border border-brand-green/20 p-2">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-primary dark:text-brand-green ml-1">Etichette Esistenti</Label>
+            <ScrollArea className="h-[200px] w-full rounded-xl bg-muted dark:bg-black/40 border border-primary/20 dark:border-brand-green/20 p-2">
               <div className="space-y-2">
                 {categories.length === 0 ? (
                   <p className="text-[10px] text-center py-10 text-muted-foreground font-bold uppercase italic">Nessuna etichetta salvata.</p>
                 ) : (
                   categories.map(cat => (
-                    <div key={cat.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                    <div key={cat.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-background dark:hover:bg-muted/50 transition-colors">
                       <div className="flex items-center gap-2">
                         <div className="h-3 w-3 rounded-full" style={{ backgroundColor: cat.colorHex }} />
-                        <span className="text-[10px] font-black uppercase tracking-tight">{cat.name}</span>
+                        <span className="text-[10px] font-black uppercase tracking-tight text-foreground dark:text-white">{cat.name}</span>
                       </div>
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 dark:hover:text-red-500 dark:hover:bg-red-500/10 transition-all"
                         onClick={() => handleDeleteCategory(cat.id)}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -141,7 +145,7 @@ export function ScoutCategoryDialog({ open, onOpenChange, categories }: ScoutCat
         </div>
 
         <DialogFooter className="p-6 pt-0">
-          <Button className="w-full rounded-xl font-black uppercase text-xs h-12 bg-black border border-brand-green/30 text-white hover:bg-black/80 hover:border-brand-green shadow-[0_0_10px_rgba(172,229,4,0.1)] transition-all" onClick={() => onOpenChange(false)}>
+          <Button className="w-full rounded-xl font-black uppercase text-xs h-12 bg-primary dark:bg-black border border-primary/30 dark:border-brand-green/30 text-white hover:opacity-90 dark:hover:bg-black/80 hover:border-primary dark:hover:border-brand-green shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.1)] transition-all" onClick={() => onOpenChange(false)}>
             Chiudi
           </Button>
         </DialogFooter>

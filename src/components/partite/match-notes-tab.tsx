@@ -36,11 +36,11 @@ export function MatchNotesTab() {
   };
 
   return (
-    <Card className="bg-black/40 border border-brand-green/30 rounded-3xl shadow-[0_0_15px_rgba(172,229,4,0.08)]">
+    <Card className="bg-card dark:bg-black/40 border border-border dark:border-brand-green/30 rounded-3xl shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.08)]">
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <div>
           <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-brand-green" />
+            <FileText className="h-5 w-5 text-primary dark:text-brand-green" />
             <CardTitle>Note Tattiche</CardTitle>
           </div>
           <CardDescription>Analisi post-partita, note sull'avversario e progressi tecnici.</CardDescription>
@@ -48,16 +48,16 @@ export function MatchNotesTab() {
         <Button 
           onClick={handleSave} 
           disabled={isSaving}
-          className="bg-black border border-brand-green text-white hover:bg-black/80 shadow-[0_0_10px_rgba(172,229,4,0.15)] font-bold uppercase text-xs transition-all"
+          className="bg-primary dark:bg-black border border-primary dark:border-brand-green text-white hover:opacity-90 dark:hover:bg-black/80 shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.15)] font-bold uppercase text-xs transition-all"
         >
-          <Save className="mr-2 h-4 w-4 text-brand-green" />
+          <Save className="mr-2 h-4 w-4 text-white dark:text-brand-green" />
           {isSaving ? "Salvataggio..." : "Salva Note"}
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         <Textarea
           placeholder="Inserisci qui le tue annotazioni (es. Punti deboli avversario, prestazioni individuali, suggerimenti per il prossimo allenamento...)"
-          className="min-h-[300px] text-sm leading-relaxed bg-black border border-brand-green/30 focus-visible:ring-1 focus-visible:ring-brand-green rounded-xl"
+          className="min-h-[300px] text-sm leading-relaxed bg-background dark:bg-black border border-primary/50 dark:border-brand-green/30 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green rounded-xl text-foreground dark:text-white"
           value={localNotes}
           onChange={(e) => setLocalNotes(e.target.value)}
         />

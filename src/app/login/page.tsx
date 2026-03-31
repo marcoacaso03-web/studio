@@ -8,11 +8,10 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
-  const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, signUp, isAuthenticated } = useAuthStore();
+  const { login, isAuthenticated } = useAuthStore();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -26,34 +25,16 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    if (isLogin) {
-      const result = await login(username, password);
-      if (result.success) {
-        router.push('/calendario');
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Accesso negato",
-          description: result.error || "Username o password errati.",
-        });
-        setIsLoading(false);
-      }
+    const result = await login(username, password);
+    if (result.success) {
+      router.push('/calendario');
     } else {
-      const result = await signUp(username, password);
-      if (result.success) {
-        toast({
-          title: "Account Creato",
-          description: `Benvenuto ${username}! Il tuo spazio cloud è pronto.`,
-        });
-        router.push('/calendario');
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Errore registrazione",
-          description: result.error || "Impossibile creare l'account.",
-        });
-        setIsLoading(false);
-      }
+      toast({
+        variant: "destructive",
+        title: "Accesso negato",
+        description: result.error || "Username o password errati.",
+      });
+      setIsLoading(false);
     }
   };
 
@@ -66,7 +47,7 @@ export default function LoginPage() {
             <img 
               src="/favicon-16x16.png" 
               alt="PitchMan Logo" 
-              className="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]" 
+              className="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(0,128,255,0.3)] dark:drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]" 
             />
           </div>
           <h1 className="text-4xl font-bold tracking-tight">PitchMan</h1>
@@ -80,7 +61,7 @@ export default function LoginPage() {
                 id="username"
                 type="text" 
                 placeholder="Username (o Email)"
-                className="h-12 bg-transparent border-neon-gradient rounded-xl px-4 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/50 transition-all font-sans"
+                className="h-12 bg-transparent border-primary/30 dark:border-neon-gradient rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-0 dark:focus-visible:ring-offset-0 placeholder:text-muted-foreground/50 transition-all font-sans"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -91,7 +72,7 @@ export default function LoginPage() {
                 id="password"
                 type="password"
                 placeholder="Password"
-                className="h-12 bg-transparent border-neon-gradient rounded-xl px-4 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/50 transition-all"
+                className="h-12 bg-transparent border-primary/30 dark:border-neon-gradient rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-0 dark:focus-visible:ring-offset-0 placeholder:text-muted-foreground/50 transition-all"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -102,33 +83,14 @@ export default function LoginPage() {
           <div className="space-y-4 pt-4">
             <Button 
               type="submit" 
-              className="w-full h-14 bg-neon-gradient text-primary-foreground font-bold text-lg rounded-full glow-neon hover:opacity-90 transition-all border-none"
+              className="w-full h-14 bg-primary dark:bg-neon-gradient text-white dark:text-primary-foreground font-bold text-lg rounded-full shadow-md dark:shadow-none dark:glow-neon hover:opacity-90 transition-all border-none"
               disabled={isLoading}
             >
-              {isLoading ? "ELABORAZIONE..." : isLogin ? "ACCEDI" : "REGISTRATI"}
+              {isLoading ? "ELABORAZIONE..." : "ACCEDI"}
             </Button>
-            
-            <div className="text-center">
-              <button 
-                type="button"
-                className="text-sm font-medium text-foreground underline hover:opacity-80 transition-colors"
-              >
-                Password dimenticata?
-              </button>
-            </div>
           </div>
         </form>
 
-        {/* Toggle Login/Signup */}
-        <div className="pt-4">
-          <button 
-            type="button"
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {isLogin ? "Crea un nuovo account" : "Hai già un account? Accedi"}
-          </button>
-        </div>
       </div>
     </div>
   );

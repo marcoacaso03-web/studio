@@ -74,14 +74,14 @@ export function ImportTuttocampoDialog({ open, onOpenChange }: ImportTuttocampoD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px] rounded-3xl p-0 overflow-hidden border-none shadow-2xl flex flex-col max-h-[90vh] bg-black">
-        <DialogHeader className="p-6 bg-white text-black shrink-0 relative">
+      <DialogContent className="sm:max-w-[550px] rounded-3xl p-0 overflow-hidden border-none shadow-2xl flex flex-col max-h-[90vh] bg-background dark:bg-black">
+        <DialogHeader className="p-6 bg-white dark:bg-foreground text-black shrink-0 relative border-b border-border dark:border-none">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-black/5 rounded-2xl">
               <ClipboardCopy className="h-6 w-6 text-black" />
             </div>
             <div>
-              <DialogTitle className="uppercase font-black tracking-tight text-xl">Importazione Calendario</DialogTitle>
+              <DialogTitle className="uppercase font-black tracking-tight text-xl text-black">Importazione Calendario</DialogTitle>
               <DialogDescription className="text-black/60 text-[10px] font-bold uppercase tracking-widest mt-1">
                 Metodo Rapido Copia-Incolla (AI)
               </DialogDescription>
@@ -92,42 +92,42 @@ export function ImportTuttocampoDialog({ open, onOpenChange }: ImportTuttocampoD
         <ScrollArea className="flex-1">
           <div className="p-6 space-y-6">
             <div className="space-y-4">
-              <div className="p-4 bg-black border border-brand-green/20 rounded-2xl border-dashed space-y-3 shadow-inner">
-                <h4 className="text-[10px] font-black uppercase text-white tracking-widest flex items-center gap-2">
-                  <Info className="h-3 w-3 text-brand-green" /> Come fare:
+              <div className="p-4 bg-muted dark:bg-black border border-border dark:border-brand-green/20 rounded-2xl border-dashed space-y-3 shadow-inner">
+                <h4 className="text-[10px] font-black uppercase text-foreground dark:text-white tracking-widest flex items-center gap-2">
+                  <Info className="h-3 w-3 text-primary dark:text-brand-green" /> Come fare:
                 </h4>
-                <div className="space-y-2 text-[11px] font-bold leading-relaxed text-white/40 uppercase">
+                <div className="space-y-2 text-[11px] font-bold leading-relaxed text-muted-foreground dark:text-white/40 uppercase">
                   <div className="flex gap-2">
-                    <span className="text-white">1.</span>
-                    <p>Vai su <span className="text-white">Tuttocampo.it</span> e apri il calendario della tua squadra.</p>
+                    <span className="text-foreground dark:text-white">1.</span>
+                    <p>Vai su <span className="text-foreground dark:text-white">Tuttocampo.it</span> e apri il calendario della tua squadra.</p>
                   </div>
                   <div className="flex gap-2">
-                    <span className="text-white">2.</span>
-                    <p>Seleziona tutta la tabella (<kbd className="bg-white/10 px-1 border border-white/10 rounded text-[9px]">CTRL+A</kbd> su PC, o <span className="text-white">Seleziona Tutto</span> su Mobile).</p>
+                    <span className="text-foreground dark:text-white">2.</span>
+                    <p>Seleziona tutta la tabella (<kbd className="bg-foreground/10 dark:bg-white/10 px-1 border border-foreground/10 dark:border-white/10 rounded text-[9px]">CTRL+A</kbd> su PC, o <span className="text-foreground dark:text-white">Seleziona Tutto</span> su Mobile).</p>
                   </div>
                   <div className="flex gap-2">
-                    <span className="text-white">3.</span>
+                    <span className="text-foreground dark:text-white">3.</span>
                     <p>Copia il contenuto e incollalo nel box qui sotto.</p>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <p className="text-[10px] font-black uppercase text-white/30 tracking-widest ml-1">Incolla qui i dati della tabella:</p>
+                <p className="text-[10px] font-black uppercase text-muted-foreground dark:text-white/30 tracking-widest ml-1">Incolla qui i dati della tabella:</p>
                 <Textarea
                   placeholder="Esempio: 20/09/2024 15:00 Squadra A vs Squadra B..."
                   value={rawText}
                   onChange={(e) => setRawText(e.target.value)}
                   disabled={isLoading}
-                  className="min-h-[200px] text-[11px] font-bold rounded-2xl bg-black border-brand-green/30 focus-visible:ring-1 focus-visible:ring-brand-green text-white placeholder:text-white/10 transition-colors"
+                  className="min-h-[200px] text-[11px] font-bold rounded-2xl bg-background dark:bg-black border-border dark:border-brand-green/30 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green text-foreground dark:text-white placeholder:text-muted-foreground/30 dark:placeholder:text-white/10 transition-colors"
                 />
               </div>
 
               {isLoading && (
-                <div className="flex flex-col items-center justify-center p-8 bg-primary/5 rounded-2xl border border-dashed border-primary/20 space-y-3 animate-in fade-in zoom-in">
-                  <Loader2 className="h-10 w-10 text-foreground animate-spin" />
+                <div className="flex flex-col items-center justify-center p-8 bg-primary/5 dark:bg-primary/5 rounded-2xl border border-dashed border-primary/20 space-y-3 animate-in fade-in zoom-in">
+                  <Loader2 className="h-10 w-10 text-primary dark:text-foreground animate-spin" />
                   <div className="text-center">
-                    <p className="text-[10px] font-black uppercase text-foreground animate-pulse tracking-widest">L'AI sta leggendo i dati...</p>
+                    <p className="text-[10px] font-black uppercase text-primary dark:text-foreground animate-pulse tracking-widest">L'AI sta leggendo i dati...</p>
                     <p className="text-[9px] text-muted-foreground uppercase font-bold mt-1">Analisi avversari e date in corso</p>
                   </div>
                 </div>
@@ -136,13 +136,13 @@ export function ImportTuttocampoDialog({ open, onOpenChange }: ImportTuttocampoD
           </div>
         </ScrollArea>
 
-        <DialogFooter className="p-6 pt-0 flex-row gap-3 shrink-0 bg-black">
-          <Button variant="ghost" className="flex-1 rounded-2xl font-black uppercase text-[10px] h-12 text-white hover:bg-white/5" onClick={() => onOpenChange(false)} disabled={isLoading}>
+        <DialogFooter className="p-6 pt-0 flex-row gap-3 shrink-0 bg-background dark:bg-black">
+          <Button variant="ghost" className="flex-1 rounded-2xl font-black uppercase text-[10px] h-12 text-foreground dark:text-white hover:bg-muted dark:hover:bg-white/5" onClick={() => onOpenChange(false)} disabled={isLoading}>
             Annulla
           </Button>
           <Button 
             onClick={handleImport} 
-            className="flex-1 bg-black border border-brand-green text-white hover:bg-brand-green/10 rounded-2xl font-black uppercase text-[10px] h-12 shadow-[0_0_15px_rgba(172,229,4,0.1)] transition-all" 
+            className="flex-1 bg-primary dark:bg-black border border-primary dark:border-brand-green text-white dark:text-white hover:opacity-90 dark:hover:bg-brand-green/10 rounded-2xl font-black uppercase text-[10px] h-12 shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.1)] transition-all" 
             disabled={isLoading || !rawText.trim()}
           >
             {isLoading ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : "Importa Calendario"}

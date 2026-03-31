@@ -195,9 +195,9 @@ export default function AltroPage() {
   if (!mounted) return null;
 
   return (
-    <div className="pb-24 pt-4 space-y-6">
+    <div className="pb-24 pt-4 space-y-6 bg-background">
       <div className="flex items-center gap-2 px-6 mb-2">
-        <h1 className="text-2xl font-black text-white uppercase tracking-tight">Impostazioni</h1>
+        <h1 className="text-2xl font-black text-foreground uppercase tracking-tight">Impostazioni</h1>
       </div>
 
       <div className="flex flex-col space-y-3 px-2">
@@ -206,55 +206,55 @@ export default function AltroPage() {
         {/* Profilo Allenatore */}
         <div
           onClick={() => setIsAccountOpen(true)}
-          className="flex items-center gap-4 bg-black/40 border border-brand-green/30 rounded-3xl p-3 cursor-pointer hover:bg-black/60 transition-all shadow-[0_0_10px_rgba(172,229,4,0.05)] active:scale-[0.98]"
+          className="flex items-center gap-4 bg-card border border-border dark:bg-black/40 dark:border-brand-green/30 rounded-3xl p-3 cursor-pointer hover:bg-muted/50 dark:hover:bg-black/60 transition-all shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)] active:scale-[0.98]"
         >
-          <div className="w-14 h-14 rounded-2xl bg-black border border-brand-green flex items-center justify-center shadow-[0_0_10px_rgba(172,229,4,0.1)]">
-            <User className="h-6 w-6 text-brand-green" />
+          <div className="w-14 h-14 rounded-2xl bg-muted dark:bg-black border border-border dark:border-brand-green flex items-center justify-center shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.1)]">
+            <User className="h-6 w-6 text-primary dark:text-brand-green" />
           </div>
           <div className="flex flex-col flex-1">
-            <span className="text-white font-bold text-lg tracking-wide">Profilo Allenatore</span>
-            <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest">Dettagli account</span>
+            <span className="text-foreground font-black text-lg tracking-wide uppercase">Profilo Allenatore</span>
+            <span className="text-foreground/40 text-[10px] font-bold uppercase tracking-widest">Dettagli account</span>
           </div>
         </div>
 
-        {/* Gestione Squadra (Archivio Stagioni & Allenamenti come richiesto) */}
+        {/* Gestione Squadra */}
         <div
           onClick={() => setIsSquadraOpen(true)}
-          className="flex items-center gap-4 bg-black/40 border border-brand-green/30 rounded-3xl p-3 cursor-pointer hover:bg-black/60 transition-all shadow-[0_0_10px_rgba(172,229,4,0.05)] active:scale-[0.98]"
+          className="flex items-center gap-4 bg-card border border-border dark:bg-black/40 dark:border-brand-green/30 rounded-3xl p-3 cursor-pointer hover:bg-muted/50 dark:hover:bg-black/60 transition-all shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)] active:scale-[0.98]"
         >
-          <div className="w-14 h-14 rounded-2xl bg-black border border-brand-green flex items-center justify-center shadow-[0_0_10px_rgba(172,229,4,0.1)]">
-            <Shirt className="h-6 w-6 text-brand-green" />
+          <div className="w-14 h-14 rounded-2xl bg-muted dark:bg-black border border-border dark:border-brand-green flex items-center justify-center shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.1)]">
+            <Shirt className="h-6 w-6 text-primary dark:text-brand-green" />
           </div>
           <div className="flex flex-col flex-1">
-            <span className="text-white font-bold text-lg tracking-wide">Gestione Squadra</span>
-            <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest">Archivio Stagioni & Allenamenti</span>
+            <span className="text-foreground font-black text-lg tracking-wide uppercase">Gestione Squadra</span>
+            <span className="text-foreground/40 text-[10px] font-bold uppercase tracking-widest">Archivio Stagioni & Allenamenti</span>
           </div>
         </div>
 
         {/* Notifiche */}
         <div
           onClick={() => toast({ title: "Presto disponibile", description: "Le notifiche push arriveranno in futuro." })}
-          className="flex items-center gap-4 bg-black/40 border border-brand-green/30 rounded-3xl p-3 cursor-pointer hover:bg-black/60 transition-all shadow-[0_0_10px_rgba(172,229,4,0.05)] active:scale-[0.98]"
+          className="flex items-center gap-4 bg-card border border-border dark:bg-black/40 dark:border-brand-green/30 rounded-3xl p-3 cursor-pointer hover:bg-muted/50 dark:hover:bg-black/60 transition-all shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)] active:scale-[0.98]"
         >
-          <div className="w-14 h-14 rounded-2xl bg-black border border-brand-green flex items-center justify-center shadow-[0_0_10px_rgba(172,229,4,0.1)]">
-            <Bell className="h-6 w-6 text-brand-green" />
+          <div className="w-14 h-14 rounded-2xl bg-muted dark:bg-black border border-border dark:border-brand-green flex items-center justify-center shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.1)]">
+            <Bell className="h-6 w-6 text-primary dark:text-brand-green" />
           </div>
           <div className="flex flex-col flex-1">
-            <span className="text-white font-bold text-lg tracking-wide">Notifiche</span>
-            <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest">Preferenze push</span>
+            <span className="text-foreground font-black text-lg tracking-wide uppercase">Notifiche</span>
+            <span className="text-foreground/40 text-[10px] font-bold uppercase tracking-widest">Preferenze push</span>
           </div>
         </div>
 
         {/* Tema */}
         <div
-          className="flex items-center gap-4 bg-black/40 border border-brand-green/30 rounded-3xl p-3 shadow-[0_0_10px_rgba(172,229,4,0.05)]"
+          className="flex items-center gap-4 bg-card border border-border dark:bg-black/40 dark:border-brand-green/30 rounded-3xl p-3 shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)]"
         >
-          <div className="w-14 h-14 rounded-2xl bg-black border border-brand-green flex items-center justify-center shadow-[0_0_10px_rgba(172,229,4,0.1)]">
-            <Moon className="h-6 w-6 text-brand-green" />
+          <div className="w-14 h-14 rounded-2xl bg-muted dark:bg-black border border-border dark:border-brand-green flex items-center justify-center shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.1)]">
+            <Moon className="h-6 w-6 text-primary dark:text-brand-green" />
           </div>
           <div className="flex flex-col flex-1">
-            <span className="text-white font-bold text-lg tracking-wide">Tema</span>
-            <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest">Chiaro/Scuro</span>
+            <span className="text-foreground font-black text-lg tracking-wide uppercase">Tema</span>
+            <span className="text-foreground/40 text-[10px] font-bold uppercase tracking-widest">Chiaro/Scuro</span>
           </div>
           <div className="bg-muted/80 rounded-full flex items-center p-1 mr-2 shadow-inner border border-white/10">
             {/* Un toggle visivo custom che mimi quello nel mockup */}
@@ -276,14 +276,14 @@ export default function AltroPage() {
         {/* Privacy & Sicurezza */}
         <div
           onClick={() => setIsPrivacyOpen(true)}
-          className="flex items-center gap-4 bg-black/40 border border-brand-green/30 rounded-3xl p-3 cursor-pointer hover:bg-black/60 transition-all shadow-[0_0_10px_rgba(172,229,4,0.05)] active:scale-[0.98]"
+          className="flex items-center gap-4 bg-card border border-border dark:bg-black/40 dark:border-brand-green/30 rounded-3xl p-3 cursor-pointer hover:bg-muted/50 dark:hover:bg-black/60 transition-all shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)] active:scale-[0.98]"
         >
-          <div className="w-14 h-14 rounded-2xl bg-black border border-brand-green flex items-center justify-center shadow-[0_0_10px_rgba(172,229,4,0.1)]">
-            <Shield className="h-6 w-6 text-brand-green" />
+          <div className="w-14 h-14 rounded-2xl bg-muted dark:bg-black border border-border dark:border-brand-green flex items-center justify-center shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.1)]">
+            <Shield className="h-6 w-6 text-primary dark:text-brand-green" />
           </div>
           <div className="flex flex-col flex-1">
-            <span className="text-white font-bold text-lg tracking-wide">Privacy & Sicurezza</span>
-            <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest">Permessi & Dati</span>
+            <span className="text-foreground font-black text-lg tracking-wide uppercase">Privacy & Sicurezza</span>
+            <span className="text-foreground/40 text-[10px] font-bold uppercase tracking-widest">Permessi & Dati</span>
           </div>
         </div>
 
@@ -293,13 +293,13 @@ export default function AltroPage() {
 
       {/* Account Dialog */}
       <Dialog open={isAccountOpen} onOpenChange={setIsAccountOpen}>
-        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-3xl bg-black border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)] text-white">
+        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground">
           <DialogHeader>
             <DialogTitle className="text-xl font-black text-foreground">Profilo Allenatore</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="flex items-center gap-4 p-4 rounded-2xl bg-card/20 hover:bg-card/30">
-              <div className="h-12 w-12 rounded-full bg-black border border-brand-green flex items-center justify-center text-brand-green font-black uppercase text-xl shadow-[0_0_10px_rgba(172,229,4,0.15)]">
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-muted/30 dark:bg-card/20 hover:bg-muted/50 dark:hover:bg-card/30">
+              <div className="h-12 w-12 rounded-full bg-background dark:bg-black border border-border dark:border-brand-green flex items-center justify-center text-primary dark:text-brand-green font-black uppercase text-xl shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.15)]">
                 {user?.username.charAt(0)}
               </div>
               <div className="flex flex-col">
@@ -311,7 +311,7 @@ export default function AltroPage() {
             <div className="pt-4">
               <Button
                 onClick={handleLogout}
-                className="w-full rounded-xl font-black uppercase text-xs h-12 bg-black border border-rose-500/50 text-rose-500 hover:bg-rose-500/10 hover:border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.05)] transition-all"
+                className="w-full rounded-xl font-black uppercase text-xs h-12 bg-background dark:bg-black border border-rose-500/50 text-rose-500 hover:bg-rose-500/10 hover:border-rose-500 shadow-sm dark:shadow-[0_0_10px_rgba(244,63,94,0.05)] transition-all"
               >
                 <LogOut className="mr-2 h-4 w-4" />
                 Esci dall'Account
@@ -321,12 +321,12 @@ export default function AltroPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Gestione Squadra (Archivio Stagioni & Allenamenti) Dialog */}
+      {/* Gestione Squadra Dialog */}
       <Dialog open={isSquadraOpen} onOpenChange={setIsSquadraOpen}>
-        <DialogContent className="max-w-[95vw] sm:max-w-lg rounded-3xl bg-black border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)] text-white max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-lg rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black text-white">Gestione Squadra</DialogTitle>
-            <DialogDescription className="text-white/30">Configura archivio stagioni e frequenza allenamento.</DialogDescription>
+            <DialogTitle className="text-xl font-black text-foreground">Gestione Squadra</DialogTitle>
+            <DialogDescription className="text-muted-foreground">Configura archivio stagioni e frequenza allenamento.</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-6 pt-4">
@@ -334,16 +334,16 @@ export default function AltroPage() {
             <div className="space-y-3">
               <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Preferenze</h3>
 
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-card/20 hover:bg-card/30">
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/30 dark:bg-card/20 hover:bg-muted/50 dark:hover:bg-card/30 border border-border dark:border-transparent">
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-brand-green" />
+                  <Clock className="w-4 h-4 text-primary dark:text-brand-green" />
                   <Label className="text-sm font-bold">Durata Partite</Label>
                 </div>
                 <Select value={defaultDuration.toString()} onValueChange={(v) => setDefaultDuration(parseInt(v))}>
-                  <SelectTrigger className="w-32 h-9 text-xs font-bold uppercase bg-black border border-brand-green/30 focus:ring-1 focus:ring-brand-green">
+                  <SelectTrigger className="w-32 h-9 text-xs font-bold uppercase bg-background dark:bg-black border border-border dark:border-brand-green/30 focus:ring-1 focus:ring-primary dark:focus:ring-brand-green">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-card border-white/10 text-foreground">
+                  <SelectContent className="bg-popover border-border dark:border-white/10 text-foreground">
                     <SelectItem value="70">70 min</SelectItem>
                     <SelectItem value="80">80 min</SelectItem>
                     <SelectItem value="90">90 min</SelectItem>
@@ -351,9 +351,9 @@ export default function AltroPage() {
                 </Select>
               </div>
 
-              <div className="flex flex-col gap-3 p-3 rounded-2xl bg-card/20 hover:bg-card/30">
+              <div className="flex flex-col gap-3 p-3 rounded-2xl bg-muted/30 dark:bg-card/20 hover:bg-muted/50 dark:hover:bg-card/30 border border-border dark:border-transparent">
                 <div className="flex items-center gap-2">
-                  <Dumbbell className="w-4 h-4 text-brand-green" />
+                  <Dumbbell className="w-4 h-4 text-primary dark:text-brand-green" />
                   <Label className="text-sm font-bold">Giorni di Allenamento</Label>
                 </div>
                 <div className="flex justify-between gap-1 mt-1">
@@ -380,8 +380,8 @@ export default function AltroPage() {
                         className={cn(
                           "w-10 h-10 rounded-xl flex items-center justify-center font-black transition-all",
                           isSelected
-                            ? "bg-black border border-brand-green text-white shadow-[0_0_10px_rgba(172,229,4,0.15)] scale-110"
-                            : "bg-black/20 text-muted-foreground hover:bg-black/40"
+                            ? "bg-primary dark:bg-black border border-primary dark:border-brand-green text-white shadow-md dark:shadow-[0_0_10px_rgba(172,229,4,0.15)] scale-110"
+                            : "bg-muted dark:bg-black/20 text-muted-foreground hover:bg-muted-foreground/10 dark:hover:bg-black/40"
                         )}
                       >
                         {day.label}
@@ -391,16 +391,16 @@ export default function AltroPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 p-3 rounded-2xl bg-card/20 hover:bg-card/30">
+              <div className="flex flex-col gap-3 p-3 rounded-2xl bg-muted/30 dark:bg-card/20 hover:bg-muted/50 dark:hover:bg-card/30 border border-border dark:border-transparent">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-brand-green" />
+                    <CheckCircle2 className="w-4 h-4 text-primary dark:text-brand-green" />
                     <Label className="text-sm font-bold">Auto-Compila Presenze</Label>
                   </div>
                   <Switch
                     checked={autoSetPresenceOnGenerate}
                     onCheckedChange={setAutoSetPresenceOnGenerate}
-                    className="data-[state=checked]:bg-brand-green"
+                    className="data-[state=checked]:bg-primary dark:data-[state=checked]:bg-brand-green"
                   />
                 </div>
                 <p className="text-[10px] text-muted-foreground/60 font-medium">Marcare tutti come presenti alla creazione automatica degli allenamenti.</p>
@@ -416,10 +416,10 @@ export default function AltroPage() {
                   placeholder="Es: 2025/26"
                   value={newSeasonName}
                   onChange={(e) => setNewSeasonName(e.target.value)}
-                  className="font-bold uppercase text-xs bg-black border border-brand-green/30 focus-visible:ring-1 focus-visible:ring-brand-green h-10 rounded-xl text-white"
+                  className="font-bold uppercase text-xs bg-background dark:bg-black border border-border dark:border-brand-green/30 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green h-10 rounded-xl text-foreground"
                 />
-                <Button onClick={handleAddSeason} className="bg-black border border-brand-green text-white hover:bg-black/80 shadow-[0_0_10px_rgba(172,229,4,0.15)] transition-all h-10 rounded-xl font-black uppercase">
-                  <Plus className="h-4 w-4 mr-1 text-brand-green" /> Crea
+                <Button onClick={handleAddSeason} className="bg-primary dark:bg-black border border-primary dark:border-brand-green text-white hover:opacity-90 dark:hover:bg-black/80 shadow-md dark:shadow-[0_0_10px_rgba(172,229,4,0.15)] transition-all h-10 rounded-xl font-black uppercase">
+                  <Plus className="h-4 w-4 mr-1 text-white dark:text-brand-green" /> Crea
                 </Button>
               </div>
 
@@ -429,18 +429,18 @@ export default function AltroPage() {
                     key={s.id}
                     className={cn(
                       "flex items-center justify-between p-3 rounded-2xl border transition-all",
-                      s.isActive ? "bg-black border-brand-green shadow-[0_0_10px_rgba(172,229,4,0.1)]" : "bg-card/20 border-transparent cursor-pointer hover:bg-card/50"
+                      s.isActive ? "bg-background dark:bg-black border-primary dark:border-brand-green shadow-md dark:shadow-[0_0_10px_rgba(172,229,4,0.1)]" : "bg-muted/30 dark:bg-card/20 border-transparent cursor-pointer hover:bg-muted/50 dark:hover:bg-card/50"
                     )}
                     onClick={() => !s.isActive && handleSwitchSeason(s.id)}
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex flex-col">
-                        <span className={cn("text-sm font-black uppercase tracking-tight", s.isActive ? "text-white" : "text-foreground")}>
+                        <span className={cn("text-sm font-black uppercase tracking-tight", s.isActive ? "text-primary dark:text-white" : "text-foreground")}>
                           Stagione {s.name}
                         </span>
                       </div>
                       {s.isActive && (
-                        <Badge className="text-[9px] bg-black border border-brand-green text-white shadow-[0_0_10px_rgba(172,229,4,0.1)] font-black uppercase py-0.5 px-2">Attiva</Badge>
+                        <Badge className="text-[9px] bg-primary dark:bg-black border border-primary dark:border-brand-green text-white shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.1)] font-black uppercase py-0.5 px-2">Attiva</Badge>
                       )}
                     </div>
 
@@ -467,18 +467,18 @@ export default function AltroPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Privacy & Sicurezza (Esporta / Reset) Dialog */}
+      {/* Privacy & Sicurezza Dialog */}
       <Dialog open={isPrivacyOpen} onOpenChange={setIsPrivacyOpen}>
-        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-3xl bg-black border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)] text-white">
+        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground">
           <DialogHeader>
             <DialogTitle className="text-xl font-black text-foreground">Privacy & Dati</DialogTitle>
-            <DialogDescription className="text-muted-foreground/60">Esporta i tuoi dati o formatta l'account.</DialogDescription>
+            <DialogDescription className="text-muted-foreground">Esporta i tuoi dati o formatta l'account.</DialogDescription>
           </DialogHeader>
           <div className="space-y-6 pt-2">
 
             <div className="space-y-2">
-              <Button onClick={handleExport} disabled={isExporting} className="w-full font-black uppercase text-xs h-12 bg-black border border-brand-green/30 text-white hover:bg-black/80 hover:border-brand-green shadow-[0_0_10px_rgba(172,229,4,0.05)] transition-all rounded-xl">
-                <Download className="mr-2 h-4 w-4 text-brand-green" />
+              <Button onClick={handleExport} disabled={isExporting} className="w-full font-black uppercase text-xs h-12 bg-primary dark:bg-black border border-primary dark:border-brand-green/30 text-white dark:text-white hover:opacity-90 dark:hover:bg-black/80 hover:border-primary dark:hover:border-brand-green shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)] transition-all rounded-xl">
+                <Download className="mr-2 h-4 w-4 text-white dark:text-brand-green" />
                 {isExporting ? "Esportazione..." : "Esporta tutto (CSV)"}
               </Button>
               <p className="text-[10px] text-foreground/40 text-center px-4">Ricevi un file per la squadra e uno per le partite nel tuo dispositivo.</p>
@@ -497,10 +497,10 @@ export default function AltroPage() {
                     <RefreshCw className="mr-2 h-4 w-4" /> Reset Stagione
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="rounded-3xl bg-black border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)] text-white max-w-[90vw]">
+                <AlertDialogContent className="rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-2xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground max-w-[90vw]">
                   <AlertDialogHeader>
                     <AlertDialogTitle className="uppercase font-black text-destructive">Resettare la stagione?</AlertDialogTitle>
-                    <AlertDialogDescription className="text-xs leading-relaxed text-white/40 font-bold">
+                    <AlertDialogDescription className="text-xs leading-relaxed text-muted-foreground font-bold">
                       Cancellazione DEFINITIVA giocatori, partite e statistiche della stagione <strong>{activeSeason?.name}</strong>.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
@@ -519,12 +519,12 @@ export default function AltroPage() {
 
       {/* Season Deletion Confirmation */}
       <AlertDialog open={!!seasonToDelete} onOpenChange={(open) => !open && setSeasonToDelete(null)}>
-        <AlertDialogContent className="rounded-3xl bg-black border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)] text-white max-w-[90vw]">
+        <AlertDialogContent className="rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-2xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground max-w-[90vw]">
           <AlertDialogHeader>
             <AlertDialogTitle className="uppercase font-black text-destructive">Elimina Stagione?</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-white/40 font-bold">
+            <DialogDescription className="text-xs text-muted-foreground font-bold">
               Questa azione cancellerà DEFINITIVAMENTE la stagione <strong>{seasonToDelete?.name}</strong> e tutti i relativi dati.
-            </AlertDialogDescription>
+            </DialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4">
             <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs bg-card/40 hover:bg-card/50 text-foreground border-none">Annulla</AlertDialogCancel>

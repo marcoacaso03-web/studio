@@ -10,35 +10,23 @@
     --card-foreground: 0 0% 0%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 0%;
-    --primary: 192 100% 22%;
-    /* #005A71 */
+    --primary: 210 100% 45%; /* Azzurro #0080FFish */
     --primary-foreground: 0 0% 100%;
     --secondary: 210 10% 90%;
-    --secondary-foreground: 0 0% 0%;
-    --muted: 210 10% 93%;
-    --muted-foreground: 0 0% 40%;
-    --accent: 74 96% 46%;
-    /* #ACE504 */
+    --secondary-foreground: 0 0% 15%;
+    --muted: 210 10% 95%;
+    --muted-foreground: 210 10% 40%;
+    --accent: 74 96% 46%; /* Keep neon for context but primary is azzurro */
     --accent-foreground: 0 0% 0%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 210 15% 85%;
-    --input: 210 15% 85%;
-    --ring: 192 100% 22%;
-    --chart-1: 192 100% 22%;
-    --chart-2: 74 96% 46%;
-    --chart-3: 60 100% 70%;
-    /* #FFFD66ish */
-    --chart-4: 180 50% 50%;
-    --chart-5: 200 50% 50%;
-    --radius: 0.5rem;
+    --border: 210 15% 90%;
+    --input: 210 15% 90%;
+    --ring: 210 100% 45%;
+    --radius: 0.75rem;
     --brand-yellow: 59 100% 70%;
-    /* #FFFD66 */
     --brand-green: 74 96% 46%;
-    /* #ACE504 */
-    --brand-lime: 75 100% 50%;
     --brand-cyan: 192 100% 22%;
-    /* #005A71 */
     --brand-pink: 340 73% 55%;
   }
 

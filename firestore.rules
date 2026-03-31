@@ -70,7 +70,7 @@ service cloud.firestore {
     match /teams/{seasonId} {
       // Only the owning user can read/write their own season document
       allow get:    if isSignedIn() && resource.data.ownerId == request.auth.uid;
-      allow list:   if isSignedIn(); // filtered server-side with where('ownerId','==',uid)
+      allow list:   if isSignedIn() && resource.data.ownerId == request.auth.uid; // filtered server-side with where('ownerId','==',uid)
       allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
       allow update: if isSignedIn()
                     && resource.data.ownerId == request.auth.uid
@@ -80,7 +80,7 @@ service cloud.firestore {
       // ── Players ────────────────────────────────────────────────────────────
       match /players/{playerId} {
         allow get:    if isSignedIn() && resource.data.teamOwnerId == request.auth.uid;
-        allow list:   if isSignedIn(); // filtered server-side with where('teamOwnerId','==',uid)
+        allow list:   if existingIsOwnedByMe(); // filtered server-side with where('teamOwnerId','==',uid)
         allow create: if incomingIsOwnedByMe();
         allow update: if existingIsOwnedByMe() && incomingIsOwnedByMe();
         allow delete: if existingIsOwnedByMe();
@@ -89,7 +89,7 @@ service cloud.firestore {
       // ── Matches ───────────────────────────────────────────────────────────
       match /matches/{matchId} {
         allow get:    if isSignedIn() && resource.data.teamOwnerId == request.auth.uid;
-        allow list:   if isSignedIn(); // filtered server-side with where('teamOwnerId','==',uid)
+        allow list:   if existingIsOwnedByMe(); // filtered server-side with where('teamOwnerId','==',uid)
         allow create: if incomingIsOwnedByMe();
         allow update: if existingIsOwnedByMe() && incomingIsOwnedByMe();
         allow delete: if existingIsOwnedByMe();
@@ -97,7 +97,7 @@ service cloud.firestore {
         // ── Match Events ─────────────────────────────────────────────────
         match /events/{eventId} {
           allow get:    if isSignedIn() && resource.data.teamOwnerId == request.auth.uid;
-          allow list:   if isSignedIn(); // filtered server-side with where('teamOwnerId','==',uid)
+          allow list:   if existingIsOwnedByMe(); // filtered server-side with where('teamOwnerId','==',uid)
           allow create: if incomingIsOwnedByMe();
           allow update: if existingIsOwnedByMe() && incomingIsOwnedByMe();
           allow delete: if existingIsOwnedByMe();

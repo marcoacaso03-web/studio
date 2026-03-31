@@ -57,18 +57,18 @@ export function MatchLineupTab() {
   if (!lineup) {
     return (
       <div className="space-y-6">
-        <Card className="border-dashed border-brand-green/20 bg-black/30">
+        <Card className="border-dashed border-border dark:border-brand-green/20 bg-card dark:bg-black/30 shadow-sm">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-            <ClipboardList className="h-16 w-16 text-brand-green mb-6 opacity-30" />
+            <ClipboardList className="h-16 w-16 text-primary dark:text-brand-green mb-6 opacity-30" />
             <h3 className="text-xl font-black uppercase tracking-tight text-foreground">Nessuna formazione inserita</h3>
-            <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mt-2 mb-8">Inizia a definire i titolari e le riserve per questa gara.</p>
+            <p className="text-sm font-bold text-foreground/50 dark:text-muted-foreground uppercase tracking-widest mt-2 mb-8">Inizia a definire i titolari e le riserve per questa gara.</p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <Button onClick={() => setIsFormOpen(true)} className="h-12 px-8 bg-black border border-brand-green text-white rounded-2xl font-black uppercase text-xs shadow-[0_0_10px_rgba(172,229,4,0.15)] hover:bg-black/80 transition-all">
-                <PlusCircle className="mr-2 h-4 w-4 text-brand-green" />
+              <Button onClick={() => setIsFormOpen(true)} className="h-12 px-8 bg-primary dark:bg-black border border-primary dark:border-brand-green text-white rounded-2xl font-black uppercase text-xs shadow-md dark:shadow-[0_0_10px_rgba(172,229,4,0.15)] hover:opacity-90 dark:hover:bg-black/80 transition-all">
+                <PlusCircle className="mr-2 h-4 w-4 text-white dark:text-brand-green" />
                 Aggiungi Formazione
               </Button>
-              <Button onClick={() => setIsSmartOpen(true)} className="h-12 px-8 bg-black border border-brand-green/30 text-white rounded-2xl font-black uppercase text-xs hover:border-brand-green transition-all">
-                <Sparkles className="mr-2 h-4 w-4 text-brand-green" />
+              <Button onClick={() => setIsSmartOpen(true)} className="h-12 px-8 bg-card dark:bg-black border border-border dark:border-brand-green/30 text-foreground dark:text-white rounded-2xl font-black uppercase text-xs hover:border-primary dark:hover:border-brand-green transition-all shadow-sm">
+                <Sparkles className="mr-2 h-4 w-4 text-primary dark:text-brand-green" />
                 AI Smart Mode
               </Button>
             </div>
@@ -84,15 +84,15 @@ export function MatchLineupTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <LayoutGrid className="h-5 w-5 text-brand-green" />
-          <h3 className="text-lg font-black uppercase tracking-tight">Layout Tattico <span className="text-brand-green ml-1">{activeFormation}</span></h3>
+          <LayoutGrid className="h-5 w-5 text-primary dark:text-brand-green" />
+          <h3 className="text-lg font-black uppercase tracking-tight text-foreground">Layout Tattico <span className="text-primary dark:text-brand-green ml-1">{activeFormation}</span></h3>
         </div>
         <div className="flex gap-2">
-          <Button size="sm" onClick={() => setIsSmartOpen(true)} className="bg-black border border-brand-green/30 text-white h-9 rounded-xl font-black uppercase text-[10px] hover:border-brand-green transition-all">
-            <Sparkles className="mr-1.5 h-3.5 w-3.5 text-brand-green" />
+          <Button size="sm" onClick={() => setIsSmartOpen(true)} className="bg-card dark:bg-black border border-border dark:border-brand-green/30 text-foreground dark:text-white h-9 rounded-xl font-black uppercase text-[10px] hover:border-primary dark:hover:border-brand-green transition-all shadow-sm">
+            <Sparkles className="mr-1.5 h-3.5 w-3.5 text-primary dark:text-brand-green" />
             Smart
           </Button>
-          <Button size="sm" onClick={() => setIsFormOpen(true)} className="bg-black border border-brand-green text-white hover:bg-black/80 shadow-[0_0_10px_rgba(172,229,4,0.1)] h-9 rounded-xl font-black uppercase text-[10px] transition-all">
+          <Button size="sm" onClick={() => setIsFormOpen(true)} className="bg-primary dark:bg-black border border-primary dark:border-brand-green text-white hover:opacity-90 dark:hover:bg-black/80 shadow-md dark:shadow-[0_0_10px_rgba(172,229,4,0.1)] h-9 rounded-xl font-black uppercase text-[10px] transition-all">
             Modifica
           </Button>
         </div>
@@ -147,15 +147,15 @@ export function MatchLineupTab() {
 
         {/* Panchina (A Disposizione) */}
         <div className="lg:col-span-1">
-          <Card className="h-full bg-black/40 border border-brand-green/30 rounded-3xl overflow-hidden shadow-[0_0_10px_rgba(172,229,4,0.08)]">
-            <div className="bg-black/60 border-b border-brand-green/30 p-4">
-              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-brand-green">A Disposizione</h4>
+          <Card className="h-full bg-card dark:bg-black/40 border border-border dark:border-brand-green/30 rounded-3xl overflow-hidden shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.08)]">
+            <div className="bg-muted/50 dark:bg-black/60 border-b border-border dark:border-brand-green/30 p-4">
+              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-foreground dark:text-brand-green">A Disposizione</h4>
             </div>
             <CardContent className="p-4 space-y-3">
               {activeSubstitutes.length > 0 ? (
                 activeSubstitutes.map((name, idx) => (
-                  <div key={idx} className="flex items-center gap-3 p-2 bg-black/40 rounded-xl border border-brand-green/20 transition-all hover:bg-black/60">
-                    <span className="text-[9px] font-black text-brand-green w-4">{idx + 12}</span>
+                  <div key={idx} className="flex items-center gap-3 p-2 bg-muted/30 dark:bg-black/40 rounded-xl border border-border dark:border-brand-green/20 transition-all hover:bg-muted/50 dark:hover:bg-black/60">
+                    <span className="text-[9px] font-black text-primary dark:text-brand-green w-4">{idx + 12}</span>
                     <span className="text-[10px] font-bold uppercase tracking-tight text-foreground truncate">{name}</span>
                   </div>
                 ))

@@ -62,14 +62,14 @@ export function SmartPlayerDialog({ open, onOpenChange, onSave }: SmartPlayerDia
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] md:max-w-xl rounded-3xl p-0 overflow-hidden border-none shadow-2xl flex flex-col max-h-[90vh]">
-        <DialogHeader className="p-6 bg-accent text-accent-foreground shrink-0">
+        <DialogHeader className="p-6 bg-primary dark:bg-accent text-white dark:text-accent-foreground shrink-0 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="bg-card border-b p-6 text-foreground pb-10 rounded-xl">
+            <div className="bg-white/10 dark:bg-card border-b border-white/20 dark:border-border p-6 text-white dark:text-foreground pb-10 rounded-xl">
               <Sparkles className="h-6 w-6" />
             </div>
             <div>
-              <DialogTitle className="uppercase font-black tracking-tight">Smart Rosa Import</DialogTitle>
-              <DialogDescription className="text-accent-foreground/70 text-[10px] font-bold uppercase tracking-widest mt-1">
+              <DialogTitle className="uppercase font-black tracking-tight text-white dark:text-accent-foreground">Smart Rosa Import</DialogTitle>
+              <DialogDescription className="text-white/70 dark:text-accent-foreground/70 text-[10px] font-bold uppercase tracking-widest mt-1">
                 Inserimento Rapido tramite AI
               </DialogDescription>
             </div>
@@ -78,12 +78,12 @@ export function SmartPlayerDialog({ open, onOpenChange, onSave }: SmartPlayerDia
 
         <ScrollArea className="flex-1">
           <div className="p-6 space-y-6">
-            <Alert className="bg-primary/5 border-primary/20 rounded-2xl">
-              <AlertCircle className="h-4 w-4 text-foreground" />
-              <AlertTitle className="text-[10px] font-black uppercase text-foreground mb-1">Guida all'uso</AlertTitle>
+            <Alert className="bg-primary/5 dark:bg-primary/5 border-primary/20 rounded-2xl">
+              <AlertCircle className="h-4 w-4 text-primary dark:text-foreground" />
+              <AlertTitle className="text-[10px] font-black uppercase text-primary dark:text-foreground mb-1">Guida all'uso</AlertTitle>
               <AlertDescription className="text-[11px] font-bold text-muted-foreground uppercase leading-relaxed">
                 Incolla la lista dei giocatori dividendo per ruolo. 
-                Esempio: <span className="text-foreground">"Difensori: Rossi, Bianchi. Centrocampisti: Verdi..."</span>
+                Esempio: <span className="text-foreground dark:text-foreground">"Difensori: Rossi, Bianchi. Centrocampisti: Verdi..."</span>
                 <span className="text-foreground block mt-1">L'AI riconoscerà automaticamente i nomi e assegnerà il ruolo corretto. Verifica sempre eventuali errori dopo l'importazione.</span>
               </AlertDescription>
             </Alert>
@@ -95,13 +95,13 @@ export function SmartPlayerDialog({ open, onOpenChange, onSave }: SmartPlayerDia
                 value={rawText}
                 onChange={(e) => setRawText(e.target.value)}
                 disabled={isAnalyzing}
-                className="min-h-[250px] text-xs font-bold rounded-2xl bg-muted/20 border-muted-foreground/20 focus:bg-background transition-all"
+                className="min-h-[250px] text-xs font-bold rounded-2xl bg-muted/40 dark:bg-muted/20 border-border dark:border-muted-foreground/20 focus:bg-background transition-all"
               />
             </div>
 
             {isAnalyzing && (
-              <div className="flex flex-col items-center justify-center p-8 bg-accent/5 rounded-2xl border border-dashed border-accent/20 space-y-3 animate-in fade-in zoom-in">
-                <Loader2 className="h-10 w-10 text-accent animate-spin" />
+              <div className="flex flex-col items-center justify-center p-8 bg-muted/20 dark:bg-accent/5 rounded-2xl border border-dashed border-border dark:border-accent/20 space-y-3 animate-in fade-in zoom-in">
+                <Loader2 className="h-10 w-10 text-primary dark:text-accent animate-spin" />
                 <div className="text-center">
                   <p className="text-[10px] font-black uppercase text-accent animate-pulse tracking-widest">L'AI sta analizzando la rosa...</p>
                   <p className="text-[9px] text-muted-foreground uppercase font-bold mt-1">Categorizzazione ruoli in corso</p>
@@ -117,7 +117,7 @@ export function SmartPlayerDialog({ open, onOpenChange, onSave }: SmartPlayerDia
           </Button>
           <Button 
             onClick={handleSmartImport} 
-            className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-2xl font-black uppercase text-[10px] h-12 shadow-lg shadow-accent/20" 
+            className="flex-1 bg-primary dark:bg-accent text-white dark:text-accent-foreground hover:opacity-90 dark:hover:bg-accent/90 rounded-2xl font-black uppercase text-[10px] h-12 shadow-lg shadow-primary/20 dark:shadow-accent/20" 
             disabled={isAnalyzing || !rawText.trim()}
           >
             {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Importa Giocatori"}

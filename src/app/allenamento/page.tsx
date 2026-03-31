@@ -135,7 +135,7 @@ export default function AllenamentoPage() {
             className="rounded-xl h-10 w-10 hover:bg-card/30"
             onClick={() => setIsStatsOpen(true)}
           >
-            <ClipboardCheck className="h-6 w-6 text-brand-green" />
+            <ClipboardCheck className="h-6 w-6 text-primary dark:text-brand-green" />
           </Button>
 
           {/* Genera - Più */}
@@ -145,7 +145,7 @@ export default function AllenamentoPage() {
             className="rounded-xl h-10 w-10 hover:bg-card/30"
             onClick={() => setIsGeneratorOpen(true)}
           >
-            <PlusCircle className="h-6 w-6 text-brand-green" />
+            <PlusCircle className="h-6 w-6 text-primary dark:text-brand-green" />
           </Button>
 
           {/* Filtra - Imbuto */}
@@ -156,18 +156,18 @@ export default function AllenamentoPage() {
                 size="icon"
                 className={cn(
                   "rounded-xl h-10 w-10 transition-all",
-                  focusFilter ? "bg-brand-green/10 shadow-[0_0_10px_rgba(172,229,4,0.2)]" : "hover:bg-card/30"
+                  focusFilter ? "bg-primary/10 dark:bg-brand-green/10 shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.2)]" : "hover:bg-card/30"
                 )}
               >
-                <Filter className="h-6 w-6 text-brand-green" />
+                <Filter className="h-6 w-6 text-primary dark:text-brand-green" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 rounded-2xl bg-background border-brand-green/30 backdrop-blur-xl text-white p-2">
-              <div className="px-2 py-1.5 mb-1 border-b border-white/5">
+            <DropdownMenuContent align="end" className="w-56 rounded-2xl bg-card dark:bg-background border-border dark:border-brand-green/30 backdrop-blur-xl text-foreground dark:text-white p-2">
+              <div className="px-2 py-1.5 mb-1 border-b border-border dark:border-white/5">
                 <span className="text-[10px] font-black uppercase text-muted-foreground/50 tracking-widest">Filtra per Focus</span>
               </div>
               <DropdownMenuItem
-                className={cn("text-[10px] font-bold uppercase rounded-xl mb-1 focus:bg-brand-green/20", !focusFilter && "bg-brand-green/10")}
+                className={cn("text-[10px] font-bold uppercase rounded-xl mb-1 focus:bg-primary/20 dark:focus:bg-brand-green/20", !focusFilter && "bg-primary/10 dark:bg-brand-green/10")}
                 onClick={() => setFocusFilter(null)}
               >
                 Mostra Tutti
@@ -175,7 +175,7 @@ export default function AllenamentoPage() {
               {uniqueFocuses.map(f => (
                 <DropdownMenuItem
                   key={f}
-                  className={cn("text-[10px] font-bold uppercase rounded-xl mb-1 focus:bg-brand-green/20", focusFilter === f && "bg-brand-green/10 text-brand-green")}
+                  className={cn("text-[10px] font-bold uppercase rounded-xl mb-1 focus:bg-primary/20 dark:focus:bg-brand-green/20", focusFilter === f && "bg-primary/10 text-primary dark:bg-brand-green/10 dark:text-brand-green")}
                   onClick={() => setFocusFilter(f)}
                 >
                   <Target className="h-3 w-3 mr-2 opacity-50" />
@@ -196,11 +196,11 @@ export default function AllenamentoPage() {
                 <Eraser className="h-6 w-6" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-2xl bg-black border-brand-green/30 backdrop-blur-xl text-white p-2">
-              <DropdownMenuItem className="text-[10px] font-black uppercase rounded-xl mb-1 focus:bg-brand-green/20 hover:bg-brand-green/10 transition-colors" onClick={() => setTimeout(() => setIsClearWeekOpen(true), 100)}>
-                <Eraser className="mr-2 h-4 w-4 text-brand-green" /> Elimina Settimana
+            <DropdownMenuContent align="end" className="rounded-2xl bg-card dark:bg-black border-border dark:border-brand-green/30 backdrop-blur-xl text-foreground dark:text-white p-2">
+              <DropdownMenuItem className="text-[10px] font-black uppercase rounded-xl mb-1 focus:bg-primary/20 hover:bg-primary/10 dark:focus:bg-brand-green/20 dark:hover:bg-brand-green/10 transition-colors" onClick={() => setTimeout(() => setIsClearWeekOpen(true), 100)}>
+                <Eraser className="mr-2 h-4 w-4 text-primary dark:text-brand-green" /> Elimina Settimana
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-[10px] font-black uppercase rounded-xl text-rose-500 focus:bg-rose-500/20 hover:bg-rose-500/10 transition-colors" onClick={() => setTimeout(() => setIsClearAllOpen(true), 100)}>
+              <DropdownMenuItem className="text-[10px] font-black uppercase rounded-xl text-rose-500 focus:bg-rose-500/20 hover:bg-rose-500/10 transition-colors cursor-pointer" onClick={() => setTimeout(() => setIsClearAllOpen(true), 100)}>
                 <Trash2 className="mr-2 h-4 w-4" /> Elimina Tutto
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -213,7 +213,7 @@ export default function AllenamentoPage() {
           variant="ghost"
           size="icon"
           onClick={prevWeek}
-          className="h-10 w-10 text-white/50 hover:bg-brand-green/10 hover:text-brand-green rounded-xl transition-all"
+          className="h-10 w-10 text-foreground/50 dark:text-white/50 hover:bg-primary/10 dark:hover:bg-brand-green/10 hover:text-primary dark:hover:text-brand-green rounded-xl transition-all"
         >
           <ChevronLeft className="h-6 w-6" />
         </Button>
@@ -229,7 +229,7 @@ export default function AllenamentoPage() {
               </span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 rounded-2xl bg-background border-white/10 text-foreground" align="center">
+          <PopoverContent className="w-auto p-0 rounded-2xl bg-card dark:bg-background border-border dark:border-white/10 text-foreground" align="center">
             <Calendar
               mode="single"
               selected={currentWeekStart}
@@ -241,16 +241,16 @@ export default function AllenamentoPage() {
               }}
               initialFocus
               locale={it}
-              className="p-3 bg-background"
+              className="p-3 bg-card dark:bg-background rounded-2xl"
               classNames={{
                 weekday: "text-muted-foreground/30 rounded-md w-9 font-black text-[0.6rem] uppercase tracking-tighter text-center",
-                caption_label: "text-sm font-black uppercase tracking-[0.2em] text-white",
+                caption_label: "text-sm font-black uppercase tracking-[0.2em] text-foreground dark:text-white",
                 day: "h-10 w-10 p-0 m-0 flex items-center justify-center relative",
-                day_button: "text-white/60 hover:bg-black hover:text-white hover:border hover:border-brand-green/30 hover:shadow-[0_0_15px_rgba(172,229,4,0.4)] rounded-xl h-10 w-10 flex items-center justify-center p-0 font-black transition-all cursor-pointer relative z-10",
-                selected: "!bg-transparent border-2 border-brand-green text-brand-green shadow-[0_0_15px_rgba(172,229,4,0.2)] hover:!bg-black hover:!text-white rounded-xl",
-                today: "bg-white/5 text-white/40 rounded-xl",
-                button_previous: "hover:bg-brand-green/10 hover:text-brand-green rounded-lg transition-colors p-1",
-                button_next: "hover:bg-brand-green/10 hover:text-brand-green rounded-lg transition-colors p-1",
+                day_button: "text-foreground/80 dark:text-white/60 hover:bg-muted dark:hover:bg-black hover:text-foreground dark:hover:text-white hover:border hover:border-primary/30 dark:hover:border-brand-green/30 hover:shadow-sm dark:hover:shadow-[0_0_15px_rgba(172,229,4,0.4)] rounded-xl h-10 w-10 flex items-center justify-center p-0 font-black transition-all cursor-pointer relative z-10",
+                selected: "!bg-transparent border-2 border-primary dark:border-brand-green text-primary dark:text-brand-green shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.2)] hover:!bg-muted dark:hover:!bg-black hover:!text-foreground dark:hover:!text-white rounded-xl",
+                today: "bg-muted/50 dark:bg-white/5 text-foreground/50 dark:text-white/40 rounded-xl",
+                button_previous: "hover:bg-primary/10 dark:hover:bg-brand-green/10 hover:text-primary dark:hover:text-brand-green rounded-lg transition-colors p-1 text-foreground/50 dark:text-white/50",
+                button_next: "hover:bg-primary/10 dark:hover:bg-brand-green/10 hover:text-primary dark:hover:text-brand-green rounded-lg transition-colors p-1 text-foreground/50 dark:text-white/50",
               }}
             />
           </PopoverContent>
@@ -260,7 +260,7 @@ export default function AllenamentoPage() {
           variant="ghost"
           size="icon"
           onClick={nextWeek}
-          className="h-10 w-10 text-white/50 hover:bg-brand-green/10 hover:text-brand-green rounded-xl transition-all"
+          className="h-10 w-10 text-foreground/50 dark:text-white/50 hover:bg-primary/10 dark:hover:bg-brand-green/10 hover:text-primary dark:hover:text-brand-green rounded-xl transition-all"
         >
           <ChevronRight className="h-6 w-6" />
         </Button>
@@ -269,12 +269,12 @@ export default function AllenamentoPage() {
       <div className="flex flex-col gap-4">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 animate-pulse">
-            <Loader2 className="h-10 w-10 text-brand-green animate-spin mb-4" />
+            <Loader2 className="h-10 w-10 text-primary dark:text-brand-green animate-spin mb-4" />
             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Sincronizzazione Cloud...</p>
           </div>
         ) : weekSessions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center border-dashed border-2 border-brand-green/30 rounded-3xl bg-card/20 hover:bg-card/30">
-            <Dumbbell className="h-16 w-16 text-brand-green opacity-40 mb-6" />
+          <div className="flex flex-col items-center justify-center py-16 text-center border-dashed border-2 border-primary/30 dark:border-brand-green/30 rounded-3xl bg-card/20 hover:bg-card/30">
+            <Dumbbell className="h-16 w-16 text-primary dark:text-brand-green opacity-40 mb-6" />
             <h3 className="text-lg font-black uppercase tracking-tight text-foreground">Nessuna sessione</h3>
             <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-2 max-w-[200px]">
               Usa le opzioni in alto per generare allenamenti.
@@ -302,11 +302,11 @@ export default function AllenamentoPage() {
             return (
               <div
                 key={session.id}
-                className="relative overflow-hidden border border-brand-green/30 rounded-3xl active:scale-[0.98] transition-transform cursor-pointer group hover:opacity-90 bg-card/40 backdrop-blur-sm shadow-[0_0_15px_rgba(172,229,4,0.1)]"
+                className="relative overflow-hidden border border-border dark:border-brand-green/30 rounded-3xl active:scale-[0.98] transition-transform cursor-pointer group hover:opacity-90 bg-card dark:bg-card/40 backdrop-blur-sm shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.1)]"
                 onClick={() => router.push(`/allenamento/${session.id}`)}
               >
                 <div className="flex justify-between items-start">
-                  <div className="bg-black/60 backdrop-blur-lg px-5 py-2.5 rounded-br-3xl flex items-center gap-1 border-b border-r border-brand-green/30 shadow-[0_0_10px_rgba(172,229,4,0.1)]">
+                  <div className="bg-muted dark:bg-black/60 backdrop-blur-lg px-5 py-2.5 rounded-br-3xl flex items-center gap-1 border-b border-r border-border dark:border-brand-green/30 shadow-none dark:shadow-[0_0_10px_rgba(172,229,4,0.1)]">
                     <span className="text-foreground font-medium text-lg leading-none">{dayName}</span>
                     <span className="text-foreground font-black text-lg leading-none">{dayNum}</span>
                     <span className="text-foreground font-medium text-lg leading-none">{monthName}</span>
@@ -318,21 +318,21 @@ export default function AllenamentoPage() {
 
                 <div className="px-5 pt-3 pb-5 space-y-4">
                   <div className="flex items-center gap-3">
-                    <FocusIcon className="h-5 w-5 text-brand-green" />
+                    <FocusIcon className="h-5 w-5 text-primary dark:text-brand-green" />
                     <span className="text-foreground text-[15px] font-medium tracking-wide">Focus: {focus}</span>
                   </div>
 
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
                       <div className="w-5 flex justify-center">
-                        <Users className="h-4 w-4 text-brand-green" />
+                        <Users className="h-4 w-4 text-primary dark:text-brand-green" />
                       </div>
                       <span className="text-foreground text-[15px] font-medium tracking-wide">Presenze: {presentPlayers}/{totalPlayers}</span>
                     </div>
 
-                    <div className="w-full bg-black border border-white/10 rounded-full h-1.5 mt-1 overflow-hidden">
+                    <div className="w-full bg-muted dark:bg-black border border-border dark:border-white/10 rounded-full h-1.5 mt-1 overflow-hidden">
                       <div
-                        className="bg-brand-green h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(172,229,4,0.5)]"
+                        className="bg-primary dark:bg-brand-green h-full rounded-full transition-all duration-1000 ease-out shadow-none dark:shadow-[0_0_10px_rgba(172,229,4,0.5)]"
                         style={{ width: `${progressPercentage}%` }}
                       />
                     </div>
@@ -346,7 +346,7 @@ export default function AllenamentoPage() {
 
       {/* Generator Dialog - Mantenuto Funzionale ma stilizzato scuro */}
       <Dialog open={isGeneratorOpen} onOpenChange={setIsGeneratorOpen}>
-        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-3xl bg-background border-white/10 text-foreground">
+        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-3xl bg-card dark:bg-background border-border dark:border-white/10 text-foreground shadow-xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-black uppercase text-foreground">Generatore Sessioni</DialogTitle>
             <DialogDescription className="text-[10px] font-bold uppercase text-muted-foreground/60">
@@ -356,16 +356,16 @@ export default function AllenamentoPage() {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-foreground/80">Data Inizio</Label>
-              <Input type="date" value={genStart} onChange={e => setGenStart(e.target.value)} className="h-11 rounded-xl font-bold uppercase text-xs bg-card/20 hover:bg-card/30 border-white/10 text-foreground" />
+              <Input type="date" value={genStart} onChange={e => setGenStart(e.target.value)} className="h-11 rounded-xl font-bold uppercase text-xs bg-background dark:bg-card/20 hover:bg-muted dark:hover:bg-card/30 border-border dark:border-white/10 text-foreground" />
             </div>
             <div className="space-y-2">
               <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-foreground/80">Data Fine</Label>
-              <Input type="date" value={genEnd} onChange={e => setGenEnd(e.target.value)} className="h-11 rounded-xl font-bold uppercase text-xs bg-card/20 hover:bg-card/30 border-white/10 text-foreground" />
+              <Input type="date" value={genEnd} onChange={e => setGenEnd(e.target.value)} className="h-11 rounded-xl font-bold uppercase text-xs bg-background dark:bg-card/20 hover:bg-muted dark:hover:bg-card/30 border-border dark:border-white/10 text-foreground" />
             </div>
           </div>
           <DialogFooter className="flex-row gap-2">
-            <Button variant="ghost" className="flex-1 rounded-xl font-black uppercase text-xs h-12 text-foreground/60 hover:text-foreground" onClick={() => setIsGeneratorOpen(false)}>Annulla</Button>
-            <Button className="flex-1 rounded-xl bg-black border border-brand-green text-white font-black uppercase text-xs h-12 shadow-[0_0_10px_rgba(172,229,4,0.15)] hover:bg-black/80 hover:scale-105 transition-all" onClick={handleGenerate}>Genera</Button>
+            <Button variant="ghost" className="flex-1 rounded-xl font-black uppercase text-xs h-12 text-foreground/60 hover:bg-muted hover:text-foreground" onClick={() => setIsGeneratorOpen(false)}>Annulla</Button>
+            <Button className="flex-1 rounded-xl bg-primary dark:bg-black border border-primary dark:border-brand-green text-white font-black uppercase text-xs h-12 shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.15)] hover:opacity-90 dark:hover:bg-black/80 hover:scale-105 transition-all" onClick={handleGenerate}>Genera</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -377,7 +377,7 @@ export default function AllenamentoPage() {
       />
 
       <AlertDialog open={!!sessionToDelete} onOpenChange={(open) => !open && setSessionToDelete(null)}>
-        <AlertDialogContent className="rounded-3xl max-w-[90vw] bg-background border-white/10 text-foreground">
+        <AlertDialogContent className="rounded-3xl max-w-[90vw] bg-card dark:bg-background border-border dark:border-white/10 text-foreground shadow-xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="uppercase font-black text-foreground">Elimina Allenamento?</AlertDialogTitle>
             <AlertDialogDescription className="text-xs text-muted-foreground/60">
@@ -385,14 +385,14 @@ export default function AllenamentoPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4">
-            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11 bg-card/20 hover:bg-card/50 border-none text-foreground">Annulla</AlertDialogCancel>
+            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11 bg-muted hover:bg-muted/80 dark:bg-card/20 dark:hover:bg-card/50 border-none text-foreground">Annulla</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteSingle} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase h-11 border-none">Elimina</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       <AlertDialog open={isClearWeekOpen} onOpenChange={setIsClearWeekOpen}>
-        <AlertDialogContent className="rounded-3xl max-w-[90vw] bg-background border-white/10 text-foreground">
+        <AlertDialogContent className="rounded-3xl max-w-[90vw] bg-card dark:bg-background border-border dark:border-white/10 text-foreground shadow-xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="uppercase font-black text-foreground">Elimina Settimana?</AlertDialogTitle>
             <AlertDialogDescription className="text-xs text-muted-foreground/60">
@@ -400,14 +400,14 @@ export default function AllenamentoPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4">
-            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11 bg-card/20 hover:bg-card/50 border-none text-foreground">Annulla</AlertDialogCancel>
+            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11 bg-muted hover:bg-muted/80 dark:bg-card/20 dark:hover:bg-card/50 border-none text-foreground">Annulla</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteWeek} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase h-11 border-none">Sì, elimina</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       <AlertDialog open={isClearAllOpen} onOpenChange={setIsClearAllOpen}>
-        <AlertDialogContent className="rounded-3xl max-w-[90vw] bg-background border-white/10 text-foreground">
+        <AlertDialogContent className="rounded-3xl max-w-[90vw] bg-card dark:bg-background border-border dark:border-white/10 text-foreground shadow-xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="uppercase font-black text-destructive">RESET TOTALE?</AlertDialogTitle>
             <AlertDialogDescription className="text-xs text-muted-foreground/60">
@@ -415,7 +415,7 @@ export default function AllenamentoPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4">
-            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11 bg-card/20 hover:bg-card/50 border-none text-foreground">Annulla</AlertDialogCancel>
+            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs uppercase h-11 bg-muted hover:bg-muted/80 dark:bg-card/20 dark:hover:bg-card/50 border-none text-foreground">Annulla</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteAll} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase h-11 border-none">RESET TUTTO</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

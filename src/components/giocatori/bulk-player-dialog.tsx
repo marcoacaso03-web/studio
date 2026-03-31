@@ -93,7 +93,7 @@ export function BulkPlayerDialog({ open, onOpenChange, onSave }: BulkPlayerDialo
         <ScrollArea className="flex-1 px-6">
           <div className="space-y-3 py-4">
             {rows.map((row, index) => (
-              <div key={row.id} className="grid grid-cols-12 gap-2 items-center p-2 rounded-xl bg-muted/20 border">
+              <div key={row.id} className="grid grid-cols-12 gap-2 items-center p-2 rounded-xl bg-muted/40 dark:bg-muted/20 border border-border dark:border-white/5">
                 <div className="col-span-1 text-[10px] font-black text-muted-foreground flex justify-center">
                   {index + 1}
                 </div>
@@ -127,7 +127,7 @@ export function BulkPlayerDialog({ open, onOpenChange, onSave }: BulkPlayerDialo
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive dark:hover:text-red-400"
                     onClick={() => removeRow(row.id)}
                     disabled={rows.length <= 1}
                   >
@@ -152,7 +152,7 @@ export function BulkPlayerDialog({ open, onOpenChange, onSave }: BulkPlayerDialo
           <Button variant="ghost" className="flex-1 rounded-xl font-bold uppercase text-xs h-11" onClick={() => onOpenChange(false)} disabled={isSaving}>
             Annulla
           </Button>
-          <Button onClick={handleSave} className="flex-1 bg-primary hover:bg-primary/90 rounded-xl font-bold uppercase text-xs h-11" disabled={isSaving}>
+          <Button onClick={handleSave} className="flex-1 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold uppercase text-xs h-11 shadow-sm" disabled={isSaving}>
             {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Salva Giocatori'}
           </Button>
         </DialogFooter>

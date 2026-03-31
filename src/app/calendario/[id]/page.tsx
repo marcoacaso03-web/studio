@@ -82,42 +82,42 @@ function MatchDetailContent() {
       <div className="flex flex-col gap-3">
         <PageHeader title={`Vs ${match.opponent}`} />
 
-        <Card className="bg-black border border-brand-green/30 shadow-[0_0_20px_rgba(172,229,4,0.15)] overflow-hidden rounded-3xl text-foreground">
+        <Card className="bg-card dark:bg-black border border-border dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] overflow-hidden rounded-3xl text-foreground">
           <CardContent className="p-5 md:p-8">
             <div className="flex flex-col items-center justify-center space-y-6">
               <div className="flex items-center justify-center gap-6 md:gap-20">
                 <div className="text-center">
-                  <p className="text-[9px] opacity-60 mb-1 font-black uppercase tracking-widest text-brand-green">{match.isHome ? "PITCHMAN" : match.opponent.toUpperCase()}</p>
-                  <p className="text-5xl md:text-7xl font-black tabular-nums">{match.result?.home ?? "-"}</p>
+                  <p className="text-[9px] opacity-60 mb-1 font-black uppercase tracking-widest text-foreground dark:text-brand-green">{match.isHome ? "PITCHMAN" : match.opponent.toUpperCase()}</p>
+                  <p className="text-5xl md:text-7xl font-black tabular-nums text-foreground">{match.result?.home ?? "-"}</p>
                 </div>
-                <div className="text-3xl md:text-5xl font-thin opacity-20 text-brand-green">VS</div>
+                <div className="text-3xl md:text-5xl font-thin opacity-20 text-primary dark:text-brand-green">VS</div>
                 <div className="text-center">
-                  <p className="text-[9px] opacity-60 mb-1 font-black uppercase tracking-widest text-brand-green">{!match.isHome ? "PITCHMAN" : match.opponent.toUpperCase()}</p>
-                  <p className="text-5xl md:text-7xl font-black tabular-nums">{match.result?.away ?? "-"}</p>
+                  <p className="text-[9px] opacity-60 mb-1 font-black uppercase tracking-widest text-foreground dark:text-brand-green">{!match.isHome ? "PITCHMAN" : match.opponent.toUpperCase()}</p>
+                  <p className="text-5xl md:text-7xl font-black tabular-nums text-foreground dark:text-white">{match.result?.away ?? "-"}</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 w-full pt-5 border-t border-brand-green/20">
+              <div className="grid grid-cols-2 gap-4 w-full pt-5 border-t border-border dark:border-brand-green/20">
                 <div className="flex items-center gap-2 text-xs font-bold">
-                  <div className="p-1.5 bg-black border border-brand-green/30 rounded-lg">
-                    <CalendarDays className="h-3.5 w-3.5 text-brand-green" />
+                  <div className="p-1.5 bg-muted dark:bg-black border border-border dark:border-brand-green/30 rounded-lg text-primary dark:text-brand-green">
+                    <CalendarDays className="h-3.5 w-3.5" />
                   </div>
-                  <span>{matchDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                  <span className="text-foreground dark:text-white">{matchDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold">
-                  <div className="p-1.5 bg-black border border-brand-green/30 rounded-lg">
-                    {match.isHome ? <Home className="h-3.5 w-3.5 text-brand-green" /> : <Plane className="h-3.5 w-3.5 text-brand-green" />}
+                  <div className="p-1.5 bg-muted dark:bg-black border border-border dark:border-brand-green/30 rounded-lg text-primary dark:text-brand-green">
+                    {match.isHome ? <Home className="h-3.5 w-3.5" /> : <Plane className="h-3.5 w-3.5" />}
                   </div>
-                  <span className="truncate uppercase tracking-wider">{match.isHome ? 'Casa' : 'Trasferta'}</span>
+                  <span className="truncate uppercase tracking-wider text-foreground dark:text-white">{match.isHome ? 'Casa' : 'Trasferta'}</span>
                 </div>
               </div>
               
               <Button 
                 size="sm" 
-                className="w-full bg-black border border-brand-green text-white hover:bg-black/80 hover:text-white shadow-[0_0_10px_rgba(172,229,4,0.15)] font-black uppercase text-[10px] h-10 rounded-xl transition-all"
+                className="w-full bg-primary dark:bg-black border border-primary dark:border-brand-green text-white hover:opacity-90 dark:hover:bg-black/80 shadow-md dark:shadow-[0_0_10px_rgba(172,229,4,0.15)] font-black uppercase text-[10px] h-10 rounded-xl transition-all"
                 onClick={() => setIsFormOpen(true)}
               >
-                <Settings2 className="mr-2 h-3.5 w-3.5 text-brand-green" />
+                <Settings2 className="mr-2 h-3.5 w-3.5 text-white dark:text-brand-green" />
                 Modifica Gara
               </Button>
             </div>
@@ -126,14 +126,14 @@ function MatchDetailContent() {
       </div>
       
       <Tabs defaultValue="eventi" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-4 h-12 bg-black/40 border border-brand-green/20 p-1 rounded-xl">
-          <TabsTrigger value="eventi" className="flex items-center gap-1.5 text-[9px] font-black uppercase rounded-lg data-[state=active]:bg-black data-[state=active]:text-brand-green data-[state=active]:border data-[state=active]:border-brand-green data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] text-muted-foreground transition-all">
+        <TabsList className="grid w-full grid-cols-3 mb-4 h-12 bg-muted/50 dark:bg-black/40 border border-border dark:border-brand-green/20 p-1 rounded-xl">
+          <TabsTrigger value="eventi" className="flex items-center gap-1.5 text-[9px] font-black uppercase rounded-lg data-[state=active]:bg-muted dark:data-[state=active]:bg-black data-[state=active]:text-foreground dark:data-[state=active]:text-brand-green data-[state=active]:border data-[state=active]:border-primary dark:data-[state=active]:border-brand-green data-[state=active]:shadow-sm dark:data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] text-muted-foreground transition-all">
             <Zap className="h-3.5 w-3.5" /> Cronaca
           </TabsTrigger>
-          <TabsTrigger value="squadra" className="flex items-center gap-1.5 text-[9px] font-black uppercase rounded-lg data-[state=active]:bg-black data-[state=active]:text-brand-green data-[state=active]:border data-[state=active]:border-brand-green data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] text-muted-foreground transition-all">
+          <TabsTrigger value="squadra" className="flex items-center gap-1.5 text-[9px] font-black uppercase rounded-lg data-[state=active]:bg-muted dark:data-[state=active]:bg-black data-[state=active]:text-foreground dark:data-[state=active]:text-brand-green data-[state=active]:border data-[state=active]:border-primary dark:data-[state=active]:border-brand-green data-[state=active]:shadow-sm dark:data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] text-muted-foreground transition-all">
             <Users className="h-3.5 w-3.5" /> Squadra
           </TabsTrigger>
-          <TabsTrigger value="note" className="flex items-center gap-1.5 text-[9px] font-black uppercase rounded-lg data-[state=active]:bg-black data-[state=active]:text-brand-green data-[state=active]:border data-[state=active]:border-brand-green data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] text-muted-foreground transition-all">
+          <TabsTrigger value="note" className="flex items-center gap-1.5 text-[9px] font-black uppercase rounded-lg data-[state=active]:bg-muted dark:data-[state=active]:bg-black data-[state=active]:text-foreground dark:data-[state=active]:text-brand-green data-[state=active]:border data-[state=active]:border-primary dark:data-[state=active]:border-brand-green data-[state=active]:shadow-sm dark:data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] text-muted-foreground transition-all">
             <FileText className="h-3.5 w-3.5" /> Note
           </TabsTrigger>
         </TabsList>
