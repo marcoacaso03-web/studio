@@ -40,15 +40,15 @@ service cloud.firestore {
       match /scoutPlayers/{scoutPlayerId} {
         allow get, list: if isOwner(userId);
         allow create:    if isOwner(userId) && request.resource.data.id == scoutPlayerId;
-        allow update:    if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-        allow delete:    if isExistingOwner(userId);
+        allow update:    if isOwner(userId);
+        allow delete:    if isOwner(userId);
       }
 
       match /scoutCategories/{scoutCategoryId} {
         allow get, list: if isOwner(userId);
         allow create:    if isOwner(userId) && request.resource.data.id == scoutCategoryId;
-        allow update:    if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-        allow delete:    if isExistingOwner(userId);
+        allow update:    if isOwner(userId);
+        allow delete:    if isOwner(userId);
       }
 
       match /trainingSessions/{sessionId} {

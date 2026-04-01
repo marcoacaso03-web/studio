@@ -30,10 +30,10 @@ import { cn } from "@/lib/utils";
 
 const rolesList: Role[] = ["Portiere", "Difensore", "Centrocampista", "Attaccante"];
 const roleColors: Record<Role, string> = {
-  "Portiere": "bg-amber-900/40 border-amber-500/30 text-amber-500", 
-  "Difensore": "bg-slate-900/40 border-slate-500/30 text-slate-500",
-  "Centrocampista": "bg-blue-900/40 border-blue-500/30 text-blue-500",
-  "Attaccante": "bg-red-900/40 border-red-500/30 text-red-500",
+  "Portiere": "bg-amber-100 dark:bg-amber-900/40 border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-500", 
+  "Difensore": "bg-slate-100 dark:bg-slate-900/40 border-slate-200 dark:border-slate-500/30 text-slate-700 dark:text-slate-500",
+  "Centrocampista": "bg-blue-100 dark:bg-blue-900/40 border-blue-200 dark:border-blue-500/30 text-blue-700 dark:text-blue-500",
+  "Attaccante": "bg-red-100 dark:bg-red-900/40 border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-500",
 };
 
 export default function RosaPage() {
@@ -124,18 +124,18 @@ export default function RosaPage() {
 
       <div className="px-4 flex gap-3 items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-brand-green" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary dark:text-brand-green" />
           <Input 
             type="text" 
             placeholder="Cerca" 
-            className="w-full h-12 pl-12 pr-4 rounded-full bg-black border border-brand-green/30 text-foreground placeholder:text-muted-foreground/50 font-medium text-lg focus-visible:ring-1 focus-visible:ring-brand-green shadow-[0_0_10px_rgba(172,229,4,0.05)]"
+            className="w-full h-12 pl-12 pr-4 rounded-full bg-background dark:bg-black border border-primary/30 dark:border-brand-green/30 text-foreground placeholder:text-muted-foreground/50 font-medium text-lg focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)]"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <Button 
           onClick={() => handleOpenForm(null)}
-          className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-black border-2 border-brand-green text-brand-green shadow-[0_0_15px_rgba(172,229,4,0.3)] transition-all hover:scale-105 active:scale-95 hover:bg-black/80"
+          className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-primary dark:bg-black border-2 border-primary dark:border-brand-green text-white dark:text-brand-green shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.3)] transition-all hover:scale-105 active:scale-95 hover:opacity-90 dark:hover:bg-black/80"
         >
           <Plus className="h-7 w-7" />
         </Button>
@@ -163,18 +163,18 @@ export default function RosaPage() {
             if (playersInRole.length === 0 && searchTerm) return null; // Hide if searching and none found
 
             return (
-              <div key={roleKey} className="overflow-hidden bg-black/40 border border-brand-green/20 rounded-2xl shadow-[0_0_10px_rgba(172,229,4,0.05)]">
+              <div key={roleKey} className="overflow-hidden bg-card dark:bg-black/40 border border-border dark:border-brand-green/20 rounded-2xl shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)]">
                 {/* Accordion Header */}
                 <div 
                    onClick={() => toggleRole(roleKey)}
                    className={cn(
-                     "flex items-center justify-between p-4 cursor-pointer select-none transition-all rounded-t-2xl border-b border-brand-green/20",
+                     "flex items-center justify-between p-4 cursor-pointer select-none transition-all rounded-t-2xl border-b border-border dark:border-brand-green/20",
                      roleColors[roleKey]
                    )}
                 >
                   <span className="font-medium text-[17px] tracking-wide">{roleName}</span>
-                  <div className="bg-black rounded-xl border border-brand-green/30 p-1 shadow overflow-hidden transition-all hover:border-brand-green">
-                    {isOpen ? <ChevronUp className="h-5 w-5 text-brand-green" /> : <ChevronDown className="h-5 w-5 text-brand-green" />}
+                  <div className="bg-background dark:bg-black rounded-xl border border-primary/20 dark:border-brand-green/30 p-1 shadow-sm overflow-hidden transition-all hover:border-primary dark:hover:border-brand-green">
+                    {isOpen ? <ChevronUp className="h-5 w-5 text-primary dark:text-brand-green" /> : <ChevronDown className="h-5 w-5 text-primary dark:text-brand-green" />}
                   </div>
                 </div>
 
@@ -182,20 +182,28 @@ export default function RosaPage() {
                 {isOpen && (
                   <div className="flex flex-col py-2 rounded-b-2xl">
                     {playersInRole.length === 0 ? (
-                      <div className="py-6 text-center text-foreground/30 text-sm italic">Nessun giocatore in questo ruolo</div>
+                      <div className="py-6 text-center text-muted-foreground text-sm italic">Nessun giocatore in questo ruolo</div>
                     ) : (
-                      playersInRole.map((player, index) => (
+                      playersInRole.map((player) => (
                         <div 
                           key={player.id} 
-                          className="flex items-center justify-between p-4 border-b border-brand-green/10 last:border-b-0 group hover:bg-black/60 transition-colors cursor-pointer"
+                          className="flex items-center justify-between p-4 border-b border-border dark:border-brand-green/10 last:border-b-0 group hover:bg-muted dark:hover:bg-black/60 transition-colors cursor-pointer"
                           onClick={() => router.push(`/membri/${player.id}`)}
                         >
                           <span className="text-foreground font-medium text-[17px]">{player.name}</span>
-                          <div className="flex items-center gap-3">
-                            <span className="text-foreground/60 text-sm font-medium">
-                                #{index + 1}
-                            </span>
-                            <div className="w-3 h-3 rounded-full bg-brand-green shadow-[0_0_8px_rgba(172,229,4,0.6)]" />
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 dark:hover:text-red-500 dark:hover:bg-red-500/10 transition-colors opacity-60 md:opacity-0 group-hover:opacity-100"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPlayerToDelete(player);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                            <div className="w-3 h-3 rounded-full bg-primary shadow-sm dark:bg-brand-green dark:shadow-[0_0_8px_rgba(172,229,4,0.6)] ml-1" />
                           </div>
                         </div>
                       ))
@@ -222,16 +230,16 @@ export default function RosaPage() {
       />
       
       <AlertDialog open={!!playerToDelete} onOpenChange={(open) => !open && setPlayerToDelete(null)}>
-        <AlertDialogContent className="max-w-[90vw] rounded-3xl bg-background border-white/10 text-foreground p-6">
+        <AlertDialogContent className="max-w-[90vw] md:max-w-md rounded-3xl bg-card dark:bg-black border border-border dark:border-brand-green/30 text-foreground p-6 shadow-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-foreground font-black uppercase text-base">Rimuovi Giocatore</AlertDialogTitle>
-            <AlertDialogDescription className="text-sm font-medium leading-relaxed text-foreground/60">
-              Vuoi eliminare definitivamente <strong>{playerToDelete?.name}</strong> dalla rosa?
+            <AlertDialogTitle className="text-foreground dark:text-white font-black uppercase text-lg tracking-tight">Rimuovi Giocatore</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm font-medium leading-relaxed text-muted-foreground">
+              Vuoi eliminare definitivamente <strong className="text-foreground dark:text-brand-green">{playerToDelete?.name}</strong> dalla rosa?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row justify-end gap-3 mt-4">
-            <AlertDialogCancel className="mt-0 text-[11px] font-bold uppercase rounded-xl flex-1 h-11 bg-card/20 hover:bg-card/50">Annulla</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeletePlayer} className="bg-destructive hover:bg-destructive/90 text-[11px] font-bold uppercase rounded-xl flex-1 h-11 border-none shadow-[0_0_15px_rgba(248,113,113,0.3)]">
+            <AlertDialogCancel className="mt-0 text-[11px] font-bold uppercase rounded-xl flex-1 h-11 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted dark:hover:bg-black/40">Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeletePlayer} className="bg-destructive hover:bg-destructive/90 text-[11px] text-destructive-foreground font-bold uppercase rounded-xl flex-1 h-11 border-none shadow-sm dark:shadow-[0_0_15px_rgba(248,113,113,0.3)]">
               Elimina
             </AlertDialogAction>
           </AlertDialogFooter>

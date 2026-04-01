@@ -81,7 +81,6 @@ export function ScoutPlayerDialog({ open, onOpenChange, player, categories }: Sc
           userId: user.uid,
           createdAt: new Date().toISOString()
         });
-        toast({ title: "Evviva!", description: "Nuovo talento inserito con successo." });
       }
       await mutate(`users/${user.uid}/scoutPlayers`);
       onOpenChange(false);

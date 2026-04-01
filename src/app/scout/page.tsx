@@ -13,6 +13,7 @@ import { collection, doc, deleteDoc } from "firebase/firestore";
 import { ScoutPlayerDialog } from "@/components/scout/scout-player-dialog";
 import { ScoutCategoryDialog } from "@/components/scout/scout-category-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ScoutPlayerSchema, ScoutCategorySchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -94,17 +95,16 @@ export default function ScoutPage() {
     );
   };
 
-  const handleDeletePlayer = async (player: ScoutPlayer) => {
-    if (window.confirm(`Sei sicuro di voler eliminare il talento ${player.name}?`)) {
-      if (!user || !firestore) return;
-      try {
-        await deleteDoc(doc(firestore, 'users', user.uid, 'scoutPlayers', player.id));
-        await mutate(`users/${user.uid}/scoutPlayers`);
-        toast({ title: "Talento eliminato", description: `${player.name} è stato rimosso.` });
-      } catch (err: any) {
-        toast({ variant: "destructive", title: "Errore", description: "Impossibile eliminare il talento." });
-        console.error("Delete Error:", err);
-      }
+  const confirmDeletePlayer = async () => {
+    if (!playerToDelete || !user || !firestore) return;
+    try {
+      await deleteDoc(doc(firestore, 'users', user.uid, 'scoutPlayers', playerToDelete.id));
+      await mutate(`users/${user.uid}/scoutPlayers`);
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Errore", description: "Impossibile eliminare il talento." });
+      console.error("Delete Error:", err);
+    } finally {
+      setPlayerToDelete(null);
     }
   };
 
@@ -226,7 +226,7 @@ export default function ScoutPage() {
                         variant="ghost"
                         size="icon"
                         className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 dark:hover:text-red-500 dark:hover:bg-red-500/10 transition-all"
-                        onClick={(e) => { e.stopPropagation(); handleDeletePlayer(player); }}
+                        onClick={(e) => { e.stopPropagation(); setPlayerToDelete(player); }}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -279,6 +279,27 @@ export default function ScoutPage() {
         onOpenChange={setIsCategoryDialogOpen}
         categories={categories || []}
       />
+      
+      {/* Alert Dialog per Delete */}
+      <AlertDialog open={!!playerToDelete} onOpenChange={(open) => !open && setPlayerToDelete(null)}>
+        <AlertDialogContent className="max-w-md rounded-3xl bg-card dark:bg-black border border-border dark:border-brand-green/30">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground dark:text-white font-black uppercase">Sei sicuro?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Vuoi eliminare definitivamente il talento <strong className="text-foreground dark:text-brand-green">{playerToDelete?.name}</strong>? Questa azione non può essere annullata.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl font-bold uppercase text-xs h-10 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted dark:hover:bg-black/40">Annulla</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDeletePlayer}
+              className="rounded-xl font-bold uppercase text-xs h-10 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Elimina
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
