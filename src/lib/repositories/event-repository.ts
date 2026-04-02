@@ -57,7 +57,7 @@ export const eventRepository = {
             createdAt: new Date().toISOString()
         };
         const docRef = await addDoc(eventsRef, eventWithAuth);
-        return { ...eventWithAuth, id: docRef.id } as MatchEvent;
+        return { ...event, id: docRef.id, teamOwnerId: userId } as MatchEvent;
     },
 
     async delete(id: string, matchId: string, seasonId: string) {

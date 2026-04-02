@@ -25,25 +25,25 @@ function MatchDetailContent() {
 
   const { match, loading, error, load, updateMatch } = useMatchDetailStore();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  
+
   useEffect(() => {
     if (id) {
-        load(id, urlSeasonId || undefined);
+      load(id, urlSeasonId || undefined);
     }
   }, [id, urlSeasonId, load]);
-  
+
   const handleSaveMatch = async (data: any) => {
     await updateMatch(data);
   };
 
   if (loading) {
     return (
-        <div className="space-y-4 max-w-4xl mx-auto">
-            <Skeleton className="h-12 w-3/4" />
-            <Skeleton className="h-48 w-full rounded-2xl" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-64 w-full rounded-2xl" />
-        </div>
+      <div className="space-y-4 max-w-4xl mx-auto">
+        <Skeleton className="h-12 w-3/4" />
+        <Skeleton className="h-48 w-full rounded-2xl" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-64 w-full rounded-2xl" />
+      </div>
     );
   }
 
@@ -57,7 +57,7 @@ function MatchDetailContent() {
         <h2 className="text-2xl font-black text-foreground dark:text-white uppercase tracking-widest mt-2 relative after:content-[''] after:absolute after:bottom-[-8px] after:left-1/2 after:-translate-x-1/2 after:w-16 after:h-[3px] after:bg-gradient-to-r after:from-transparent after:via-destructive dark:after:via-destructive after:to-transparent">
           Dettagli non disponibili
         </h2>
-        <Card className="mt-4 border-destructive/20 bg-destructive/5 w-full rounded-2xl shadow-sm dark:shadow-[0_0_15px_rgba(239,68,68,0.05)] bg-card dark:bg-black/40 backdrop-blur-sm">
+        <Card className="mt-4 border-destructive/20 bg-card/5 w-full rounded-2xl shadow-sm dark:shadow-[0_0_15px_rgba(239,68,68,0.05)] dark:bg-black/40 backdrop-blur-sm">
           <CardContent className="p-4">
             <p className="text-sm font-medium text-destructive/80 dark:text-red-400 leading-relaxed">
               {error}
@@ -65,18 +65,18 @@ function MatchDetailContent() {
           </CardContent>
         </Card>
         <div className="flex gap-3 w-full mt-4">
-          <Button 
-            variant="outline" 
-            className="flex-1 font-black uppercase text-xs tracking-wider rounded-xl bg-background dark:bg-black border-2 border-border dark:border-white/10 text-foreground dark:text-white hover:bg-muted dark:hover:bg-white/5 h-12 transition-all shadow-sm" 
+          <Button
+            variant="outline"
+            className="flex-1 font-black uppercase text-xs tracking-wider rounded-xl bg-background dark:bg-black border-2 border-border dark:border-white/10 text-foreground dark:text-white hover:bg-muted dark:hover:bg-white/5 h-12 transition-all shadow-sm"
             onClick={() => router.push('/calendario')}
           >
-             <ArrowLeft className="h-4 w-4 mr-2" /> Torna Indietro
+            <ArrowLeft className="h-4 w-4 mr-2" /> Torna Indietro
           </Button>
-          <Button 
-            className="flex-1 font-black uppercase text-xs tracking-wider rounded-xl bg-primary dark:bg-black border-2 border-transparent dark:border-brand-green/80 text-white dark:text-white hover:opacity-90 dark:hover:bg-brand-green/10 h-12 shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.3)] transition-all" 
+          <Button
+            className="flex-1 font-black uppercase text-xs tracking-wider rounded-xl bg-primary dark:bg-black border-2 border-transparent dark:border-brand-green/80 text-white dark:text-white hover:opacity-90 dark:hover:bg-brand-green/10 h-12 shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.3)] transition-all"
             onClick={() => load(id, urlSeasonId || undefined)}
           >
-             Riprova
+            Riprova
           </Button>
         </div>
       </div>
@@ -121,9 +121,9 @@ function MatchDetailContent() {
                   <span className="truncate uppercase tracking-wider text-foreground dark:text-white">{match.isHome ? 'Casa' : 'Trasferta'}</span>
                 </div>
               </div>
-              
-              <Button 
-                size="sm" 
+
+              <Button
+                size="sm"
                 className="w-full bg-primary dark:bg-black border border-primary dark:border-brand-green text-white hover:opacity-90 dark:hover:bg-black/80 shadow-md dark:shadow-[0_0_10px_rgba(172,229,4,0.15)] font-black uppercase text-[10px] h-10 rounded-xl transition-all"
                 onClick={() => setIsFormOpen(true)}
               >
@@ -134,7 +134,7 @@ function MatchDetailContent() {
           </CardContent>
         </Card>
       </div>
-      
+
       <Tabs defaultValue="eventi" className="w-full">
         <TabsList className="grid w-full grid-cols-3 mb-4 h-12 bg-muted/50 dark:bg-black/40 border border-border dark:border-brand-green/20 p-1 rounded-xl">
           <TabsTrigger value="eventi" className="flex items-center gap-1.5 text-[9px] font-black uppercase rounded-lg data-[state=active]:bg-muted dark:data-[state=active]:bg-black data-[state=active]:text-foreground dark:data-[state=active]:text-brand-green data-[state=active]:border data-[state=active]:border-primary dark:data-[state=active]:border-brand-green data-[state=active]:shadow-sm dark:data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] text-muted-foreground transition-all">
@@ -149,15 +149,15 @@ function MatchDetailContent() {
         </TabsList>
 
         <TabsContent value="eventi" className="outline-none">
-           <MatchEventsTab />
+          <MatchEventsTab />
         </TabsContent>
 
         <TabsContent value="squadra" className="outline-none">
-            <MatchLineupTab />
+          <MatchLineupTab />
         </TabsContent>
 
         <TabsContent value="note" className="outline-none">
-            <MatchNotesTab />
+          <MatchNotesTab />
         </TabsContent>
       </Tabs>
 
