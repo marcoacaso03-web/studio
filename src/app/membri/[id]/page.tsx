@@ -105,14 +105,14 @@ const roleLabel: Record<string, string> = {
 };
 
 const roleBg: Record<string, string> = {
-  Portiere: "bg-amber-500/10 text-amber-500 border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.1)]",
-  Difensore: "bg-slate-500/10 text-slate-300 border-slate-500/30",
-  Centrocampista: "bg-brand-green/10 text-brand-green border-brand-green/30 shadow-[0_0_10px_rgba(172,229,4,0.1)]",
-  Attaccante: "bg-red-500/10 text-red-500 border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.1)]",
+  Portiere: "bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-500 border-amber-200 dark:border-amber-500/30 shadow-sm dark:shadow-[0_0_10px_rgba(245,158,11,0.1)]",
+  Difensore: "bg-slate-100 dark:bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-500/30",
+  Centrocampista: "bg-blue-100 dark:bg-brand-green/10 text-blue-700 dark:text-brand-green border-blue-200 dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.1)]",
+  Attaccante: "bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/30 shadow-sm dark:shadow-[0_0_10px_rgba(239,68,68,0.1)]",
 };
 
 // ─── Componente StatCard ───────────────────────────────────────────────────────
-function StatCard({ icon: Icon, label, value, sub, color = "text-brand-green" }: {
+function StatCard({ icon: Icon, label, value, sub, color = "text-primary dark:text-brand-green" }: {
   icon: React.ElementType;
   label: string;
   value: string | number;
@@ -120,11 +120,11 @@ function StatCard({ icon: Icon, label, value, sub, color = "text-brand-green" }:
   color?: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-1 bg-black/40 backdrop-blur-sm border border-brand-green/20 rounded-2xl p-4 text-center shadow-[0_0_15px_rgba(172,229,4,0.05)] hover:border-brand-green/40 transition-all">
+    <div className="flex flex-col items-center justify-center gap-1 bg-card dark:bg-black/40 backdrop-blur-sm border border-border dark:border-brand-green/20 rounded-2xl p-4 text-center shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.05)] hover:border-primary/50 dark:hover:border-brand-green/40 transition-all">
       <Icon className={`h-5 w-5 ${color} mb-1 opacity-80`} />
-      <span className="text-[9px] font-black uppercase tracking-[0.1em] text-white/30">{label}</span>
-      <span className={`text-2xl font-black text-white`}>{value}</span>
-      {sub && <span className="text-[8px] text-white/40 font-black uppercase tracking-tighter">{sub}</span>}
+      <span className="text-[9px] font-black uppercase tracking-[0.1em] text-muted-foreground dark:text-white/30">{label}</span>
+      <span className={`text-2xl font-black text-foreground dark:text-white`}>{value}</span>
+      {sub && <span className="text-[8px] text-muted-foreground dark:text-white/40 font-black uppercase tracking-tighter">{sub}</span>}
     </div>
   );
 }
@@ -158,15 +158,15 @@ function TrainingHeatmap({ records }: { records: TrainingRecord[] }) {
     <div className="space-y-3">
       {/* Progress bar */}
       <div className="flex items-center gap-3">
-        <div className="flex-1 bg-black/40 rounded-full h-2.5 overflow-hidden border border-white/5">
+        <div className="flex-1 bg-muted dark:bg-black/40 rounded-full h-2.5 overflow-hidden border border-border dark:border-white/5">
           <div
-            className="h-full bg-brand-green rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(172,229,4,0.5)]"
+            className="h-full bg-primary dark:bg-brand-green rounded-full transition-all duration-700 shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.5)]"
             style={{ width: `${percentuale}%` }}
           />
         </div>
-        <span className="text-xs font-black text-brand-green min-w-[3rem] text-right">{percentuale}%</span>
+        <span className="text-xs font-black text-primary dark:text-brand-green min-w-[3rem] text-right">{percentuale}%</span>
       </div>
-      <p className="text-[9px] text-white/30 font-black uppercase tracking-widest mt-1">
+      <p className="text-[9px] text-muted-foreground dark:text-white/30 font-black uppercase tracking-widest mt-1">
         {presenti} presenze su {totale} allenamenti
       </p>
 
@@ -234,15 +234,15 @@ function MatchHeatmap({ records }: { records: MatchRecord[] }) {
     <div className="space-y-3">
       {/* Progress bar */}
       <div className="flex items-center gap-3">
-        <div className="flex-1 bg-black/40 rounded-full h-2.5 overflow-hidden border border-white/5">
+        <div className="flex-1 bg-muted dark:bg-black/40 rounded-full h-2.5 overflow-hidden border border-border dark:border-white/5">
           <div
-            className="h-full bg-brand-green rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(172,229,4,0.5)]"
+            className="h-full bg-primary dark:bg-brand-green rounded-full transition-all duration-700 shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.5)]"
             style={{ width: `${pct}%` }}
           />
         </div>
-        <span className="text-xs font-black text-brand-green min-w-[3rem] text-right">{pct}%</span>
+        <span className="text-xs font-black text-primary dark:text-brand-green min-w-[3rem] text-right">{pct}%</span>
       </div>
-      <p className="text-[9px] text-white/30 font-black uppercase tracking-widest mt-1">
+      <p className="text-[9px] text-muted-foreground dark:text-white/30 font-black uppercase tracking-widest mt-1">
         Presenza in campo nel {pct}% dei match disputati
       </p>
 
@@ -470,11 +470,22 @@ export default function PlayerDetailPage() {
   // ─── Loading skeleton ────────────────────────────────────────────────────────
   if (!player && !loadingData) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-        <User className="h-12 w-12 text-muted-foreground" />
-        <p className="text-sm font-medium text-muted-foreground">Giocatore non trovato.</p>
-        <Button variant="outline" onClick={() => router.push("/membri")}>
-          <ArrowLeft className="h-4 w-4 mr-2" /> Torna alla Rosa
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4 text-center">
+        <div className="h-24 w-24 rounded-full bg-primary/10 dark:bg-brand-green/10 flex items-center justify-center mb-2 border border-primary/20 dark:border-brand-green/20 shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] relative">
+          <User className="h-12 w-12 text-primary dark:text-brand-green opacity-80" />
+          <div className="absolute inset-0 rounded-full animate-ping opacity-20 bg-primary dark:bg-brand-green"></div>
+        </div>
+        <h2 className="text-2xl md:text-3xl font-black text-foreground dark:text-white uppercase tracking-widest mt-2 relative after:content-[''] after:absolute after:bottom-[-8px] after:left-1/2 after:-translate-x-1/2 after:w-16 after:h-[3px] after:bg-gradient-to-r after:from-transparent after:via-primary dark:after:via-brand-green after:to-transparent">
+          Non Trovato
+        </h2>
+        <p className="text-sm font-medium text-muted-foreground dark:text-white/50 max-w-sm mt-4 leading-relaxed">
+          I dettagli di questo membro non sono disponibili. Potrebbe essere stato rimosso dalla rosa o essersi verificato un errore.
+        </p>
+        <Button 
+          onClick={() => router.push("/membri")} 
+          className="mt-6 bg-primary dark:bg-black border-2 border-primary dark:border-brand-green/80 text-white dark:text-white hover:opacity-90 dark:hover:bg-brand-green/10 font-black tracking-wider uppercase rounded-2xl px-8 h-14 shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.2)] transition-all"
+        >
+          <ArrowLeft className="h-5 w-5 mr-3" /> Ritorna alla Rosa
         </Button>
       </div>
     );
@@ -489,12 +500,12 @@ export default function PlayerDetailPage() {
         title={
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
-              <Link href="/membri" className="h-8 w-8 flex items-center justify-center rounded-xl bg-black border border-brand-green/20 text-brand-green hover:bg-brand-green/10 transition-colors">
+              <Link href="/membri" className="h-8 w-8 flex items-center justify-center rounded-xl bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green hover:bg-primary/10 dark:hover:bg-brand-green/10 transition-colors">
                 <ArrowLeft className="h-4 w-4" />
               </Link>
-              <span className="text-xl md:text-3xl text-white">
+              <span className="text-xl md:text-3xl text-foreground dark:text-white">
                 {loadingData && !player ? (
-                  <Skeleton className="h-7 w-40 bg-white/5" />
+                  <Skeleton className="h-7 w-40 bg-muted dark:bg-white/5" />
                 ) : (
                   <>
                     <span className="font-light">{firstName}</span>
@@ -504,27 +515,27 @@ export default function PlayerDetailPage() {
               </span>
               {player && (
                 <span
-                  className={`text-[8px] font-black px-2 py-0.5 rounded-full border shadow-sm ${roleBg[player.role] ?? "bg-white/5 text-white/40 border-white/10"}`}
+                  className={`text-[8px] font-black px-2 py-0.5 rounded-full border shadow-sm ${roleBg[player.role] ?? "bg-muted dark:bg-white/5 text-muted-foreground dark:text-white/40 border-border dark:border-white/10"}`}
                 >
                   {roleLabel[player.role] ?? player.role}
                 </span>
               )}
             </div>
-            <span className="text-[8px] md:text-[10px] uppercase font-black text-white/30 tracking-[0.2em] ml-10">
+            <span className="text-[8px] md:text-[10px] uppercase font-black text-muted-foreground dark:text-white/30 tracking-[0.2em] ml-10">
               {activeSeason?.name ?? "…"}
             </span>
           </div>
         }
       >
         <Link href={`/membri/confronto?p1=${playerId}`}>
-          <Button variant="outline" size="sm" className="hidden md:flex gap-2 rounded-xl bg-black border-brand-green/30 text-white hover:bg-brand-green/10 border-2">
-            <ArrowRightLeft className="h-4 w-4 text-brand-green" />
+          <Button variant="outline" size="sm" className="hidden md:flex gap-2 rounded-xl bg-background dark:bg-black border-primary/30 dark:border-brand-green/30 text-foreground dark:text-white hover:bg-primary/10 dark:hover:bg-brand-green/10 border-2">
+            <ArrowRightLeft className="h-4 w-4 text-primary dark:text-brand-green" />
             <span className="text-xs font-black uppercase tracking-wider">Confronta</span>
           </Button>
         </Link>
         <Link href={`/membri/confronto?p1=${playerId}`} className="md:hidden">
-          <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl bg-black border-brand-green/30 text-white hover:bg-brand-green/10 border-2">
-            <ArrowRightLeft className="h-5 w-5 text-brand-green" />
+          <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl bg-background dark:bg-black border-primary/30 dark:border-brand-green/30 text-foreground dark:text-white hover:bg-primary/10 dark:hover:bg-brand-green/10 border-2">
+            <ArrowRightLeft className="h-5 w-5 text-primary dark:text-brand-green" />
           </Button>
         </Link>
       </PageHeader>
@@ -561,30 +572,30 @@ export default function PlayerDetailPage() {
       {/* Grafici rendimento */}
       <div className="grid md:grid-cols-2 gap-4">
         {/* Radar */}
-        <Card className="rounded-3xl bg-black/40 backdrop-blur-sm border-brand-green/20 shadow-[0_0_20px_rgba(172,229,4,0.05)] overflow-hidden">
+        <Card className="rounded-3xl bg-card dark:bg-black/40 backdrop-blur-sm border-border dark:border-brand-green/20 shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.05)] overflow-hidden">
           <CardHeader className="pb-0 px-6 pt-6">
-            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 flex items-center gap-2">
-              <TrendingUp className="h-3.5 w-3.5 text-brand-green" /> Profilo Tecnico
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground dark:text-white/30 flex items-center gap-2">
+              <TrendingUp className="h-3.5 w-3.5 text-primary dark:text-brand-green" /> Profilo Tecnico
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-2 px-6">
-            {loadingData ? <Skeleton className="h-60 w-full bg-white/5" /> : <RadarChart data={radarData} />}
+            {loadingData ? <Skeleton className="h-60 w-full bg-muted dark:bg-white/5" /> : <RadarChart data={radarData} />}
           </CardContent>
         </Card>
 
         {/* Barchart W/D/L */}
-        <Card className="rounded-3xl bg-black/40 backdrop-blur-sm border-brand-green/20 shadow-[0_0_20px_rgba(172,229,4,0.05)] overflow-hidden">
+        <Card className="rounded-3xl bg-card dark:bg-black/40 backdrop-blur-sm border-border dark:border-brand-green/20 shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.05)] overflow-hidden">
           <CardHeader className="pb-0 px-6 pt-6">
-            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 flex items-center gap-2">
-              <Sword className="h-3.5 w-3.5 text-brand-green" /> Risultati Personali
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground dark:text-white/30 flex items-center gap-2">
+              <Sword className="h-3.5 w-3.5 text-primary dark:text-brand-green" /> Risultati Personali
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-4 px-6 pb-6">
-            {loadingData ? <Skeleton className="h-40 w-full bg-white/5" /> : (
+            {loadingData ? <Skeleton className="h-40 w-full bg-muted dark:bg-white/5" /> : (
               <>
                 <BarChartComponent data={barData} />
-                <p className="text-[9px] text-center text-white/20 mt-2 font-black uppercase tracking-widest">
-                  Partite giocate: <strong className="text-white/60">{playerStats?.appearances ?? 0}</strong> · Minuti totali: <strong className="text-white/60">{playerStats?.totalMinutes ?? 0}'</strong>
+                <p className="text-[9px] text-center text-muted-foreground dark:text-white/20 mt-2 font-black uppercase tracking-widest">
+                  Partite giocate: <strong className="text-foreground dark:text-white/60">{playerStats?.appearances ?? 0}</strong> · Minuti totali: <strong className="text-foreground dark:text-white/60">{playerStats?.totalMinutes ?? 0}'</strong>
                 </p>
               </>
             )}
@@ -594,17 +605,17 @@ export default function PlayerDetailPage() {
 
       {/* Heatmap presenze */}
       <div className="grid md:grid-cols-2 gap-4">
-        <Card className="rounded-3xl bg-black/40 backdrop-blur-sm border-brand-green/20 shadow-[0_0_20px_rgba(172,229,4,0.05)] overflow-hidden">
+        <Card className="rounded-3xl bg-card dark:bg-black/40 backdrop-blur-sm border-border dark:border-brand-green/20 shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.05)] overflow-hidden">
           <CardHeader className="pb-0 px-6 pt-6">
-            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 flex items-center gap-2">
-              <Sword className="h-3.5 w-3.5 text-brand-green" /> Storico Presenze Partite
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground dark:text-white/30 flex items-center gap-2">
+              <Sword className="h-3.5 w-3.5 text-primary dark:text-brand-green" /> Storico Presenze Partite
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-4 px-6 pb-6">
             {loadingData ? (
               <div className="space-y-3">
-                <Skeleton className="h-4 w-full bg-white/5" />
-                <Skeleton className="h-16 w-full bg-white/5" />
+                <Skeleton className="h-4 w-full bg-muted dark:bg-white/5" />
+                <Skeleton className="h-16 w-full bg-muted dark:bg-white/5" />
               </div>
             ) : (
               <MatchHeatmap records={matchRecords} />
@@ -612,17 +623,17 @@ export default function PlayerDetailPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-3xl bg-black/40 backdrop-blur-sm border-brand-green/20 shadow-[0_0_20px_rgba(172,229,4,0.05)] overflow-hidden">
+        <Card className="rounded-3xl bg-card dark:bg-black/40 backdrop-blur-sm border-border dark:border-brand-green/20 shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.05)] overflow-hidden">
           <CardHeader className="pb-0 px-6 pt-6">
-            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 flex items-center gap-2">
-              <Calendar className="h-3.5 w-3.5 text-brand-green" /> Storico Presenze Allenamenti
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground dark:text-white/30 flex items-center gap-2">
+              <Calendar className="h-3.5 w-3.5 text-primary dark:text-brand-green" /> Storico Presenze Allenamenti
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-4 px-6 pb-6">
             {loadingData ? (
               <div className="space-y-3">
-                <Skeleton className="h-4 w-full bg-white/5" />
-                <Skeleton className="h-16 w-full bg-white/5" />
+                <Skeleton className="h-4 w-full bg-muted dark:bg-white/5" />
+                <Skeleton className="h-16 w-full bg-muted dark:bg-white/5" />
               </div>
             ) : (
               <TrainingHeatmap records={trainingRecords} />

@@ -215,18 +215,13 @@ export default function TrainingDetailPage() {
               
               return (
                 <Card key={player.id} className="rounded-2xl border border-border dark:border-brand-green/20 overflow-hidden bg-card dark:bg-card/40 backdrop-blur-sm shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)]">
-                  <CardContent className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="hidden sm:flex h-10 w-10 rounded-xl bg-background dark:bg-card border border-border dark:border-white/10 flex-shrink-0 items-center justify-center font-black text-xs text-muted-foreground/60">
-                        {player.name.charAt(0)}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs font-black uppercase tracking-tight text-foreground leading-none">{player.name}</span>
-                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-1">{player.role}</span>
-                      </div>
+                  <CardContent className="p-4 flex flex-row items-center justify-between gap-4">
+                    <div className="flex flex-col justify-center sm:pl-2 flex-1">
+                      <span className="text-[15px] font-black uppercase tracking-tight text-foreground">{player.name}</span>
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">{player.role}</span>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-3 gap-1.5 w-auto">
                       <Button 
                         size="sm" 
                         variant={currentStatus === 'presente' ? 'default' : 'outline'}

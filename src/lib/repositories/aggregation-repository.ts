@@ -61,14 +61,18 @@ export const aggregationRepository = {
 
         const completedMatches = matches.filter(m => m.status === 'completed');
         
-        // Fetch di tutti i dettagli delle partite in parallelo (Batch)
         const detailsResults = await Promise.all(completedMatches.map(async (match) => {
-            const [events, lineup, stats] = await Promise.all([
-                eventRepository.getForMatch(match.id, seasonId, userId),
-                lineupRepository.getForMatch(match.id, seasonId, userId),
-                statsRepository.getForMatch(match.id, seasonId, userId)
-            ]);
-            return { matchId: match.id, events, lineup, stats };
+            try {
+                const [events, lineup, stats] = await Promise.all([
+                    eventRepository.getForMatch(match.id, seasonId, userId).catch(() => []),
+                    lineupRepository.getForMatch(match.id, seasonId, userId).catch(() => undefined),
+                    statsRepository.getForMatch(match.id, seasonId, userId).catch(() => [])
+                ]);
+                return { matchId: match.id, events, lineup, stats };
+            } catch (e) {
+                console.warn(`Could not fetch details for match ${match.id}`, e);
+                return { matchId: match.id, events: [], lineup: undefined, stats: [] };
+            }
         }));
 
         const matchesDetails: SeasonDataContext['matchesDetails'] = {};

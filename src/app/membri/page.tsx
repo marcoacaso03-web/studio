@@ -195,7 +195,7 @@ export default function RosaPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 dark:hover:text-red-500 dark:hover:bg-red-500/10 transition-colors opacity-60 md:opacity-0 group-hover:opacity-100"
+                              className="h-8 w-8 text-muted-foreground dark:text-white/40 hover:text-destructive hover:bg-destructive/10 dark:hover:text-red-500 dark:hover:bg-red-500/10 transition-all opacity-60 dark:opacity-40 group-hover:opacity-100 dark:group-hover:opacity-100"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setPlayerToDelete(player);

@@ -286,7 +286,7 @@ export default function ScoutPage() {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-foreground dark:text-white font-black uppercase">Sei sicuro?</AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground">
-              Vuoi eliminare definitivamente il talento <strong className="text-foreground dark:text-brand-green">{playerToDelete?.name}</strong>? Questa azione non può essere annullata.
+              Vuoi eliminare definitivamente il talento <strong className="text-foreground dark:text-brand-green uppercase">{playerToDelete?.name}</strong>? Questa azione non può essere annullata.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

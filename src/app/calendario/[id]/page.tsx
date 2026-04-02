@@ -49,23 +49,33 @@ function MatchDetailContent() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 max-w-md mx-auto text-center p-6">
-        <div className="p-4 bg-destructive/10 rounded-full">
-          <AlertCircle className="h-12 w-12 text-destructive" />
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 max-w-md mx-auto text-center px-4">
+        <div className="h-24 w-24 rounded-full bg-destructive/10 dark:bg-destructive/20 flex items-center justify-center mb-2 border border-destructive/20 dark:border-destructive/30 shadow-sm dark:shadow-[0_0_20px_rgba(239,68,68,0.2)] relative">
+          <AlertCircle className="h-12 w-12 text-destructive opacity-90" />
+          <div className="absolute inset-0 rounded-full animate-pulse opacity-20 bg-destructive"></div>
         </div>
-        <h2 className="text-2xl font-black uppercase text-foreground">Dettagli non disponibili</h2>
-        <Card className="border-destructive/20 bg-destructive/5 w-full">
+        <h2 className="text-2xl font-black text-foreground dark:text-white uppercase tracking-widest mt-2 relative after:content-[''] after:absolute after:bottom-[-8px] after:left-1/2 after:-translate-x-1/2 after:w-16 after:h-[3px] after:bg-gradient-to-r after:from-transparent after:via-destructive dark:after:via-destructive after:to-transparent">
+          Dettagli non disponibili
+        </h2>
+        <Card className="mt-4 border-destructive/20 bg-destructive/5 w-full rounded-2xl shadow-sm dark:shadow-[0_0_15px_rgba(239,68,68,0.05)] bg-card dark:bg-black/40 backdrop-blur-sm">
           <CardContent className="p-4">
-            <p className="text-sm font-medium text-destructive/80 leading-relaxed">
+            <p className="text-sm font-medium text-destructive/80 dark:text-red-400 leading-relaxed">
               {error}
             </p>
           </CardContent>
         </Card>
         <div className="flex gap-3 w-full mt-4">
-          <Button variant="outline" className="flex-1 font-bold uppercase text-xs" onClick={() => router.push('/calendario')}>
-             <ArrowLeft className="h-4 w-4 mr-2" /> Torna indietro
+          <Button 
+            variant="outline" 
+            className="flex-1 font-black uppercase text-xs tracking-wider rounded-xl bg-background dark:bg-black border-2 border-border dark:border-white/10 text-foreground dark:text-white hover:bg-muted dark:hover:bg-white/5 h-12 transition-all shadow-sm" 
+            onClick={() => router.push('/calendario')}
+          >
+             <ArrowLeft className="h-4 w-4 mr-2" /> Torna Indietro
           </Button>
-          <Button className="flex-1 font-bold uppercase text-xs" onClick={() => load(id, urlSeasonId || undefined)}>
+          <Button 
+            className="flex-1 font-black uppercase text-xs tracking-wider rounded-xl bg-primary dark:bg-black border-2 border-transparent dark:border-brand-green/80 text-white dark:text-white hover:opacity-90 dark:hover:bg-brand-green/10 h-12 shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.3)] transition-all" 
+            onClick={() => load(id, urlSeasonId || undefined)}
+          >
              Riprova
           </Button>
         </div>
