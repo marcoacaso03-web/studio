@@ -1,12 +1,12 @@
 
-import Dexie, { type EntityTable } from 'dexie';
+import Dexie, { type EntityTable, type Table } from 'dexie';
 import type { Player, Match, MatchAttendance, PlayerMatchStats, MatchLineup, MatchEvent, Season } from './types';
 
 class PitchManDB extends Dexie {
     players!: EntityTable<Player, 'id'>;
     matches!: EntityTable<Match, 'id'>;
-    matchAttendances!: EntityTable<MatchAttendance, ['matchId', 'playerId']>;
-    playerMatchStats!: EntityTable<PlayerMatchStats, ['matchId', 'playerId']>;
+    matchAttendances!: Table<MatchAttendance, [string, string]>;
+    playerMatchStats!: Table<PlayerMatchStats, [string, string]>;
     matchLineups!: EntityTable<MatchLineup, 'matchId'>;
     matchEvents!: EntityTable<MatchEvent, 'id'>;
     seasons!: EntityTable<Season, 'id'>;
