@@ -67,8 +67,8 @@ export function ScoutCategoryDialog({ open, onOpenChange, categories }: ScoutCat
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-md rounded-3xl p-0 overflow-hidden bg-card dark:bg-background border border-primary/30 dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.15)]">
-        <DialogHeader className="p-6 bg-muted dark:bg-black/60 border-b border-primary/30 dark:border-brand-green/30 text-foreground dark:text-white shrink-0">
+      <DialogContent className="max-w-[95vw] md:max-w-md rounded-3xl p-0 overflow-hidden bg-background dark:bg-black border border-border dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] transition-colors duration-300">
+        <DialogHeader className="p-6 bg-card dark:bg-black border-b border-border dark:border-brand-green/30 text-foreground dark:text-white shrink-0">
           <DialogTitle className="text-xl font-black uppercase tracking-tight">
             Gestisci Etichette
           </DialogTitle>
@@ -76,7 +76,7 @@ export function ScoutCategoryDialog({ open, onOpenChange, categories }: ScoutCat
 
         <div className="p-6 space-y-6">
           {/* Form nuova categoria */}
-          <div className="space-y-4 p-4 rounded-2xl bg-muted dark:bg-black/40 border border-primary/20 dark:border-brand-green/20">
+          <div className="space-y-4 p-4 rounded-2xl bg-muted dark:bg-card/50 border border-border dark:border-brand-green/20">
             <div className="space-y-1.5">
               <Label className="text-[10px] font-black uppercase tracking-widest text-primary dark:text-brand-green ml-1">Nuova Etichetta</Label>
               <div className="flex gap-2">
@@ -117,7 +117,7 @@ export function ScoutCategoryDialog({ open, onOpenChange, categories }: ScoutCat
           {/* Lista categorie esistenti */}
           <div className="space-y-2">
             <Label className="text-[10px] font-black uppercase tracking-widest text-primary dark:text-brand-green ml-1">Etichette Esistenti</Label>
-            <ScrollArea className="h-[200px] w-full rounded-xl bg-muted dark:bg-black/40 border border-primary/20 dark:border-brand-green/20 p-2">
+            <ScrollArea className="h-[200px] w-full rounded-xl bg-muted dark:bg-card/50 border border-border dark:border-brand-green/20 p-2">
               <div className="space-y-2">
                 {categories.length === 0 ? (
                   <p className="text-[10px] text-center py-10 text-muted-foreground font-bold uppercase italic">Nessuna etichetta salvata.</p>

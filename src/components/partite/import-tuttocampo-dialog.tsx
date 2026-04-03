@@ -75,24 +75,24 @@ export function ImportTuttocampoDialog({ open, onOpenChange }: ImportTuttocampoD
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px] rounded-3xl p-0 overflow-hidden border-none shadow-2xl flex flex-col max-h-[90vh] bg-background dark:bg-black">
-        <DialogHeader className="p-6 bg-white dark:bg-foreground text-black shrink-0 relative border-b border-border dark:border-none">
+        <DialogHeader className="p-6 bg-card dark:bg-background text-foreground shrink-0 relative border-b border-border dark:border-white/5 transition-colors">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-black/5 rounded-2xl">
-              <ClipboardCopy className="h-6 w-6 text-black" />
+            <div className="p-2 bg-muted dark:bg-white/5 rounded-2xl">
+              <ClipboardCopy className="h-6 w-6 text-primary dark:text-brand-green" />
             </div>
             <div>
-              <DialogTitle className="uppercase font-black tracking-tight text-xl text-black">Importazione Calendario</DialogTitle>
-              <DialogDescription className="text-black/60 text-[10px] font-bold uppercase tracking-widest mt-1">
+              <DialogTitle className="uppercase font-black tracking-tight text-xl text-foreground">Importazione Calendario</DialogTitle>
+              <DialogDescription className="text-muted-foreground dark:text-white/40 text-[10px] font-bold uppercase tracking-widest mt-1">
                 Metodo Rapido Copia-Incolla (AI)
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 bg-background dark:bg-black transition-colors">
           <div className="p-6 space-y-6">
             <div className="space-y-4">
-              <div className="p-4 bg-muted dark:bg-black border border-border dark:border-brand-green/20 rounded-2xl border-dashed space-y-3 shadow-inner">
+              <div className="p-4 bg-muted dark:bg-card/50 border border-border dark:border-brand-green/20 rounded-2xl border-dashed space-y-3 shadow-inner">
                 <h4 className="text-[10px] font-black uppercase text-foreground dark:text-white tracking-widest flex items-center gap-2">
                   <Info className="h-3 w-3 text-primary dark:text-brand-green" /> Come fare:
                 </h4>
@@ -136,8 +136,8 @@ export function ImportTuttocampoDialog({ open, onOpenChange }: ImportTuttocampoD
           </div>
         </ScrollArea>
 
-        <DialogFooter className="p-6 pt-0 flex-row gap-3 shrink-0 bg-background dark:bg-black">
-          <Button variant="ghost" className="flex-1 rounded-2xl font-black uppercase text-[10px] h-12 text-foreground dark:text-white hover:bg-muted dark:hover:bg-white/5" onClick={() => onOpenChange(false)} disabled={isLoading}>
+        <DialogFooter className="p-6 pt-0 flex-row gap-3 shrink-0 bg-background dark:bg-black transition-colors">
+          <Button variant="ghost" className="flex-1 rounded-2xl font-black uppercase text-[10px] h-12 text-foreground dark:text-white hover:bg-muted dark:hover:bg-white/5 transition-colors" onClick={() => onOpenChange(false)} disabled={isLoading}>
             Annulla
           </Button>
           <Button 

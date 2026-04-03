@@ -3,16 +3,29 @@
 import { useStatsStore } from "@/store/useStatsStore";
 import { Line, LineChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
+import { useThemeStore } from "@/store/useThemeStore";
 
 export function TeamPerformanceChart() {
     const { teamTrend } = useStatsStore();
+    const { theme } = useThemeStore();
+    const isDark = theme === "dark";
+
+    // Colori adattivi
+    const LINE_COLOR     = isDark ? "#ace504" : "hsl(210 100% 45%)";
+    const GRID_COLOR     = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.07)";
+    const REF_COLOR      = isDark ? "rgba(255,255,255,0.1)"  : "rgba(0,0,0,0.12)";
+    const TICK_COLOR     = isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.4)";
+    const TOOLTIP_BG     = isDark ? "rgba(0,0,0,0.92)"       : "rgba(255,255,255,0.97)";
+    const TOOLTIP_BORDER = isDark ? "rgba(172,229,4,0.3)"    : "rgba(0,128,255,0.25)";
+    const TOOLTIP_TEXT   = isDark ? "#fff"                   : "#000";
+    const TOOLTIP_SUB    = isDark ? "rgba(255,255,255,0.4)"  : "rgba(0,0,0,0.4)";
 
     if (!teamTrend || teamTrend.length === 0) {
         return (
-            <Card>
+            <Card className="bg-card border border-primary/20 dark:border-brand-green/30 rounded-3xl">
                 <CardHeader>
-                    <CardTitle>Andamento Risultati</CardTitle>
+                    <CardTitle className="text-base font-black uppercase tracking-tight text-primary">Andamento Risultati</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <p className="text-sm text-muted-foreground">Registra una partita per vedere l'andamento.</p>
@@ -20,18 +33,15 @@ export function TeamPerformanceChart() {
             </Card>
         );
     }
-    
+
     const chartConfig = {
-        value: {
-            label: "Esito",
-            color: "#ace504",
-        }
+        value: { label: "Esito", color: LINE_COLOR },
     };
 
     return (
-        <Card className="bg-black/40 border-brand-green/30 shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
+        <Card className="bg-card border border-primary/20 dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
             <CardHeader className="pb-2">
-                <CardTitle className="text-base font-black uppercase tracking-tight text-brand-green">Andamento Risultati</CardTitle>
+                <CardTitle className="text-base font-black uppercase tracking-tight text-primary">Andamento Risultati</CardTitle>
                 <CardDescription className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">
                     Sequenza cronologica di Vittorie (V), Pareggi (P) e Sconfitte (S).
                 </CardDescription>
@@ -39,58 +49,69 @@ export function TeamPerformanceChart() {
             <CardContent className="pt-4">
                 <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
                     <ResponsiveContainer width="100%" height={250}>
-                        <LineChart 
-                            data={teamTrend} 
-                            margin={{ top: 20, right: 20, left: -20, bottom: 0 }}
-                        >
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255, 255, 255, 0.05)" />
-                             <XAxis 
-                                dataKey="date" 
+                        <LineChart data={teamTrend} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={GRID_COLOR} />
+                            <XAxis
+                                dataKey="date"
                                 tickLine={false}
                                 axisLine={false}
                                 tickMargin={12}
-                                tick={{ fontSize: 9, fontWeight: 900, fill: "rgba(255, 255, 255, 0.3)" }}
+                                tick={{ fontSize: 9, fontWeight: 900, fill: TICK_COLOR }}
                             />
-                            <YAxis 
-                                domain={[-1.2, 1.2]} 
-                                ticks={[-1, 0, 1]} 
+                            <YAxis
+                                domain={[-1.2, 1.2]}
+                                ticks={[-1, 0, 1]}
                                 tickFormatter={(val) => {
-                                    if (val === 1) return 'V';
-                                    if (val === -1) return 'S';
-                                    return 'P';
+                                    if (val === 1)  return "V";
+                                    if (val === -1) return "S";
+                                    return "P";
                                 }}
                                 tickLine={false}
                                 axisLine={false}
-                                tick={{ fontSize: 11, fontStyle: 'italic', fontWeight: 900, fill: "rgba(255, 255, 255, 0.5)" }}
+                                tick={{ fontSize: 11, fontStyle: "italic", fontWeight: 900, fill: TICK_COLOR }}
                             />
-                            <Tooltip 
+                            <Tooltip
                                 content={({ active, payload }) => {
                                     if (active && payload && payload.length) {
                                         const data = payload[0].payload;
-                                        const resultLabel = data.value === 1 ? 'Vittoria' : data.value === -1 ? 'Sconfitta' : 'Pareggio';
-                                        const resultColor = data.value === 1 ? "text-brand-green" : data.value === -1 ? "text-rose-500" : "text-white/60";
-                                        
+                                        const resultLabel =
+                                            data.value === 1  ? "Vittoria"  :
+                                            data.value === -1 ? "Sconfitta" : "Pareggio";
+                                        const resultColor =
+                                            data.value === 1  ? LINE_COLOR  :
+                                            data.value === -1 ? "#f43f5e"   : TOOLTIP_SUB;
+
                                         return (
-                                            <div className="bg-black/90 border border-brand-green/30 backdrop-blur-md rounded-2xl p-3 shadow-2xl text-[10px] min-w-[140px]">
-                                                <p className="font-black text-white/40 uppercase tracking-widest border-b border-white/5 pb-2 mb-2">{data.date}</p>
-                                                <p className="text-white/60 font-black uppercase tracking-tighter mb-1 select-none">Avversario</p>
-                                                <p className="text-sm font-black text-white mb-2 uppercase tracking-tight">{data.opponent}</p>
-                                                <p className="font-black pt-2 border-t border-white/5 uppercase tracking-widest text-[9px] opacity-40 mb-1">Risultato</p>
-                                                <p className={`text-base font-black uppercase italic ${resultColor}`}>{resultLabel}</p>
+                                            <div style={{
+                                                backgroundColor: TOOLTIP_BG,
+                                                border: `1px solid ${TOOLTIP_BORDER}`,
+                                                borderRadius: 16,
+                                                padding: "10px 14px",
+                                                fontSize: 10,
+                                                minWidth: 140,
+                                                color: TOOLTIP_TEXT,
+                                            }}>
+                                                <p style={{ color: TOOLTIP_SUB, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", borderBottom: `1px solid ${TOOLTIP_SUB}30`, paddingBottom: 6, marginBottom: 6 }}>
+                                                    {data.date}
+                                                </p>
+                                                <p style={{ color: TOOLTIP_SUB, fontWeight: 900, textTransform: "uppercase", marginBottom: 2 }}>Avversario</p>
+                                                <p style={{ color: TOOLTIP_TEXT, fontWeight: 900, fontSize: 13, textTransform: "uppercase", marginBottom: 8 }}>{data.opponent}</p>
+                                                <p style={{ color: TOOLTIP_SUB, fontWeight: 900, textTransform: "uppercase", fontSize: 9, borderTop: `1px solid ${TOOLTIP_SUB}30`, paddingTop: 6, marginBottom: 2 }}>Risultato</p>
+                                                <p style={{ color: resultColor, fontWeight: 900, fontSize: 15, fontStyle: "italic", textTransform: "uppercase" }}>{resultLabel}</p>
                                             </div>
                                         );
                                     }
                                     return null;
-                                }} 
+                                }}
                             />
-                            <ReferenceLine y={0} stroke="rgba(255, 255, 255, 0.1)" />
-                            <Line 
-                                type="monotone" 
-                                dataKey="value" 
-                                stroke="#ace504" 
+                            <ReferenceLine y={0} stroke={REF_COLOR} />
+                            <Line
+                                type="monotone"
+                                dataKey="value"
+                                stroke={LINE_COLOR}
                                 strokeWidth={4}
-                                dot={{ r: 4, fill: "#ace504", strokeWidth: 0 }}
-                                activeDot={{ r: 6, fill: "#ace504", strokeWidth: 4, stroke: "rgba(172, 229, 4, 0.2)" }}
+                                dot={{ r: 4, fill: LINE_COLOR, strokeWidth: 0 }}
+                                activeDot={{ r: 6, fill: LINE_COLOR, strokeWidth: 4, stroke: `${LINE_COLOR}33` }}
                                 animationDuration={1000}
                             />
                         </LineChart>

@@ -176,172 +176,188 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[90vw] sm:max-w-md bg-background border-border text-foreground p-6 rounded-2xl overflow-y-auto max-h-[90vh]">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-black uppercase text-center mb-6 text-foreground tracking-tight">Inserimento evento</DialogTitle>
+      <DialogContent className="max-w-[95vw] sm:max-w-sm bg-card dark:bg-black border border-border dark:border-brand-green/30 text-foreground p-6 rounded-[28px] shadow-2xl dark:shadow-[0_0_20px_rgba(172,229,4,0.05)]">
+        <DialogHeader className="mb-4">
+          <DialogTitle className="text-2xl font-black uppercase text-center text-foreground dark:text-white tracking-widest leading-none">
+            Evento
+          </DialogTitle>
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/30 text-center mt-1">Tempo Reale</p>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between border-b border-muted pb-2">
-            <span className="text-muted-foreground font-medium">Squadra:</span>
+        <div className="space-y-2">
+          {/* SQUADRA */}
+          <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Squadra</span>
             <Select value={team} onValueChange={(v) => { setTeam(v as any); setPlayerId(""); setSubInPlayerId(""); setSubOutPlayerId(""); }}>
-              <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-bold focus:ring-0">
+              <SelectTrigger className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
                 <SelectValue placeholder="Seleziona" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="home">{match?.isHome ? "PitchMan" : (match?.opponent || "Avversario")}</SelectItem>
-                <SelectItem value="away">{!match?.isHome ? "PitchMan" : (match?.opponent || "Avversario")}</SelectItem>
+              <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
+                <SelectItem value="home" className="text-[10px] font-black uppercase">{match?.isHome ? "Home" : "Away"}</SelectItem>
+                <SelectItem value="away" className="text-[10px] font-black uppercase">{!match?.isHome ? "Home" : "Away"}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="flex items-center justify-between border-b border-muted pb-2">
-            <span className="text-muted-foreground font-medium">Evento:</span>
+          {/* EVENTO */}
+          <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Tipo</span>
             <Select value={uiType} onValueChange={(v) => setUiType(v as UIEventType)}>
-              <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-bold focus:ring-0">
+              <SelectTrigger className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
                 <SelectValue placeholder="Seleziona" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="goal">Goal</SelectItem>
-                <SelectItem value="yellow_card">Ammonizione</SelectItem>
-                <SelectItem value="red_card">Espulsione</SelectItem>
-                <SelectItem value="substitution">Sostituzione</SelectItem>
+              <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
+                <SelectItem value="goal" className="text-[10px] font-black uppercase dark:text-white text-brand-green">Goal</SelectItem>
+                <SelectItem value="yellow_card" className="text-[10px] font-black uppercase dark:text-white text-amber-500">Ammonizione</SelectItem>
+                <SelectItem value="red_card" className="text-[10px] font-black uppercase dark:text-white text-rose-500">Espulsione</SelectItem>
+                <SelectItem value="substitution" className="text-[10px] font-black uppercase dark:text-white text-primary">Sostituzione</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
+          {/* GOAL SECTION */}
           {uiType === 'goal' && (
-            <>
-              <div className="flex items-center justify-between border-b border-muted pb-2">
-                <span className="text-muted-foreground font-medium">Marcatore:</span>
+            <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Scorer</span>
                 {isPitchManSide ? (
                   <Select value={playerId} onValueChange={setPlayerId}>
-                    <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-bold focus:ring-0">
-                      <SelectValue placeholder="In campo" />
+                    <SelectTrigger className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
+                      <SelectValue placeholder="Giocatore" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
                       {playersStatus.onPitch.map(p => (
-                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                        <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{p.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 ) : (
-                  <input className="w-[180px] bg-transparent border-none text-right font-bold focus:outline-none" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} />
+                  <input className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} />
                 )}
               </div>
-              <div className="flex items-center justify-between border-b border-muted pb-2">
-                <span className="text-muted-foreground font-medium">Assist:</span>
+              <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Assist</span>
                 {isPitchManSide ? (
                   <Select value={assistPlayerId} onValueChange={setAssistPlayerId}>
-                    <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-bold focus:ring-0">
-                      <SelectValue placeholder="In campo (opz.)" />
+                    <SelectTrigger className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
+                      <SelectValue placeholder="opz." />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">-- nessuno --</SelectItem>
+                    <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
+                      <SelectItem value="none" className="text-[10px] font-black uppercase">-- nessuno --</SelectItem>
                       {playersStatus.onPitch.filter(p => p.id !== playerId).map(p => (
-                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                        <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{p.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 ) : (
-                  <input className="w-[180px] bg-transparent border-none text-right font-bold focus:outline-none" placeholder="Nome" value={assistPlayerName} onChange={e => setAssistPlayerName(e.target.value)} />
+                  <input className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green" placeholder="Nome" value={assistPlayerName} onChange={e => setAssistPlayerName(e.target.value)} />
                 )}
               </div>
-            </>
+            </div>
           )}
 
+          {/* SUBSTITUTION SECTION */}
           {uiType === 'substitution' && (
-            <>
-              <div className="flex items-center justify-between border-b border-muted pb-2">
-                <span className="text-muted-foreground font-medium">Esce:</span>
+            <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
+                <span className="text-[10px] font-black uppercase tracking-widest text-rose-500/50">Out</span>
                 {isPitchManSide ? (
                   <Select value={subOutPlayerId} onValueChange={setSubOutPlayerId}>
-                    <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-bold focus:ring-0">
-                      <SelectValue placeholder="Dal campo" />
+                    <SelectTrigger className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0 text-rose-500">
+                      <SelectValue placeholder="Esce" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
                       {playersStatus.onPitch.map(p => (
-                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                        <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{p.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 ) : (
-                  <input className="w-[180px] bg-transparent border-none text-right font-bold focus:outline-none" placeholder="Esce" value={subOutPlayerName} onChange={e => setSubOutPlayerName(e.target.value)} />
+                  <input className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-rose-500" placeholder="Esce" value={subOutPlayerName} onChange={e => setSubOutPlayerName(e.target.value)} />
                 )}
               </div>
-              <div className="flex items-center justify-between border-b border-muted pb-2">
-                <span className="text-muted-foreground font-medium">Entra:</span>
+              <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
+                <span className="text-[10px] font-black uppercase tracking-widest text-brand-green/50">In</span>
                 {isPitchManSide ? (
                   <Select value={subInPlayerId} onValueChange={setSubInPlayerId}>
-                    <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-bold focus:ring-0">
-                      <SelectValue placeholder="Dalla panchina" />
+                    <SelectTrigger className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0 text-brand-green">
+                      <SelectValue placeholder="Entra" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
                       {playersStatus.onBench.map(p => (
-                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                        <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{p.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 ) : (
-                  <input className="w-[180px] bg-transparent border-none text-right font-bold focus:outline-none" placeholder="Entra" value={subInPlayerName} onChange={e => setSubInPlayerName(e.target.value)} />
+                  <input className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-brand-green" placeholder="Entra" value={subInPlayerName} onChange={e => setSubInPlayerName(e.target.value)} />
                 )}
               </div>
-            </>
+            </div>
           )}
 
+          {/* CARDS SECTION */}
           {(uiType === 'yellow_card' || uiType === 'red_card') && (
-            <div className="flex items-center justify-between border-b border-muted pb-2">
-              <span className="text-muted-foreground font-medium">Giocatore:</span>
+            <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Player</span>
               {isPitchManSide ? (
                 <Select value={playerId} onValueChange={setPlayerId}>
-                  <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-bold focus:ring-0">
-                    <SelectValue placeholder="Seleziona giocatore" />
+                  <SelectTrigger className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
+                    <SelectValue placeholder="Seleziona" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
                     {allPlayers.map(p => (
-                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                      <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{p.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               ) : (
-                <input className="w-[180px] bg-transparent border-none text-right font-bold focus:outline-none" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} />
+                <input className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} />
               )}
             </div>
           )}
 
-          <div className="flex items-center justify-between border-b border-muted pb-2 pt-2">
-            <span className="text-muted-foreground font-medium">Tempo & Minuto:</span>
+          {/* TIME SECTION */}
+          <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Time</span>
             <div className="flex items-center gap-2">
                 <Select value={period} onValueChange={(v) => setPeriod(v as any)}>
-                    <SelectTrigger className="w-20 bg-transparent border-none text-right font-bold focus:ring-0">
+                    <SelectTrigger className="w-16 h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
                         <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="1T">1T</SelectItem>
-                        <SelectItem value="2T">2T</SelectItem>
-                        <SelectItem value="1TS">1TS</SelectItem>
-                        <SelectItem value="2TS">2TS</SelectItem>
+                    <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
+                        <SelectItem value="1T" className="text-[10px] font-black uppercase">1T</SelectItem>
+                        <SelectItem value="2T" className="text-[10px] font-black uppercase">2T</SelectItem>
+                        <SelectItem value="1TS" className="text-[10px] font-black uppercase">1TS</SelectItem>
+                        <SelectItem value="2TS" className="text-[10px] font-black uppercase">2TS</SelectItem>
                     </SelectContent>
                 </Select>
                 <Select value={minute.toString()} onValueChange={(v) => setMinute(parseInt(v))}>
-                    <SelectTrigger className="w-16 bg-transparent border-none text-right font-bold focus:ring-0">
+                    <SelectTrigger className="w-16 h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
                         <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
                         {Array.from({length: maxMinutes + 1}, (_, i) => (
-                            <SelectItem key={i} value={i.toString()}>{i}&apos;</SelectItem>
+                            <SelectItem key={i} value={i.toString()} className="text-[10px] font-black uppercase">{i}&apos;</SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
             </div>
           </div>
 
-          <div className="flex items-center justify-between mt-8 pt-4">
-            <Button variant="ghost" onClick={() => onOpenChange(false)}>
+          <div className="flex items-center gap-3 mt-6 pt-2">
+            <Button 
+               variant="ghost" 
+               className="flex-1 rounded-xl font-black uppercase text-[10px] tracking-widest h-12 text-muted-foreground hover:bg-muted dark:hover:bg-white/5 transition-all"
+               onClick={() => onOpenChange(false)}
+            >
               Annulla
             </Button>
-            <Button className="bg-accent hover:bg-accent/90 text-accent-foreground font-black px-8" onClick={handleSave}>
-              Salva evento
+            <Button 
+               className="flex-1 bg-primary dark:bg-black border-2 border-primary dark:border-brand-green text-white dark:text-brand-green font-black uppercase text-[10px] tracking-widest h-12 shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.1)] hover:scale-[1.02] active:scale-95 transition-all"
+               onClick={handleSave}
+            >
+              Salva
             </Button>
           </div>
         </div>

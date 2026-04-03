@@ -28,7 +28,7 @@ export const useSeasonsStore = create<SeasonsState>((set, get) => ({
           return;
         }
         
-        set({ loading: true });
+        if (get().seasons.length === 0) set({ loading: true });
         try {
             const active = await seasonRepository.ensureDefaultSeason(user.id);
             const all = await seasonRepository.getAll(user.id);

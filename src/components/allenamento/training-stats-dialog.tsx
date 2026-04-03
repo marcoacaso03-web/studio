@@ -88,12 +88,12 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] h-[90vh] md:max-w-2xl rounded-3xl p-0 overflow-hidden flex flex-col border border-border dark:border-brand-green/30 shadow-md dark:shadow-[0_0_25px_rgba(172,229,4,0.15)] [&>button]:hidden">
-        <DialogHeader className="p-6 bg-card dark:bg-black border-b border-border dark:border-brand-green/30 text-foreground flex-row items-center gap-4 space-y-0 shrink-0">
-          <Button variant="ghost" size="icon" className="text-primary dark:text-brand-green hover:bg-muted dark:hover:bg-black/60 h-8 w-8" onClick={() => onOpenChange(false)}>
+        <DialogHeader className="p-6 bg-card dark:bg-black border-b border-border dark:border-brand-green/30 text-foreground flex-row items-center gap-4 space-y-0 shrink-0 transition-colors">
+          <Button variant="ghost" size="icon" className="text-primary dark:text-brand-green hover:bg-muted dark:hover:bg-black/60 h-8 w-8 transition-colors" onClick={() => onOpenChange(false)}>
             <ChevronLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-muted dark:bg-black border border-border dark:border-brand-green/30 rounded-xl shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.1)]">
+            <div className="p-2 bg-muted dark:bg-black border border-border dark:border-brand-green/30 rounded-xl shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.1)] transition-all">
               <ClipboardCheck className="h-5 w-5 text-primary dark:text-brand-green" />
             </div>
             <div>
@@ -103,7 +103,7 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
           </div>
         </DialogHeader>
 
-        <div className="flex-1 bg-background overflow-hidden flex flex-col">
+        <div className="flex-1 bg-background dark:bg-black overflow-hidden flex flex-col transition-colors">
           {loading ? (
             <div className="flex-1 flex flex-col items-center justify-center space-y-4">
               <Loader2 className="h-10 w-10 text-foreground animate-spin" />
@@ -113,7 +113,7 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
             <ScrollArea className="flex-1">
               <div className="p-4">
                 <Table>
-                  <TableHeader className="bg-muted/50 dark:bg-black/60">
+                  <TableHeader className="bg-muted dark:bg-card/50">
                     <TableRow className="hover:bg-transparent border-b border-border dark:border-brand-green/20 h-10">
                       <TableHead className="text-[9px] font-black uppercase tracking-widest text-primary dark:text-brand-green px-3">Giocatore</TableHead>
                       <TableHead className="text-[9px] font-black uppercase tracking-widest text-center text-primary dark:text-brand-green px-1">Sett (P)</TableHead>
@@ -123,7 +123,7 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
                   </TableHeader>
                   <TableBody>
                     {stats.map((row) => (
-                      <TableRow key={row.id} className="h-12 border-b border-border dark:border-brand-green/10 hover:bg-muted dark:hover:bg-black/40 transition-all">
+                      <TableRow key={row.id} className="h-12 border-b border-border dark:border-brand-green/10 hover:bg-muted dark:hover:bg-card/50 transition-all">
                         <TableCell className="px-3 py-0">
                           <span className="text-xs font-black uppercase text-foreground leading-tight block truncate max-w-[120px]">
                             {row.name}
@@ -140,7 +140,7 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
                           </span>
                         </TableCell>
                         <TableCell className="text-center px-1 py-0">
-                          <div className="bg-primary/10 dark:bg-black border border-primary/20 dark:border-brand-green/30 px-2 py-1 rounded-lg inline-block min-w-[32px]">
+                          <div className="bg-primary/10 dark:bg-card border border-primary/20 dark:border-brand-green/30 px-2 py-1 rounded-lg inline-block min-w-[32px]">
                             <span className="text-sm font-black text-primary dark:text-brand-green tabular-nums">
                               {row.totalPresent}
                             </span>
@@ -155,14 +155,14 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
           )}
         </div>
 
-        <div className="p-4 bg-card dark:bg-black border-t border-border dark:border-brand-green/20 flex items-center justify-center gap-6">
+        <div className="p-4 bg-muted/30 dark:bg-black border-t border-border dark:border-brand-green/20 flex items-center justify-center gap-6 transition-colors">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-primary dark:bg-brand-green shadow-sm dark:shadow-[0_0_6px_rgba(172,229,4,0.5)]" />
-            <span className="text-[8px] font-black text-muted-foreground uppercase">Sett (P): Presenze Settimana</span>
+            <span className="text-[8px] font-black text-muted-foreground dark:text-white/40 uppercase">Sett (P): Presenze Settimana</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-yellow-500" />
-            <span className="text-[8px] font-black text-muted-foreground uppercase">Sett (R): Ritardi Settimana</span>
+            <span className="text-[8px] font-black text-muted-foreground dark:text-white/40 uppercase">Sett (R): Ritardi Settimana</span>
           </div>
         </div>
       </DialogContent>

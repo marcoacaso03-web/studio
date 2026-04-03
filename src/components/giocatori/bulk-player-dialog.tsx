@@ -82,18 +82,18 @@ export function BulkPlayerDialog({ open, onOpenChange, onSave }: BulkPlayerDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-2xl rounded-2xl p-0 overflow-hidden flex flex-col max-h-[90vh]">
-        <DialogHeader className="p-6 pb-2">
-          <DialogTitle className="text-foreground font-black uppercase">Aggiungi in Blocco</DialogTitle>
+      <DialogContent className="max-w-[95vw] md:max-w-2xl rounded-2xl p-0 overflow-hidden flex flex-col max-h-[90vh] bg-background dark:bg-black border-none shadow-2xl transition-colors duration-300">
+        <DialogHeader className="p-6 pb-4 bg-muted/30 dark:bg-background border-b border-border dark:border-white/5 transition-colors">
+          <DialogTitle className="text-foreground dark:text-white font-black uppercase text-xl">Aggiungi in Blocco</DialogTitle>
           <DialogDescription className="text-xs font-medium">
             Inserisci i dati dei giocatori. Nome e Cognome sono obbligatori per il salvataggio.
           </DialogDescription>
         </DialogHeader>
         
-        <ScrollArea className="flex-1 px-6">
+        <ScrollArea className="flex-1 bg-background dark:bg-black px-6 transition-colors">
           <div className="space-y-3 py-4">
             {rows.map((row, index) => (
-              <div key={row.id} className="grid grid-cols-12 gap-2 items-center p-2 rounded-xl bg-muted/40 dark:bg-muted/20 border border-border dark:border-white/5">
+              <div key={row.id} className="grid grid-cols-12 gap-2 items-center p-2 rounded-xl bg-muted dark:bg-card/50 border border-border dark:border-white/5">
                 <div className="col-span-1 text-[10px] font-black text-muted-foreground flex justify-center">
                   {index + 1}
                 </div>
@@ -148,11 +148,11 @@ export function BulkPlayerDialog({ open, onOpenChange, onSave }: BulkPlayerDialo
           </div>
         </ScrollArea>
 
-        <DialogFooter className="p-6 pt-2 flex-row gap-2">
-          <Button variant="ghost" className="flex-1 rounded-xl font-bold uppercase text-xs h-11" onClick={() => onOpenChange(false)} disabled={isSaving}>
+        <DialogFooter className="p-6 pt-2 flex-row gap-2 bg-muted/30 dark:bg-black border-t border-border dark:border-white/5 transition-colors">
+          <Button variant="ghost" className="flex-1 rounded-xl font-bold uppercase text-xs h-11 text-foreground dark:text-white hover:bg-muted dark:hover:bg-white/5" onClick={() => onOpenChange(false)} disabled={isSaving}>
             Annulla
           </Button>
-          <Button onClick={handleSave} className="flex-1 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold uppercase text-xs h-11 shadow-sm" disabled={isSaving}>
+          <Button onClick={handleSave} className="flex-1 bg-primary dark:bg-brand-green text-white dark:text-black hover:opacity-90 dark:hover:bg-brand-green/90 rounded-xl font-bold uppercase text-xs h-11 shadow-sm transition-all" disabled={isSaving}>
             {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Salva Giocatori'}
           </Button>
         </DialogFooter>

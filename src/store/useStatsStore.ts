@@ -51,7 +51,7 @@ interface StatsState {
     loadDetailedStats: (seasonId?: string) => Promise<void>;
 }
 
-export const useStatsStore = create<StatsState>((set) => ({
+export const useStatsStore = create<StatsState>((set, get) => ({
     teamRecord: null,
     homeRecord: null,
     awayRecord: null,
@@ -68,7 +68,7 @@ export const useStatsStore = create<StatsState>((set) => ({
             return;
         }
 
-        set({ loading: true });
+        if (get().teamRecord === null) set({ loading: true });
         
         try {
             // Carica solo i dati necessari per il riepilogo (velocissimo)
@@ -95,7 +95,7 @@ export const useStatsStore = create<StatsState>((set) => ({
             return;
         }
 
-        set({ loading: true });
+        if (get().playerLeaderboard.length === 0) set({ loading: true });
         
         try {
             // Carica l'intero contesto (più lento, per pagina statistiche)

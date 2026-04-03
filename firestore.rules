@@ -123,6 +123,15 @@ service cloud.firestore {
       }
     }
 
+    // ─── /exercises/{exerciseId} ─────────────────────────────────────────────
+    // Training exercises library: visible if global OR if the caller is the owner.
+    
+    match /exercises/{exerciseId} {
+      allow get, list: if isSignedIn() && (resource.data.visibility == 'global' || resource.data.userId == request.auth.uid);
+      allow create:    if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.userId);
+    }
+
     // ─── Catch-all: deny everything else ─────────────────────────────────────
     match /{document=**} {
       allow read, write: if false;

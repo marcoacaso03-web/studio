@@ -3,18 +3,26 @@
 import { useStatsStore } from "@/store/useStatsStore";
 import { Pie, PieChart, ResponsiveContainer, Cell, Tooltip, Legend } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
+import { useThemeStore } from "@/store/useThemeStore";
 
 export function GoalsIntervalChart() {
     const { goalsIntervals } = useStatsStore();
+    const { theme } = useThemeStore();
+    const isDark = theme === "dark";
+
+    const TOOLTIP_BG     = isDark ? "rgba(0,0,0,0.92)" : "rgba(255,255,255,0.97)";
+    const TOOLTIP_BORDER = isDark ? "rgba(172,229,4,0.3)" : "rgba(0,128,255,0.25)";
+    const TOOLTIP_COLOR  = isDark ? "#fff" : "#000";
+    const LEGEND_COLOR   = isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.55)";
 
     const hasData = goalsIntervals.some(item => item.value > 0);
 
     if (!hasData) {
         return (
-            <Card className="bg-black/40 border-brand-green/30 shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
+            <Card className="bg-card border border-primary/20 dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
                 <CardHeader>
-                    <CardTitle className="text-base font-black uppercase tracking-tight text-brand-green">Distribuzione Gol</CardTitle>
+                    <CardTitle className="text-base font-black uppercase tracking-tight text-primary">Distribuzione Gol</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <p className="text-sm font-bold text-muted-foreground/60 uppercase tracking-widest text-center py-10 opacity-50">Nessun gol segnato finora.</p>
@@ -22,17 +30,17 @@ export function GoalsIntervalChart() {
             </Card>
         );
     }
-    
-    const chartConfig = {
-        value: {
-            label: "Gol",
-        }
-    };
+
+    const chartConfig = { value: { label: "Gol" } };
+
+    const COLORS = isDark 
+        ? ["#ace504", "rgba(172, 229, 4, 0.7)", "rgba(172, 229, 4, 0.4)"]
+        : ["hsl(210 100% 45%)", "rgba(0, 120, 255, 0.6)", "rgba(0, 120, 255, 0.3)"];
 
     return (
-        <Card className="bg-black/40 border-brand-green/30 shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
+        <Card className="bg-card border border-primary/20 dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
             <CardHeader className="pb-2">
-                <CardTitle className="text-base font-black uppercase tracking-tight text-brand-green">Gol per Intervallo</CardTitle>
+                <CardTitle className="text-base font-black uppercase tracking-tight text-primary">Gol per Intervallo</CardTitle>
                 <CardDescription className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Distribuzione dei gol segnati nei diversi momenti della gara.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -53,16 +61,34 @@ export function GoalsIntervalChart() {
                                 labelLine={false}
                             >
                                 {goalsIntervals.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.fill} className="hover:opacity-80 transition-opacity cursor-pointer" />
+                                    <Cell
+                                        key={`cell-${index}`}
+                                        fill={COLORS[index % COLORS.length]}
+                                        className="hover:opacity-80 transition-opacity cursor-pointer"
+                                    />
                                 ))}
                             </Pie>
-                            <Tooltip 
-                                contentStyle={{ backgroundColor: 'rgba(0,0,0,0.9)', borderRadius: '16px', border: '1px solid rgba(172,229,4,0.3)', color: '#fff', fontSize: '12px', fontWeight: '900' }}
-                                itemStyle={{ color: '#ace504' }}
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: TOOLTIP_BG,
+                                    borderRadius: 16,
+                                    border: `1px solid ${TOOLTIP_BORDER}`,
+                                    color: TOOLTIP_COLOR,
+                                    fontSize: 12,
+                                    fontWeight: 900,
+                                }}
+                                itemStyle={{ color: TOOLTIP_COLOR }}
                             />
-                            <Legend 
-                                iconType="circle" 
-                                wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em' }} 
+                            <Legend
+                                iconType="circle"
+                                wrapperStyle={{
+                                    paddingTop: 20,
+                                    fontSize: 10,
+                                    fontWeight: 900,
+                                    textTransform: "uppercase",
+                                    letterSpacing: "0.1em",
+                                    color: LEGEND_COLOR,
+                                }}
                             />
                         </PieChart>
                     </ResponsiveContainer>

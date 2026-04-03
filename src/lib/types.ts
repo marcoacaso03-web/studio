@@ -142,3 +142,24 @@ export interface ScoutPlayer {
   categoryIds?: string[];
   notes?: string;
 }
+
+export type ExerciseMediaType = 'image' | 'video' | 'link';
+
+export interface ExerciseMedia {
+  type: ExerciseMediaType;
+  url: string;
+}
+
+export interface Exercise {
+  id: string;
+  userId: string;
+  ownerName: string;
+  name: string;
+  description: string;
+  focus: string[];
+  visibility: 'private' | 'global';
+  media: ExerciseMedia[];
+  playerCount: string[];
+  createdAt: string;
+  updatedAt: string;
+}

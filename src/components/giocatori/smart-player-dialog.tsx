@@ -61,63 +61,77 @@ export function SmartPlayerDialog({ open, onOpenChange, onSave }: SmartPlayerDia
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-xl rounded-3xl p-0 overflow-hidden border-none shadow-2xl flex flex-col max-h-[90vh]">
-        <DialogHeader className="p-6 bg-primary dark:bg-accent text-white dark:text-accent-foreground shrink-0 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="bg-white/10 dark:bg-card border-b border-white/20 dark:border-border p-6 text-white dark:text-foreground pb-10 rounded-xl">
-              <Sparkles className="h-6 w-6" />
+      <DialogContent className="max-w-[95vw] md:max-w-xl rounded-[32px] p-0 overflow-hidden border border-border dark:border-brand-green/30 shadow-2xl flex flex-col max-h-[90vh] bg-card dark:bg-black">
+        <DialogHeader className="p-8 bg-primary dark:bg-black text-white dark:text-brand-green shrink-0 shadow-sm border-b border-white/10 dark:border-brand-green/20">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-white/10 dark:bg-brand-green/10 rounded-2xl shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.1)]">
+              <Sparkles className="h-7 w-7 text-white dark:text-brand-green" />
             </div>
             <div>
-              <DialogTitle className="uppercase font-black tracking-tight text-white dark:text-accent-foreground">Smart Rosa Import</DialogTitle>
-              <DialogDescription className="text-white/70 dark:text-accent-foreground/70 text-[10px] font-bold uppercase tracking-widest mt-1">
-                Inserimento Rapido tramite AI
+              <DialogTitle className="uppercase font-black text-2xl tracking-tighter text-white dark:text-white">Smart Rosa Import</DialogTitle>
+              <DialogDescription className="text-white/70 dark:text-brand-green/60 text-[10px] font-black uppercase tracking-[0.3em] mt-1">
+                Potenziato da Intelligenza Artificiale
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1">
-          <div className="p-6 space-y-6">
-            <Alert className="bg-primary/5 dark:bg-primary/5 border-primary/20 rounded-2xl">
-              <AlertCircle className="h-4 w-4 text-primary dark:text-foreground" />
-              <AlertTitle className="text-[10px] font-black uppercase text-primary dark:text-foreground mb-1">Guida all'uso</AlertTitle>
-              <AlertDescription className="text-[11px] font-bold text-muted-foreground uppercase leading-relaxed">
-                Incolla la lista dei giocatori dividendo per ruolo. 
-                Esempio: <span className="text-foreground dark:text-foreground">"Difensori: Rossi, Bianchi. Centrocampisti: Verdi..."</span>
-                <span className="text-foreground block mt-1">L'AI riconoscerà automaticamente i nomi e assegnerà il ruolo corretto. Verifica sempre eventuali errori dopo l'importazione.</span>
-              </AlertDescription>
+        <ScrollArea className="flex-1 bg-background dark:bg-black transition-colors">
+          <div className="p-8 space-y-8">
+            <Alert className="bg-muted dark:bg-black/40 border-primary/20 dark:border-brand-green/20 rounded-[24px] p-5 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.05)] transition-all">
+              <Info className="h-5 w-5 text-primary dark:text-brand-green" />
+              <div className="ml-2">
+                <AlertTitle className="text-[11px] font-black uppercase text-foreground dark:text-white tracking-widest mb-1.5 flex items-center gap-2">
+                  Guida Rapida
+                </AlertTitle>
+                <AlertDescription className="text-[11px] font-bold text-muted-foreground dark:text-white/40 uppercase leading-relaxed tracking-wide">
+                  Copia e incolla la lista dei giocatori. Puoi specificare i ruoli come intestazioni. 
+                  <span className="text-foreground dark:text-white block mt-2 p-3 bg-background/50 dark:bg-black rounded-xl border border-border dark:border-brand-green/10">
+                    Esempio: "Difensori: Rossi, Bianchi. Centrocampisti: Verdi..."
+                  </span>
+                  <span className="text-foreground dark:text-brand-green/80 block mt-3 font-black">L'AI riconoscerà automaticamente nomi e ruoli tecnici.</span>
+                </AlertDescription>
+              </div>
             </Alert>
 
-            <div className="space-y-2">
-              <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Testo della lista:</p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between px-2">
+                <p className="text-[10px] font-black uppercase text-muted-foreground tracking-[0.3em] ml-1">Input Testuale</p>
+                {rawText.length > 0 && <span className="text-[9px] font-black text-primary dark:text-brand-green uppercase">{rawText.length} Caratteri</span>}
+              </div>
               <Textarea
-                placeholder="Esempio:&#10;Portieri: Buffon&#10;Difensori: Chiellini, Bonucci&#10;..."
+                placeholder="Incolla qui la lista...&#10;Es: Portieri: Buffon; Difensori: Chiellini..."
                 value={rawText}
                 onChange={(e) => setRawText(e.target.value)}
                 disabled={isAnalyzing}
-                className="min-h-[250px] text-xs font-bold rounded-2xl bg-muted/40 dark:bg-muted/20 border-border dark:border-muted-foreground/20 focus:bg-background transition-all"
+                className="min-h-[280px] text-xs font-black uppercase rounded-[24px] bg-muted/30 dark:bg-black border-border dark:border-brand-green/20 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green focus-visible:border-primary dark:focus-visible:border-brand-green transition-all p-5 placeholder:text-muted-foreground/30"
               />
             </div>
 
             {isAnalyzing && (
-              <div className="flex flex-col items-center justify-center p-8 bg-muted/20 dark:bg-accent/5 rounded-2xl border border-dashed border-border dark:border-accent/20 space-y-3 animate-in fade-in zoom-in">
-                <Loader2 className="h-10 w-10 text-primary dark:text-accent animate-spin" />
-                <div className="text-center">
-                  <p className="text-[10px] font-black uppercase text-accent animate-pulse tracking-widest">L'AI sta analizzando la rosa...</p>
-                  <p className="text-[9px] text-muted-foreground uppercase font-bold mt-1">Categorizzazione ruoli in corso</p>
+              <div className="flex flex-col items-center justify-center p-10 bg-muted/20 dark:bg-brand-green/5 rounded-[28px] border border-dashed border-primary/20 dark:border-brand-green/30 space-y-4 animate-in fade-in zoom-in duration-500">
+                <Loader2 className="h-12 w-12 text-primary dark:text-brand-green animate-spin" />
+                <div className="text-center space-y-1">
+                  <p className="text-[11px] font-black uppercase text-primary dark:text-brand-green animate-pulse tracking-[0.3em]">Analisi AI in Corso...</p>
+                  <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest">Organizzazione rosa e categorizzazione ruoli</p>
                 </div>
               </div>
             )}
           </div>
         </ScrollArea>
 
-        <DialogFooter className="p-6 pt-0 flex-row gap-3 shrink-0">
-          <Button variant="ghost" className="flex-1 rounded-2xl font-black uppercase text-[10px] h-12" onClick={() => onOpenChange(false)} disabled={isAnalyzing}>
+        <DialogFooter className="p-8 pt-0 flex-row gap-4 shrink-0 bg-background dark:bg-black transition-colors">
+          <Button 
+            variant="ghost" 
+            className="flex-1 rounded-2xl font-black uppercase text-[10px] tracking-widest h-14 text-muted-foreground hover:bg-muted dark:hover:bg-white/5 transition-all" 
+            onClick={() => onOpenChange(false)} 
+            disabled={isAnalyzing}
+          >
             Annulla
           </Button>
           <Button 
             onClick={handleSmartImport} 
-            className="flex-1 bg-primary dark:bg-accent text-white dark:text-accent-foreground hover:opacity-90 dark:hover:bg-accent/90 rounded-2xl font-black uppercase text-[10px] h-12 shadow-lg shadow-primary/20 dark:shadow-accent/20" 
+            className="flex-1 bg-primary dark:bg-black border-2 border-primary dark:border-brand-green text-white dark:text-brand-green hover:opacity-90 dark:hover:bg-black/80 rounded-2xl font-black uppercase text-[10px] tracking-widest h-14 shadow-lg dark:shadow-[0_0_15px_rgba(172,229,4,0.2)] hover:scale-[1.02] active:scale-95 transition-all" 
             disabled={isAnalyzing || !rawText.trim()}
           >
             {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Importa Giocatori"}

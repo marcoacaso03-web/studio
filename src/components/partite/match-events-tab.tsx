@@ -4,7 +4,9 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMatchDetailStore } from "@/store/useMatchDetailStore";
 import { Badge } from "@/components/ui/badge";
-import { Goal, Info, Zap, Plus, Trash2, ArrowRightLeft } from "lucide-react";
+import { Info, Plus, Trash2, ArrowRightLeft } from "lucide-react";
+import { GiSoccerBall, GiSoccerKick } from "react-icons/gi";
+import { IoSquare } from "react-icons/io5";
 import { MatchEventDialog } from "./match-event-dialog";
 import { Button } from "@/components/ui/button";
 import { MatchEventType } from "@/lib/types";
@@ -15,10 +17,10 @@ export function MatchEventsTab() {
 
   const getEventIcon = (type: MatchEventType) => {
     switch(type) {
-      case 'goal': return <Goal className="h-5 w-5 text-primary dark:text-brand-green" />;
-      case 'assist': return <Zap className="h-5 w-5 text-primary dark:text-brand-green" />;
-      case 'yellow_card': return <div className="h-5 w-4 bg-yellow-400 rounded-sm border border-yellow-300 shadow-sm" />;
-      case 'red_card': return <div className="h-5 w-4 bg-red-600 rounded-sm border border-red-400 shadow-sm" />;
+      case 'goal': return <GiSoccerBall className="h-5 w-5 text-primary dark:text-brand-green" />;
+      case 'assist': return <GiSoccerKick className="h-5 w-5 text-primary dark:text-brand-green" />;
+      case 'yellow_card': return <IoSquare className="h-5 w-5 text-yellow-400 drop-shadow-sm" />;
+      case 'red_card': return <IoSquare className="h-5 w-5 text-red-600 drop-shadow-sm" />;
       case 'substitution':
       case 'sub_in':
       case 'sub_out': return <ArrowRightLeft className="h-5 w-5 text-primary dark:text-brand-green" />;
@@ -51,7 +53,7 @@ export function MatchEventsTab() {
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <div>
             <div className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-primary dark:text-brand-green" />
+              <GiSoccerBall className="h-5 w-5 text-primary dark:text-brand-green" />
               <CardTitle className="uppercase font-black text-foreground">Cronaca Partita</CardTitle>
             </div>
             <CardDescription className="uppercase text-[10px] font-bold text-muted-foreground">Riepilogo degli eventi principali della gara.</CardDescription>

@@ -2,7 +2,8 @@
 
 import { useStatsStore } from "@/store/useStatsStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Goal, ShieldAlert, Swords, TrendingUp, TrendingDown, Trophy, Star } from "lucide-react";
+import { GiSoccerBall, GiSoccerKick } from "react-icons/gi";
+import { Swords, TrendingUp, TrendingDown, Trophy, Star } from "lucide-react";
 
 export function TeamRecord() {
     const { teamRecord, playerLeaderboard } = useStatsStore();
@@ -32,34 +33,34 @@ export function TeamRecord() {
         <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
                 {/* Card Record Partite */}
-                <Card className="bg-black/40 border-brand-green/30 shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
+                <Card className="bg-card dark:bg-black/40 border-border dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm transition-colors">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-base font-black uppercase tracking-tight flex items-center gap-2 text-brand-green">
+                        <CardTitle className="text-base font-black uppercase tracking-tight flex items-center gap-2 text-primary dark:text-brand-green">
                             <Swords className="h-4 w-4" />
                             Andamento Stagione
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                    <div className="text-3xl font-black text-white mb-4">{teamRecord.matchesPlayed} <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest ml-1">Gare totali</span></div>
+                    <div className="text-3xl font-black text-foreground dark:text-white mb-4">{teamRecord.matchesPlayed} <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest ml-1">Gare totali</span></div>
                     <div className="grid grid-cols-3 gap-2">
-                        <div className="flex flex-col items-center p-3 bg-black/40 rounded-2xl border border-brand-green/20 group hover:border-brand-green/40 transition-all">
-                            <span className="text-[10px] font-black text-brand-green uppercase tracking-widest mb-1.5 opacity-80">VITTORIA</span>
+                        <div className="flex flex-col items-center p-3 bg-muted/50 dark:bg-black/40 rounded-2xl border border-primary/20 dark:border-brand-green/20 group hover:border-primary/40 dark:hover:border-brand-green/40 transition-all">
+                            <span className="text-[10px] font-black text-primary dark:text-brand-green uppercase tracking-widest mb-1.5 opacity-80">VITTORIA</span>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-black text-white">{teamRecord.wins}</span>
-                                <span className="text-xs font-bold text-brand-green/60">({winPct}%)</span>
+                                <span className="text-2xl font-black text-foreground dark:text-white">{teamRecord.wins}</span>
+                                <span className="text-xs font-bold text-primary/60 dark:text-brand-green/60">({winPct}%)</span>
                             </div>
                         </div>
-                        <div className="flex flex-col items-center p-3 bg-black/40 rounded-2xl border border-white/5 group hover:border-white/10 transition-all">
+                        <div className="flex flex-col items-center p-3 bg-muted/50 dark:bg-black/40 rounded-2xl border border-divider dark:border-white/5 group hover:border-divider/20 dark:hover:border-white/10 transition-all">
                             <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1.5 opacity-80">PAREGGIO</span>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-black text-white">{teamRecord.draws}</span>
+                                <span className="text-2xl font-black text-foreground dark:text-white">{teamRecord.draws}</span>
                                 <span className="text-xs font-bold text-muted-foreground/40">({drawPct}%)</span>
                             </div>
                         </div>
-                        <div className="flex flex-col items-center p-3 bg-black/40 rounded-2xl border border-rose-500/20 group hover:border-rose-500/40 transition-all">
+                        <div className="flex flex-col items-center p-3 bg-muted/50 dark:bg-black/40 rounded-2xl border border-rose-500/20 group hover:border-rose-500/40 transition-all">
                             <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1.5 opacity-80">SCONFITTA</span>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-black text-white">{teamRecord.losses}</span>
+                                <span className="text-2xl font-black text-foreground dark:text-white">{teamRecord.losses}</span>
                                 <span className="text-xs font-bold text-rose-500/60">({lossPct}%)</span>
                             </div>
                         </div>
@@ -68,10 +69,10 @@ export function TeamRecord() {
                 </Card>
 
                 {/* Card Bilancio Reti */}
-                <Card className="bg-black/40 border-brand-green/30 shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
+                <Card className="bg-card dark:bg-black/40 border-border dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm transition-colors">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-base font-black uppercase tracking-tight flex items-center gap-2 text-brand-green">
-                            <Goal className="h-4 w-4" />
+                        <CardTitle className="text-base font-black uppercase tracking-tight flex items-center gap-2 text-primary dark:text-brand-green">
+                            <GiSoccerBall className="h-4 w-4" />
                             Bilancio Reti
                         </CardTitle>
                     </CardHeader>
@@ -80,31 +81,31 @@ export function TeamRecord() {
                             <div className="space-y-1">
                                 <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Differenza Reti</p>
                                 <div className="flex items-center gap-3">
-                                    <span className={`text-4xl font-black ${goalDifference > 0 ? 'text-brand-green' : goalDifference < 0 ? 'text-rose-500' : 'text-white'}`}>
+                                    <span className={`text-4xl font-black ${goalDifference > 0 ? 'text-primary dark:text-brand-green' : goalDifference < 0 ? 'text-rose-500' : 'text-foreground dark:text-white'}`}>
                                         {goalDifference > 0 ? `+${goalDifference}` : goalDifference}
                                     </span>
-                                    {goalDifference > 0 ? <TrendingUp className="h-7 w-7 text-brand-green drop-shadow-[0_0_8px_rgba(172,229,4,0.4)]" /> : goalDifference < 0 ? <TrendingDown className="h-7 w-7 text-rose-500 drop-shadow-[0_0_8px_rgba(244,63,94,0.4)]" /> : null}
+                                    {goalDifference > 0 ? <TrendingUp className="h-7 w-7 text-primary dark:text-brand-green drop-shadow-[0_0_8px_rgba(172,229,4,0.4)]" /> : goalDifference < 0 ? <TrendingDown className="h-7 w-7 text-rose-500 drop-shadow-[0_0_8px_rgba(244,63,94,0.4)]" /> : null}
                                 </div>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
                             <div className="flex items-start gap-3">
-                                <div className="p-2 bg-brand-green/10 rounded-xl border border-brand-green/20">
-                                    <Goal className="h-4 w-4 text-brand-green" />
+                                <div className="p-2 bg-primary/10 dark:bg-brand-green/10 rounded-xl border border-primary/20 dark:border-brand-green/20">
+                                    <GiSoccerBall className="h-4 w-4 text-primary dark:text-brand-green" />
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Gol Fatti</p>
-                                    <p className="text-xl font-black text-white">{teamRecord.goalsFor}</p>
+                                    <p className="text-xl font-black text-foreground dark:text-white">{teamRecord.goalsFor}</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
                                 <div className="p-2 bg-rose-500/10 rounded-xl border border-rose-500/20">
-                                    <ShieldAlert className="h-4 w-4 text-rose-500" />
+                                    <GiSoccerBall className="h-4 w-4 text-rose-500" />
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Gol Subiti</p>
-                                    <p className="text-xl font-black text-white">{teamRecord.goalsAgainst}</p>
+                                    <p className="text-xl font-black text-foreground dark:text-white">{teamRecord.goalsAgainst}</p>
                                 </div>
                             </div>
                         </div>
@@ -113,40 +114,40 @@ export function TeamRecord() {
             </div>
 
             {/* Card Migliori Rendimenti */}
-            <Card className="bg-black/40 border-brand-green/30 shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
+            <Card className="bg-card dark:bg-black/40 border-border dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm transition-colors">
                 <CardHeader className="pb-2">
-                    <CardTitle className="text-base font-black uppercase tracking-tight flex items-center gap-2 text-brand-green">
+                    <CardTitle className="text-base font-black uppercase tracking-tight flex items-center gap-2 text-primary dark:text-brand-green">
                         <Trophy className="h-4 w-4" />
                         Migliori Rendimenti
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 pt-2">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="flex items-center gap-4 p-4 bg-black/40 rounded-2xl border border-brand-green/20 hover:bg-black/60 transition-all">
-                            <div className="h-12 w-12 rounded-2xl bg-black border border-brand-green flex items-center justify-center shadow-[0_0_10px_rgba(172,229,4,0.15)]">
-                                <Trophy className="h-6 w-6 text-brand-green" />
+                        <div className="flex items-center gap-4 p-4 bg-muted/50 dark:bg-black/40 rounded-2xl border border-primary/20 dark:border-brand-green/20 hover:bg-muted dark:hover:bg-black/60 transition-all">
+                            <div className="h-12 w-12 rounded-2xl bg-card dark:bg-black border border-primary/50 dark:border-brand-green flex items-center justify-center shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.15)]">
+                                <GiSoccerBall className="h-6 w-6 text-primary dark:text-brand-green" />
                             </div>
                             <div className="flex-1">
                                 <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60 mb-0.5">Capocannoniere</p>
-                                <p className="text-base font-black uppercase tracking-tight text-white">
+                                <p className="text-base font-black uppercase tracking-tight text-foreground dark:text-white">
                                     {topScorer && topScorer.stats.goals > 0 ? (
                                         <>
-                                            {topScorer.name} <span className="text-brand-green ml-1">({topScorer.stats.goals})</span>
+                                            {topScorer.name} <span className="text-primary dark:text-brand-green ml-1">({topScorer.stats.goals})</span>
                                         </>
                                     ) : "-"}
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 p-4 bg-black/40 rounded-2xl border border-white/5 hover:bg-black/60 transition-all">
-                            <div className="h-12 w-12 rounded-2xl bg-black border border-white/20 flex items-center justify-center">
-                                <Star className="h-6 w-6 text-white" />
+                        <div className="flex items-center gap-4 p-4 bg-muted/50 dark:bg-black/40 rounded-2xl border border-divider dark:border-white/5 hover:bg-muted dark:hover:bg-black/60 transition-all">
+                            <div className="h-12 w-12 rounded-2xl bg-card dark:bg-black border border-divider dark:border-white/20 flex items-center justify-center">
+                                <GiSoccerKick className="h-6 w-6 text-foreground dark:text-white" />
                             </div>
                             <div className="flex-1">
                                 <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60 mb-0.5">Assistman</p>
-                                <p className="text-base font-black uppercase tracking-tight text-white">
+                                <p className="text-base font-black uppercase tracking-tight text-foreground dark:text-white">
                                     {topAssist && topAssist.stats.assists > 0 ? (
                                         <>
-                                            {topAssist.name} <span className="text-white ml-1 opacity-80">({topAssist.stats.assists})</span>
+                                            {topAssist.name} <span className="text-muted-foreground dark:text-white ml-1 opacity-80">({topAssist.stats.assists})</span>
                                         </>
                                     ) : "-"}
                                 </p>

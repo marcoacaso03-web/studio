@@ -27,8 +27,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (!mounted) {
      return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
-        <img src="/favicon-16x16.png" alt="App Logo" className="h-16 w-16 animate-pulse drop-shadow-[0_0_20px_rgba(172,229,4,0.5)]" />
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background dark:bg-black transition-colors duration-500">
+        <img src="/favicon-16x16.png" alt="App Logo" className="h-16 w-16 animate-pulse drop-shadow-[0_0_20px_rgba(172,229,4,0.3)] dark:drop-shadow-[0_0_20px_rgba(172,229,4,0.5)]" />
       </div>
     );
   }
@@ -41,8 +41,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   // Se non autenticato e non in pagine libere, mostriamo lo splash di caricamento mentre reindirizza
   if (!isAuthenticated) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
-        <img src="/favicon-16x16.png" alt="App Logo" className="h-16 w-16 animate-pulse drop-shadow-[0_0_20px_rgba(172,229,4,0.5)]" />
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background dark:bg-black transition-colors duration-500">
+        <img src="/favicon-16x16.png" alt="App Logo" className="h-16 w-16 animate-pulse drop-shadow-[0_0_20px_rgba(172,229,4,0.3)] dark:drop-shadow-[0_0_20px_rgba(172,229,4,0.5)]" />
       </div>
     );
   }

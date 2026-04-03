@@ -6,32 +6,15 @@ import { usePathname } from "next/navigation";
 import {
   Search,
   LayoutGrid,
-  Settings
+  Settings,
+  TrendingUp
 } from "lucide-react";
+import { PiTrafficCone } from "react-icons/pi";
 import { cn } from "@/lib/utils";
-
-// Icona Rugby Ball (Allenamento) come SVG manuale per evitare errori di import
-const RugbyBallIcon = ({ className }: { className?: string }) => (
-  <svg 
-    className={className} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-  >
-    <path d="m15.6 11.6-5.8-5.8" />
-    <path d="m11.6 15.6-5.8-5.8" />
-    <path d="M12 21c3.6 0 9-3.9 9-9s-5.4-9-9-9-9 3.9-9 9 5.4 9 9 9Z" />
-    <path d="M14.8 5.2 5.2 14.8" />
-    <path d="M18.8 9.2 9.2 18.8" />
-  </svg>
-);
 
 const navItems = [
   { href: "/calendario", label: "Dashboard", icon: LayoutGrid },
-  { href: "/allenamento", label: "Allenamento", icon: RugbyBallIcon },
+  { href: "/allenamento", label: "Allenamento", icon: PiTrafficCone },
   { href: "/scout", label: "Scout", icon: Search },
   { href: "/altro", label: "Impostazioni", icon: Settings },
 ];
@@ -45,12 +28,12 @@ function NavLink({ href, label, icon: Icon }: { href: string; label: string; ico
       href={href}
       className={cn(
         "flex flex-col items-center justify-center gap-1 p-2 transition-all w-full",
-        isActive ? "text-foreground dark:text-brand-green" : "text-muted-foreground/50 dark:text-muted-foreground/30"
+        isActive ? "text-primary dark:text-brand-green" : "text-muted-foreground/50 dark:text-muted-foreground/30"
       )}
     >
       <div className={cn(
         "transition-all duration-300 p-1.5 rounded-xl",
-        isActive && "text-primary dark:text-brand-green shadow-sm dark:drop-shadow-[0_0_6px_rgba(172,229,4,0.8)] scale-110"
+        isActive && "text-primary dark:text-brand-green shadow-[0_0_15px_rgba(37,99,235,0.2)] dark:shadow-none dark:drop-shadow-[0_0_6px_rgba(172,229,4,0.8)] scale-110"
       )}>
         <Icon className="h-6 w-6" />
       </div>

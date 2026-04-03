@@ -95,26 +95,32 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] rounded-2xl">
-        <DialogHeader>
-          <DialogTitle className="text-foreground font-black uppercase text-xl">{player ? "Modifica Giocatore" : "Nuovo Giocatore"}</DialogTitle>
-          <DialogDescription className="text-xs">
-            Gestisci i dettagli anagrafici e il ruolo tecnico.
+      <DialogContent className="sm:max-w-[425px] rounded-[28px] bg-card dark:bg-black border border-border dark:border-brand-green/30 shadow-xl dark:shadow-[0_0_25px_rgba(172,229,4,0.05)] p-6 overflow-hidden">
+        <DialogHeader className="space-y-1">
+          <DialogTitle className="text-foreground dark:text-white font-black uppercase text-xl md:text-2xl tracking-tight">
+            {player ? "Modifica Giocatore" : "Nuovo Giocatore"}
+          </DialogTitle>
+          <DialogDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+            Dettagli anagrafici e ruolo tecnico in rosa.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
-            <div className="grid grid-cols-2 gap-3">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 pt-4">
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="firstName"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Nome</FormLabel>
+                  <FormItem className="space-y-1.5">
+                    <FormLabel className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/80 ml-1">Nome</FormLabel>
                     <FormControl>
-                      <Input placeholder="Mario" {...field} className="h-10 text-xs font-bold uppercase" />
+                      <Input 
+                        placeholder="Mario" 
+                        {...field} 
+                        className="h-11 text-xs font-black uppercase rounded-xl bg-background dark:bg-black border border-border dark:border-brand-green/20 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green focus-visible:border-primary dark:focus-visible:border-brand-green transition-all" 
+                      />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-[9px] font-bold uppercase" />
                   </FormItem>
                 )}
               />
@@ -122,12 +128,16 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
                 control={form.control}
                 name="lastName"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Cognome</FormLabel>
+                  <FormItem className="space-y-1.5">
+                    <FormLabel className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/80 ml-1">Cognome</FormLabel>
                     <FormControl>
-                      <Input placeholder="Rossi" {...field} className="h-10 text-xs font-bold uppercase" />
+                      <Input 
+                        placeholder="Rossi" 
+                        {...field} 
+                        className="h-11 text-xs font-black uppercase rounded-xl bg-background dark:bg-black border border-border dark:border-brand-green/20 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green focus-visible:border-primary dark:focus-visible:border-brand-green transition-all" 
+                      />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-[9px] font-bold uppercase" />
                   </FormItem>
                 )}
               />
@@ -137,28 +147,42 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
               control={form.control}
               name="role"
               render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Ruolo</FormLabel>
+                  <FormItem className="space-y-1.5">
+                    <FormLabel className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/80 ml-1">Ruolo Tecnico</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                         <FormControl>
-                            <SelectTrigger className="h-10 text-xs font-bold uppercase">
+                            <SelectTrigger className="h-11 text-xs font-black uppercase rounded-xl bg-background dark:bg-black border border-border dark:border-brand-green/20 focus:ring-1 focus:ring-primary dark:focus:ring-brand-green focus:border-primary dark:focus:border-brand-green transition-all">
                                 <SelectValue placeholder="Seleziona ruolo" />
                             </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
                             {ROLES.map(role => (
-                                <SelectItem key={role} value={role} className="text-xs font-bold uppercase">{role}</SelectItem>
+                                <SelectItem key={role} value={role} className="text-xs font-black uppercase focus:bg-primary/10 dark:focus:bg-brand-green/10 focus:text-primary dark:focus:text-brand-green transition-colors">
+                                  {role}
+                                </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
-                    <FormMessage />
+                    <FormMessage className="text-[9px] font-bold uppercase" />
                   </FormItem>
               )}
             />
 
-            <DialogFooter className="pt-4 flex-row gap-2">
-              <Button type="button" variant="ghost" className="flex-1 rounded-xl font-bold uppercase text-xs h-11" onClick={() => onOpenChange(false)}>Annulla</Button>
-              <Button type="submit" className="flex-1 bg-primary hover:bg-primary/90 rounded-xl font-bold uppercase text-xs h-11">Salva</Button>
+            <DialogFooter className="pt-6 flex-row gap-3">
+              <Button 
+                type="button" 
+                variant="ghost" 
+                className="flex-1 rounded-xl font-black uppercase text-[10px] tracking-widest h-12 text-muted-foreground hover:bg-muted dark:hover:bg-white/5 transition-all" 
+                onClick={() => onOpenChange(false)}
+              >
+                Annulla
+              </Button>
+              <Button 
+                type="submit" 
+                className="flex-1 bg-primary dark:bg-black border-2 border-primary dark:border-brand-green text-white dark:text-brand-green font-black uppercase text-[10px] tracking-widest h-12 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.2)] hover:scale-[1.02] active:scale-95 transition-all"
+              >
+                Salva
+              </Button>
             </DialogFooter>
           </form>
         </Form>

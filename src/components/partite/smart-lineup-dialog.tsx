@@ -64,23 +64,23 @@ export function SmartLineupDialog({ open, onOpenChange }: SmartLineupDialogProps
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] md:max-w-xl rounded-3xl p-0 overflow-hidden border-none shadow-2xl flex flex-col max-h-[90vh] bg-background dark:bg-black">
-        <DialogHeader className="p-6 bg-primary dark:bg-yellow-300 text-white dark:text-black shrink-0 relative">
+        <DialogHeader className="p-6 bg-primary dark:bg-yellow-300 text-white dark:text-black shrink-0 relative transition-colors">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-white/10 dark:bg-black/10 rounded-xl">
               <Sparkles className="h-6 w-6" />
             </div>
             <div>
               <DialogTitle className="uppercase font-black tracking-tight">AI Smart Lineup</DialogTitle>
-              <DialogDescription className="text-black/60 text-[10px] font-bold uppercase tracking-widest mt-1">
+              <DialogDescription className="text-white/60 dark:text-black/60 text-[10px] font-bold uppercase tracking-widest mt-1">
                 Associazione Automatica Giocatori
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 bg-background dark:bg-black transition-colors">
           <div className="p-6 space-y-6">
-            <Alert className="bg-muted dark:bg-black border-border dark:border-brand-green/30 rounded-2xl">
+            <Alert className="bg-muted dark:bg-card/50 border-border dark:border-brand-green/30 rounded-2xl transition-colors">
               <AlertCircle className="h-4 w-4 text-primary dark:text-white" />
               <AlertTitle className="text-[10px] font-black uppercase text-foreground dark:text-white mb-1">Attenzione</AlertTitle>
               <AlertDescription className="text-[11px] font-bold text-muted-foreground dark:text-white/40 uppercase leading-relaxed">
@@ -112,8 +112,8 @@ export function SmartLineupDialog({ open, onOpenChange }: SmartLineupDialogProps
           </div>
         </ScrollArea>
 
-        <DialogFooter className="p-6 pt-0 flex-row gap-3 shrink-0 bg-background dark:bg-black">
-          <Button variant="ghost" className="flex-1 rounded-2xl font-black uppercase text-[10px] h-12 text-foreground dark:text-white hover:bg-muted dark:hover:bg-white/5" onClick={() => onOpenChange(false)} disabled={isAnalyzing}>
+        <DialogFooter className="p-6 pt-0 flex-row gap-3 shrink-0 bg-background dark:bg-black transition-colors">
+          <Button variant="ghost" className="flex-1 rounded-2xl font-black uppercase text-[10px] h-12 text-foreground dark:text-white hover:bg-muted dark:hover:bg-white/5 transition-colors" onClick={() => onOpenChange(false)} disabled={isAnalyzing}>
             Annulla
           </Button>
           <Button 

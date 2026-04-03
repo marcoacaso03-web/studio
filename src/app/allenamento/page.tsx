@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dumbbell, ChevronLeft, ChevronRight, PlusCircle, Trash2, Loader2, Eraser, ClipboardCheck, Target, Users, Filter } from "lucide-react";
+import { PiTrafficCone } from "react-icons/pi";
 import { useTrainingStore } from "@/store/useTrainingStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
@@ -126,8 +127,18 @@ export default function AllenamentoPage() {
 
   return (
     <div className="space-y-6 pb-20">
-      <PageHeader title="Sessioni Allenamento">
+      <PageHeader title="Allenamento">
         <div className="flex gap-2">
+          {/* Libreria - Cono */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-xl h-10 w-10 hover:bg-card/30"
+            onClick={() => router.push('/allenamento/libreria')}
+          >
+            <PiTrafficCone className="h-6 w-6 text-primary dark:text-brand-green" />
+          </Button>
+
           {/* Statistiche - Lavagnetta */}
           <Button
             variant="ghost"

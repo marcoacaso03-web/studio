@@ -103,8 +103,8 @@ export function ScoutPlayerDialog({ open, onOpenChange, player, categories }: Sc
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-md rounded-3xl p-0 overflow-hidden bg-card dark:bg-background border border-primary/30 dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.15)]">
-        <DialogHeader className="p-6 bg-muted dark:bg-black/60 border-b border-primary/30 dark:border-brand-green/30 text-foreground dark:text-white shrink-0">
+      <DialogContent className="max-w-[95vw] md:max-w-md rounded-3xl p-0 overflow-hidden bg-background dark:bg-black border border-border dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] transition-colors duration-300">
+        <DialogHeader className="p-6 bg-card dark:bg-black border-b border-border dark:border-brand-green/30 text-foreground dark:text-white shrink-0">
           <DialogTitle className="text-xl font-black uppercase tracking-tight">
             {player ? "Modifica Talento" : "Nuovo Talento Scout"}
           </DialogTitle>
@@ -149,7 +149,7 @@ export function ScoutPlayerDialog({ open, onOpenChange, player, categories }: Sc
 
             <div className="space-y-1.5">
               <Label className="text-[10px] font-black uppercase tracking-widest text-primary dark:text-brand-green ml-1">Etichette (Seleziona)</Label>
-              <div className="flex flex-wrap gap-2 pt-1 border border-primary/20 dark:border-brand-green/20 rounded-xl p-3 bg-muted dark:bg-black/20 text-foreground">
+              <div className="flex flex-wrap gap-2 pt-1 border border-border dark:border-brand-green/20 rounded-xl p-3 bg-muted dark:bg-card/50 text-foreground">
                 {categories.length === 0 ? (
                   <p className="text-[9px] font-bold text-muted-foreground uppercase italic p-2 bg-background dark:bg-muted/30 w-full rounded-lg">
                     Nessuna etichetta creata. Creale dal tasto "Etichette" in home scout.

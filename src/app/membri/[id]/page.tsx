@@ -5,10 +5,13 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { ArrowLeft, User, Shield, Sword, Zap, Clock, AlertTriangle, Target, Calendar, TrendingUp, ArrowRightLeft } from "lucide-react";
+import { GiSoccerBall, GiSoccerKick } from "react-icons/gi";
+import { IoSquare } from "react-icons/io5";
 
 import { usePlayersStore } from "@/store/usePlayersStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useThemeStore } from "@/store/useThemeStore";
 import { aggregationRepository } from "@/lib/repositories/aggregation-repository";
 import { trainingRepository } from "@/lib/repositories/training-repository";
 import type { Player, TrainingSession, TrainingAttendance, TrainingStatus, Match } from "@/lib/types";
@@ -19,20 +22,61 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 
+// ─── Helper colori chart adattivi ─────────────────────────────────────────────
+function useChartColors() {
+  const { theme } = useThemeStore();
+  const isDark = theme === "dark";
+  return {
+    primary:      isDark ? "#ace504"                  : "hsl(210 100% 45%)",
+    primaryFill:  isDark ? "rgba(172,229,4,0.15)"     : "rgba(0,128,255,0.12)",
+    grid:         isDark ? "rgba(255,255,255,0.05)"   : "rgba(0,0,0,0.07)",
+    tick:         isDark ? "rgba(255,255,255,0.3)"    : "rgba(0,0,0,0.4)",
+    tooltipBg:    isDark ? "rgba(0,0,0,0.92)"         : "rgba(255,255,255,0.97)",
+    tooltipBorder:isDark ? "rgba(172,229,4,0.3)"      : "rgba(0,128,255,0.25)",
+    tooltipColor: isDark ? "#fff"                     : "#000",
+    cursorFill:   isDark ? "rgba(172,229,4,0.05)"     : "rgba(0,128,255,0.05)",
+    muted:        isDark ? "rgba(255,255,255,0.2)"    : "rgba(0,0,0,0.1)",
+  };
+}
+
+// ─── Tipi grafici ─────────────────────────────────────────────────────────────
+interface RadarData {
+  subject: string;
+  score: number;
+  rawValue: number;
+}
+
+interface BarData {
+  name: string;
+  value: number;
+  color: string;
+}
+
+interface ChartColors {
+  primary: string;
+  primaryFill: string;
+  grid: string;
+  tick: string;
+  tooltipBg: string;
+  tooltipBorder: string;
+  tooltipColor: string;
+  cursorFill: string;
+}
+
 // Lazy-load grafici per ottimizzare LCP
-const RadarChart = dynamic(
+const RadarChart = dynamic<{ data: RadarData[]; colors: ChartColors }>(
   () => import("recharts").then((mod) => {
     const { RadarChart: RC, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Tooltip } = mod;
-    const Chart = ({ data }: { data: { subject: string; score: number; rawValue: number }[] }) => (
+    const Chart = ({ data, colors }: { data: RadarData[]; colors: ChartColors }) => (
       <ResponsiveContainer width="100%" height={240}>
         <RC data={data} margin={{ top: 10, right: 20, bottom: 10, left: 20 }}>
-          <PolarGrid stroke="rgba(255,255,255,0.05)" />
-          <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: "rgba(255,255,255,0.3)", fontWeight: 900 }} />
+          <PolarGrid stroke={colors.grid} />
+          <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: colors.tick, fontWeight: 900 }} />
           <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
-          <Radar dataKey="score" stroke="#ace504" fill="#ace504" fillOpacity={0.15} strokeWidth={2} />
+          <Radar dataKey="score" stroke={colors.primary} fill={colors.primary} fillOpacity={0.15} strokeWidth={2} />
           <Tooltip
-            contentStyle={{ backgroundColor: "black", border: "1px solid rgba(172,229,4,0.3)", borderRadius: 16, fontSize: 11, color: "white" }}
-            itemStyle={{ color: "white" }}
+            contentStyle={{ backgroundColor: colors.tooltipBg, border: `1px solid ${colors.tooltipBorder}`, borderRadius: 16, fontSize: 11, color: colors.tooltipColor }}
+            itemStyle={{ color: colors.tooltipColor }}
             formatter={(val: number, name: string, props: any) => [props.payload.rawValue, ""]}
           />
         </RC>
@@ -43,25 +87,24 @@ const RadarChart = dynamic(
   { ssr: false, loading: () => <Skeleton className="h-60 w-full" /> }
 );
 
-const BarChartComponent = dynamic(
+const BarChartComponent = dynamic<{ data: BarData[]; colors: ChartColors }>(
   () => import("recharts").then((mod) => {
     const { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } = mod;
-    const Chart = ({ data }: { data: { name: string; value: number; color: string }[] }) => (
+    const Chart = ({ data, colors }: { data: BarData[]; colors: ChartColors }) => (
       <ResponsiveContainer width="100%" height={160}>
         <BarChart data={data} barSize={28}>
-          <XAxis dataKey="name" tick={{ fontSize: 9, fill: "rgba(255,255,255,0.3)", fontWeight: 900 }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 9, fill: "rgba(255,255,255,0.3)" }} axisLine={false} tickLine={false} allowDecimals={false} />
+          <XAxis dataKey="name" tick={{ fontSize: 9, fill: colors.tick, fontWeight: 900 }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 9, fill: colors.tick }} axisLine={false} tickLine={false} allowDecimals={false} />
           <Tooltip
-            contentStyle={{ backgroundColor: "black", border: "1px solid rgba(172,229,4,0.3)", borderRadius: 16, fontSize: 11, color: "white" }}
-            itemStyle={{ color: "white" }}
-            cursor={{ fill: 'rgba(172, 229, 4, 0.05)' }}
-            formatter={(v: number) => [v, ""]}
+            contentStyle={{ backgroundColor: colors.tooltipBg, border: `1px solid ${colors.tooltipBorder}`, borderRadius: 16, fontSize: 11, color: colors.tooltipColor }}
+            itemStyle={{ color: colors.tooltipColor }}
+            cursor={{ fill: colors.cursorFill }}
           />
-          {data.map((entry, i) => (
-            <Bar key={i} dataKey="value" radius={[6, 6, 0, 0]}>
-              <Cell fill={entry.color} />
-            </Bar>
-          ))}
+          <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.color} />
+            ))}
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     );
@@ -85,6 +128,8 @@ interface PlayerDetailStats {
   cleanSheets: number;
   goalsConcededOnPitch: number;
   goalsScoredOnPitch: number;
+  starts: number;
+  subs: number;
 }
 
 interface TrainingRecord {
@@ -285,6 +330,7 @@ export default function PlayerDetailPage() {
   const { players, fetchAll: fetchPlayers } = usePlayersStore();
   const { activeSeason, fetchAll: fetchSeasons } = useSeasonsStore();
   const { user } = useAuthStore();
+  const chartColors = useChartColors();
 
   const [loadingData, setLoadingData] = useState(true);
   const [playerStats, setPlayerStats] = useState<PlayerDetailStats | null>(null);
@@ -322,6 +368,8 @@ export default function PlayerDetailPage() {
         let cleanSheets = 0;
         let goalsConcededOnPitch = 0;
         let goalsScoredOnPitch = 0;
+        let starts = 0;
+        let subs = 0;
 
         const completedMatches = context.matches.filter((m) => m.status === "completed");
         for (const match of completedMatches) {
@@ -333,6 +381,8 @@ export default function PlayerDetailPage() {
 
           if (hasPlayed) {
             totalMinutes += stat?.minutesPlayed ?? 0;
+            if (isStarter) starts++;
+            else if (stat && stat.minutesPlayed > 0) subs++;
 
             // Calcolo On-Pitch Goals
             const chronologicalEvents = [...details.events].sort((a, b) => a.minute - b.minute);
@@ -387,9 +437,11 @@ export default function PlayerDetailPage() {
               draws,
               cleanSheets,
               goalsConcededOnPitch,
-              goalsScoredOnPitch
+              goalsScoredOnPitch,
+              starts,
+              subs
             }
-            : { appearances: 0, goals: 0, assists: 0, avgMinutes: 0, yellowCards: 0, redCards: 0, totalMinutes: 0, wins: 0, losses: 0, draws: 0, cleanSheets: 0, goalsConcededOnPitch: 0, goalsScoredOnPitch: 0 }
+            : { appearances: 0, goals: 0, assists: 0, avgMinutes: 0, yellowCards: 0, redCards: 0, totalMinutes: 0, wins: 0, losses: 0, draws: 0, cleanSheets: 0, goalsConcededOnPitch: 0, goalsScoredOnPitch: 0, starts: 0, subs: 0 }
         );
 
         // Storico presenze partite
@@ -455,11 +507,11 @@ export default function PlayerDetailPage() {
   const barData = useMemo(() => {
     if (!playerStats) return [];
     return [
-      { name: "Vittorie", value: playerStats.wins, color: "#ace504" },
-      { name: "Pareggi", value: playerStats.draws, color: "rgba(255,255,255,0.2)" },
+      { name: "Vittorie", value: playerStats.wins, color: chartColors.primary },
+      { name: "Pareggi", value: playerStats.draws, color: chartColors.muted },
       { name: "Sconfitte", value: playerStats.losses, color: "#ef4444" },
     ];
-  }, [playerStats]);
+  }, [playerStats, chartColors]);
 
   const splitName = (fullName: string) => {
     const parts = fullName.split(" ");
@@ -543,27 +595,41 @@ export default function PlayerDetailPage() {
       {/* Statistiche principali e avanzate */}
       <div className="space-y-2">
         {loadingData ? (
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-            {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-xl" />)}
+          <div className="grid grid-cols-3 gap-2">
+            {[...Array(9)].map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-xl" />)}
           </div>
         ) : playerStats ? (
           <>
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-              <StatCard icon={Calendar} label="Presenze" value={playerStats.appearances} />
-              <StatCard icon={Target} label="Gol" value={playerStats.goals} />
-              <StatCard icon={Zap} label="Assist" value={playerStats.assists} />
-              <StatCard icon={Clock} label="Min giocati" value={playerStats.totalMinutes} sub="minuti totali" />
-              <StatCard icon={AlertTriangle} label="Gialli" value={playerStats.yellowCards} />
-              <StatCard icon={Shield} label="Rossi" value={playerStats.redCards} />
+            {/* 1^ riga: Presenze totali, da titolare e da subentrato */}
+            <div className="grid grid-cols-3 gap-2">
+              <StatCard icon={Calendar} label="Presenze Totali" value={playerStats.appearances} />
+              <StatCard icon={User} label="Da Titolare" value={playerStats.starts} />
+              <StatCard icon={Zap} label="Da Subentrato" value={playerStats.subs} />
             </div>
 
-            {/* Statistiche Avanzate On-Pitch */}
-            <div className={`grid grid-cols-2 ${player?.role === 'Portiere' ? 'md:grid-cols-5' : 'md:grid-cols-4'} gap-2`}>
-              <StatCard icon={Target} label="Gol x Match" value={playerStats.appearances > 0 ? (playerStats.goals / playerStats.appearances).toFixed(2) : "0"} />
-              {playerStats.goals > 0 && <StatCard icon={Clock} label="Minuti x Gol" value={Math.round(playerStats.totalMinutes / playerStats.goals)} sub="un gol ogni" />}
-              <StatCard icon={Sword} label="Gol Fatti" value={playerStats.goalsScoredOnPitch} sub="in campo" />
-              <StatCard icon={Shield} label="Gol Subiti" value={playerStats.goalsConcededOnPitch} sub="in campo" />
-              {player?.role === "Portiere" && <StatCard icon={Zap} label="Clean Sheets" value={playerStats.cleanSheets} sub="reti inviolate" />}
+            {/* 2^ riga: Gol, Assist, Gol ogni xx minuti */}
+            <div className="grid grid-cols-3 gap-2">
+              <StatCard icon={GiSoccerBall} label="Gol" value={playerStats.goals} />
+              <StatCard icon={GiSoccerKick} label="Assist" value={playerStats.assists} />
+              <StatCard 
+                icon={Clock} 
+                label="Un Gol Ogni..." 
+                value={playerStats.goals > 0 ? Math.round(playerStats.totalMinutes / playerStats.goals) : "---"} 
+                sub="minuti" 
+              />
+            </div>
+
+            {/* 3^ riga: minuti giocati totali, ammonizioni, espulsioni */}
+            <div className="grid grid-cols-3 gap-2">
+              <StatCard icon={Clock} label="Minuti Totali" value={playerStats.totalMinutes} sub="minuti" />
+              <StatCard icon={IoSquare} label="Ammonizioni" value={playerStats.yellowCards} color="text-yellow-400" />
+              <StatCard icon={IoSquare} label="Espulsioni" value={playerStats.redCards} color="text-red-600" />
+            </div>
+
+            {/* 4^ riga: gol fatti mentre è in campo, gol subiti mentre è in campo */}
+            <div className="grid grid-cols-2 gap-2">
+              <StatCard icon={GiSoccerBall} label="Gol Fatti" value={playerStats.goalsScoredOnPitch} sub="in campo" color="text-primary dark:text-brand-green" />
+              <StatCard icon={GiSoccerBall} label="Gol Subiti" value={playerStats.goalsConcededOnPitch} sub="in campo" color="text-rose-500" />
             </div>
           </>
         ) : null}
@@ -579,7 +645,7 @@ export default function PlayerDetailPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-2 px-6">
-            {loadingData ? <Skeleton className="h-60 w-full bg-muted dark:bg-white/5" /> : <RadarChart data={radarData} />}
+            {loadingData ? <Skeleton className="h-60 w-full bg-muted dark:bg-white/5" /> : <RadarChart data={radarData} colors={chartColors} />}
           </CardContent>
         </Card>
 
@@ -593,7 +659,7 @@ export default function PlayerDetailPage() {
           <CardContent className="pt-4 px-6 pb-6">
             {loadingData ? <Skeleton className="h-40 w-full bg-muted dark:bg-white/5" /> : (
               <>
-                <BarChartComponent data={barData} />
+                <BarChartComponent data={barData} colors={chartColors} />
                 <p className="text-[9px] text-center text-muted-foreground dark:text-white/20 mt-2 font-black uppercase tracking-widest">
                   Partite giocate: <strong className="text-foreground dark:text-white/60">{playerStats?.appearances ?? 0}</strong> · Minuti totali: <strong className="text-foreground dark:text-white/60">{playerStats?.totalMinutes ?? 0}'</strong>
                 </p>

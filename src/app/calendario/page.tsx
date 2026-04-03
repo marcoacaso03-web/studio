@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { Users, Trophy, Calendar, Home, Plane, LayoutList } from "lucide-react";
+import { Users, TrendingUp, Calendar, Home, Plane, LayoutList } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Match, MatchStatus } from "@/lib/types";
 import { useMatchesStore } from "@/store/useMatchesStore";
@@ -116,7 +116,7 @@ export default function DashboardPage() {
         >
           <div className="flex justify-between items-center mb-1">
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-foreground dark:text-white/40">STATISTICHE</h3>
-            <Trophy className="h-4 w-4 text-primary dark:text-brand-green opacity-90" />
+            <TrendingUp className="h-4 w-4 text-primary dark:text-brand-green opacity-90" />
           </div>
           {statsLoading ? <Skeleton className="h-8 w-16 rounded-lg bg-muted/20 hover:bg-muted/30 dark:bg-card/20 dark:hover:bg-card/30" /> : (
             <div className="flex flex-col">

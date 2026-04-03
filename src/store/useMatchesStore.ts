@@ -24,7 +24,7 @@ export const useMatchesStore = create<MatchState>((set, get) => ({
         const user = useAuthStore.getState().user;
         if (!user) return;
 
-        set({ loading: true });
+        if (get().matches.length === 0) set({ loading: true });
         const targetSeasonId = seasonId || useSeasonsStore.getState().activeSeason?.id;
         
         if (!targetSeasonId) {

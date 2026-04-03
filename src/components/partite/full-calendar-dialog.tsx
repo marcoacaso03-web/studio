@@ -81,9 +81,9 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-[95vw] h-[90vh] md:max-w-3xl rounded-3xl p-0 overflow-hidden flex flex-col border-none shadow-2xl [&>button]:hidden">
-          <DialogHeader className="p-6 bg-card dark:bg-background border-b border-border dark:border-white/5 flex-row items-center justify-between space-y-0 shrink-0">
+          <DialogHeader className="p-6 bg-card dark:bg-background border-b border-border dark:border-white/5 flex-row items-center justify-between space-y-0 shrink-0 transition-colors">
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" className="text-foreground hover:bg-white/10 h-8 w-8" onClick={() => onOpenChange(false)}>
+              <Button variant="ghost" size="icon" className="text-foreground hover:bg-primary/10 dark:hover:bg-white/10 h-8 w-8 transition-colors" onClick={() => onOpenChange(false)}>
                 <ChevronLeft className="h-5 w-5 text-foreground" />
               </Button>
               <div>

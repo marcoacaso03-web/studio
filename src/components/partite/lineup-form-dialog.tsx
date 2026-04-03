@@ -108,18 +108,18 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-full h-full sm:max-w-md p-0 overflow-hidden flex flex-col gap-0 border-none bg-background dark:bg-black text-foreground dark:text-white">
+      <DialogContent className="max-w-full h-full sm:max-w-md p-0 overflow-hidden flex flex-col gap-0 border-none bg-background dark:bg-black text-foreground dark:text-white transition-colors duration-300">
         <DialogHeader className="bg-muted dark:bg-black text-foreground dark:text-white p-4 flex-row items-center gap-4 space-y-0 border-b border-border dark:border-brand-green/30 shrink-0">
-          <Button variant="ghost" size="icon" className="text-primary dark:text-brand-green hover:bg-muted/80 dark:hover:bg-white/10" onClick={() => onOpenChange(false)}>
+          <Button variant="ghost" size="icon" className="text-primary dark:text-brand-green hover:bg-primary/10 dark:hover:bg-white/10" onClick={() => onOpenChange(false)}>
             <ChevronLeft className="h-6 w-6" />
           </Button>
           <DialogTitle className="text-xl font-black uppercase tracking-tighter">Inserisci formazioni</DialogTitle>
         </DialogHeader>
 
-        <div className="bg-card dark:bg-neutral-900 border-b border-border dark:border-white/10 px-4 py-3 flex items-center justify-between text-[10px] uppercase font-black tracking-widest shadow-inner shrink-0">
+        <div className="bg-card dark:bg-card/50 border-b border-border dark:border-white/10 px-4 py-3 flex items-center justify-between text-[10px] uppercase font-black tracking-widest shadow-inner shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-5 h-5 bg-primary dark:bg-brand-green rounded-full shadow-sm dark:shadow-[0_0_8px_rgba(172,229,4,0.4)]" />
-            <span className="text-foreground dark:text-white">PITCHMAN</span>
+            <span className="text-foreground dark:text-white font-black">PITCHMAN</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground dark:text-white/60">MODULO</span>
@@ -141,7 +141,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
         </div>
 
         <div className="flex-1 overflow-y-auto bg-background dark:bg-black p-3 space-y-4">
-          <div className="bg-card dark:bg-neutral-900 rounded-xl shadow-sm dark:shadow-lg border border-border dark:border-white/10 py-1">
+          <div className="bg-card dark:bg-card/50 rounded-xl shadow-sm dark:shadow-lg border border-border dark:border-white/10 py-1">
             {starters.map((s, i) => (
               <PlayerRow
                 key={i}
@@ -158,11 +158,11 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
           </div>
 
           <div className="space-y-0">
-            <div className="bg-muted dark:bg-neutral-900 text-muted-foreground dark:text-white/50 px-4 py-3 flex items-center gap-2 text-[10px] uppercase font-black tracking-widest rounded-t-xl border-t border-x border-border dark:border-white/10">
+            <div className="bg-muted dark:bg-card/50 text-muted-foreground dark:text-white/50 px-4 py-3 flex items-center gap-2 text-[10px] uppercase font-black tracking-widest rounded-t-xl border-t border-x border-border dark:border-white/10">
               <div className="w-4 h-4 bg-background dark:bg-black border border-border dark:border-white/20 rounded-full" />
-              <span className="text-foreground dark:text-white text-xs">Panchina</span>
+              <span className="text-foreground dark:text-white text-xs font-black">Panchina</span>
             </div>
-            <div className="bg-card dark:bg-neutral-900 rounded-b-xl shadow-sm dark:shadow-lg border border-border dark:border-white/10 py-1 border-t-0">
+            <div className="bg-card dark:bg-card/50 rounded-b-xl shadow-sm dark:shadow-lg border border-border dark:border-white/10 py-1 border-t-0">
               {substitutes.map((s, i) => (
                 <PlayerRow
                   key={i}
@@ -180,7 +180,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
           </div>
         </div>
 
-        <div className="p-4 bg-muted dark:bg-neutral-900 border-t border-border dark:border-brand-green/30 shrink-0">
+        <div className="p-4 bg-muted dark:bg-card/50 border-t border-border dark:border-brand-green/30 shrink-0">
           <Button
             className="w-full bg-primary dark:bg-black border-2 border-primary dark:border-brand-green text-white hover:opacity-90 dark:hover:bg-brand-green dark:hover:text-black font-black uppercase text-sm h-14 rounded-2xl shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.2)] transition-all"
             onClick={handleSave}

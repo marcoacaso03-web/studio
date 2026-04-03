@@ -32,7 +32,7 @@ export const useTrainingStore = create<TrainingState>()(
         const activeSeason = useSeasonsStore.getState().activeSeason;
         if (!user || !activeSeason) return;
 
-        set({ loading: true });
+        if (get().sessions.length === 0) set({ loading: true });
         try {
           const sessions = await trainingRepository.getAll(user.id, activeSeason.id);
           set({ 
