@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
+import { SplashScreen } from '@/components/layout/splash-screen';
 
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -26,11 +27,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const isRootPage = pathname === '/';
 
   if (!mounted) {
-     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background dark:bg-black transition-colors duration-500">
-        <img src="/favicon-16x16.png" alt="App Logo" className="h-16 w-16 animate-pulse drop-shadow-[0_0_20px_rgba(172,229,4,0.3)] dark:drop-shadow-[0_0_20px_rgba(172,229,4,0.5)]" />
-      </div>
-    );
+     return <SplashScreen />;
   }
 
   // Se siamo sulla root o in login, non blocchiamo il rendering
@@ -40,11 +37,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   // Se non autenticato e non in pagine libere, mostriamo lo splash di caricamento mentre reindirizza
   if (!isAuthenticated) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background dark:bg-black transition-colors duration-500">
-        <img src="/favicon-16x16.png" alt="App Logo" className="h-16 w-16 animate-pulse drop-shadow-[0_0_20px_rgba(172,229,4,0.3)] dark:drop-shadow-[0_0_20px_rgba(172,229,4,0.5)]" />
-      </div>
-    );
+    return <SplashScreen />;
   }
 
   return <>{children}</>;

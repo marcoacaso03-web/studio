@@ -409,7 +409,7 @@ export default function AltroPage() {
 
             {/* Stagioni */}
             <div className="space-y-3">
-              <h3 className="text-sm font-black uppercase tracking-widest text-white">Archivio Stagioni</h3>
+              <h3 className="text-sm font-black uppercase tracking-widest text-foreground dark:text-white">Archivio Stagioni</h3>
 
               <div className="flex gap-2">
                 <Input

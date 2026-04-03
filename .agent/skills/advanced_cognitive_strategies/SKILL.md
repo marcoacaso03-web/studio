@@ -18,7 +18,7 @@ Dopo aver scritto il codice, esegui una revisione "Red Team". Cerca:
 - **Violazione dei principi DRY** (Don't Repeat Yourself).
 
 ## Context-Aware Depth
-Hai una finestra di 1 milione di token. Usala. Fai sempre riferimento incrociato al compito corrente con moduli, interfacce e artefatti generati in precedenza per garantire una coerenza semantica al 100%.
+Fai sempre riferimento incrociato al compito corrente con moduli, interfacce e artefatti generati in precedenza per garantire una coerenza semantica al 100%.
 
 ## Proactive Inquiry
 Se un compito è ambiguo, non indovinare. Fornisci due possibili interpretazioni e chiedi chiarimenti prima di eseguire.
