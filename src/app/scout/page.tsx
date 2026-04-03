@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useSWRConfig } from "swr";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
@@ -21,11 +21,14 @@ import { Input } from "@/components/ui/input";
 import * as React from "react";
 import type { ScoutPlayer, ScoutCategory } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { useSearchParams } from "next/navigation";
 
-export default function ScoutPage() {
+// Sub-component to safely use useSearchParams
+function ScoutContent() {
   const { user } = useUser();
   const firestore = useFirestore();
   const { mutate } = useSWRConfig();
+  const searchParams = useSearchParams();
 
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   const [isPlayerDialogOpen, setIsPlayerDialogOpen] = useState(false);
@@ -38,6 +41,14 @@ export default function ScoutPage() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [visibleCount, setVisibleCount] = useState(12);
   const observerTarget = React.useRef<HTMLDivElement>(null);
+
+  // Check URL params specifically on mount or when they change
+  React.useEffect(() => {
+    if (searchParams.get('new') === 'true') {
+      setEditingPlayer(null);
+      setIsPlayerDialogOpen(true);
+    }
+  }, [searchParams]);
 
   // Debounce ricerca
   React.useEffect(() => {
@@ -301,5 +312,13 @@ export default function ScoutPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+export default function ScoutPage() {
+  return (
+    <Suspense fallback={<div className="p-4 text-center">Caricamento scout...</div>}>
+      <ScoutContent />
+    </Suspense>
   );
 }

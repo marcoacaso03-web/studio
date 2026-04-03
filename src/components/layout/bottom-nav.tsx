@@ -13,7 +13,7 @@ import { PiTrafficCone } from "react-icons/pi";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/calendario", label: "Dashboard", icon: LayoutGrid },
+  { href: "/", label: "Dashboard", icon: LayoutGrid },
   { href: "/allenamento", label: "Allenamento", icon: PiTrafficCone },
   { href: "/scout", label: "Scout", icon: Search },
   { href: "/altro", label: "Impostazioni", icon: Settings },
@@ -21,7 +21,7 @@ const navItems = [
 
 function NavLink({ href, label, icon: Icon }: { href: string; label: string; icon: React.ElementType }) {
   const pathname = usePathname();
-  const isActive = pathname.startsWith(href);
+  const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
     <Link

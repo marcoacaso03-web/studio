@@ -32,7 +32,8 @@
 - [ ] **Condivisione formazione** — Generare un'immagine PNG del layout tattico (campo con nomi) da condividere su WhatsApp/Telegram.
 - [ ] **Storico formazioni** — Mostrare le formazioni delle ultime N partite per confronto tattico.
 
-### 👥 Gestione Rosa
+### Codice di condivisione della stagione
+- Nella schermata gestione stagione ci deve essere un bottone per mostrare il codice della stagione, crea quindi una sezione nella gestione stagione in cui inserendo il codice della stagione che è una sequenza di lettere e numeri che potrebbe anche coincidere con l'ID, se lo ritieni ragionevole(tu intelligenza artificiale), inserendo tale codice l'utente ottiene l'accesso alla stagione con quell 'id dal proprio account
 
 
 ### 📊 Statistiche Avanzate
