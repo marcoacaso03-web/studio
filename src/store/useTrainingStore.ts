@@ -110,23 +110,57 @@ export const useTrainingStore = create<TrainingState>()(
 
       deleteSession: async (id) => {
         const user = useAuthStore.getState().user;
-        if (!user) return;
+        const activeSeason = useSeasonsStore.getState().activeSeason;
+        if (!user || !activeSeason) return;
+
         try {
           await trainingRepository.delete(user.id, id);
-          set(state => ({ sessions: state.sessions.filter(s => s.id !== id) }));
+          
+          // Re-indexing logic
+          const allSessions = await trainingRepository.getAll(user.id, activeSeason.id);
+          const sorted = [...allSessions].sort((a, b) => a.date.localeCompare(b.date));
+          
+          const { getFirestore, doc, writeBatch } = await import('firebase/firestore');
+          const db = getFirestore();
+          const batch = writeBatch(db);
+          
+          sorted.forEach((session, idx) => {
+            const docRef = doc(db, 'users', user.id, 'trainingSessions', session.id);
+            batch.update(docRef, { index: idx + 1 });
+          });
+          
+          await batch.commit();
+          await get().fetchAll();
         } catch (e) {
-          console.error(e);
+          console.error("Delete session error:", e);
         }
       },
 
       deleteSessions: async (ids) => {
         const user = useAuthStore.getState().user;
-        if (!user) return;
+        const activeSeason = useSeasonsStore.getState().activeSeason;
+        if (!user || !activeSeason || ids.length === 0) return;
+
         try {
           await trainingRepository.deleteMany(user.id, ids);
-          set(state => ({ sessions: state.sessions.filter(s => !ids.includes(s.id)) }));
+          
+          // Re-indexing logic
+          const allSessions = await trainingRepository.getAll(user.id, activeSeason.id);
+          const sorted = [...allSessions].sort((a, b) => a.date.localeCompare(b.date));
+          
+          const { getFirestore, doc, writeBatch } = await import('firebase/firestore');
+          const db = getFirestore();
+          const batch = writeBatch(db);
+          
+          sorted.forEach((session, idx) => {
+            const docRef = doc(db, 'users', user.id, 'trainingSessions', session.id);
+            batch.update(docRef, { index: idx + 1 });
+          });
+          
+          await batch.commit();
+          await get().fetchAll();
         } catch (e) {
-          console.error(e);
+          console.error("Delete sessions error:", e);
         }
       },
 

@@ -8,6 +8,7 @@ import { useMatchesStore } from '@/store/useMatchesStore';
 import { useTrainingStore } from '@/store/useTrainingStore';
 import { useStatsStore } from '@/store/useStatsStore';
 import { useSeasonsStore } from '@/store/useSeasonsStore';
+import { useAppStore } from '@/store/useAppStore';
 
 import { SplashScreen } from '@/components/layout/splash-screen';
 import { PageHeader } from '@/components/layout/page-header';
@@ -31,7 +32,8 @@ export default function HomePage() {
   const router = useRouter();
 
   const [mounted, setMounted] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(true);
+  const { hasInitialized, setHasInitialized } = useAppStore();
+  const [isInitializing, setIsInitializing] = useState(!hasInitialized);
   const [isMatchFormOpen, setIsMatchFormOpen] = useState(false);
   const [isFullCalendarOpen, setIsFullCalendarOpen] = useState(false);
 
@@ -68,6 +70,7 @@ export default function HomePage() {
         console.error("Dashboard initialization error", e);
       } finally {
         // Extra little delay to prevent flashing
+        setHasInitialized(true);
         setTimeout(() => setIsInitializing(false), 300);
       }
     };
@@ -102,13 +105,13 @@ export default function HomePage() {
   }, [matches]);
 
   // 3. Prossimo Allenamento
-  const nextTrainingId = useMemo(() => {
+  const nextTraining = useMemo(() => {
     const today = startOfDay(new Date());
     const upcoming = sessions.filter(s => {
       const tDate = parseISO(s.date);
       return tDate >= today;
     }).sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
-    return upcoming.length > 0 ? upcoming[0].id : null;
+    return upcoming.length > 0 ? upcoming[0] : null;
   }, [sessions]);
 
   // 4. Wall of Fame (Top Players)
@@ -197,11 +200,13 @@ export default function HomePage() {
         </Button>
 
         <Button
-          onClick={() => nextTrainingId ? router.push(`/allenamento/${nextTrainingId}`) : router.push('/allenamento')}
+          onClick={() => nextTraining ? router.push(`/allenamento/${nextTraining.id}`) : router.push('/allenamento')}
           className="h-auto flex-col items-center justify-center p-3 bg-card dark:bg-white/5 border border-border dark:border-white/10 hover:bg-muted dark:hover:bg-white/10 hover:border-primary dark:hover:border-brand-green/50 text-foreground dark:text-white rounded-2xl transition-all shadow-sm gap-2"
         >
           <Dumbbell className="h-5 w-5 text-primary dark:text-brand-green" />
-          <span className="text-xs font-black uppercase text-center leading-tight">Prox<br />Allenamento</span>
+          <span className="text-xs font-black uppercase text-center leading-tight">
+            {nextTraining ? format(parseISO(nextTraining.date), "dd/MM") : "Prox"}<br />Allenamento
+          </span>
         </Button>
 
         <Button

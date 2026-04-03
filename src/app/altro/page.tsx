@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, RefreshCw, LogOut, User, Trash2, Clock, Dumbbell, Loader2, Bell, Shield, ChevronRight, Shirt } from 'lucide-react';
+import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, RefreshCw, LogOut, User, Trash2, Clock, Dumbbell, Loader2, Bell, Shield, ChevronRight, Shirt, Share2, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { playerRepository } from '@/lib/repositories/player-repository';
 import { matchRepository } from '@/lib/repositories/match-repository';
@@ -51,11 +51,15 @@ export default function AltroPage() {
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isSquadraOpen, setIsSquadraOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [isJoinDialogOpen, setIsJoinDialogOpen] = useState(false);
+  const [joinCode, setJoinCode] = useState('');
+  const [seasonToShare, setSeasonToShare] = useState<any>(null);
+  const [isJoining, setIsJoining] = useState(false);
 
   const { toast } = useToast();
   const router = useRouter();
   const { theme, toggleTheme } = useThemeStore();
-  const { seasons, activeSeason, fetchAll: fetchSeasons, addSeason, setActiveSeason, removeSeason } = useSeasonsStore();
+  const { seasons, activeSeason, fetchAll: fetchSeasons, addSeason, setActiveSeason, removeSeason, joinSeason } = useSeasonsStore();
   const { defaultDuration, setDefaultDuration, sessionsPerWeek, setSessionsPerWeek, trainingDays, setTrainingDays, autoSetPresenceOnGenerate, setAutoSetPresenceOnGenerate } = useSettingsStore();
   const { user, logout } = useAuthStore();
   const [mounted, setMounted] = useState(false);
@@ -79,6 +83,27 @@ export default function AltroPage() {
       useStatsStore.getState().loadSummaryStats(id)
     ]);
   };
+
+  const handleJoinSeason = async () => {
+    if (!joinCode.trim()) return;
+    setIsJoining(true);
+    try {
+      await joinSeason(joinCode.trim());
+      toast({ title: "Stagione Unita!", description: "Ora puoi collaborare su questa stagione." });
+      setJoinCode('');
+      setIsJoinDialogOpen(false);
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Errore", description: error.message || "Impossibile unirsi alla stagione." });
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ title: "Copiato!", description: "Codice stagione copiato negli appunti." });
+  };
+
 
   const handleDeleteSeason = async () => {
     if (!seasonToDelete) return;
@@ -412,6 +437,12 @@ export default function AltroPage() {
               <h3 className="text-sm font-black uppercase tracking-widest text-foreground dark:text-white">Archivio Stagioni</h3>
 
               <div className="flex gap-2">
+                <Button onClick={() => setIsJoinDialogOpen(true)} className="flex-1 bg-background dark:bg-black border border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted dark:hover:bg-black/60 shadow-sm transition-all h-10 rounded-xl font-black uppercase text-[10px]">
+                  <Plus className="h-3.5 w-3.5 mr-1" /> Partecipa con Codice
+                </Button>
+              </div>
+
+              <div className="flex gap-2">
                 <Input
                   placeholder="Es: 2025/26"
                   value={newSeasonName}
@@ -442,9 +473,25 @@ export default function AltroPage() {
                       {s.isActive && (
                         <Badge className="text-[9px] bg-primary dark:bg-black border border-primary dark:border-brand-green text-white shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.1)] font-black uppercase py-0.5 px-2">Attiva</Badge>
                       )}
+                      {s.ownerId !== user?.id && (
+                        <Badge variant="outline" className="text-[8px] border-blue-500/50 text-blue-500 font-black uppercase py-0.5 px-1.5 ml-1">Invitato</Badge>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-2">
+                      {s.ownerId === user?.id && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-primary dark:text-brand-green hover:bg-primary/10 dark:hover:bg-brand-green/10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSeasonToShare(s);
+                          }}
+                        >
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                      )}
                       {!s.isActive && (
                         <Button
                           variant="ghost"
@@ -513,6 +560,56 @@ export default function AltroPage() {
                 </AlertDialogContent>
               </AlertDialog>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Join Season Dialog */}
+      <Dialog open={isJoinDialogOpen} onOpenChange={setIsJoinDialogOpen}>
+        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black text-foreground uppercase tracking-tight">Partecipa a una Stagione</DialogTitle>
+            <DialogDescription className="text-xs font-bold text-muted-foreground uppercase">Inserisci il codice condiviso dal tuo collega Mister.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <Input
+              placeholder="Es: S-K9B2A"
+              value={joinCode}
+              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+              className="font-black text-center text-lg h-14 tracking-widest bg-muted/30 dark:bg-black border-2 border-border dark:border-brand-green/20 focus-visible:ring-brand-green rounded-2xl"
+            />
+            <Button
+              onClick={handleJoinSeason}
+              disabled={isJoining || !joinCode}
+              className="w-full rounded-2xl font-black uppercase h-12 bg-primary dark:bg-black border border-primary dark:border-brand-green text-white shadow-lg dark:shadow-[0_0_15px_rgba(172,229,4,0.2)]"
+            >
+              {isJoining ? <Loader2 className="h-5 w-5 animate-spin" /> : "Unisciti alla Squadra"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Season Dialog */}
+      <Dialog open={!!seasonToShare} onOpenChange={(open) => !open && setSeasonToShare(null)}>
+        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground text-center">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black text-foreground uppercase tracking-tight mx-auto">Condividi Stagione</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+             <div className="p-6 rounded-3xl bg-muted/30 dark:bg-brand-green/5 border border-dashed border-primary/30 dark:border-brand-green/40">
+                <p className="text-[10px] font-black uppercase text-muted-foreground mb-2">Codice d'invito</p>
+                <h2 className="text-3xl font-black tracking-widest text-primary dark:text-brand-green mb-4">{seasonToShare?.id}</h2>
+                <Button 
+                  onClick={() => copyToClipboard(seasonToShare?.id)}
+                  variant="outline" 
+                  className="rounded-xl font-black uppercase text-xs h-10 border-primary/30 dark:border-brand-green/30 text-primary dark:text-brand-green hover:bg-primary/10 dark:hover:bg-brand-green/10"
+                >
+                  <Copy className="h-3.5 w-3.5 mr-2" /> Copia Codice
+                </Button>
+             </div>
+             <p className="text-[10px] font-bold text-muted-foreground leading-relaxed px-4">
+               Invia questo codice al tuo assistente o collega osservatore. Inserendolo nella sezione "Partecipa con Codice", potrà accedere a tutti i dati di questa stagione.
+             </p>
           </div>
         </DialogContent>
       </Dialog>

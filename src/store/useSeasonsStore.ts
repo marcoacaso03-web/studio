@@ -14,6 +14,7 @@ interface SeasonsState {
     addSeason: (name: string) => Promise<void>;
     setActiveSeason: (id: string) => Promise<void>;
     removeSeason: (id: string) => Promise<void>;
+    joinSeason: (id: string) => Promise<void>;
 }
 
 export const useSeasonsStore = create<SeasonsState>((set, get) => ({
@@ -67,6 +68,13 @@ export const useSeasonsStore = create<SeasonsState>((set, get) => ({
         const user = useAuthStore.getState().user;
         if (!user) return;
         await seasonRepository.delete(id);
+        await get().fetchAll();
+    },
+
+    joinSeason: async (id) => {
+        const user = useAuthStore.getState().user;
+        if (!user) return;
+        await seasonRepository.joinSeason(id, user.id);
         await get().fetchAll();
     }
 }));

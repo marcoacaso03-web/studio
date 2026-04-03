@@ -12,11 +12,14 @@ import { useTrainingStore } from "@/store/useTrainingStore";
 import { trainingRepository } from "@/lib/repositories/training-repository";
 import { useAuthStore } from "@/store/useAuthStore";
 import { usePlayersStore } from "@/store/usePlayersStore";
-import { ArrowLeft, Save, ClipboardList, Users, CheckCircle2, Clock, XCircle, Loader2, Target } from "lucide-react";
+import { ArrowLeft, Save, ClipboardList, Users, CheckCircle2, Clock, XCircle, Loader2, Target, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { TrainingSession, TrainingAttendance, TrainingStatus } from "@/lib/types";
+import { format } from "date-fns";
+import { it } from "date-fns/locale";
+import { parseISO } from "date-fns";
 
 export default function TrainingDetailPage() {
   const params = useParams();
@@ -125,7 +128,11 @@ export default function TrainingDetailPage() {
           <ArrowLeft className="h-5 w-5 text-primary dark:text-brand-green" />
         </Button>
         <div className="flex flex-col">
-          <h1 className="text-2xl font-black uppercase tracking-tighter text-foreground leading-none">Allenamento #{session.index.toString().padStart(2, '0')}</h1>
+          <h1 className="text-2xl font-black uppercase tracking-tighter text-foreground leading-none flex items-center gap-2">
+            <span>Allenamento #{session.index.toString().padStart(2, '0')}</span>
+            <span className="text-primary dark:text-brand-green opacity-40">/</span>
+            <span className="text-lg opacity-80">{format(session.date.includes('T') ? parseISO(session.date) : new Date(session.date), "dd MMM yyyy", { locale: it })}</span>
+          </h1>
           <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mt-1">
             Programma Tecnico & Presenze
           </span>

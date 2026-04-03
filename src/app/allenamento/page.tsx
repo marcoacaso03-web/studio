@@ -323,11 +323,21 @@ export default function AllenamentoPage() {
                     <span className="text-foreground font-medium text-lg leading-none">{monthName}</span>
                   </div>
                   <div className="p-4 flex gap-2">
-                    {/* Bottone Elimina rimosso per pulizia UI */}
+                    <Button
+                      variant="ghost" 
+                      size="icon"
+                      className="h-9 w-9 rounded-xl text-rose-500/30 hover:text-rose-500 hover:bg-rose-500/10 transition-all"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSessionToDelete(session.id);
+                      }}
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </Button>
                   </div>
                 </div>
 
-                <div className="px-5 pt-3 pb-5 space-y-4">
+                <div className="px-5 pt-0 pb-5 space-y-3">
                   <div className="flex items-center gap-3">
                     <FocusIcon className="h-5 w-5 text-primary dark:text-brand-green" />
                     <span className="text-foreground text-[15px] font-medium tracking-wide">Focus: {focus}</span>

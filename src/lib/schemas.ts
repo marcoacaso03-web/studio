@@ -76,6 +76,7 @@ export const SeasonSchema = z.object({
   ownerId: z.string(),
   name: z.string(),
   isActive: z.boolean(),
+  sharedWith: z.array(z.string()).optional().default([]),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });

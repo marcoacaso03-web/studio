@@ -17,6 +17,7 @@ export type Season = {
   ownerId: string;
   name: string;
   isActive: boolean;
+  sharedWith?: string[];
   createdAt: string;
   updatedAt: string;
 };

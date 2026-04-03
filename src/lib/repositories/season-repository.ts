@@ -1,4 +1,3 @@
-
 import { 
   collection, 
   query, 
@@ -7,8 +6,11 @@ import {
   getDoc, 
   doc, 
   setDoc, 
+  updateDoc,
+  arrayUnion,
   writeBatch,
-  getFirestore
+  getFirestore,
+  or
 } from 'firebase/firestore';
 import type { Season } from '@/lib/types';
 import { SeasonSchema } from '@/lib/schemas';
@@ -18,17 +20,26 @@ export const seasonRepository = {
         if (!userId) return [];
         const db = getFirestore();
         const seasonsRef = collection(db, 'teams');
-        const q = query(seasonsRef, where('ownerId', '==', userId));
+        
+        // Fetch seasons where user is owner OR where user is in sharedWith array
+        const q = query(
+          seasonsRef, 
+          or(
+            where('ownerId', '==', userId),
+            where('sharedWith', 'array-contains', userId)
+          )
+        );
+        
         const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => {
-      const data = { ...doc.data(), id: doc.id };
-      const parsed = SeasonSchema.safeParse(data);
-      if (!parsed.success) {
-        console.error("Schema validation failed for Season:", parsed.error);
-        return data as Season;
-      }
-      return parsed.data as Season;
-    });
+        return snapshot.docs.map(doc => {
+          const data = { ...doc.data(), id: doc.id };
+          const parsed = SeasonSchema.safeParse(data);
+          if (!parsed.success) {
+            console.error("Schema validation failed for Season:", parsed.error);
+            return data as Season;
+          }
+          return parsed.data as Season;
+        });
     },
 
     async getById(id: string) {
@@ -41,12 +52,8 @@ export const seasonRepository = {
 
     async getActive(userId: string) {
         if (!userId) return undefined;
-        const db = getFirestore();
-        const seasonsRef = collection(db, 'teams');
-        const q = query(seasonsRef, where('ownerId', '==', userId), where('isActive', '==', true));
-        const snapshot = await getDocs(q);
-        // Restituisce solo la prima, ma il sistema ora garantisce l'unicità tramite ensureDefaultSeason
-        return snapshot.docs.length > 0 ? { ...snapshot.docs[0].data(), id: snapshot.docs[0].id } as Season : undefined;
+        const seasons = await this.getAll(userId);
+        return seasons.find(s => s.isActive);
     },
 
     async add(name: string, userId: string) {
@@ -60,6 +67,7 @@ export const seasonRepository = {
             ownerId: userId, 
             name, 
             isActive: false,
+            sharedWith: [],
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
@@ -67,24 +75,48 @@ export const seasonRepository = {
         return newSeason;
     },
 
+    async joinSeason(seasonId: string, userId: string) {
+        const db = getFirestore();
+        const seasonRef = doc(db, 'teams', seasonId);
+        const seasonSnap = await getDoc(seasonRef);
+        
+        if (!seasonSnap.exists()) {
+            throw new Error("Stagione non trovata. Controlla il codice d'invito.");
+        }
+        
+        const seasonData = seasonSnap.data() as Season;
+        if (seasonData.ownerId === userId) {
+            throw new Error("Sei già il proprietario di questa stagione.");
+        }
+        
+        if (seasonData.sharedWith?.includes(userId)) {
+            throw new Error("Hai già partecipato a questa stagione.");
+        }
+        
+        await updateDoc(seasonRef, {
+            sharedWith: arrayUnion(userId),
+            updatedAt: new Date().toISOString()
+        });
+        
+        return seasonSnap.id;
+    },
+
     async setActive(id: string, userId: string) {
         if (!userId) return;
         const db = getFirestore();
         const batch = writeBatch(db);
         
-        // Trova tutte le stagioni attualmente attive per questo utente
-        const seasonsRef = collection(db, 'teams');
-        const q = query(seasonsRef, where('ownerId', '==', userId), where('isActive', '==', true));
-        const snapshot = await getDocs(q);
+        // Fetch all seasons the user has access to
+        const seasons = await this.getAll(userId);
         
-        // Disattiva tutte le stagioni attive tranne quella target (se già presente)
-        snapshot.docs.forEach(docSnap => {
-            if (docSnap.id !== id) {
-                batch.update(docSnap.ref, { isActive: false, updatedAt: new Date().toISOString() });
+        // Deactivate all that are currently active
+        seasons.forEach(season => {
+            if (season.isActive && season.id !== id) {
+                batch.update(doc(db, 'teams', season.id), { isActive: false, updatedAt: new Date().toISOString() });
             }
         });
         
-        // Attiva la stagione target
+        // Activate target season
         batch.update(doc(db, 'teams', id), { isActive: true, updatedAt: new Date().toISOString() });
         
         await batch.commit();
@@ -99,24 +131,20 @@ export const seasonRepository = {
     async ensureDefaultSeason(userId: string) {
         if (!userId) return undefined;
         
-        // Recupera tutte le stagioni per controllare l'integrità dell'attivazione
         const all = await this.getAll(userId);
         const activeSeasons = all.filter(s => s.isActive);
         
-        // Caso ideale: esattamente una stagione attiva
         if (activeSeasons.length === 1) {
             return activeSeasons[0];
         }
 
-        // Se ci sono stagioni ma nessuna o troppe sono attive, normalizziamo
         if (all.length > 0) {
             const targetId = activeSeasons.length > 1 ? activeSeasons[0].id : all[0].id;
             await this.setActive(targetId, userId);
-            // Restituiamo l'oggetto aggiornato
-            return { ...all.find(s => s.id === targetId)!, isActive: true };
+            const updatedSeasons = await this.getAll(userId);
+            return updatedSeasons.find(s => s.id === targetId);
         }
         
-        // Se non esistono stagioni, creiamo quella predefinita
         const defaultId = `S-DEFAULT-${userId.substring(0, 6).toUpperCase()}`;
         const db = getFirestore();
         
@@ -126,6 +154,7 @@ export const seasonRepository = {
             ownerId: userId, 
             name: '2025/26', 
             isActive: true,
+            sharedWith: [],
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };

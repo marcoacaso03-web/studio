@@ -18,18 +18,31 @@ service cloud.firestore {
     }
 
     // Checks that the incoming document data sets teamOwnerId to the caller's UID
-    function incomingIsOwnedByMe() {
-      return isSignedIn() && request.resource.data.teamOwnerId == request.auth.uid;
+    // OR that the current user is in the sharedWith list of the parent season
+    function incomingIsAuthorized(seasonId) {
+      return isSignedIn() && (
+        request.resource.data.teamOwnerId == request.auth.uid ||
+        request.auth.uid in get(/databases/$(database)/documents/teams/$(seasonId)).data.sharedWith ||
+        get(/databases/$(database)/documents/teams/$(seasonId)).data.ownerId == request.auth.uid
+      );
     }
 
-    // Checks that the existing document is owned by the caller
-    function existingIsOwnedByMe() {
-      return isSignedIn() && resource.data.teamOwnerId == request.auth.uid;
+    // Checks that the existing document is authorized for the caller
+    function existingIsAuthorized(seasonId) {
+      return isSignedIn() && (
+        resource.data.teamOwnerId == request.auth.uid ||
+        request.auth.uid in get(/databases/$(database)/documents/teams/$(seasonId)).data.sharedWith ||
+        get(/databases/$(database)/documents/teams/$(seasonId)).data.ownerId == request.auth.uid
+      );
+    }
+    
+    function isSeasonAuthorized(seasonId) {
+      let season = get(/databases/$(database)/documents/teams/$(seasonId)).data;
+      return isSignedIn() && (season.ownerId == request.auth.uid || request.auth.uid in season.sharedWith);
     }
 
     // ─── /users/{userId} ─────────────────────────────────────────────────────
-    // Personal user document and sub-collections (Scout, Training sessions)
-
+    
     match /users/{userId} {
       allow get:    if isOwner(userId);
       allow list:   if false;
@@ -64,67 +77,61 @@ service cloud.firestore {
     }
 
     // ─── /teams/{seasonId} ───────────────────────────────────────────────────
-    // Season document: owned by the user who created it (ownerId field).
-    // Sub-collections (players, matches, events, lineup) gated by teamOwnerId.
-
+    
     match /teams/{seasonId} {
-      // Only the owning user can read/write their own season document
-      allow get:    if isSignedIn() && (resource == null || resource.data.ownerId == request.auth.uid);
-      allow list:   if isSignedIn() && resource.data.ownerId == request.auth.uid; // filtered server-side with where('ownerId','==',uid)
+      allow get:    if isSignedIn() && (resource == null || resource.data.ownerId == request.auth.uid || request.auth.uid in resource.data.sharedWith);
+      allow list:   if isSignedIn() && (resource.data.ownerId == request.auth.uid || request.auth.uid in resource.data.sharedWith);
       allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update: if isSignedIn()
-                    && resource.data.ownerId == request.auth.uid
-                    && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isSignedIn() && (
+                      (resource.data.ownerId == request.auth.uid && request.resource.data.ownerId == request.auth.uid) ||
+                      (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['sharedWith']) && request.auth.uid in request.resource.data.sharedWith)
+                    );
       allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
 
       // ── Players ────────────────────────────────────────────────────────────
       match /players/{playerId} {
-        allow get:    if isSignedIn() && (resource == null || resource.data.teamOwnerId == request.auth.uid);
-        allow list:   if existingIsOwnedByMe(); // filtered server-side with where('teamOwnerId','==',uid)
-        allow create: if incomingIsOwnedByMe();
-        allow update: if existingIsOwnedByMe() && incomingIsOwnedByMe();
-        allow delete: if existingIsOwnedByMe();
+        allow get:    if isSignedIn() && (resource == null || isSeasonAuthorized(seasonId));
+        allow list:   if isSignedIn() && isSeasonAuthorized(seasonId);
+        allow create: if isSignedIn() && isSeasonAuthorized(seasonId);
+        allow update: if isSignedIn() && isSeasonAuthorized(seasonId);
+        allow delete: if isSignedIn() && isSeasonAuthorized(seasonId);
       }
 
       // ── Matches ───────────────────────────────────────────────────────────
       match /matches/{matchId} {
-        allow get:    if isSignedIn() && (resource == null || resource.data.teamOwnerId == request.auth.uid);
-        allow list:   if existingIsOwnedByMe(); // filtered server-side with where('teamOwnerId','==',uid)
-        allow create: if incomingIsOwnedByMe();
-        allow update: if existingIsOwnedByMe() && incomingIsOwnedByMe();
-        allow delete: if existingIsOwnedByMe();
+        allow get:    if isSignedIn() && (resource == null || isSeasonAuthorized(seasonId));
+        allow list:   if isSignedIn() && isSeasonAuthorized(seasonId);
+        allow create: if isSignedIn() && isSeasonAuthorized(seasonId);
+        allow update: if isSignedIn() && isSeasonAuthorized(seasonId);
+        allow delete: if isSignedIn() && isSeasonAuthorized(seasonId);
 
-        // ── Match Lineup ─────────────────────────────────────────────────
         match /lineup/{lineupId} {
-          allow get:    if isSignedIn() && (resource == null || !("teamOwnerId" in resource.data) || resource.data.teamOwnerId == request.auth.uid);
-          allow list:   if existingIsOwnedByMe(); // filtered server-side with where('teamOwnerId','==',uid)
-          allow create: if incomingIsOwnedByMe();
-          allow update: if existingIsOwnedByMe() && incomingIsOwnedByMe();
-          allow delete: if existingIsOwnedByMe();
+          allow get:    if isSignedIn() && (resource == null || isSeasonAuthorized(seasonId));
+          allow list:   if isSignedIn() && isSeasonAuthorized(seasonId);
+          allow create: if isSignedIn() && isSeasonAuthorized(seasonId);
+          allow update: if isSignedIn() && isSeasonAuthorized(seasonId);
+          allow delete: if isSignedIn() && isSeasonAuthorized(seasonId);
         }
 
-        // ── Match Events ─────────────────────────────────────────────────
         match /events/{eventId} {
-          allow get:    if isSignedIn() && (resource == null || !("teamOwnerId" in resource.data) || resource.data.teamOwnerId == request.auth.uid);
-          allow list:   if existingIsOwnedByMe(); // filtered server-side with where('teamOwnerId','==',uid)
-          allow create: if incomingIsOwnedByMe();
-          allow update: if existingIsOwnedByMe() && incomingIsOwnedByMe();
-          allow delete: if existingIsOwnedByMe();
+          allow get:    if isSignedIn() && (resource == null || isSeasonAuthorized(seasonId));
+          allow list:   if isSignedIn() && isSeasonAuthorized(seasonId);
+          allow create: if isSignedIn() && isSeasonAuthorized(seasonId);
+          allow update: if isSignedIn() && isSeasonAuthorized(seasonId);
+          allow delete: if isSignedIn() && isSeasonAuthorized(seasonId);
         }
 
-        // ── Match Stats ──────────────────────────────────────────────────
         match /stats/{statId} {
-          allow get:    if isSignedIn() && (resource == null || !("teamOwnerId" in resource.data) || resource.data.teamOwnerId == request.auth.uid);
-          allow list:   if existingIsOwnedByMe(); // filtered server-side with where('teamOwnerId','==',uid)
-          allow create: if incomingIsOwnedByMe();
-          allow update: if existingIsOwnedByMe() && incomingIsOwnedByMe();
-          allow delete: if existingIsOwnedByMe();
+          allow get:    if isSignedIn() && (resource == null || isSeasonAuthorized(seasonId));
+          allow list:   if isSignedIn() && isSeasonAuthorized(seasonId);
+          allow create: if isSignedIn() && isSeasonAuthorized(seasonId);
+          allow update: if isSignedIn() && isSeasonAuthorized(seasonId);
+          allow delete: if isSignedIn() && isSeasonAuthorized(seasonId);
         }
       }
     }
 
     // ─── /exercises/{exerciseId} ─────────────────────────────────────────────
-    // Training exercises library: visible if global OR if the caller is the owner.
     
     match /exercises/{exerciseId} {
       allow get, list: if isSignedIn() && (resource.data.visibility == 'global' || resource.data.userId == request.auth.uid);
@@ -132,7 +139,6 @@ service cloud.firestore {
       allow update, delete: if isOwner(resource.data.userId);
     }
 
-    // ─── Catch-all: deny everything else ─────────────────────────────────────
     match /{document=**} {
       allow read, write: if false;
     }
