@@ -82,17 +82,19 @@ export function MatchLineupTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <LayoutGrid className="h-5 w-5 text-primary dark:text-brand-green" />
-          <h3 className="text-lg font-black uppercase tracking-tight text-foreground">Layout Tattico <span className="text-primary dark:text-brand-green ml-1">{activeFormation}</span></h3>
+          <LayoutGrid className="h-5 w-5 shrink-0 text-primary dark:text-brand-green" />
+          <h3 className="text-base sm:text-lg font-black uppercase tracking-tight text-foreground">
+            Layout Tattico <span className="text-primary dark:text-brand-green whitespace-nowrap ml-1">{activeFormation}</span>
+          </h3>
         </div>
-        <div className="flex gap-2">
-          <Button size="sm" onClick={() => setIsSmartOpen(true)} className="bg-card dark:bg-black border border-border dark:border-brand-green/30 text-foreground dark:text-white h-9 rounded-xl font-black uppercase text-[10px] hover:border-primary dark:hover:border-brand-green transition-all shadow-sm">
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button size="sm" onClick={() => setIsSmartOpen(true)} className="flex-1 sm:flex-none bg-card dark:bg-black border border-border dark:border-brand-green/30 text-foreground dark:text-white h-9 rounded-xl font-black uppercase text-[10px] hover:border-primary dark:hover:border-brand-green transition-all shadow-sm">
             <Sparkles className="mr-1.5 h-3.5 w-3.5 text-primary dark:text-brand-green" />
             Smart
           </Button>
-          <Button size="sm" onClick={() => setIsFormOpen(true)} className="bg-primary dark:bg-black border border-primary dark:border-brand-green text-white hover:opacity-90 dark:hover:bg-black/80 shadow-md dark:shadow-[0_0_10px_rgba(172,229,4,0.1)] h-9 rounded-xl font-black uppercase text-[10px] transition-all">
+          <Button size="sm" onClick={() => setIsFormOpen(true)} className="flex-1 sm:flex-none bg-primary dark:bg-black border border-primary dark:border-brand-green text-white hover:opacity-90 dark:hover:bg-black/80 shadow-md dark:shadow-[0_0_10px_rgba(172,229,4,0.1)] h-9 rounded-xl font-black uppercase text-[10px] transition-all">
             Modifica
           </Button>
         </div>
@@ -113,26 +115,26 @@ export function MatchLineupTab() {
             {/* Giocatori in Campo (disposti per file) */}
             <div className="flex-1 flex flex-col justify-between relative z-10 py-4">
               {rows.map((rowIndices, rowIdx) => (
-                <div key={rowIdx} className="flex justify-around items-center w-full px-4">
+                <div key={rowIdx} className="flex justify-evenly items-center w-full px-1 sm:px-4">
                   {rowIndices.map((starterIdx) => {
                     const playerEntry = activeStarters.find(s => s.originalIdx === starterIdx);
                     const p = playerEntry ? allPlayers.find(player => player.id === playerEntry.id) : null;
                     const isPOR = starterIdx === 0;
 
                     return (
-                      <div key={starterIdx} className="flex flex-col items-center gap-1.5 min-w-[80px]">
+                      <div key={starterIdx} className="flex flex-col items-center gap-1 sm:gap-1.5 w-[52px] sm:w-[70px] md:w-[80px]">
                         <div className={cn(
-                          "w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center border-4 shadow-xl transition-transform hover:scale-110",
+                          "w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 shrink-0 rounded-full flex items-center justify-center border-2 md:border-4 shadow-xl transition-transform hover:scale-110",
                           isPOR
                             ? "bg-amber-700 border-amber-600 text-black"
                             : "bg-neutral-800 border-neutral-700 text-white"
                         )}>
-                          <span className="text-[10px] md:text-sm font-black uppercase">
+                          <span className="text-[9px] md:text-sm font-black uppercase">
                             {currentAcronyms[starterIdx] || (starterIdx + 1)}
                           </span>
                         </div>
-                        <div className="bg-black/40 backdrop-blur-md px-2 py-0.5 rounded border border-white/10 min-w-[60px] text-center">
-                          <p className="text-[8px] md:text-[10px] font-black text-white uppercase truncate whitespace-nowrap">
+                        <div className="bg-black/40 backdrop-blur-md px-1 py-0.5 rounded border border-white/10 w-full text-center overflow-hidden">
+                          <p className="text-[8px] sm:text-[9px] md:text-[10px] font-black text-white uppercase truncate whitespace-nowrap">
                             {p ? formatPlayerName(p.name) : "---"}
                           </p>
                         </div>

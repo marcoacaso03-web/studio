@@ -128,7 +128,7 @@ export default function AllenamentoPage() {
   return (
     <div className="space-y-6 pb-20">
       <PageHeader title="Allenamento">
-        <div className="flex gap-2">
+        <div className="flex gap-0.5 sm:gap-2">
           {/* Libreria - Cono */}
           <Button
             variant="ghost"
