@@ -1,0 +1,145 @@
+node.exe : FAIL src/lib/services/sta
+ts-advanced-service.test.ts
+In riga:1 car:1
++ & "D:\Node/node.exe" "D:\Node/node
+_modules/npm/bin/npx-cli.js" jest s 
+...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSp 
+   ecified: (FAIL src/lib/se...ser  
+  vice.test.ts:String) [], Remote   
+ Exception
+    + FullyQualifiedErrorId : Nativ 
+   eCommandError
+ 
+  Advanced Stats Service
+    ??? should correctly normalize 
+matches with legacy result objects 
+(5 ms)
+    ?? should compute best CB pair 
+with thresholds (24 ms)
+    ??? should compute best G/A per 
+starter appearance (1 ms)
+    ?? should compute decisive 
+goals correctly (1 ms)
+    ?? should compute lowest 
+starter loss rate (1 ms)
+
+  ??? Advanced Stats Service ??? 
+should compute best CB pair with 
+thresholds
+
+    expect(received).toBe(expected) 
+// Object.is equality
+
+    Expected: 3
+    Received: 4
+
+    [0m [90m 79 |[39m         exp
+ect(pair[33m.[39mmatchesTogether)
+[33m.[39mtoBe([35m3[39m)[33m;[3
+9m
+     [90m 80 |[39m         
+[90m// M1: 0 goals conceded, M2: 2 
+goals conceded, M3: 1 goal 
+conceded. Total 3.[39m
+    [31m[1m>[22m[39m[90m 81 
+|[39m         expect(pair[33m.[39
+mgoalsConceded)[33m.[39mtoBe([35m
+3[39m)[33m;[39m
+     [90m    |[39m                
+                    
+[31m[1m^[22m[39m
+     [90m 82 |[39m         expect(
+pair[33m.[39mgoalsConcededPerMatch
+)[33m.[39mtoBe([35m1[39m)[33m;
+[39m
+     [90m 83 |[39m     
+})[33m;[39m
+     [90m 84 |[39m[0m
+
+      at Object.toBe (src/lib/servic
+es/stats-advanced-service.test.ts:81
+:36)
+
+  ??? Advanced Stats Service ??? 
+should compute decisive goals 
+correctly
+
+    expect(received).toBe(expected) 
+// Object.is equality
+
+    Expected: 1
+    Received: undefined
+
+    [0m [90m 108 |[39m         
+     [90m 109 |[39m         expect
+(p3[33m?[39m[33m.[39mdecisiveGoa
+ls)[33m.[39mtoBe([35m1[39m)[33m
+;[39m
+    [31m[1m>[22m[39m[90m 110 
+|[39m         expect(p4[33m?[39m
+[33m.[39mdecisiveGoals)[33m.[39mt
+oBe([35m1[39m)[33m;[39m
+     [90m     |[39m               
+                    
+[31m[1m^[22m[39m
+     [90m 111 |[39m         expect
+(p4[33m?[39m[33m.[39mconfidence)
+[33m.[39mtoBe([32m'high'[39m)[3
+3m;[39m
+     [90m 112 |[39m     
+})[33m;[39m
+     [90m 113 |[39m[0m
+
+      at Object.toBe (src/lib/servic
+es/stats-advanced-service.test.ts:11
+0:35)
+
+  ??? Advanced Stats Service ??? 
+should compute lowest starter loss 
+rate
+
+    expect(received).toBe(expected) 
+// Object.is equality
+
+    Expected: 1
+    Received: 2
+
+    [0m [90m 119 |[39m         
+[36mconst[39m p3 [33m=[39m stats
+[33m.[39mlowestStarterLossRate[33
+m.[39mfind(s [33m=>[39m 
+s[33m.[39mplayerId [33m===[39m 
+[32m'P3'[39m)[33m;[39m
+     [90m 120 |[39m         
+    [31m[1m>[22m[39m[90m 121 
+|[39m         expect(p1[33m?[39m
+[33m.[39mstarterLosses)[33m.[39mt
+oBe([35m1[39m)[33m;[39m
+     [90m     |[39m               
+                    
+[31m[1m^[22m[39m
+     [90m 122 |[39m         expect
+(p1[33m?[39m[33m.[39mstarterApps
+)[33m.[39mtoBe([35m4[39m)[33m;
+[39m
+     [90m 123 |[39m         expect
+(p1[33m?[39m[33m.[39mlossRate)[
+33m.[39mtoBe([35m0.25[39m)[33m;
+[39m
+     [90m 124 |[39m         [0m
+
+      at Object.toBe (src/lib/servic
+es/stats-advanced-service.test.ts:12
+1:35)
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 2 passed, 5 
+total
+Snapshots:   0 total
+Time:        2.54 s
+Ran all test suites matching /src\\l
+ib\\services\\stats-advanced-service
+.test.ts/i.

@@ -1,9 +1,32 @@
+import { 
+    getFirestore, 
+    doc, 
+    setDoc, 
+    getDoc,
+    collection,
+    query,
+    where,
+    getDocs,
+    writeBatch
+} from 'firebase/firestore';
 import { matchRepository } from './match-repository';
 import { playerRepository } from './player-repository';
 import { eventRepository } from './event-repository';
 import { statsRepository } from './stats-repository';
 import { lineupRepository } from './lineup-repository';
-import type { Match, Player, MatchEvent, PlayerMatchStats, MatchLineup } from '../types';
+import type { 
+    Match, 
+    Player, 
+    MatchEvent, 
+    PlayerMatchStats, 
+    MatchLineup,
+    AdvancedStatsLeaderboard
+} from '../types';
+import { 
+    computeAdvancedStatsBundle, 
+    AdvancedStatsOptions 
+} from '../services/stats-advanced-service';
+import { AdvancedStatsLeaderboardSchema } from '../schemas';
 
 export interface TeamStatsRecord {
     wins: number;
@@ -241,5 +264,73 @@ export const aggregationRepository = {
         for (const { playerId, stats } of allStats) {
             await playerRepository.update(playerId, seasonId, { stats });
         }
+    },
+
+    /**
+     * Calcola le statistiche avanzate (Leaderboard) per la stagione attuale.
+     */
+    async getAdvancedStats(userId: string, seasonId: string, options?: AdvancedStatsOptions): Promise<AdvancedStatsLeaderboard> {
+        const context = await this.getDetailedContext(userId, seasonId);
+        
+        const matches = context.matches;
+        const players = context.players;
+        const lineups: Record<string, MatchLineup> = {};
+        const events: Record<string, MatchEvent[]> = {};
+
+        Object.entries(context.matchesDetails).forEach(([id, details]) => {
+            if (details.lineup) lineups[id] = details.lineup;
+            events[id] = details.events;
+        });
+
+        return computeAdvancedStatsBundle(seasonId, matches, lineups, events, players, options);
+    },
+
+    /**
+     * Calcola e salva le statistiche avanzate su Firestore.
+     */
+    async rebuildAndPersistSeasonAggregates(userId: string, seasonId: string, options?: AdvancedStatsOptions) {
+        const leaderboard = await this.getAdvancedStats(userId, seasonId, options);
+        const db = getFirestore();
+        
+        // 1. Salva leaderboard corrente
+        const leaderboardRef = doc(db, 'teams', seasonId, 'aggregates', 'leaderboards', 'current', 'data');
+        await setDoc(leaderboardRef, {
+            ...leaderboard,
+            teamOwnerId: userId,
+            updatedAt: new Date().toISOString()
+        });
+
+        // 2. Opzionale: Salva i cbPair aggregati individualmente per query dirette
+        const batch = writeBatch(db);
+        leaderboard.bestCbPair.forEach(pair => {
+            const pairRef = doc(db, 'teams', seasonId, 'aggregates', 'cbPairs', pair.pairKey);
+            batch.set(pairRef, { ...pair, teamOwnerId: userId, updatedAt: new Date().toISOString() });
+        });
+
+        // 3. Opzionale: Aggiorna campi playerStats se necessario (ma già gestito da syncAllPlayersStats)
+        
+        await batch.commit();
+        return leaderboard;
+    },
+
+    async getPersistedLeaderboard(seasonId: string): Promise<AdvancedStatsLeaderboard | undefined> {
+        try {
+            const db = getFirestore();
+            const leaderboardRef = doc(db, 'teams', seasonId, 'aggregates', 'leaderboards', 'current', 'data');
+            const snap = await getDoc(leaderboardRef);
+            
+            if (snap.exists()) {
+                const data = snap.data();
+                const parsed = AdvancedStatsLeaderboardSchema.safeParse(data);
+                if (!parsed.success) {
+                    console.error('Invalid leaderboard schema in Firestore', parsed.error);
+                    return data as any as AdvancedStatsLeaderboard;
+                }
+                return parsed.data as AdvancedStatsLeaderboard;
+            }
+        } catch (error) {
+            console.warn("Non è stato possibile caricare le statistiche persistite (possibile problema di permessi o documento mancante).", error);
+        }
+        return undefined;
     }
 };

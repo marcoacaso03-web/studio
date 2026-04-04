@@ -46,10 +46,57 @@ export const MatchSchema = z.object({
   type: MatchTypeSchema,
   duration: z.number().default(60),
   result: MatchResultSchema.optional(),
+  teamGoals: z.number().optional(),
+  opponentGoals: z.number().optional(),
+  resultType: z.enum(['W', 'D', 'L']).optional(),
   status: MatchStatusSchema.default('scheduled'),
   notes: z.string().optional().default(''),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
+});
+
+export const StarterPlayerSchema = z.object({
+  playerId: z.string(),
+  role: z.string(),
+  positionCode: z.string().optional(),
+});
+
+export const MatchLineupSchema = z.object({
+  matchId: z.string(),
+  starters: z.array(z.union([z.string(), StarterPlayerSchema])),
+  substitutes: z.array(z.union([z.string(), StarterPlayerSchema])),
+  formation: z.string().optional(),
+  teamOwnerId: z.string().optional(),
+});
+
+export const MatchEventSchema = z.object({
+  id: z.string(),
+  matchId: z.string(),
+  type: z.string(), // Use string to support legacy types if needed
+  team: z.enum(['home', 'away']),
+  teamSide: z.enum(['our', 'opponent']).optional(),
+  playerId: z.string().optional(),
+  playerName: z.string().optional(),
+  subOutPlayerId: z.string().optional(),
+  minute: z.number(),
+  period: z.enum(['1T', '2T', '1TS', '2TS']),
+});
+
+export const AdvancedStatsLeaderboardSchema = z.object({
+  generatedAt: z.string(),
+  seasonId: z.string(),
+  filters: z.object({
+    minStarterApps: z.number(),
+    minPairMatches: z.number(),
+  }),
+  bestCbPair: z.array(z.any()),
+  bestCbTrio: z.array(z.any()),
+  bestGaPerStarter: z.array(z.any()),
+  decisiveGoalsLeaders: z.array(z.any()),
+  lowestStarterLossRate: z.array(z.any()),
+  meta: z.object({
+    warnings: z.array(z.string()).optional(),
+  }).optional(),
 });
 
 export const TrainingStatusSchema = z.enum(['presente', 'ritardo', 'assente']);

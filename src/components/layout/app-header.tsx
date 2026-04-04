@@ -8,7 +8,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { href: "/calendario", label: "Dashboard" },
+  { href: "/", label: "Dashboard" },
   { href: "/allenamento", label: "Allenamento" },
   { href: "/scout", label: "Scout" },
   { href: "/altro", label: "Impostazioni" },
@@ -34,7 +34,7 @@ export function AppHeader() {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1.5">
           {navItems.map((item) => {
-            const isActive = pathname.startsWith(item.href);
+            const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}

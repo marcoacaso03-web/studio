@@ -17,7 +17,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/calendario');
+      router.push('/');
     }
   }, [isAuthenticated, router]);
 
@@ -27,7 +27,7 @@ export default function LoginPage() {
 
     const result = await login(username, password);
     if (result.success) {
-      router.push('/calendario');
+      router.push('/');
     } else {
       toast({
         variant: "destructive",

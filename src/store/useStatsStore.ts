@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { aggregationRepository } from '@/lib/repositories/aggregation-repository';
 import { useSeasonsStore } from './useSeasonsStore';
 import { useAuthStore } from './useAuthStore';
+import type { AdvancedStatsLeaderboard } from '@/lib/types';
 
 interface TeamRecord {
     wins: number;
@@ -46,9 +47,11 @@ interface StatsState {
     playerLeaderboard: PlayerLeaderboardEntry[];
     teamTrend: TrendEntry[];
     goalsIntervals: IntervalEntry[];
+    advancedLeaderboard: AdvancedStatsLeaderboard | null;
     loading: boolean;
     loadSummaryStats: (seasonId?: string) => Promise<void>;
     loadDetailedStats: (seasonId?: string) => Promise<void>;
+    loadAdvancedStats: (seasonId?: string) => Promise<void>;
 }
 
 export const useStatsStore = create<StatsState>((set, get) => ({
@@ -58,6 +61,7 @@ export const useStatsStore = create<StatsState>((set, get) => ({
     playerLeaderboard: [],
     teamTrend: [],
     goalsIntervals: [],
+    advancedLeaderboard: null,
     loading: true,
     loadSummaryStats: async (seasonId?: string) => {
         const user = useAuthStore.getState().user;
@@ -128,6 +132,26 @@ export const useStatsStore = create<StatsState>((set, get) => ({
         } catch (error) {
             console.error("Errore nel caricamento detailed stats:", error);
             set({ loading: false });
+        }
+    },
+    loadAdvancedStats: async (seasonId?: string) => {
+        const user = useAuthStore.getState().user;
+        const activeSeasonId = seasonId ?? useSeasonsStore.getState().activeSeason?.id;
+
+        if (!user || !activeSeasonId) return;
+
+        try {
+            // Verifica se esiste già una leaderboard persistita su Firestore
+            let leaderboard = await aggregationRepository.getPersistedLeaderboard(activeSeasonId);
+            
+            // Se non esiste, calcolala on-demand (e salva se necessario)
+            if (!leaderboard) {
+                leaderboard = await aggregationRepository.getAdvancedStats(user.id, activeSeasonId);
+            }
+            
+            set({ advancedLeaderboard: leaderboard });
+        } catch (error) {
+            console.error("Errore nel caricamento advanced stats:", error);
         }
     },
 }));

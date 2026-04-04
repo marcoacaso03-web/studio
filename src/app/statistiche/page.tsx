@@ -30,17 +30,22 @@ const GoalsIntervalChart = dynamic(() => import("@/components/statistiche/goals-
 });
 
 export default function StatistichePage() {
-  const { loading, loadDetailedStats } = useStatsStore();
+  const { loading, loadDetailedStats, loadAdvancedStats } = useStatsStore();
   const { fetchAll: fetchSeasons } = useSeasonsStore();
 
   useEffect(() => {
     const initialize = async () => {
-      const season = await fetchSeasons();
+      const seasons = await fetchSeasons();
       const activeId = useSeasonsStore.getState().activeSeason?.id;
-      loadDetailedStats(activeId);
+      if (activeId) {
+        await Promise.all([
+          loadDetailedStats(activeId),
+          loadAdvancedStats(activeId)
+        ]);
+      }
     };
     initialize();
-  }, [loadDetailedStats, fetchSeasons]);
+  }, [loadDetailedStats, loadAdvancedStats, fetchSeasons]);
 
   return (
     <div>

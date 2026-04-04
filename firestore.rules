@@ -129,6 +129,12 @@ service cloud.firestore {
           allow delete: if isSignedIn() && isSeasonAuthorized(seasonId);
         }
       }
+
+      // ── Aggregates ────────────────────────────────────────────────────────
+      match /aggregates/{aggregateId=**} {
+        allow get, list: if isSignedIn() && isSeasonAuthorized(seasonId);
+        allow write:    if isSignedIn() && isSeasonAuthorized(seasonId);
+      }
     }
 
     // ─── /exercises/{exerciseId} ─────────────────────────────────────────────

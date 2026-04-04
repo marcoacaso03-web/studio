@@ -57,6 +57,9 @@ export type Match = {
   type: MatchType;
   duration: number;
   result?: MatchResult;
+  teamGoals?: number; // Normalized
+  opponentGoals?: number; // Normalized
+  resultType?: 'W' | 'D' | 'L'; // Normalized
   status: MatchStatus;
   notes?: string;
   createdAt?: string;
@@ -73,10 +76,16 @@ export type MatchAttendance = {
   teamOwnerId?: string;
 };
 
+export type StarterPlayer = {
+  playerId: string;
+  role: string;
+  positionCode?: string;
+};
+
 export type MatchLineup = {
     matchId: string;
-    starters: string[];
-    substitutes: string[];
+    starters: (string | StarterPlayer)[];
+    substitutes: (string | StarterPlayer)[];
     formation?: string;
     teamOwnerId?: string;
 }
@@ -100,6 +109,7 @@ export type MatchEvent = {
   matchId: string;
   type: MatchEventType;
   team: 'home' | 'away';
+  teamSide?: 'our' | 'opponent'; // Normalized
   playerId?: string;
   playerName?: string; 
   subOutPlayerId?: string; 
@@ -110,6 +120,50 @@ export type MatchEvent = {
   period: '1T' | '2T' | '1TS' | '2TS';
   teamOwnerId?: string;
 };
+
+export interface AdvancedStatsLeaderboard {
+    generatedAt: string;
+    seasonId: string;
+    filters: { 
+        minStarterApps: number; 
+        minPairMatches: number;
+    };
+    bestCbPair: Array<{ 
+        pairKey: string; 
+        playerIds: string[]; 
+        matchesTogether: number; 
+        goalsConceded: number; 
+        goalsConcededPerMatch: number;
+    }>;
+    bestCbTrio: Array<{ 
+        trioKey: string; 
+        playerIds: string[]; 
+        matchesTogether: number; 
+        goalsConceded: number; 
+        goalsConcededPerMatch: number;
+    }>;
+    bestGaPerStarter: Array<{ 
+        playerId: string; 
+        goals: number; 
+        assists: number; 
+        starterApps: number; 
+        gaPerStarter: number;
+    }>;
+    decisiveGoalsLeaders: Array<{ 
+        playerId: string; 
+        decisiveGoals: number; 
+        confidence: 'high' | 'mixed';
+    }>;
+    lowestStarterLossRate: Array<{ 
+        playerId: string; 
+        starterApps: number; 
+        starterLosses: number; 
+        lossRate: number;
+    }>;
+    meta?: {
+        warnings?: string[];
+    }
+}
 
 export type TrainingStatus = 'presente' | 'ritardo' | 'assente';
 

@@ -2,11 +2,12 @@
 
 import { useStatsStore } from "@/store/useStatsStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GiSoccerBall, GiSoccerKick } from "react-icons/gi";
-import { Swords, TrendingUp, TrendingDown, Trophy, Star } from "lucide-react";
+import { GiSoccerBall } from "react-icons/gi";
+import { Swords, TrendingUp, TrendingDown } from "lucide-react";
+import { AdvancedStatsSection } from "./advanced-stats-section";
 
 export function TeamRecord() {
-    const { teamRecord, playerLeaderboard } = useStatsStore();
+    const { teamRecord } = useStatsStore();
 
     if (!teamRecord) {
         return <p className="text-center py-10 text-muted-foreground">Nessun dato disponibile.</p>;
@@ -18,16 +19,6 @@ export function TeamRecord() {
     const winPct = total > 0 ? Math.round((teamRecord.wins / total) * 100) : 0;
     const drawPct = total > 0 ? Math.round((teamRecord.draws / total) * 100) : 0;
     const lossPct = total > 0 ? Math.round((teamRecord.losses / total) * 100) : 0;
-
-    // Trova il capocannoniere (già ordinato nello store, ma per sicurezza cerchiamo il max)
-    const topScorer = playerLeaderboard.length > 0 
-        ? [...playerLeaderboard].sort((a, b) => b.stats.goals - a.stats.goals)[0] 
-        : null;
-
-    // Trova l'assistman
-    const topAssist = playerLeaderboard.length > 0 
-        ? [...playerLeaderboard].sort((a, b) => b.stats.assists - a.stats.assists)[0] 
-        : null;
 
     return (
         <div className="space-y-4">
@@ -113,49 +104,7 @@ export function TeamRecord() {
                 </Card>
             </div>
 
-            {/* Card Migliori Rendimenti */}
-            <Card className="bg-card dark:bg-black/40 border-border dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm transition-colors">
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-base font-black uppercase tracking-tight flex items-center gap-2 text-primary dark:text-brand-green">
-                        <Trophy className="h-4 w-4" />
-                        Migliori Rendimenti
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4 pt-2">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="flex items-center gap-4 p-4 bg-muted/50 dark:bg-black/40 rounded-2xl border border-primary/20 dark:border-brand-green/20 hover:bg-muted dark:hover:bg-black/60 transition-all">
-                            <div className="h-12 w-12 rounded-2xl bg-card dark:bg-black border border-primary/50 dark:border-brand-green flex items-center justify-center shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.15)]">
-                                <GiSoccerBall className="h-6 w-6 text-primary dark:text-brand-green" />
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60 mb-0.5">Capocannoniere</p>
-                                <p className="text-base font-black uppercase tracking-tight text-foreground dark:text-white">
-                                    {topScorer && topScorer.stats.goals > 0 ? (
-                                        <>
-                                            {topScorer.name} <span className="text-primary dark:text-brand-green ml-1">({topScorer.stats.goals})</span>
-                                        </>
-                                    ) : "-"}
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4 p-4 bg-muted/50 dark:bg-black/40 rounded-2xl border border-divider dark:border-white/5 hover:bg-muted dark:hover:bg-black/60 transition-all">
-                            <div className="h-12 w-12 rounded-2xl bg-card dark:bg-black border border-divider dark:border-white/20 flex items-center justify-center">
-                                <GiSoccerKick className="h-6 w-6 text-foreground dark:text-white" />
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60 mb-0.5">Assistman</p>
-                                <p className="text-base font-black uppercase tracking-tight text-foreground dark:text-white">
-                                    {topAssist && topAssist.stats.assists > 0 ? (
-                                        <>
-                                            {topAssist.name} <span className="text-muted-foreground dark:text-white ml-1 opacity-80">({topAssist.stats.assists})</span>
-                                        </>
-                                    ) : "-"}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+            <AdvancedStatsSection />
         </div>
     );
 }
