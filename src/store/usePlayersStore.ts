@@ -19,6 +19,7 @@ interface PlayerState {
     bulkAdd: (data: { name: string, role: Role }[]) => Promise<void>;
     update: (id: string, updates: Partial<Omit<PlayerCreateData, 'seasonId' | 'userId'>>) => Promise<void>;
     remove: (id: string) => Promise<void>;
+    removeAll: () => Promise<void>;
 }
 
 export const getPlayersSWRKey = (userId?: string, seasonId?: string) => 
@@ -97,6 +98,16 @@ export const usePlayersStore = create<PlayerState>()(
           if (!activeSeason || !user) return;
           
           await playerRepository.delete(id, activeSeason.id);
+          await mutate(getPlayersSWRKey(user.id, activeSeason.id));
+          await get().fetchAll(activeSeason.id);
+          useStatsStore.getState().loadSummaryStats();
+      },
+      removeAll: async () => {
+          const user = useAuthStore.getState().user;
+          const activeSeason = useSeasonsStore.getState().activeSeason;
+          if (!activeSeason || !user) return;
+          
+          await playerRepository.deleteAll(user.id, activeSeason.id);
           await mutate(getPlayersSWRKey(user.id, activeSeason.id));
           await get().fetchAll(activeSeason.id);
           useStatsStore.getState().loadSummaryStats();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { PlusCircle, Trash2, Calendar, Home, Plane, Globe, ChevronLeft } from "lucide-react";
+import { PlusCircle, Trash2, Calendar, Home, Plane, Globe, ChevronLeft, ClipboardCopy } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Match, MatchStatus } from "@/lib/types";
 import { useMatchesStore } from "@/store/useMatchesStore";
@@ -19,6 +19,7 @@ import { useSeasonsStore } from "@/store/useSeasonsStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ImportTuttocampoDialog } from "@/components/partite/import-tuttocampo-dialog";
+import { ImportCalendarioScraperDialog } from "@/components/partite/import-calendario-scraper-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,14 +41,26 @@ interface FullCalendarDialogProps {
 }
 
 export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogProps) {
-  const { matches, loading: matchesLoading, add: addMatch, remove: removeMatch } = useMatchesStore();
+  const { matches, loading: matchesLoading, add: addMatch, remove: removeMatch, removeAll: removeAllMatches } = useMatchesStore();
   const { loadSummaryStats } = useStatsStore();
   const { activeSeason } = useSeasonsStore();
   const router = useRouter();
   
+  // Cleanup degli eventi del puntatore (fix per bug Radix UI nested dialogs)
+  useEffect(() => {
+    if (!open) {
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = "";
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isScraperImportOpen, setIsScraperImportOpen] = useState(false);
   const [matchToDelete, setMatchToDelete] = useState<Match | null>(null);
+  const [isDeleteAllOpen, setIsDeleteAllOpen] = useState(false);
 
   const handleSaveMatch = async (data: any) => {
     const newMatch = await addMatch(data);
@@ -58,9 +71,41 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
 
   const handleDeleteMatch = async () => {
     if (!matchToDelete) return;
-    await removeMatch(matchToDelete.id);
+    const matchId = matchToDelete.id;
+    const seasonId = activeSeason?.id;
+    
+    // Pattern: chiudiamo il dialog PRIMA per evitare lock della UI di Radix
     setMatchToDelete(null);
-    loadSummaryStats(activeSeason?.id);
+    
+    // Eseguiamo l'eliminazione con un piccolo delay
+    setTimeout(async () => {
+      try {
+        await removeMatch(matchId);
+        loadSummaryStats(seasonId);
+        // Forza pulizia pointer-events per bug Radix
+        document.body.style.pointerEvents = "";
+      } catch (error) {
+        console.error("Errore durante l'eliminazione della partita:", error);
+      }
+    }, 200);
+  };
+
+  const handleDeleteAllMatches = async () => {
+    const seasonId = activeSeason?.id;
+    
+    // Chiudiamo il dialog PRIMA
+    setIsDeleteAllOpen(false);
+    
+    setTimeout(async () => {
+      try {
+        await removeAllMatches();
+        loadSummaryStats(seasonId);
+        // Forza pulizia pointer-events per bug Radix
+        document.body.style.pointerEvents = "";
+      } catch (error) {
+        console.error("Errore durante l'eliminazione di tutte le partite:", error);
+      }
+    }, 200);
   };
 
   const navigateToMatch = (match: Match) => {
@@ -83,27 +128,51 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
         <DialogContent className="max-w-[95vw] h-[90vh] md:max-w-3xl rounded-3xl p-0 overflow-hidden flex flex-col border-none shadow-2xl [&>button]:hidden">
           <DialogHeader className="p-6 bg-card dark:bg-background border-b border-border dark:border-white/5 flex-row items-center justify-between space-y-0 shrink-0 transition-colors">
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" className="text-foreground hover:bg-primary/10 dark:hover:bg-white/10 h-8 w-8 transition-colors" onClick={() => onOpenChange(false)}>
-                <ChevronLeft className="h-5 w-5 text-foreground" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="text-foreground hover:bg-primary/10 dark:hover:bg-white/10 h-8 w-8 transition-colors" onClick={() => onOpenChange(false)}>
+                  <ChevronLeft className="h-5 w-5 text-foreground" />
+                </Button>
+                {matches.length > 0 && (
+                   <Button 
+                     variant="ghost" 
+                     size="icon" 
+                     className="text-muted-foreground hover:text-destructive h-8 w-8 transition-colors" 
+                     onClick={() => setIsDeleteAllOpen(true)}
+                     title="Elimina tutto"
+                   >
+                     <Trash2 className="h-4 w-4" />
+                   </Button>
+                )}
+              </div>
               <div>
                 <DialogTitle className="text-xl font-black uppercase tracking-tight text-foreground">Calendario</DialogTitle>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Stagione {activeSeason?.name}</p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5 overflow-x-auto pb-1 max-w-[200px] md:max-w-none">
               <Button 
                 variant="outline"
-                className="bg-muted dark:bg-black/80 border-border dark:border-brand-green text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 text-[9px] font-black uppercase px-3 rounded-xl shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.15)]"
+                className="bg-muted dark:bg-black/80 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 text-[8px] md:text-[9px] font-black uppercase px-2 md:px-3 rounded-xl shadow-sm"
                 size="sm"
-                onClick={() => setIsImportOpen(true)}
+                onClick={() => setIsScraperImportOpen(true)}
+                title="Sincronizza da URL"
               >
                 <Globe className="mr-1 h-3 w-3 text-primary dark:text-brand-green" />
-                Importa
+                Scraping
+              </Button>
+              <Button 
+                variant="outline"
+                className="bg-muted dark:bg-black/80 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 text-[8px] md:text-[9px] font-black uppercase px-2 md:px-3 rounded-xl shadow-sm"
+                size="sm"
+                onClick={() => setIsImportOpen(true)}
+                title="Copia e Incolla"
+              >
+                <ClipboardCopy className="mr-1 h-3 w-3 text-primary dark:text-brand-green opacity-50" />
+                Smart
               </Button>
               <Button 
                 variant="outline" 
-                className="bg-muted dark:bg-black/80 border-border dark:border-brand-green text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 text-[9px] font-black uppercase px-3 rounded-xl shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.15)]" 
+                className="bg-muted dark:bg-black/80 border-border dark:border-brand-green text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 text-[8px] md:text-[9px] font-black uppercase px-2 md:px-3 rounded-xl shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.15)]" 
                 size="sm" 
                 onClick={() => setIsFormOpen(true)}
               >
@@ -180,6 +249,40 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
               </Table>
             )}
           </ScrollArea>
+          
+          <AlertDialog open={!!matchToDelete} onOpenChange={(open) => !open && setMatchToDelete(null)}>
+            <AlertDialogContent className="max-w-[90vw] rounded-3xl border border-border dark:border-none shadow-2xl p-8 bg-card dark:bg-background">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-foreground text-2xl font-black uppercase tracking-tight">Elimina Gara</AlertDialogTitle>
+                <AlertDialogDescription className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
+                  Questa azione è irreversibile.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex-row gap-3 mt-8">
+                <AlertDialogCancel className="flex-1 mt-0 rounded-2xl font-black text-foreground uppercase text-xs h-12 bg-muted hover:bg-muted/80 dark:bg-muted/50 border-none">Annulla</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteMatch} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-2xl font-black uppercase text-xs h-12 shadow-lg shadow-destructive/20">
+                  Conferma
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <AlertDialog open={isDeleteAllOpen} onOpenChange={setIsDeleteAllOpen}>
+            <AlertDialogContent className="max-w-[90vw] rounded-3xl border border-border dark:border-none shadow-2xl p-8 bg-card dark:bg-background">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-2xl font-black uppercase tracking-tight text-destructive">Svuota Calendario</AlertDialogTitle>
+                <AlertDialogDescription className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
+                  Sei sicuro di voler eliminare TUTTE le {matches.length} partite? Questa azione è irreversibile.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex-row gap-3 mt-8">
+                <AlertDialogCancel className="flex-1 mt-0 rounded-2xl font-black text-foreground uppercase text-xs h-12 bg-muted hover:bg-muted/80 dark:bg-muted/50 border-none">Annulla</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteAllMatches} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-2xl font-black uppercase text-xs h-12 shadow-lg shadow-destructive/20">
+                  Elimina Tutto
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </DialogContent>
       </Dialog>
 
@@ -199,22 +302,12 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
         />
       )}
 
-      <AlertDialog open={!!matchToDelete} onOpenChange={(open) => !open && setMatchToDelete(null)}>
-        <AlertDialogContent className="max-w-[90vw] rounded-3xl border border-border dark:border-none shadow-2xl p-8 bg-card dark:bg-background">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-foreground text-2xl font-black uppercase tracking-tight">Elimina Gara</AlertDialogTitle>
-            <AlertDialogDescription className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
-              Questa azione è irreversibile.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-row gap-3 mt-8">
-            <AlertDialogCancel className="flex-1 mt-0 rounded-2xl font-black text-foreground uppercase text-xs h-12 bg-muted hover:bg-muted/80 dark:bg-muted/50 border-none">Annulla</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteMatch} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-2xl font-black uppercase text-xs h-12 shadow-lg shadow-destructive/20">
-              Conferma
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {isScraperImportOpen && (
+        <ImportCalendarioScraperDialog
+          open={isScraperImportOpen}
+          onOpenChange={setIsScraperImportOpen}
+        />
+      )}
     </>
   );
 }

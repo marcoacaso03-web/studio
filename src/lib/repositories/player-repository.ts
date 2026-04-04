@@ -118,4 +118,20 @@ export const playerRepository = {
     const db = getFirestore();
     return await deleteDoc(doc(db, 'teams', seasonId, 'players', id));
   },
+
+  async deleteAll(userId: string, seasonId: string) {
+    if (!userId || !seasonId) return;
+    const db = getFirestore();
+    const playersRef = collection(db, 'teams', seasonId, 'players');
+    const q = query(playersRef, where('teamOwnerId', '==', userId));
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) return;
+    
+    const batch = writeBatch(db);
+    snapshot.docs.forEach(d => {
+        batch.delete(d.ref);
+    });
+    await batch.commit();
+  }
 };

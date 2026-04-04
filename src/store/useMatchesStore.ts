@@ -15,6 +15,7 @@ interface MatchState {
     bulkAdd: (matchesData: Omit<MatchCreateData, 'userId' | 'seasonId' | 'teamOwnerId' | 'teamId'>[]) => Promise<void>;
     update: (id: string, updates: Partial<Omit<Match, 'id' | 'userId'>>) => Promise<void>;
     remove: (id: string) => Promise<void>;
+    removeAll: () => Promise<void>;
 }
 
 export const useMatchesStore = create<MatchState>((set, get) => ({
@@ -73,6 +74,14 @@ export const useMatchesStore = create<MatchState>((set, get) => ({
         if (!activeSeason) return;
         
         await matchRepository.delete(id, activeSeason.id);
+        await get().fetchAll(activeSeason.id);
+    },
+    removeAll: async () => {
+        const user = useAuthStore.getState().user;
+        const activeSeason = useSeasonsStore.getState().activeSeason;
+        if (!activeSeason || !user) return;
+        
+        await matchRepository.deleteAll(user.id, activeSeason.id);
         await get().fetchAll(activeSeason.id);
     },
 }));

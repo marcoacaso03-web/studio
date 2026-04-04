@@ -5,12 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, Sparkles, Search, Plus, ChevronRight } from "lucide-react";
+import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, Sparkles, Search, Plus, ChevronRight, Globe } from "lucide-react";
 import type { Player, Role } from "@/lib/types";
 import dynamic from "next/dynamic";
 
 const PlayerFormDialog = dynamic(() => import("@/components/squadra/player-form-dialog").then(mod => mod.PlayerFormDialog), { ssr: false });
 const SmartPlayerDialog = dynamic(() => import("@/components/giocatori/smart-player-dialog").then(mod => mod.SmartPlayerDialog), { ssr: false });
+const ImportTuttocampoDialog = dynamic(() => import("@/components/squadra/import-tuttocampo-dialog").then(mod => mod.ImportTuttocampoDialog), { ssr: false });
 
 import {
   AlertDialog,
@@ -38,13 +39,15 @@ const roleColors: Record<Role, string> = {
 
 export default function RosaPage() {
   const router = useRouter();
-  const { players, loading: playersLoading, fetchAll, add, update, remove, bulkAdd } = usePlayersStore();
+  const { players, loading: playersLoading, fetchAll, add, update, remove, bulkAdd, removeAll } = usePlayersStore();
   const { activeSeason, loading: seasonsLoading, fetchAll: fetchSeasons } = useSeasonsStore();
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSmartFormOpen, setIsSmartFormOpen] = useState(false);
+  const [isImportTuttocampoOpen, setIsImportTuttocampoOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
+  const [isDeleteAllOpen, setIsDeleteAllOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   
   // Array per tenere traccia delle sezioni aperte (tipo accordion multiplo)
@@ -85,8 +88,32 @@ export default function RosaPage() {
 
   const handleDeletePlayer = async () => {
     if (!playerToDelete) return;
-    await remove(playerToDelete.id);
+    const playerId = playerToDelete.id;
     setPlayerToDelete(null);
+    
+    setTimeout(async () => {
+      try {
+        await remove(playerId);
+        // Forza pulizia pointer-events per bug Radix
+        document.body.style.pointerEvents = "";
+      } catch (error) {
+        console.error("Errore durante l'eliminazione del giocatore:", error);
+      }
+    }, 200);
+  };
+
+  const handleDeleteAllPlayers = async () => {
+    setIsDeleteAllOpen(false);
+    
+    setTimeout(async () => {
+      try {
+        await removeAll();
+        // Forza pulizia pointer-events per bug Radix
+        document.body.style.pointerEvents = "";
+      } catch (error) {
+        console.error("Errore durante l'eliminazione della rosa:", error);
+      }
+    }, 200);
   };
 
   const groupedPlayers = useMemo(() => {
@@ -133,12 +160,40 @@ export default function RosaPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button 
-          onClick={() => handleOpenForm(null)}
-          className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-primary dark:bg-black border-2 border-primary dark:border-brand-green text-white dark:text-brand-green shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.3)] transition-all hover:scale-105 active:scale-95 hover:opacity-90 dark:hover:bg-black/80"
-        >
-          <Plus className="h-7 w-7" />
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => setIsSmartFormOpen(true)}
+            variant="ghost"
+            className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
+            title="Importazione AI"
+          >
+            <Sparkles className="h-6 w-6" />
+          </Button>
+          <Button 
+            onClick={() => setIsImportTuttocampoOpen(true)}
+            variant="ghost"
+            className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
+            title="Importa da Tuttocampo"
+          >
+            <Globe className="h-6 w-6" />
+          </Button>
+          <Button 
+            onClick={() => handleOpenForm(null)}
+            className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-primary dark:bg-black border-2 border-primary dark:border-brand-green text-white dark:text-brand-green shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.3)] transition-all hover:scale-105 active:scale-95 hover:opacity-90 dark:hover:bg-black/80"
+          >
+            <Plus className="h-7 w-7" />
+          </Button>
+          {players.length > 0 && (
+            <Button 
+              onClick={() => setIsDeleteAllOpen(true)}
+              variant="ghost"
+              className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-destructive/20 text-destructive shadow-sm hover:bg-destructive/5 transition-all hover:scale-105 active:scale-95"
+              title="Svuota Rosa"
+            >
+              <Trash2 className="h-6 w-6" />
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="space-y-4 px-3">
@@ -238,6 +293,12 @@ export default function RosaPage() {
         onOpenChange={setIsSmartFormOpen}
         onSave={handleSmartSavePlayers}
       />
+
+      <ImportTuttocampoDialog
+        open={isImportTuttocampoOpen}
+        onOpenChange={setIsImportTuttocampoOpen}
+        onSave={handleSmartSavePlayers}
+      />
       
       <AlertDialog open={!!playerToDelete} onOpenChange={(open) => !open && setPlayerToDelete(null)}>
         <AlertDialogContent className="max-w-[90vw] md:max-w-md rounded-3xl bg-card dark:bg-black border border-border dark:border-brand-green/30 text-foreground p-6 shadow-lg">
@@ -251,6 +312,23 @@ export default function RosaPage() {
             <AlertDialogCancel className="mt-0 text-[11px] font-bold uppercase rounded-xl flex-1 h-11 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted dark:hover:bg-black/40">Annulla</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeletePlayer} className="bg-destructive hover:bg-destructive/90 text-[11px] text-destructive-foreground font-bold uppercase rounded-xl flex-1 h-11 border-none shadow-sm dark:shadow-[0_0_15px_rgba(248,113,113,0.3)]">
               Elimina
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isDeleteAllOpen} onOpenChange={setIsDeleteAllOpen}>
+        <AlertDialogContent className="max-w-[90vw] md:max-w-md rounded-3xl bg-card dark:bg-black border border-border dark:border-brand-green/30 text-foreground p-6 shadow-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive font-black uppercase text-lg tracking-tight">Svuota Rosa</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm font-medium leading-relaxed text-muted-foreground">
+              Vuoi eliminare TUTTI i {players.length} giocatori della rosa? Questa azione è irreversibile.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row justify-end gap-3 mt-4">
+            <AlertDialogCancel className="mt-0 text-[11px] font-bold uppercase rounded-xl flex-1 h-11 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted dark:hover:bg-black/40">Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteAllPlayers} className="bg-destructive hover:bg-destructive/90 text-[11px] text-destructive-foreground font-bold uppercase rounded-xl flex-1 h-11 border-none shadow-sm dark:shadow-[0_0_15px_rgba(248,113,113,0.3)]">
+              Elimina Tutto
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
