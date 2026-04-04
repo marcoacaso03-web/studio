@@ -13,7 +13,8 @@
 
 ## 🟡 Ottimizzazioni
 
-### Performance
+### Developer mode
+- Il developer ha accesso alle funzioni di import da tuttocampo con login, per rosa e calendario. Poi bisogna aggiornare la cronaca eventi, la proposta è uno scraping settimanale automatizzato con cronjob
 
 
 ### Sicurezza

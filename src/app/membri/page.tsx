@@ -203,7 +203,17 @@ export default function RosaPage() {
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
-                            <div className="w-3 h-3 rounded-full bg-primary shadow-sm dark:bg-brand-green dark:shadow-[0_0_8px_rgba(172,229,4,0.6)] ml-1" />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground dark:text-white/40 hover:text-primary dark:hover:text-brand-green hover:bg-primary/10 dark:hover:bg-brand-green/10 transition-all opacity-60 dark:opacity-40 group-hover:opacity-100 dark:group-hover:opacity-100"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenForm(player);
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
                       ))
