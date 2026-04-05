@@ -42,8 +42,14 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
   React.useEffect(() => {
     if (open) {
       if (lineup) {
-        const s = [...Array(11)].map((_, i) => lineup.starters[i] || "");
-        const subs = [...Array(9)].map((_, i) => lineup.substitutes[i] || "");
+        const s = [...Array(11)].map((_, i) => {
+          const p = lineup.starters[i];
+          return (typeof p === "string" ? p : p?.playerId) || "";
+        });
+        const subs = [...Array(9)].map((_, i) => {
+          const p = lineup.substitutes[i];
+          return (typeof p === "string" ? p : p?.playerId) || "";
+        });
         setStarters(s);
         setSubstitutes(subs);
         if (lineup.formation) setModulo(lineup.formation);
