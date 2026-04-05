@@ -50,6 +50,7 @@ export const MatchSchema = z.object({
   opponentGoals: z.number().optional(),
   resultType: z.enum(['W', 'D', 'L']).optional(),
   status: MatchStatusSchema.default('scheduled'),
+  round: z.number().optional().default(0),
   notes: z.string().optional().default(''),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),

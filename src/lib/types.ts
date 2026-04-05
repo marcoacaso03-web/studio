@@ -61,6 +61,7 @@ export type Match = {
   opponentGoals?: number; // Normalized
   resultType?: 'W' | 'D' | 'L'; // Normalized
   status: MatchStatus;
+  round?: number;
   notes?: string;
   createdAt?: string;
   updatedAt?: string;

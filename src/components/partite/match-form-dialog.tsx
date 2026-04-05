@@ -56,6 +56,7 @@ const formSchema = z.object({
   type: z.enum(MATCH_TYPES),
   duration: z.coerce.number().int().min(1, "Durata richiesta"),
   status: z.enum(['scheduled', 'completed', 'canceled']),
+  round: z.coerce.number().int().optional().or(z.literal(0)),
 });
 
 type MatchFormValues = z.infer<typeof formSchema>;
@@ -79,6 +80,7 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
       type: 'Campionato',
       duration: defaultDuration,
       status: 'completed',
+      round: 0,
     },
   });
 
@@ -92,6 +94,7 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
         type: match?.type || 'Campionato',
         duration: match?.duration || defaultDuration,
         status: match?.status || 'completed',
+        round: match?.round || 0,
       });
     }
   }, [open, match, form, defaultDuration]);
@@ -119,7 +122,7 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto rounded-3xl bg-card dark:bg-background border border-primary/30 dark:border-brand-green/30 shadow-[0_0_25px_rgba(172,229,4,0.15)]">
+              <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto rounded-3xl bg-card dark:bg-background border border-primary/30 dark:border-brand-green/30 shadow-[0_0_25px_rgba(172,229,4,0.15)]">
         <DialogHeader>
           <DialogTitle className="font-black uppercase text-foreground">
             {match ? "Modifica Gara" : "Nuova Gara"}
@@ -146,7 +149,7 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
                 <FormField
                 control={form.control}
                 name="type"
@@ -169,8 +172,9 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
                     </FormItem>
                 )}
                 />
+            </div>
 
-                <FormField
+            <FormField
                 control={form.control}
                 name="duration"
                 render={({ field }) => (
@@ -192,7 +196,6 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
                     </FormItem>
                 )}
                 />
-            </div>
 
               <FormField
               control={form.control}
