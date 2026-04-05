@@ -26,43 +26,43 @@ export function TeamRecord() {
                 {/* Card Record Partite */}
                 <Card className="bg-card dark:bg-black/40 border-border dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm transition-colors">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-base font-black uppercase tracking-tight flex items-center gap-2 text-primary dark:text-brand-green">
+                        <CardTitle className="text-base font-black uppercase tracking-tight flex items-center gap-2 text-primary dark:text-white">
                             <Swords className="h-4 w-4" />
                             Andamento Stagione
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                    <div className="text-3xl font-black text-foreground dark:text-white mb-4">{teamRecord.matchesPlayed} <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest ml-1">Gare totali</span></div>
-                    <div className="grid grid-cols-3 gap-2">
-                        <div className="flex flex-col items-center p-3 bg-muted/50 dark:bg-black/40 rounded-2xl border border-primary/20 dark:border-brand-green/20 group hover:border-primary/40 dark:hover:border-brand-green/40 transition-all">
-                            <span className="text-[10px] font-black text-primary dark:text-brand-green uppercase tracking-widest mb-1.5 opacity-80">VITTORIA</span>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-black text-foreground dark:text-white">{teamRecord.wins}</span>
-                                <span className="text-xs font-bold text-primary/60 dark:text-brand-green/60">({winPct}%)</span>
+                        <div className="text-3xl font-black text-foreground dark:text-white mb-4">{teamRecord.matchesPlayed} <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest ml-1">Gare totali</span></div>
+                        <div className="grid grid-cols-3 gap-2">
+                            <div className="flex flex-col items-center p-3 bg-muted/50 dark:bg-black/40 rounded-2xl border border-primary/20 dark:border-brand-green/20 group hover:border-primary/40 dark:hover:border-brand-green/40 transition-all">
+                                <span className="text-[10px] font-black text-primary dark:text-brand-green uppercase tracking-widest mb-1.5 opacity-80">VITTORIA</span>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-2xl font-black text-foreground dark:text-white">{teamRecord.wins}</span>
+                                    <span className="text-xs font-bold text-primary/60 dark:text-brand-green/60">({winPct}%)</span>
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-center p-3 bg-muted/50 dark:bg-black/40 rounded-2xl border border-divider dark:border-white/5 group hover:border-divider/20 dark:hover:border-white/10 transition-all">
+                                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1.5 opacity-80">PAREGGIO</span>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-2xl font-black text-foreground dark:text-white">{teamRecord.draws}</span>
+                                    <span className="text-xs font-bold text-muted-foreground/40">({drawPct}%)</span>
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-center p-3 bg-muted/50 dark:bg-black/40 rounded-2xl border border-rose-500/20 group hover:border-rose-500/40 transition-all">
+                                <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1.5 opacity-80">SCONFITTA</span>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-2xl font-black text-foreground dark:text-white">{teamRecord.losses}</span>
+                                    <span className="text-xs font-bold text-rose-500/60">({lossPct}%)</span>
+                                </div>
                             </div>
                         </div>
-                        <div className="flex flex-col items-center p-3 bg-muted/50 dark:bg-black/40 rounded-2xl border border-divider dark:border-white/5 group hover:border-divider/20 dark:hover:border-white/10 transition-all">
-                            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1.5 opacity-80">PAREGGIO</span>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-black text-foreground dark:text-white">{teamRecord.draws}</span>
-                                <span className="text-xs font-bold text-muted-foreground/40">({drawPct}%)</span>
-                            </div>
-                        </div>
-                        <div className="flex flex-col items-center p-3 bg-muted/50 dark:bg-black/40 rounded-2xl border border-rose-500/20 group hover:border-rose-500/40 transition-all">
-                            <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1.5 opacity-80">SCONFITTA</span>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-black text-foreground dark:text-white">{teamRecord.losses}</span>
-                                <span className="text-xs font-bold text-rose-500/60">({lossPct}%)</span>
-                            </div>
-                        </div>
-                    </div>
                     </CardContent>
                 </Card>
 
                 {/* Card Bilancio Reti */}
                 <Card className="bg-card dark:bg-black/40 border-border dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm transition-colors">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-base font-black uppercase tracking-tight flex items-center gap-2 text-primary dark:text-brand-green">
+                        <CardTitle className="text-base font-black uppercase tracking-tight flex items-center gap-2 text-primary dark:text-white">
                             <GiSoccerBall className="h-4 w-4" />
                             Bilancio Reti
                         </CardTitle>

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/useAuthStore';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { GuideDialog } from './guide-dialog';
 
 const navItems = [
   { href: "/", label: "Dashboard" },
@@ -55,6 +56,9 @@ export function AppHeader() {
 
       {user && (
         <div className="flex items-center gap-3">
+          {/* Help Button */}
+          <GuideDialog />
+
           <div className="hidden sm:flex flex-col text-right">
             <span className="text-[10px] font-black text-foreground dark:text-white uppercase leading-none">
               {user.username}

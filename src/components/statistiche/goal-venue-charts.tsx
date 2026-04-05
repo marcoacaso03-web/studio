@@ -15,21 +15,21 @@ export function GoalVenueCharts() {
     const HOME_COLOR = isDark ? "#ace504" : "hsl(210 100% 45%)";
     const AWAY_COLOR = isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.15)";
 
-    const TOOLTIP_BG     = isDark ? "rgba(0,0,0,0.92)" : "rgba(255,255,255,0.97)";
+    const TOOLTIP_BG = isDark ? "rgba(0,0,0,0.92)" : "rgba(255,255,255,0.97)";
     const TOOLTIP_BORDER = isDark ? "rgba(172,229,4,0.3)" : "rgba(0,128,255,0.25)";
-    const TOOLTIP_COLOR  = isDark ? "#fff" : "#000";
+    const TOOLTIP_COLOR = isDark ? "#fff" : "#000";
 
     if (!homeRecord || !awayRecord) return null;
     if (homeRecord.matchesPlayed === 0 && awayRecord.matchesPlayed === 0) return null;
 
     const scoredData = [
-        { name: "IN CASA",    value: homeRecord.goalsFor,     fill: HOME_COLOR },
-        { name: "TRASFERTA",  value: awayRecord.goalsFor,     fill: AWAY_COLOR },
+        { name: "IN CASA", value: homeRecord.goalsFor, fill: HOME_COLOR },
+        { name: "TRASFERTA", value: awayRecord.goalsFor, fill: AWAY_COLOR },
     ].filter(d => d.value > 0);
 
     const concededData = [
-        { name: "IN CASA",    value: homeRecord.goalsAgainst, fill: HOME_COLOR },
-        { name: "TRASFERTA",  value: awayRecord.goalsAgainst, fill: AWAY_COLOR },
+        { name: "IN CASA", value: homeRecord.goalsAgainst, fill: HOME_COLOR },
+        { name: "TRASFERTA", value: awayRecord.goalsAgainst, fill: AWAY_COLOR },
     ].filter(d => d.value > 0);
 
     const chartConfig = { value: { label: "Gol" } };
@@ -74,7 +74,7 @@ export function GoalVenueCharts() {
     return (
         <Card className="bg-card border border-primary/20 dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
             <CardHeader className="pb-2">
-                <CardTitle className="text-base font-black uppercase tracking-tight text-primary flex items-center gap-2">
+                <CardTitle className="font-black uppercase tracking-tight text-base dark:text-white flex items-center gap-2">
                     <GiSoccerBall className="h-4 w-4" />
                     Bilancio Reti
                 </CardTitle>
@@ -82,7 +82,7 @@ export function GoalVenueCharts() {
             </CardHeader>
             <CardContent className="pt-4">
                 <div className="grid grid-cols-2 gap-4">
-                    <GoalPieChart title="Gol Fatti"  data={scoredData}   total={homeRecord.goalsFor + awayRecord.goalsFor} />
+                    <GoalPieChart title="Gol Fatti" data={scoredData} total={homeRecord.goalsFor + awayRecord.goalsFor} />
                     <GoalPieChart title="Gol Subiti" data={concededData} total={homeRecord.goalsAgainst + awayRecord.goalsAgainst} />
                 </div>
                 {/* Legenda */}

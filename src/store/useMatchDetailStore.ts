@@ -49,7 +49,12 @@ export const useMatchDetailStore = create<MatchDetailState>()(
     error: null,
 
     load: async (matchId, seasonId) => {
-        set({ loading: true, error: null, matchId, match: null });
+        set(state => ({ 
+            loading: !state.match || state.matchId !== matchId, 
+            error: null, 
+            matchId, 
+            match: state.matchId === matchId ? state.match : null 
+        }));
         
         try {
             const authState = useAuthStore.getState();
@@ -88,14 +93,12 @@ export const useMatchDetailStore = create<MatchDetailState>()(
             set({ 
                 match, 
                 allPlayers,
-                events: matchEvents,
+                events: matchEvents || [],
                 lineup: matchLineup || null,
-                stats: matchStats,
+                stats: matchStats || [],
                 loading: false,
                 error: null
             });
-
-            get().syncAndPersistMinutes();
         } catch (e: any) {
             console.error("Match load error:", e);
             set({ 

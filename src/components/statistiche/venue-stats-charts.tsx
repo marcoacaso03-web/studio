@@ -12,19 +12,19 @@ export function VenueStatsCharts() {
     const isDark = theme === "dark";
 
     // Colori adattivi al tema
-    const WIN_COLOR  = isDark ? "#ace504" : "hsl(210 100% 45%)";   // neon green / azzurro
+    const WIN_COLOR = isDark ? "#ace504" : "hsl(210 100% 45%)";   // neon green / azzurro
     const DRAW_COLOR = isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.15)"; // grigio chiaro / grigio scuro
     const LOSS_COLOR = "#f43f5e";                                    // rosso invariante
 
-    const TOOLTIP_BG     = isDark ? "rgba(0,0,0,0.92)" : "rgba(255,255,255,0.97)";
+    const TOOLTIP_BG = isDark ? "rgba(0,0,0,0.92)" : "rgba(255,255,255,0.97)";
     const TOOLTIP_BORDER = isDark ? "rgba(172,229,4,0.3)" : "rgba(0,128,255,0.25)";
-    const TOOLTIP_COLOR  = isDark ? "#fff" : "#000";
+    const TOOLTIP_COLOR = isDark ? "#fff" : "#000";
 
     if (!teamRecord || teamRecord.matchesPlayed === 0) return null;
 
     const prepareData = (record: any) => [
-        { name: "VITTORIE",  value: record.wins,   fill: WIN_COLOR  },
-        { name: "PAREGGI",   value: record.draws,  fill: DRAW_COLOR },
+        { name: "VITTORIE", value: record.wins, fill: WIN_COLOR },
+        { name: "PAREGGI", value: record.draws, fill: DRAW_COLOR },
         { name: "SCONFITTE", value: record.losses, fill: LOSS_COLOR },
     ].filter(d => d.value > 0);
 
@@ -69,13 +69,13 @@ export function VenueStatsCharts() {
     return (
         <Card className="bg-card border border-primary/20 dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
             <CardHeader className="pb-2">
-                <CardTitle className="text-base font-black uppercase tracking-tight text-primary">Statistiche Risultati</CardTitle>
+                <CardTitle className="text-base font-black uppercase tracking-tight text-primary dark: text-white">Statistiche Risultati</CardTitle>
                 <CardDescription className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Distribuzione esiti Totale, In Casa e In Trasferta.</CardDescription>
             </CardHeader>
             <CardContent className="pt-4">
                 <div className="grid grid-cols-3 gap-2">
-                    <SmallPieChart title="Totale"    data={prepareData(teamRecord)}      total={teamRecord.matchesPlayed} />
-                    <SmallPieChart title="In Casa"   data={prepareData(homeRecord || {})} total={homeRecord?.matchesPlayed || 0} />
+                    <SmallPieChart title="Totale" data={prepareData(teamRecord)} total={teamRecord.matchesPlayed} />
+                    <SmallPieChart title="In Casa" data={prepareData(homeRecord || {})} total={homeRecord?.matchesPlayed || 0} />
                     <SmallPieChart title="Trasferta" data={prepareData(awayRecord || {})} total={awayRecord?.matchesPlayed || 0} />
                 </div>
                 {/* Legenda */}

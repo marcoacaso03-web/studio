@@ -12,20 +12,20 @@ export function TeamPerformanceChart() {
     const isDark = theme === "dark";
 
     // Colori adattivi
-    const LINE_COLOR     = isDark ? "#ace504" : "hsl(210 100% 45%)";
-    const GRID_COLOR     = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.07)";
-    const REF_COLOR      = isDark ? "rgba(255,255,255,0.1)"  : "rgba(0,0,0,0.12)";
-    const TICK_COLOR     = isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.4)";
-    const TOOLTIP_BG     = isDark ? "rgba(0,0,0,0.92)"       : "rgba(255,255,255,0.97)";
-    const TOOLTIP_BORDER = isDark ? "rgba(172,229,4,0.3)"    : "rgba(0,128,255,0.25)";
-    const TOOLTIP_TEXT   = isDark ? "#fff"                   : "#000";
-    const TOOLTIP_SUB    = isDark ? "rgba(255,255,255,0.4)"  : "rgba(0,0,0,0.4)";
+    const LINE_COLOR = isDark ? "#ace504" : "hsl(210 100% 45%)";
+    const GRID_COLOR = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.07)";
+    const REF_COLOR = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.12)";
+    const TICK_COLOR = isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.4)";
+    const TOOLTIP_BG = isDark ? "rgba(0,0,0,0.92)" : "rgba(255,255,255,0.97)";
+    const TOOLTIP_BORDER = isDark ? "rgba(172,229,4,0.3)" : "rgba(0,128,255,0.25)";
+    const TOOLTIP_TEXT = isDark ? "#fff" : "#000";
+    const TOOLTIP_SUB = isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)";
 
     if (!teamTrend || teamTrend.length === 0) {
         return (
             <Card className="bg-card border border-primary/20 dark:border-brand-green/30 rounded-3xl">
                 <CardHeader>
-                    <CardTitle className="text-base font-black uppercase tracking-tight text-primary">Andamento Risultati</CardTitle>
+                    <CardTitle className="text-base font-black uppercase tracking-tight dark:text-white">Andamento Risultati</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <p className="text-sm text-muted-foreground">Registra una partita per vedere l'andamento.</p>
@@ -41,7 +41,7 @@ export function TeamPerformanceChart() {
     return (
         <Card className="bg-card border border-primary/20 dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
             <CardHeader className="pb-2">
-                <CardTitle className="text-base font-black uppercase tracking-tight text-primary">Andamento Risultati</CardTitle>
+                <CardTitle className="text-base font-black uppercase tracking-tight dark:text-white">Andamento Risultati</CardTitle>
                 <CardDescription className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">
                     Sequenza cronologica di Vittorie (V), Pareggi (P) e Sconfitte (S).
                 </CardDescription>
@@ -62,7 +62,7 @@ export function TeamPerformanceChart() {
                                 domain={[-1.2, 1.2]}
                                 ticks={[-1, 0, 1]}
                                 tickFormatter={(val) => {
-                                    if (val === 1)  return "V";
+                                    if (val === 1) return "V";
                                     if (val === -1) return "S";
                                     return "P";
                                 }}
@@ -75,11 +75,11 @@ export function TeamPerformanceChart() {
                                     if (active && payload && payload.length) {
                                         const data = payload[0].payload;
                                         const resultLabel =
-                                            data.value === 1  ? "Vittoria"  :
-                                            data.value === -1 ? "Sconfitta" : "Pareggio";
+                                            data.value === 1 ? "Vittoria" :
+                                                data.value === -1 ? "Sconfitta" : "Pareggio";
                                         const resultColor =
-                                            data.value === 1  ? LINE_COLOR  :
-                                            data.value === -1 ? "#f43f5e"   : TOOLTIP_SUB;
+                                            data.value === 1 ? LINE_COLOR :
+                                                data.value === -1 ? "#f43f5e" : TOOLTIP_SUB;
 
                                         return (
                                             <div style={{
