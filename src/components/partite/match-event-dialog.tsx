@@ -59,8 +59,8 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
   const playersStatus = React.useMemo(() => {
     if (!isPitchManSide || !lineup) return { onPitch: allPlayers, onBench: [] };
 
-    let currentPitch = new Set<string>(lineup.starters.filter(id => id !== ""));
-    let currentBench = new Set<string>(lineup.substitutes.filter(id => id !== ""));
+    let currentPitch = new Set<string>(lineup.starters.map(p => typeof p === "string" ? p : p.playerId).filter(id => id !== ""));
+    let currentBench = new Set<string>(lineup.substitutes.map(p => typeof p === "string" ? p : p.playerId).filter(id => id !== ""));
 
     const sortedEvents = [...allEvents].sort((a, b) => {
       if (periodOrder[a.period] !== periodOrder[b.period]) {

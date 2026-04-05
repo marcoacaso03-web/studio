@@ -36,12 +36,16 @@ export function MatchLineupTab() {
   const [isSmartOpen, setIsSmartOpen] = useState(false);
 
   const activeStarters = useMemo(() =>
-    lineup?.starters.map((id, idx) => ({ id, originalIdx: idx })) || [],
+    lineup?.starters.map((p, idx) => ({ 
+      id: typeof p === 'string' ? p : p?.playerId || "", 
+      originalIdx: idx 
+    })) || [],
     [lineup]
   );
 
   const activeSubstitutes = useMemo(() =>
     lineup?.substitutes
+      .map(p => typeof p === 'string' ? p : p?.playerId || "")
       .filter(id => id !== "")
       .map(id => {
         const p = allPlayers.find(player => player.id === id);

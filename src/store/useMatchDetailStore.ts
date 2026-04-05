@@ -137,8 +137,8 @@ export const useMatchDetailStore = create<MatchDetailState>()(
             const assists = teamEvents.filter(e => e.type === 'goal' && e.assistPlayerId === playerId).length;
 
             let minutesPlayed = 0;
-            const isStarter = lineup?.starters.includes(playerId);
-            const isSubstitute = lineup?.substitutes.includes(playerId);
+            const isStarter = lineup?.starters.some(p => (typeof p === 'string' ? p : p.playerId) === playerId);
+            const isSubstitute = lineup?.substitutes.some(p => (typeof p === 'string' ? p : p.playerId) === playerId);
 
             if (lineup && (isStarter || isSubstitute)) {
                 if (isStarter) {

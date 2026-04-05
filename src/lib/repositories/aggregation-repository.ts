@@ -222,7 +222,7 @@ export const aggregationRepository = {
                 const details = context.matchesDetails[match.id];
                 if (!details) continue;
 
-                const isStarter = details.lineup?.starters.includes(player.id) ?? false;
+                const isStarter = details.lineup?.starters.some(pid => (typeof pid === 'string' ? pid : pid.playerId) === player.id) ?? false;
                 const playerStats = details.stats.find(s => s.playerId === player.id);
                 const hasPlayed = isStarter || !!playerStats;
 
