@@ -15,14 +15,14 @@ export function GuideDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <button 
+        <button
           className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-white dark:bg-black font-black text-xs text-foreground dark:text-white shadow-sm transition-all hover:bg-muted dark:hover:bg-brand-green/10 dark:border-brand-green/30 dark:shadow-[0_0_12px_rgba(172,229,4,0.15)] group shrink-0"
           title="Guida al setup"
         >
           <span className="group-hover:scale-110 transition-transform">?</span>
         </button>
       </DialogTrigger>
-      
+
       <DialogContent className="max-w-2xl max-h-[85vh] p-0 overflow-hidden border-border dark:border-brand-green/30 dark:shadow-[0_0_20px_rgba(172,229,4,0.1)]">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="flex items-center gap-2 text-2xl font-black italic uppercase tracking-tighter">
@@ -44,14 +44,14 @@ export function GuideDialog() {
                   Primo Avvio: Configurazione
                 </h3>
               </div>
-              
+
               <div className="grid gap-6">
                 {[
                   {
                     step: "1",
                     title: "Gestione Squadra",
                     icon: <Settings className="h-5 w-5" />,
-                    text: "Inizia definendo le informazioni base del tuo team. Puoi farlo manualmente o usando la funzione \"Importa da Tuttocampo\" per recuperare istantaneamente logo e anagrafica."
+                    text: "Inizia definendo le informazioni base del tuo team. Nelle impostazioni cerca la sezione Gestione Squadra e imposta le tue preferenze."
                   },
                   {
                     step: "2",
@@ -69,7 +69,7 @@ export function GuideDialog() {
                     step: "4",
                     title: "Generazione Allenamenti",
                     icon: <Activity className="h-5 w-5" />,
-                    text: "Usa il modulo \"Allenamento\" per segnare le presenze settimanali. Controlla tutti i pulsanti in alto per capirne le funzionalità e generare le tue sessioni."
+                    text: "In Allenamento premi il tasto '+' per generare le tue giornate di allenamento per periodi, puoi scegliere se generare tutto subito o settimana per settimana. Nelle schede di allenamento puoi segnare le presenze settimanali. Controlla tutti i pulsanti in alto per capirne le funzionalità e generare le tue sessioni."
                   }
                 ].map((item) => (
                   <div key={item.step} className="flex gap-4 group">
@@ -87,7 +87,7 @@ export function GuideDialog() {
                   </div>
                 ))}
               </div>
-              
+
               <div className="p-3 bg-muted/50 dark:bg-zinc-900/50 border border-dashed border-brand-green/30 rounded-xl text-center">
                 <p className="text-xs font-bold italic text-brand-green">
                   Una volta completati questi passaggi, l'app può considerarsi settata!
@@ -102,7 +102,7 @@ export function GuideDialog() {
               <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground px-1">
                 Funzionalità Avanzate
               </h3>
-              
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="p-4 rounded-2xl border border-border dark:border-brand-green/10 bg-muted/30 dark:bg-zinc-900/30 space-y-2 hover:border-brand-green/30 transition-colors">
                   <h4 className="font-bold text-sm flex items-center gap-2 italic">
