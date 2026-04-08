@@ -89,27 +89,33 @@ export function computeBestDefenseStats(
         if (m.status !== 'completed' && (m.status as string) !== 'played') return;
         const normalizedMatch = normalizeMatch(m);
         const lineup = normalizeLineup(lineups[m.id], players);
-        
-        const defenders = lineup.starters.filter((s): s is StarterPlayer => (s as StarterPlayer).role === 'Difensore');
-        const numDefenders = defenders.length;
+        const formation = lineup.formation || '4-4-2';
         
         let targetCbs: string[] = [];
         let type: 'pair' | 'trio' | 'none' = 'none';
 
-        if (numDefenders === 2) {
-            targetCbs = defenders.map(d => d.playerId);
-            type = 'pair';
-        } else if (numDefenders === 3) {
-            targetCbs = defenders.map(d => d.playerId);
-            type = 'trio';
-        } else if (numDefenders === 4) {
-            // Heuristic: middle 2
-            targetCbs = [defenders[1].playerId, defenders[2].playerId];
-            type = 'pair';
-        } else if (numDefenders === 5) {
-            // Heuristic: middle 3
-            targetCbs = [defenders[1].playerId, defenders[2].playerId, defenders[3].playerId];
-            type = 'trio';
+        if (formation.startsWith('4')) {
+            // Difesa a 4: i centrali sono agli indici 2 e 3
+            const s2 = lineup.starters[2];
+            const s3 = lineup.starters[3];
+            const p1 = s2 ? (typeof s2 === 'string' ? s2 : s2.playerId) : null;
+            const p2 = s3 ? (typeof s3 === 'string' ? s3 : s3.playerId) : null;
+            if (p1 && p2) {
+                targetCbs = [p1, p2];
+                type = 'pair';
+            }
+        } else if (formation.startsWith('3')) {
+            // Difesa a 3: i tre centrali sono agli indici 1, 2 e 3
+            const s1 = lineup.starters[1];
+            const s2 = lineup.starters[2];
+            const s3 = lineup.starters[3];
+            const p1 = s1 ? (typeof s1 === 'string' ? s1 : s1.playerId) : null;
+            const p2 = s2 ? (typeof s2 === 'string' ? s2 : s2.playerId) : null;
+            const p3 = s3 ? (typeof s3 === 'string' ? s3 : s3.playerId) : null;
+            if (p1 && p2 && p3) {
+                targetCbs = [p1, p2, p3];
+                type = 'trio';
+            }
         }
 
         if (type === 'pair' && targetCbs.length === 2) {

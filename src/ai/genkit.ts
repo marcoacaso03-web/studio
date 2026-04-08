@@ -1,6 +1,6 @@
 import 'server-only';
-import {genkit} from 'genkit';
-import {googleAI} from '@genkit-ai/google-genai';
+import { genkit } from 'genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 
 /**
  * Pulisce la chiave API rimuovendo eventuali virgolette o spazi aggiunti accidentalmente dall'utente.
