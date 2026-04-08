@@ -68,7 +68,7 @@ function MatchDetailContent() {
           <Button
             variant="outline"
             className="flex-1 font-black uppercase text-xs tracking-wider rounded-xl bg-background dark:bg-black border-2 border-border dark:border-white/10 text-foreground dark:text-white hover:bg-muted dark:hover:bg-white/5 h-12 transition-all shadow-sm"
-            onClick={() => router.push('/calendario')}
+            onClick={() => router.push('/?dialog=calendar')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" /> Torna Indietro
           </Button>
@@ -90,7 +90,10 @@ function MatchDetailContent() {
   return (
     <div className="max-w-4xl mx-auto space-y-4 pb-20">
       <div className="flex flex-col gap-3">
-        <PageHeader title={`Vs ${match.opponent}`} />
+        <PageHeader 
+          title={`Vs ${match.opponent}`} 
+          backAction={() => router.push('/?dialog=calendar')}
+        />
 
         <Card className="bg-card dark:bg-black border border-border dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] overflow-hidden rounded-3xl text-foreground">
           <CardContent className="p-5 md:p-8">

@@ -17,16 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ChevronLeft } from "lucide-react";
+import { getJerseyNumber, getSubstituteNumber, FORMATION_POSITIONS, getPositionAcronym } from "@/lib/lineup-mapping";
 
-export const FORMATION_POSITIONS: Record<string, string[]> = {
-  "4-4-2": ["POR", "TS", "DC", "DC", "TD", "ES", "CC", "CC", "ED", "ATT", "ATT"],
-  "4-3-3": ["POR", "TS", "DC", "DC", "TD", "CC", "MED", "CC", "AS", "ATT", "AD"],
-  "3-5-2": ["POR", "DC", "DC", "DC", "ES", "CC", "MED", "CC", "ED", "ATT", "ATT"],
-  "4-2-3-1": ["POR", "TS", "DC", "DC", "TD", "MED", "MED", "ES", "TRQ", "ED", "ATT"],
-  "3-4-2-1": ["POR", "DC", "DC", "DC", "ES", "CC", "CC", "ED", "TRQ", "TRQ", "ATT"],
-  "3-4-1-2": ["POR", "DC", "DC", "DC", "ES", "CC", "CC", "ED", "TRQ", "ATT", "ATT"],
-  "4-3-1-2": ["POR", "TS", "DC", "DC", "TD", "CC", "MED", "CC", "TRQ", "ATT", "ATT"]
-};
 
 interface LineupFormDialogProps {
   open: boolean;
@@ -90,7 +82,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
 
     return (
       <div className="flex items-center gap-2 border-b border-border dark:border-white/10 py-1.5 last:border-0 hover:bg-muted dark:hover:bg-white/10 transition-all px-2">
-        <div className="bg-muted dark:bg-black/50 text-foreground dark:text-white w-10 h-8 flex items-center justify-center font-black text-[10px] uppercase rounded border border-border dark:border-white/20 shadow-none dark:shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+        <div className="bg-muted dark:bg-black/50 text-foreground dark:text-white w-14 h-8 flex items-center justify-center font-black text-[10px] uppercase rounded border border-border dark:border-white/20 shadow-none dark:shadow-[0_0_10px_rgba(0,0,0,0.5)]">
           {label}
         </div>
         <div className="flex-1">
@@ -110,7 +102,6 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
     );
   };
 
-  const currentPositions = FORMATION_POSITIONS[modulo] || Array(11).fill("N/A");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -151,7 +142,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
             {starters.map((s, i) => (
               <PlayerRow
                 key={i}
-                label={currentPositions[i]}
+                label={getPositionAcronym(modulo, i)}
                 value={s}
                 isStarter={true}
                 onValueChange={(val) => {

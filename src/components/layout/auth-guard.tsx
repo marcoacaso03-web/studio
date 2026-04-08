@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -9,6 +8,7 @@ import { SplashScreen } from '@/components/layout/splash-screen';
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isInitialized = useAuthStore((state) => state.isInitialized);
   const router = useRouter();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
@@ -18,24 +18,30 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (mounted && !isAuthenticated && pathname !== '/login' && pathname !== '/') {
+    if (mounted && isInitialized && !isAuthenticated && pathname !== '/login' && pathname !== '/') {
       router.push('/login');
     }
-  }, [isAuthenticated, pathname, router, mounted]);
+  }, [isAuthenticated, isInitialized, pathname, router, mounted]);
 
   const isLoginPage = pathname === '/login';
   const isRootPage = pathname === '/';
 
+  // Hydration guard: show splash screen until mounted on client
   if (!mounted) {
-     return <SplashScreen />;
+    return <SplashScreen />;
   }
 
-  // Se siamo sulla root o in login, non blocchiamo il rendering
+  // Se siamo sulla root o in login, non blocchiamo mai il rendering
   if (isLoginPage || isRootPage) {
     return <>{children}</>;
   }
 
-  // Se non autenticato e non in pagine libere, mostriamo lo splash di caricamento mentre reindirizza
+  // Aspettiamo che firebase sia pronto
+  if (!isInitialized) {
+    return <SplashScreen />;
+  }
+
+  // Se non autenticato, reindirizziamo ma mostriamo splash nel frattempo
   if (!isAuthenticated) {
     return <SplashScreen />;
   }

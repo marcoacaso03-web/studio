@@ -45,6 +45,13 @@ export default function HomePage() {
 
   useEffect(() => {
     setMounted(true);
+    
+    // Check if we navigated back to this page with a request to open the calendar
+    if (typeof window !== 'undefined' && window.location.search.includes('dialog=calendar')) {
+      setIsFullCalendarOpen(true);
+      // Clean up the URL
+      window.history.replaceState(null, '', '/');
+    }
   }, []);
 
   useEffect(() => {

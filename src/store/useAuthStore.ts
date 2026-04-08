@@ -80,7 +80,7 @@ export const useAuthStore = create<AuthState>()(
           const username = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Utente';
           set({ 
             isAuthenticated: true, 
-            isInitialized: true,
+             isInitialized: true,
             user: { 
               id: firebaseUser.uid, 
               username,

@@ -1,7 +1,14 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -26,8 +33,15 @@ interface SmartLineupDialogProps {
 export function SmartLineupDialog({ open, onOpenChange }: SmartLineupDialogProps) {
   const [rawList, setRawList] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const { allPlayers, saveLineup } = useMatchDetailStore();
+  const { allPlayers, saveLineup, lineup } = useMatchDetailStore();
+  const [modulo, setModulo] = useState('4-4-2');
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (open && lineup?.formation) {
+      setModulo(lineup.formation);
+    }
+  }, [open, lineup]);
 
   const handleSmartAnalyze = async () => {
     if (!rawList.trim()) return;
@@ -35,13 +49,14 @@ export function SmartLineupDialog({ open, onOpenChange }: SmartLineupDialogProps
     setIsAnalyzing(true);
     try {
       const availablePlayers = allPlayers.map(p => ({ id: p.id, name: p.name }));
-      const result = await suggestLineup({ rawList, availablePlayers });
+      const result = await suggestLineup({ rawList, availablePlayers, formation: modulo });
 
       // Salviamo la formazione suggerita
       await saveLineup({
         matchId: "", // Gestito dallo store
         starters: result.starters,
         substitutes: result.substitutes,
+        formation: modulo,
       });
 
       toast({
@@ -77,6 +92,28 @@ export function SmartLineupDialog({ open, onOpenChange }: SmartLineupDialogProps
             </div>
           </div>
         </DialogHeader>
+
+        <div className="bg-card dark:bg-card/50 border-b border-border dark:border-white/10 px-6 py-3 flex items-center justify-between text-[10px] uppercase font-black tracking-widest shadow-inner shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground dark:text-white/60">SELEZIONA MODULO</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Select value={modulo} onValueChange={setModulo}>
+              <SelectTrigger className="bg-background dark:bg-black text-foreground dark:text-white h-8 text-[11px] w-28 py-0 font-black border border-primary/50 dark:border-brand-green/50 shadow-sm uppercase focus:ring-1 focus:ring-primary dark:focus:ring-brand-green">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-card dark:bg-black border-border dark:border-brand-green/50 text-foreground dark:text-white">
+                <SelectItem value="4-4-2" className="text-[11px] font-black">4-4-2</SelectItem>
+                <SelectItem value="4-3-3" className="text-[11px] font-black">4-3-3</SelectItem>
+                <SelectItem value="3-5-2" className="text-[11px] font-black">3-5-2</SelectItem>
+                <SelectItem value="4-2-3-1" className="text-[11px] font-black">4-2-3-1</SelectItem>
+                <SelectItem value="3-4-2-1" className="text-[11px] font-black">3-4-2-1</SelectItem>
+                <SelectItem value="3-4-1-2" className="text-[11px] font-black">3-4-1-2</SelectItem>
+                <SelectItem value="4-3-1-2" className="text-[11px] font-black">4-3-1-2</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
         <ScrollArea className="flex-1 bg-background dark:bg-black transition-colors">
           <div className="p-6 space-y-6">

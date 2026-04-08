@@ -5,9 +5,10 @@ import { useMatchDetailStore } from "@/store/useMatchDetailStore";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, ClipboardList, Sparkles, LayoutGrid } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { LineupFormDialog, FORMATION_POSITIONS } from "./lineup-form-dialog";
+import { LineupFormDialog } from "./lineup-form-dialog";
 import { SmartLineupDialog } from "./smart-lineup-dialog";
 import { cn } from "@/lib/utils";
+import { getJerseyNumber, getSubstituteNumber, FORMATION_POSITIONS, getPositionAcronym } from "@/lib/lineup-mapping";
 
 // Definizione righe (dall'Attacco al Portiere in basso)
 // Indici Left-to-Right basati su FORMATION_POSITIONS
@@ -36,9 +37,9 @@ export function MatchLineupTab() {
   const [isSmartOpen, setIsSmartOpen] = useState(false);
 
   const activeStarters = useMemo(() =>
-    lineup?.starters.map((p, idx) => ({ 
-      id: typeof p === 'string' ? p : p?.playerId || "", 
-      originalIdx: idx 
+    lineup?.starters.map((p, idx) => ({
+      id: typeof p === 'string' ? p : p?.playerId || "",
+      originalIdx: idx
     })) || [],
     [lineup]
   );
@@ -90,7 +91,7 @@ export function MatchLineupTab() {
         <div className="flex items-center gap-2">
           <LayoutGrid className="h-5 w-5 shrink-0 text-primary dark:text-brand-green" />
           <h3 className="text-base sm:text-lg font-black uppercase tracking-tight text-foreground">
-            Layout Tattico <span className="text-primary dark:text-brand-green whitespace-nowrap ml-1">{activeFormation}</span>
+            Formazione <span className="text-primary dark:text-white whitespace-nowrap ml-1">{activeFormation}</span>
           </h3>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
@@ -130,11 +131,11 @@ export function MatchLineupTab() {
                         <div className={cn(
                           "w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 shrink-0 rounded-full flex items-center justify-center border-2 md:border-4 shadow-xl transition-transform hover:scale-110",
                           isPOR
-                            ? "bg-amber-700 border-amber-600 text-black"
+                            ? "bg-amber-700 border-amber-600 text-black shadow-[0_0_15px_rgba(180,100,0,0.4)]"
                             : "bg-neutral-800 border-neutral-700 text-white"
                         )}>
-                          <span className="text-[9px] md:text-sm font-black uppercase">
-                            {currentAcronyms[starterIdx] || (starterIdx + 1)}
+                          <span className="text-[8px] md:text-[11px] font-black uppercase text-center leading-none">
+                            {getPositionAcronym(activeFormation, starterIdx)}
                           </span>
                         </div>
                         <div className="bg-black/40 backdrop-blur-md px-1 py-0.5 rounded border border-white/10 w-full text-center overflow-hidden">
@@ -161,7 +162,9 @@ export function MatchLineupTab() {
               {activeSubstitutes.length > 0 ? (
                 activeSubstitutes.map((name, idx) => (
                   <div key={idx} className="flex items-center gap-3 p-2 bg-muted/30 dark:bg-black/40 rounded-xl border border-border dark:border-brand-green/20 transition-all hover:bg-muted/50 dark:hover:bg-black/60">
-                    <span className="text-[9px] font-black text-primary dark:text-brand-green w-4">{idx + 12}</span>
+                    <div className="w-4 h-4 rounded-full bg-primary/20 dark:bg-brand-green/20 border border-primary/30 dark:border-brand-green/30 flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary dark:bg-brand-green" />
+                    </div>
                     <span className="text-[10px] font-bold uppercase tracking-tight text-foreground truncate">{name}</span>
                   </div>
                 ))
