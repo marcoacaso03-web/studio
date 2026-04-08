@@ -283,12 +283,18 @@ export const useMatchDetailStore = create<MatchDetailState>()(
         const { matchId, match } = get();
         if (!matchId || !match) return;
 
-        const updatedMatch = { ...match, ...data };
+        let updates: Partial<Match> = { ...data };
+        // Se la partita viene segnata come completata ma non c'è un risultato, lo inizializziamo a 0-0
+        if (updates.status === 'completed' && !match.result && !updates.result) {
+            updates.result = { home: 0, away: 0 };
+        }
+
+        const updatedMatch = { ...match, ...updates };
         set({ match: updatedMatch });
 
-        matchRepository.update(matchId, match.seasonId, data);
+        matchRepository.update(matchId, match.seasonId, updates);
         
-        if (data.duration) {
+        if (updates.duration || updates.status === 'completed') {
             get().syncAndPersistMinutes();
         }
     },

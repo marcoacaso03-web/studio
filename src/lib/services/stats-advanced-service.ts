@@ -23,15 +23,14 @@ const DEFAULT_OPTIONS: AdvancedStatsOptions = {
 
 export function normalizeMatch(match: Match): Match {
     const isHome = match.isHome;
-    const teamGoals = isHome ? (match.result?.home ?? 0) : (match.result?.away ?? 0);
-    const opponentGoals = isHome ? (match.result?.away ?? 0) : (match.result?.home ?? 0);
+    const result = match.result || { home: 0, away: 0 };
+    const teamGoals = isHome ? result.home : result.away;
+    const opponentGoals = isHome ? result.away : result.home;
     
     let resultType: 'W' | 'D' | 'L' | undefined;
-    if (match.result) {
-        if (teamGoals > opponentGoals) resultType = 'W';
-        else if (teamGoals < opponentGoals) resultType = 'L';
-        else resultType = 'D';
-    }
+    if (teamGoals > opponentGoals) resultType = 'W';
+    else if (teamGoals < opponentGoals) resultType = 'L';
+    else resultType = 'D';
 
     return {
         ...match,

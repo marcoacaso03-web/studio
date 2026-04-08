@@ -124,14 +124,14 @@ export const aggregationRepository = {
         const completedMatches = context.matches.filter(m => m.status === 'completed');
 
         for (const match of completedMatches) {
-            if (!match.result) continue;
+            const result = match.result || { home: 0, away: 0 };
             
             const target = match.isHome ? record.home : record.away;
             record.overall.matchesPlayed++;
             target.matchesPlayed++;
 
-            const homeGoals = match.result.home;
-            const awayGoals = match.result.away;
+            const homeGoals = result.home;
+            const awayGoals = result.away;
 
             if (match.isHome) {
                 record.overall.goalsFor += homeGoals;
@@ -160,9 +160,8 @@ export const aggregationRepository = {
         const completedMatches = context.matches.filter(m => m.status === 'completed');
 
         return completedMatches.map(match => {
-            if (!match.result) return null;
             let value = 0;
-            const { home, away } = match.result;
+            const { home, away } = match.result || { home: 0, away: 0 };
             if (match.isHome) {
                 if (home > away) value = 1;
                 else if (home < away) value = -1;
