@@ -38,8 +38,8 @@ export function PlayerLeaderboard() {
       let bVal: any = 0;
 
       if (sortKey === 'name') {
-        aVal = a.name.toLowerCase();
-        bVal = b.name.toLowerCase();
+        aVal = (a.lastName || a.name || "").toLowerCase();
+        bVal = (b.lastName || b.name || "").toLowerCase();
       } else {
         aVal = a.stats[sortKey as keyof typeof a.stats] || 0;
         bVal = b.stats[sortKey as keyof typeof b.stats] || 0;

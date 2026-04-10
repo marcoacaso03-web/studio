@@ -565,13 +565,21 @@ export default function PlayerDetailPage() {
                   </>
                 )}
               </span>
-              {player && (
-                <span
-                  className={`text-[8px] font-black px-2 py-0.5 rounded-full border shadow-sm ${roleBg[player.role] ?? "bg-muted dark:bg-white/5 text-muted-foreground dark:text-white/40 border-border dark:border-white/10"}`}
-                >
-                  {roleLabel[player.role] ?? player.role}
-                </span>
-              )}
+                <div className="flex gap-1.5 items-center">
+                  <span
+                    className={`text-[8px] font-black px-2 py-0.5 rounded-full border shadow-sm ${roleBg[player.role] ?? "bg-muted dark:bg-white/5 text-muted-foreground dark:text-white/40 border-border dark:border-white/10"}`}
+                  >
+                    {roleLabel[player.role] ?? player.role}
+                  </span>
+                  {player.secondaryRoles && player.secondaryRoles.map(r => (
+                    <span
+                      key={r}
+                      className="text-[8px] font-bold px-2 py-0.5 rounded-full border border-border dark:border-white/10 bg-muted/50 dark:bg-white/5 text-muted-foreground/70 dark:text-white/30"
+                    >
+                      {roleLabel[r] ?? r}
+                    </span>
+                  ))}
+                </div>
             </div>
             <span className="text-[8px] md:text-[10px] uppercase font-black text-muted-foreground dark:text-white/30 tracking-[0.2em] ml-10">
               {activeSeason?.name ?? "…"}

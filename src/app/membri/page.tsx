@@ -74,7 +74,7 @@ export default function RosaPage() {
     setIsFormOpen(true);
   };
   
-  const handleSavePlayer = async (data: {name: string, role: Role}, playerId?: string) => {
+  const handleSavePlayer = async (data: {name: string, firstName: string, lastName: string, role: Role, secondaryRoles: Role[]}, playerId?: string) => {
     if (playerId) {
       await update(playerId, data);
     } else {
@@ -135,7 +135,7 @@ export default function RosaPage() {
     });
 
     Object.keys(groups).forEach(key => {
-        groups[key].sort((a,b) => a.name.localeCompare(b.name));
+        groups[key].sort((a,b) => (a.lastName || "").localeCompare(b.lastName || ""));
     });
 
     return groups;
@@ -245,7 +245,18 @@ export default function RosaPage() {
                           className="flex items-center justify-between p-4 border-b border-border dark:border-brand-green/10 last:border-b-0 group hover:bg-muted dark:hover:bg-black/60 transition-colors cursor-pointer"
                           onClick={() => router.push(`/membri/${player.id}`)}
                         >
-                          <span className="text-foreground font-medium text-[17px]">{player.name}</span>
+                          <div className="flex flex-col">
+                            <span className="text-foreground font-medium text-[17px]">{player.name}</span>
+                            {player.secondaryRoles && player.secondaryRoles.length > 0 && (
+                              <div className="flex gap-1 mt-0.5">
+                                {player.secondaryRoles.map(r => (
+                                  <span key={r} className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground/60 bg-muted-foreground/5 px-1 rounded">
+                                    {r.substring(0, 3)}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                           <div className="flex items-center gap-2">
                             <Button
                               variant="ghost"

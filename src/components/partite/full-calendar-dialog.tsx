@@ -127,7 +127,7 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
     if (!round || round === 0) return null;
 
     return (
-      <div className="w-8 h-8 rounded-xl flex items-center justify-center border-2 border-brand-green bg-black text-white text-xs font-black shrink-0">
+      <div className="w-8 h-8 rounded-xl flex items-center justify-center border-2 border-primary dark:border-brand-green bg-primary/10 dark:bg-black text-primary dark:text-brand-green text-xs font-black shrink-0">
         {round}
       </div>
     );
@@ -152,38 +152,36 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
             <div className="flex gap-1 md:gap-1.5 shrink-0 items-center">
               <Button
                 variant="outline"
-                className="bg-muted dark:bg-black/80 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 text-[8px] md:text-[9px] font-black uppercase px-1.5 md:px-3 rounded-xl shadow-sm"
-                size="sm"
+                className="bg-muted dark:bg-black/80 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 w-8 rounded-xl shadow-sm p-0"
+                size="icon"
                 onClick={() => setIsScraperImportOpen(true)}
-                title="Sincronizza da URL"
+                title="Sincronizza da URL (Scraping)"
               >
-                <Globe className="mr-1 h-3 w-3 text-primary dark:text-brand-green" />
-                Scraping
+                <Globe className="h-4 w-4 text-primary dark:text-brand-green" />
               </Button>
               <Button
                 variant="outline"
-                className="bg-muted dark:bg-black/80 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 text-[8px] md:text-[9px] font-black uppercase px-1.5 md:px-3 rounded-xl shadow-sm"
-                size="sm"
+                className="bg-muted dark:bg-black/80 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 w-8 rounded-xl shadow-sm p-0"
+                size="icon"
                 onClick={() => setIsImportOpen(true)}
-                title="Copia e Incolla"
+                title="Importazione Smart (Copia e Incolla)"
               >
-                <ClipboardCopy className="mr-1 h-3 w-3 text-primary dark:text-brand-green opacity-50" />
-                Smart
+                <ClipboardCopy className="h-4 w-4 text-primary dark:text-brand-green" />
               </Button>
               <Button
                 variant="outline"
-                className="bg-muted dark:bg-black/80 border-border dark:border-brand-green text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 text-[8px] md:text-[9px] font-black uppercase px-1.5 md:px-3 rounded-xl]"
-                size="sm"
+                className="bg-muted dark:bg-black/80 border-border dark:border-brand-green text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 w-8 rounded-xl shadow-sm p-0"
+                size="icon"
                 onClick={() => setIsFormOpen(true)}
+                title="Nuova Partita"
               >
-                <PlusCircle className="mr-1 h-3 w-3 text-primary dark:text-brand-green" />
-                Nuova
+                <PlusCircle className="h-4 w-4 text-primary dark:text-brand-green" />
               </Button>
               {matches.length > 0 && (
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-red-500 hover:text-white hover:bg-red-600 bg-black border border-red-500/40 h-8 w-8 transition-all rounded-lg"
+                  className="text-red-600 dark:text-red-500 hover:text-white hover:bg-red-600 bg-red-50 dark:bg-black border border-red-200 dark:border-red-500/40 h-8 w-8 transition-all rounded-lg"
                   onClick={() => setIsDeleteAllOpen(true)}
                   title="Elimina tutto"
                 >
@@ -252,7 +250,7 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-all"
+                            className="h-8 w-8 text-muted-foreground hover:text-red-600 dark:hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 lg:opacity-20 lg:group-hover:opacity-100 opacity-100 transition-all rounded-lg"
                             onClick={(e) => { e.stopPropagation(); setMatchToDelete(match); }}
                           >
                             <Trash2 className="h-3.5 w-3.5" />

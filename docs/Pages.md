@@ -1,19 +1,21 @@
 # Pages, Dialog e Card — PitchMan
 
-> Ultimo aggiornamento: 2026-04-02
+> Ultimo aggiornamento: 2026-04-09
 > Struttura basata su Next.js App Router (`src/app/`)
 
 ---
 
 ## 📄 Pages
 
-### 1. Splash / Home
+### 1. Dashboard
 | Campo | Valore |
 |---|---|
 | **Route** | `/` |
 | **File** | `src/app/page.tsx` |
-| **Componente** | `Home` |
-| **Descrizione** | Schermata di avvio con logo animato e barra di progresso. Dopo 800 ms reindirizza a `/calendario` (se autenticato) o `/login`. |
+| **Componente** | `HomePage` |
+| **Descrizione** | Hub principale dell'app. Gestisce la fase di splash (caricamento dati e Auth check) e mostra il riepilogo stagione: prossimo impegno, azioni rapide, stato rosa e card Wall of Fame (Bomber, Assistman, Fedelissimo). |
+| **Card** | `Prossimo Impegno` · `Azioni Rapide` · `Stato Rosa` · `Wall of Fame` |
+| **Dialog usati** | `MatchFormDialog` · `FullCalendarDialog` · `GuideDialog` |
 
 ---
 
@@ -27,15 +29,6 @@
 
 ---
 
-### 3. Dashboard / Calendario
-| Campo | Valore |
-|---|---|
-| **Route** | `/calendario` |
-| **File** | `src/app/calendario/page.tsx` |
-| **Componente** | `DashboardPage` |
-| **Descrizione** | Home principale dell'app. Mostra due mini-card statistiche (Rosa e Statistiche) e la lista delle partite recenti/prossime con navigazione alla partita di dettaglio. |
-| **Card** | `ROSA` · `STATISTICHE` |
-| **Dialog usati** | `FullCalendarDialog` |
 
 ---
 
@@ -59,7 +52,7 @@
 | **File** | `src/app/membri/page.tsx` |
 | **Componente** | `RosaPage` |
 | **Descrizione** | Lista giocatori della rosa, raggruppati per ruolo (Portieri, Difensori, Centrocampisti, Attaccanti) con accordion espandibile. Supporta ricerca per nome. |
-| **Dialog usati** | `PlayerFormDialog` · `SmartPlayerDialog` · `AlertDialog` (conferma eliminazione) |
+| **Dialog usati** | `PlayerFormDialog` (Nome, Cognome, Ruolo) · `SmartPlayerDialog` · `AlertDialog` (conferma eliminazione) |
 
 ---
 
@@ -128,7 +121,7 @@
 | **Componente** | `StatistichePage` |
 | **Descrizione** | Pannello statistiche stagionali a tre tab. |
 | **Tab** | Record · Giocatori (Leaderboard) · Grafici |
-| **Componenti usati** | `TeamRecord` · `PlayerLeaderboard` · `VenueStatsCharts` · `GoalVenueCharts` · `TeamPerformanceChart` · `GoalsIntervalChart` |
+| **Componenti usati** | `TeamRecord` · `PlayerLeaderboard` · `VenueStatsCharts` · `GoalVenueCharts` · `TeamPerformanceChart` · `GoalsIntervalChart` · `AdvancedStatsSection` |
 
 ---
 
@@ -154,13 +147,13 @@
 | `match-event-dialog.tsx` | `MatchEventDialog` | Form per aggiungere/modificare eventi di partita (gol, assist, cartellini, sostituzioni). |
 | `lineup-form-dialog.tsx` | `LineupFormDialog` | Form per compilare la formazione (titolari e panchina). |
 | `import-tuttocampo-dialog.tsx` | `ImportTuttocampoDialog` | Import formazione da Tuttocampo (incolla HTML). |
-| `smart-lineup-dialog.tsx` | `SmartLineupDialog` | Generazione formazione intelligente assistita da AI. |
+| `smart-lineup-dialog.tsx` | `SmartLineupDialog` | Generazione formazione intelligente assistita da AI. Supporta logiche di ruolo specifiche per moduli 3-X-X (es. 3-5-2). |
 
 ### Dialog Giocatori (`src/components/giocatori/` + `src/components/squadra/`)
 
 | File | Componente | Descrizione |
 |---|---|---|
-| `squadra/player-form-dialog.tsx` | `PlayerFormDialog` | Form aggiungi/modifica giocatore (nome + ruolo). |
+| `squadra/player-form-dialog.tsx` | `PlayerFormDialog` | Form aggiungi/modifica giocatore (Nome, Cognome e Ruolo Tecnico). |
 | `giocatori/smart-player-dialog.tsx` | `SmartPlayerDialog` | Importazione massiva giocatori via AI (incolla lista nomi). |
 | `giocatori/bulk-player-dialog.tsx` | `BulkPlayerDialog` | Aggiunta giocatori in blocco manualmente. |
 
@@ -197,9 +190,9 @@
 
 | Card | Usata in | Descrizione |
 |---|---|---|
-| `ROSA` | `/calendario` | Mini-card con totale giocatori e breakdown per ruolo. |
-| `STATISTICHE` | `/calendario` | Mini-card con vittorie/pareggi/sconfitte e diff-reti stagione. |
-| `Prossime & Recenti` | `/calendario` | Lista delle ultime e prossime partite con risultato e badge stato. |
+| `Prossimo Impegno` | `/` | Card con dettagli della prossima gara in programma. |
+| `Azioni Rapide` | `/` | Hub di pulsanti per aggiunta rapida gare, allenamenti e scout. |
+| `Wall of Fame` | `/` | Breakdown dei leader stagionali (Gol, Assist, Presenze). |
 | Card Riepilogo Partita | `/calendario/[id]` | Mostra risultato (home vs away), data e casa/trasferta. |
 | `StatCard` | `/membri/[id]` | Card statistica piccola con icona, label e valore numerico (presenze, gol, assist, ecc.). |
 | Card Profilo Tecnico | `/membri/[id]` | Radar chart a 5 assi del profilo del giocatore. |
@@ -211,6 +204,8 @@
 | Card Giocatore Presenza | `/allenamento/[id]` | Card per ogni giocatore con pulsanti Presente / Ritardo / Assente. |
 | Card Talento Scout | `/scout` | Card con nome, ruolo, squadra, note e etichette colorate. |
 | Card Vuota (empty state) | `/scout` | Mostrata quando nessun talento corrisponde ai filtri. |
+| Card Advanced Stats | `/statistiche` | Card "Muro Difensivo", "Efficiency Index", "Risolutore" e "Amuleto Squadra". |
+| Card Muro Difensivo | `/statistiche` | Statistica aggregata coppie/tria difensivi (selezionabile 3 o 4 difensori). |
 
 ---
 
@@ -231,7 +226,7 @@
 
 | Componente / Page | Stato | Messaggio | File |
 |---|---|---|---|
-| `DashboardPage` | Nessuna partita | Icona Calendar + "Nessuna partita" | `src/app/calendario/page.tsx` |
+| `HomePage` | Nessuna partita | Testo semplice "Nessuna gara in programma" | `src/app/page.tsx` |
 | `MatchDetailPage` | Errore caricamento | Icona AlertCircle rosso + "Dettagli non disponibili" + pulsante Riprova | `src/app/calendario/[id]/page.tsx` |
 | `PlayerDetailPage` | Giocatore non trovato | Icona User + "Non Trovato" + pulsante torna alla Rosa | `src/app/membri/[id]/page.tsx` |
 | `TrainingDetailPage` | Sessione non trovata | Testo semplice "Sessione non trovata" | `src/app/allenamento/[id]/page.tsx` |
@@ -254,9 +249,8 @@
 
 | Pagina | File | Priorità | Note |
 |---|---|---|---|
-| Splash / Home | `src/app/page.tsx` | 🟢 | **Risolto** — ora usa `bg-background`, `text-foreground` e gradienti adattivi. |
+| Dashboard | `src/app/page.tsx` | 🟢 | **Risolto** — ora usa `bg-background`, `bg-card` e token semantici. |
 | Error Boundary | `src/app/error.tsx` | 🟢 | **Risolto** — ora usa token semantici `bg-background`, `text-foreground`, `text-primary`. |
-| Dashboard / Calendario | `src/app/calendario/page.tsx` | 🟢 | Usa `dark:` prefix su tutti i token significativi. |
 | Dettaglio Partita | `src/app/calendario/[id]/page.tsx` | 🟢 | Token semantici + `dark:` prefix. |
 | Rosa / Membri | `src/app/membri/page.tsx` | 🟢 | Colori per ruolo usano palette adattiva (amber/slate/blue/red con dark: variant). |
 | Dettaglio Giocatore | `src/app/membri/[id]/page.tsx` | 🟢 | **Risolto** — ora usa `useThemeStore` + colori dinamici per grafici. |
@@ -331,7 +325,7 @@
 | 5 | `GoalsIntervalChart` | Risolto | Implementati colori dinamici via `useThemeStore` |
 | 6 | `RadarChart` (PlayerDetail) | Risolto | Implementati colori dinamici via `useThemeStore` |
 | 7 | `BarChartComponent` (PlayerDetail) | Risolto | Implementati colori dinamici via `useThemeStore` |
-| 8 | `page.tsx` (Splash) | Risolto | Sostituiti colori hardcoded con token semantici |
+| 8 | `page.tsx` (Dashboard) | Risolto | Sostituiti colori hardcoded con token semantici |
 
 ---
 
@@ -340,7 +334,8 @@
 | File | Componente | Descrizione |
 |---|---|---|
 | `layout/app-header.tsx` | `AppHeader` | Header superiore dell'app con logo e azioni contestuali. |
-| `layout/bottom-nav.tsx` | `BottomNav` | Navigazione inferiore a tab (Calendario · Membri · Allenamento · Scout · Altro). |
+| `layout/bottom-nav.tsx` | `BottomNav` | Navigazione inferiore a tab (Dashboard · Membri · Allenamento · Scout · Altro). |
 | `layout/page-header.tsx` | `PageHeader` | Header di pagina riutilizzabile con titolo e slot per azioni. |
 | `layout/auth-guard.tsx` | `AuthGuard` | HOC che protegge le route richiedendo l'autenticazione. |
 | `layout/theme-provider.tsx` | `ThemeProvider` | Provider per il tema dark/light. |
+| `layout/guide-dialog.tsx` | `GuideDialog` | Dialog di onboarding e guida rapida alle funzionalità dell'app. |

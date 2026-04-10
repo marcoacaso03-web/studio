@@ -17,7 +17,10 @@ import { PlayerSchema } from '@/lib/schemas';
 
 export type PlayerCreateData = {
     name: string;
+    firstName: string;
+    lastName: string;
     role: Role;
+    secondaryRoles?: Role[];
     seasonId: string;
     userId: string;
 }
@@ -30,7 +33,16 @@ export const playerRepository = {
     const q = query(playersRef, where('teamOwnerId', '==', userId));
     const snapshot = await getDocs(q);
     const players = snapshot.docs.map(doc => {
-      const data = { ...doc.data(), id: doc.id };
+      const pData = doc.data();
+      
+      // Fallback per dati esistenti senza firstName/lastName
+      if (!pData.firstName || !pData.lastName) {
+        const parts = (pData.name || "").split(" ");
+        pData.firstName = parts.shift() || "";
+        pData.lastName = parts.join(" ") || pData.firstName;
+      }
+
+      const data = { ...pData, id: doc.id };
       const parsed = PlayerSchema.safeParse(data);
       if (!parsed.success) {
         console.error("Schema validation failed for Player:", parsed.error);
@@ -38,7 +50,7 @@ export const playerRepository = {
       }
       return parsed.data;
     });
-    return players.sort((a, b) => a.name.localeCompare(b.name));
+    return players.sort((a, b) => a.lastName.localeCompare(b.lastName));
   },
 
   async getById(id: string, seasonId: string) {
@@ -62,7 +74,10 @@ export const playerRepository = {
       teamId: data.seasonId,
       seasonId: data.seasonId,
       name: data.name.toUpperCase(),
+      firstName: data.firstName.toUpperCase(),
+      lastName: data.lastName.toUpperCase(),
       role: data.role,
+      secondaryRoles: data.secondaryRoles || [],
       stats: { appearances: 0, goals: 0, assists: 0, avgMinutes: 0 },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -86,7 +101,10 @@ export const playerRepository = {
         teamId: seasonId,
         seasonId,
         name: p.name.toUpperCase(),
+        firstName: (p as any).firstName?.toUpperCase() || p.name.split(" ")[0].toUpperCase(),
+        lastName: (p as any).lastName?.toUpperCase() || p.name.split(" ").slice(1).join(" ").toUpperCase() || p.name.toUpperCase(),
         role: p.role,
+        secondaryRoles: [],
         stats: { appearances: 0, goals: 0, assists: 0, avgMinutes: 0 },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()

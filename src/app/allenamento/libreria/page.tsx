@@ -11,6 +11,7 @@ import { useExerciseStore } from "@/store/useExerciseStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { ExerciseCard } from "@/components/allenamento/exercise-card";
 import { ExerciseDialog } from "../../../components/allenamento/exercise-dialog";
+import { ExerciseViewDialog } from "../../../components/allenamento/exercise-view-dialog";
 import { ExerciseFilterDialog } from "../../../components/allenamento/exercise-filter-dialog";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ export default function ExerciseLibraryPage() {
   const [visibilityFilter, setVisibilityFilter] = useState<'all' | 'private' | 'global'>('all');
   const [playerCountFilter, setPlayerCountFilter] = useState<string[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isViewOpen, setIsViewOpen] = useState(false);
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<any>(null);
 
@@ -34,7 +36,8 @@ export default function ExerciseLibraryPage() {
   const filteredExercises = useMemo(() => {
     return exercises.filter(ex => {
       const matchesSearch = ex.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          ex.description.toLowerCase().includes(searchTerm.toLowerCase());
+                          ex.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (ex.objectives?.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesFocus = !focusFilter || ex.focus.includes(focusFilter);
       const matchesVisibility = visibilityFilter === 'all' || ex.visibility === visibilityFilter;
       const matchesPlayerCount = playerCountFilter.length === 0 || 
@@ -54,6 +57,11 @@ export default function ExerciseLibraryPage() {
   const handleEdit = (ex: any) => {
     setSelectedExercise(ex);
     setIsDialogOpen(true);
+  };
+
+  const handleView = (ex: any) => {
+    setSelectedExercise(ex);
+    setIsViewOpen(true);
   };
 
   const handleAdd = () => {
@@ -154,6 +162,7 @@ export default function ExerciseLibraryPage() {
               exercise={ex} 
               isOwner={ex.userId === user?.id}
               onEdit={handleEdit}
+              onView={handleView}
               onDelete={deleteExercise}
             />
           ))}
@@ -163,6 +172,12 @@ export default function ExerciseLibraryPage() {
       <ExerciseDialog 
         open={isDialogOpen} 
         onOpenChange={setIsDialogOpen} 
+        exercise={selectedExercise}
+      />
+
+      <ExerciseViewDialog 
+        open={isViewOpen}
+        onOpenChange={setIsViewOpen}
         exercise={selectedExercise}
       />
     </div>

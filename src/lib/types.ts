@@ -29,7 +29,10 @@ export type Player = {
   teamId: string;
   seasonId: string;
   name: string;
+  firstName: string;
+  lastName: string;
   role: Role;
+  secondaryRoles?: Role[];
   stats: PlayerStats;
   createdAt?: string;
   updatedAt?: string;
@@ -212,6 +215,7 @@ export interface Exercise {
   ownerName: string;
   name: string;
   description: string;
+  objectives?: string;
   focus: string[];
   visibility: 'private' | 'global';
   media: ExerciseMedia[];

@@ -19,13 +19,14 @@ interface ExerciseDialogProps {
 }
 
 const DEFAULT_FOCUSES = ['Tecnico', 'Tattico', 'Fisico', 'Portieri', 'Partita', 'Recupero'];
-const COMMON_PLAYER_COUNTS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12+'];
+const COMMON_PLAYER_COUNTS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '22+'];
 
 export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogProps) {
   const { addExercise, updateExercise, loading } = useExerciseStore();
   
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [objectives, setObjectives] = useState("");
   const [focus, setFocus] = useState<string[]>([]);
   const [visibility, setVisibility] = useState<'private' | 'global'>('private');
   const [playerCount, setPlayerCount] = useState<string[]>([]);
@@ -37,6 +38,7 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
     if (exercise) {
       setName(exercise.name);
       setDescription(exercise.description);
+      setObjectives(exercise.objectives || "");
       setFocus(exercise.focus);
       setVisibility(exercise.visibility);
       setPlayerCount(exercise.playerCount || []);
@@ -44,6 +46,7 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
     } else {
       setName("");
       setDescription("");
+      setObjectives("");
       setFocus([]);
       setVisibility('private');
       setPlayerCount([]);
@@ -75,6 +78,7 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
     const data = {
       name,
       description,
+      objectives,
       focus,
       visibility,
       playerCount: playerCount.length > 0 ? playerCount : ['Qualsiasi'],
@@ -123,12 +127,24 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
                   value={name}
                   onChange={e => setName(e.target.value)}
                 />
-                <Textarea 
-                  placeholder="Obiettivi e svolgimento..." 
-                  className="min-h-[100px] rounded-xl bg-background dark:bg-black/40 border-border dark:border-brand-green/10 focus-visible:ring-primary dark:focus-visible:ring-brand-green text-xs font-medium resize-none"
-                  value={description}
-                  onChange={e => setDescription(e.target.value)}
-                />
+                <div className="space-y-1">
+                  <Label className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground/40 ml-1">Obiettivi</Label>
+                  <Textarea 
+                    placeholder="Quali sono gli obiettivi tecnici/tattici?" 
+                    className="min-h-[60px] rounded-xl bg-background dark:bg-black/40 border-border dark:border-brand-green/10 focus-visible:ring-primary dark:focus-visible:ring-brand-green text-xs font-medium resize-none px-3 py-2"
+                    value={objectives}
+                    onChange={e => setObjectives(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground/40 ml-1">Svolgimento</Label>
+                  <Textarea 
+                    placeholder="Descrivi come si svolge l'esercizio..." 
+                    className="min-h-[100px] rounded-xl bg-background dark:bg-black/40 border-border dark:border-brand-green/10 focus-visible:ring-primary dark:focus-visible:ring-brand-green text-xs font-medium resize-none px-3 py-2"
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
+                  />
+                </div>
               </div>
 
               <div className="space-y-3">
@@ -206,27 +222,42 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
                   <ImageIcon className="h-3.5 w-3.5 text-primary dark:text-brand-green" />
                   <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Risorse Multimediali</Label>
                 </div>
-                <div className="flex gap-2">
-                  <Select value={newMediaType} onValueChange={(v: any) => setNewMediaType(v)}>
-                    <SelectTrigger className="w-[100px] h-10 rounded-xl bg-background dark:bg-black/20 border-border dark:border-brand-green/10 text-[9px] font-black uppercase">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-card dark:bg-zinc-950 border-border dark:border-brand-green/20">
-                      <SelectItem value="image" className="text-[10px] font-black uppercase">Immagine</SelectItem>
-                      <SelectItem value="video" className="text-[10px] font-black uppercase">Video (YT/Vim)</SelectItem>
-                      <SelectItem value="link" className="text-[10px] font-black uppercase">Link Est.</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Input 
-                    placeholder="URL risorsa..." 
-                    className="flex-1 h-10 rounded-xl bg-background dark:bg-black/40 border-border dark:border-brand-green/10 text-xs"
-                    value={newMediaUrl}
-                    onChange={e => setNewMediaUrl(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && addMedia()}
-                  />
-                  <Button onClick={addMedia} variant="secondary" size="icon" className="h-10 w-10 rounded-xl bg-primary dark:bg-brand-green text-white dark:text-black">
-                    <Plus className="h-4 w-4" />
-                  </Button>
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <Select value={newMediaType} onValueChange={(v: any) => setNewMediaType(v)}>
+                      <SelectTrigger className="w-[110px] h-10 rounded-xl bg-background dark:bg-black/20 border-border dark:border-brand-green/10 text-[9px] font-black uppercase">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-card dark:bg-zinc-950 border-border dark:border-brand-green/20">
+                        <SelectItem value="image" className="text-[10px] font-black uppercase">Immagine</SelectItem>
+                        <SelectItem value="video" className="text-[10px] font-black uppercase">Video (YT/Vim)</SelectItem>
+                        <SelectItem value="link" className="text-[10px] font-black uppercase">Link Est.</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input 
+                      placeholder="URL risorsa..." 
+                      className="flex-1 h-10 rounded-xl bg-background dark:bg-black/40 border-border dark:border-brand-green/10 text-xs"
+                      value={newMediaUrl}
+                      onChange={e => setNewMediaUrl(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && addMedia()}
+                    />
+                    <Button onClick={addMedia} variant="secondary" size="icon" className="h-10 w-10 rounded-xl bg-primary dark:bg-brand-green text-white dark:text-black">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  {newMediaType === 'image' && newMediaUrl && (
+                    <div className="h-20 w-full rounded-xl border border-dashed border-border dark:border-brand-green/30 bg-muted/5 flex items-center justify-center overflow-hidden">
+                      <img 
+                        src={newMediaUrl} 
+                        alt="Live Preview" 
+                        className="h-full w-full object-contain"
+                        onError={(e) => {
+                          (e.target as any).src = 'https://placehold.co/300x100?text=Anteprima+non+disponibile';
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-1.5 max-h-[260px] overflow-y-auto px-1 scrollbar-hide py-1 border border-border/40 dark:border-brand-green/5 rounded-2xl bg-black/5 dark:bg-black/20">
@@ -240,10 +271,18 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
                       <div key={i} className="flex items-center justify-between p-2 rounded-xl bg-background dark:bg-zinc-900 border border-border dark:border-brand-green/10 group/item hover:border-primary/30 dark:hover:border-brand-green/30 transition-all">
                         <div className="flex items-center gap-3 overflow-hidden">
                           <div className={cn(
-                            "h-7 w-7 rounded-lg flex items-center justify-center shrink-0",
-                            item.type === 'image' ? "bg-blue-500/10 text-blue-500" : item.type === 'video' ? "bg-rose-500/10 text-rose-500" : "bg-amber-500/10 text-amber-500"
+                            "h-7 w-7 rounded-lg flex items-center justify-center shrink-0 overflow-hidden border border-border/20",
+                            item.type === 'image' ? "bg-blue-500/10" : item.type === 'video' ? "bg-rose-500/10 text-rose-500" : "bg-amber-500/10 text-amber-500"
                           )}>
-                            {item.type === 'image' ? <ImageIcon className="h-3.5 w-3.5" /> : item.type === 'video' ? <Video className="h-3.5 w-3.5" /> : <LinkIcon className="h-3.5 w-3.5" />}
+                            {item.type === 'image' ? (
+                              <img src={item.url} alt="preview" className="h-full w-full object-cover" onError={(e) => {
+                                (e.target as any).src = 'https://placehold.co/100x100?text=No+Img';
+                              }} />
+                            ) : item.type === 'video' ? (
+                              <Video className="h-3.5 w-3.5" />
+                            ) : (
+                              <LinkIcon className="h-3.5 w-3.5" />
+                            )}
                           </div>
                           <span className="text-[10px] font-medium text-foreground/70 truncate">{item.url}</span>
                         </div>

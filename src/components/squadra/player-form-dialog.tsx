@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -14,6 +15,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -37,13 +39,17 @@ const formSchema = z.object({
   firstName: z.string().min(2, { message: "Il nome è richiesto." }),
   lastName: z.string().min(2, { message: "Il cognome è richiesto." }),
   role: z.enum(ROLES, { required_error: "Il ruolo è richiesto."}),
+  secondaryRoles: z.array(z.enum(ROLES)).default([]),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 type PlayerSaveData = {
   name: string;
+  firstName: string;
+  lastName: string;
   role: Role;
+  secondaryRoles: Role[];
 };
 
 interface PlayerFormDialogProps {
@@ -60,8 +66,9 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
       firstName: "",
       lastName: "",
       role: "Centrocampista",
+      secondaryRoles: [],
     },
-  });
+});
 
   React.useEffect(() => {
     if (open) {
@@ -73,12 +80,14 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
               firstName,
               lastName,
               role: player.role,
+              secondaryRoles: player.secondaryRoles || [],
           });
       } else {
           form.reset({
               firstName: "",
               lastName: "",
-              role: "Centrocampista"
+              role: "Centrocampista",
+              secondaryRoles: [],
           });
       }
     }
@@ -87,7 +96,10 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
   function onSubmit(data: FormValues) {
     const saveData: PlayerSaveData = {
       name: `${data.firstName} ${data.lastName}`.trim(),
-      role: data.role
+      firstName: data.firstName,
+      lastName: data.lastName,
+      role: data.role,
+      secondaryRoles: data.secondaryRoles as Role[]
     };
     onSave(saveData, player?.id);
     onOpenChange(false);
@@ -165,6 +177,63 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
                     </Select>
                     <FormMessage className="text-[9px] font-bold uppercase" />
                   </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="secondaryRoles"
+              render={() => (
+                <FormItem className="space-y-3 p-4 bg-muted/30 dark:bg-white/5 rounded-2xl border border-divider dark:border-white/5">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/80 ml-1">Ruoli Secondari</FormLabel>
+                    <FormDescription className="text-[8px] font-bold uppercase text-muted-foreground/40 ml-1">
+                      Seleziona altri ruoli in cui il giocatore può adattarsi.
+                    </FormDescription>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 pt-1">
+                    {ROLES.map((role) => {
+                      // Non mostrare il ruolo primario selezionato
+                      if (role === form.watch('role')) return null;
+                      
+                      return (
+                        <FormField
+                          key={role}
+                          control={form.control}
+                          name="secondaryRoles"
+                          render={({ field }) => {
+                            return (
+                              <FormItem
+                                key={role}
+                                className="flex flex-row items-center space-x-2 space-y-0"
+                              >
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(role)}
+                                    onCheckedChange={(checked) => {
+                                      return checked
+                                        ? field.onChange([...field.value, role])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                              (value) => value !== role
+                                            )
+                                          )
+                                    }}
+                                    className="border-primary/30 dark:border-brand-green/30 data-[state=checked]:bg-primary dark:data-[state=checked]:bg-brand-green data-[state=checked]:text-white dark:data-[state=checked]:text-black"
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-[10px] font-black uppercase tracking-tight text-foreground dark:text-white/80 cursor-pointer">
+                                  {role}
+                                </FormLabel>
+                              </FormItem>
+                            )
+                          }}
+                        />
+                      )
+                    })}
+                  </div>
+                  <FormMessage className="text-[9px] font-bold uppercase" />
+                </FormItem>
               )}
             />
 
