@@ -18,6 +18,8 @@ interface TeamRecord {
 interface PlayerLeaderboardEntry {
     playerId: string;
     name: string;
+    firstName?: string;
+    lastName?: string;
     stats: {
         appearances: number;
         goals: number;
