@@ -93,6 +93,26 @@ export function MatchEventsTab() {
     setIsEventDialogOpen(true);
   };
 
+  const formatDisplayMinute = (minute: number | null, period: string) => {
+    if (minute === null) return "";
+    
+    const totalDuration = match?.duration || 90;
+    const halfTime = Math.floor(totalDuration / 2);
+    
+    switch(period) {
+      case '1T':
+        return minute > halfTime ? `${halfTime}+${minute-halfTime}'` : `${minute}'`;
+      case '2T':
+        return minute > halfTime ? `${totalDuration}+${minute-halfTime}'` : `${halfTime + minute}'`;
+      case '1TS':
+        return minute > 15 ? `${totalDuration}+15+${minute-15}'` : `${totalDuration + minute}'`;
+      case '2TS':
+        return minute > 15 ? `${totalDuration}+30+${minute-15}'` : `${totalDuration + 15 + minute}'`;
+      default:
+        return `${minute}'`;
+    }
+  };
+
   return (
     <div className="space-y-6 relative">
       <Card className="bg-card dark:bg-black/40 border border-border dark:border-brand-green/30 rounded-3xl shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.08)] overflow-hidden">
@@ -120,20 +140,35 @@ export function MatchEventsTab() {
             <div className="relative pt-4">
               <div className="absolute left-1/2 top-4 bottom-0 w-px bg-border dark:bg-brand-green/20 -translate-x-1/2 before:content-[''] before:absolute before:top-0 before:left-1/2 before:-translate-x-1/2 before:w-2 before:h-2 before:rounded-full before:bg-brand-green/30" />
 
-              <div className="space-y-12">
+              <div className="space-y-6">
+                {/* Cronaca Temporale */}
                 {timedEvents.length > 0 && (
-                  <div className="space-y-8">
-                    {timedEvents.map((event) => (
-                      <TimelineEvent 
-                        key={event.id} 
-                        event={event} 
-                        match={match} 
-                        getEventIcon={getEventIcon} 
-                        getEventLabel={getEventLabel} 
-                        isHome={event.team === 'home'}
-                        onOptionsClick={setSelectedEventOptions}
-                      />
-                    ))}
+                  <div className="space-y-3">
+                    {timedEvents.map((event, index) => {
+                      const isTransitionTo2T = event.period === '2T' && timedEvents[index-1]?.period === '1T';
+                      
+                      return (
+                        <div key={event.id} className="space-y-3">
+                          {isTransitionTo2T && (
+                            <div className="relative flex items-center justify-center py-4">
+                                <div className="absolute left-0 right-0 h-px border-t border-dashed border-border dark:border-brand-green/20"></div>
+                                <span className="relative bg-card dark:bg-[#060a02] px-3 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 z-10">
+                                    Fine 1° Tempo
+                                </span>
+                            </div>
+                          )}
+                          <TimelineEvent 
+                            event={event} 
+                            match={match} 
+                            getEventIcon={getEventIcon} 
+                            getEventLabel={getEventLabel} 
+                            isHome={event.team === 'home'}
+                            onOptionsClick={setSelectedEventOptions}
+                            formatMinute={formatDisplayMinute}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -153,6 +188,7 @@ export function MatchEventsTab() {
                         getEventLabel={getEventLabel} 
                         isHome={event.team === 'home'}
                         onOptionsClick={setSelectedEventOptions}
+                        formatMinute={formatDisplayMinute}
                       />
                     ))}
                   </div>
@@ -186,7 +222,7 @@ export function MatchEventsTab() {
   );
 }
 
-function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOptionsClick }: any) {
+function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOptionsClick, formatMinute }: any) {
   const isPitchManTeam = match?.isHome ? isHome : !isHome;
   const mainName = event.playerName || (isPitchManTeam ? 'GIOCATORE' : (match?.opponent || 'AVVERSARIO'));
   const alignLeft = isHome;
@@ -203,7 +239,7 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
                 "absolute whitespace-nowrap bg-muted/80 dark:bg-black/80 px-2 py-0.5 rounded-full border border-border dark:border-brand-green/10 text-[9px] font-black tabular-nums shadow-sm z-20",
                 alignLeft ? "left-full ml-4" : "right-full mr-4"
             )}>
-                {event.minute}&apos;{event.period}
+                {formatMinute(event.minute, event.period)}
             </div>
         )}
 
@@ -216,7 +252,7 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
       </div>
 
       <div className={cn(
-        "flex-1 px-4 sm:px-8",
+        "flex-1 px-10 sm:px-16",
         alignLeft ? "text-right" : "text-left"
       )}>
         <div className={cn(
