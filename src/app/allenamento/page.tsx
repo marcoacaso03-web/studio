@@ -40,6 +40,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { TrainingStatsDialog } from "@/components/allenamento/training-stats-dialog";
+import { TrainingListDialog } from "@/components/allenamento/training-list-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import { parseError, missingSeasonError } from "@/lib/error-utils";
 
@@ -56,6 +57,7 @@ export default function AllenamentoPage() {
   const [genStart, setGenStart] = useState(format(new Date(), "yyyy-MM-dd"));
   const [genEnd, setGenEnd] = useState(format(addWeeks(new Date(), 4), "yyyy-MM-dd"));
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const [focusFilter, setFocusFilter] = useState<string | null>(null);
 
   // States for deletions
@@ -171,41 +173,16 @@ export default function AllenamentoPage() {
               <PlusCircle className="h-6 w-6 text-primary dark:text-brand-green" />
             </Button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    "rounded-xl h-10 w-10 transition-all",
-                    focusFilter ? "bg-primary/10 dark:bg-brand-green/10 shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.2)]" : "hover:bg-card/30"
-                  )}
-                >
-                  <Filter className="h-6 w-6 text-primary dark:text-brand-green" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 rounded-2xl bg-card dark:bg-background border-border dark:border-brand-green/30 backdrop-blur-xl text-foreground dark:text-white p-2">
-                <div className="px-2 py-1.5 mb-1 border-b border-border dark:border-white/5">
-                  <span className="text-[10px] font-black uppercase text-muted-foreground/50 tracking-widest">Filtra per Focus</span>
-                </div>
-                <DropdownMenuItem
-                  className={cn("text-[10px] font-bold uppercase rounded-xl mb-1 focus:bg-primary/20 dark:focus:bg-brand-green/20", !focusFilter && "bg-primary/10 dark:bg-brand-green/10")}
-                  onClick={() => setFocusFilter(null)}
-                >
-                  Mostra Tutti
-                </DropdownMenuItem>
-                {uniqueFocuses.map(f => (
-                  <DropdownMenuItem
-                    key={f}
-                    className={cn("text-[10px] font-bold uppercase rounded-xl mb-1 focus:bg-primary/20 dark:focus:bg-brand-green/20", focusFilter === f && "bg-primary/10 text-primary dark:bg-brand-green/10 dark:text-brand-green")}
-                    onClick={() => setFocusFilter(f)}
-                  >
-                    <Target className="h-3 w-3 mr-2 opacity-50" />
-                    {f}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "rounded-xl h-10 w-10 transition-all hover:bg-card/30"
+              )}
+              onClick={() => setIsArchiveOpen(true)}
+            >
+              <Filter className="h-6 w-6 text-primary dark:text-brand-green" />
+            </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -254,9 +231,12 @@ export default function AllenamentoPage() {
 
         <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
           <PopoverTrigger asChild>
-            <Button variant="ghost" className="flex flex-col items-center h-auto hover:bg-transparent px-2">
-              <span className="text-[10px] font-black uppercase text-muted-foreground/50 tracking-widest leading-tight">Settimana del</span>
-              <span className="text-sm font-black uppercase text-foreground tracking-tight">
+            <Button variant="ghost" className="flex flex-col items-center h-auto hover:bg-transparent px-2 transition-opacity active:opacity-70">
+              <div className="flex items-center gap-1.5 translate-y-0.5">
+                <CalendarRange className="h-3 w-3 text-primary/40 dark:text-brand-green/40" />
+                <span className="text-[10px] font-black uppercase text-muted-foreground/50 tracking-widest leading-tight">Settimana del</span>
+              </div>
+              <span className="text-sm font-black uppercase text-foreground tracking-tight mt-0.5">
                 {format(currentWeekStart, "dd MMM yyyy", { locale: it })}
                 <span className="text-muted-foreground mx-1.5 opacity-50">-</span>
                 {format(addDays(currentWeekStart, 6), "dd MMM yyyy", { locale: it })}
@@ -420,6 +400,12 @@ export default function AllenamentoPage() {
         open={isStatsOpen}
         onOpenChange={setIsStatsOpen}
         currentWeekStart={currentWeekStart}
+      />
+
+      <TrainingListDialog 
+        open={isArchiveOpen}
+        onOpenChange={setIsArchiveOpen}
+        sessions={sessions}
       />
 
       <AlertDialog open={!!sessionToDelete} onOpenChange={(open) => !open && setSessionToDelete(null)}>

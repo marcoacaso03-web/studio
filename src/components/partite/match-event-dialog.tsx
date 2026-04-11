@@ -296,7 +296,13 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
               <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Tipo Goal</span>
               <Select 
                 value={goalType} 
-                onValueChange={(v) => setGoalType(v as GoalType)}
+                onValueChange={(v) => {
+                  setGoalType(v as GoalType);
+                  if (v === 'rigore') {
+                    setAssistPlayerId("");
+                    setAssistPlayerName("");
+                  }
+                }}
                 open={openSelect === 'goalDetail'}
                 onOpenChange={(open) => setOpenSelect(open ? 'goalDetail' : null)}
               >
@@ -338,29 +344,31 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                   <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} />
                 )}
               </div>
-              <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Assist</span>
-                {isPitchManSide ? (
-                  <Select
-                    value={assistPlayerId}
-                    onValueChange={setAssistPlayerId}
-                    open={openSelect === 'assist'}
-                    onOpenChange={(open) => setOpenSelect(open ? 'assist' : null)}
-                  >
-                    <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
-                      <SelectValue placeholder="OPZIONALE" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
-                      <SelectItem value="none" className="text-[10px] font-black uppercase">-- nessuno --</SelectItem>
-                      {playersStatus.onPitch.filter(p => p.id !== playerId).map(p => (
-                        <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{p.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8" placeholder="Nome" value={assistPlayerName} onChange={e => setAssistPlayerName(e.target.value)} />
-                )}
-              </div>
+              {goalType !== 'rigore' && (
+                <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Assist</span>
+                  {isPitchManSide ? (
+                    <Select
+                      value={assistPlayerId}
+                      onValueChange={setAssistPlayerId}
+                      open={openSelect === 'assist'}
+                      onOpenChange={(open) => setOpenSelect(open ? 'assist' : null)}
+                    >
+                      <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
+                        <SelectValue placeholder="OPZIONALE" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
+                        <SelectItem value="none" className="text-[10px] font-black uppercase">-- nessuno --</SelectItem>
+                        {playersStatus.onPitch.filter(p => p.id !== playerId).map(p => (
+                          <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{p.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8" placeholder="Nome" value={assistPlayerName} onChange={e => setAssistPlayerName(e.target.value)} />
+                  )}
+                </div>
+              )}
             </div>
           )}
 

@@ -75,14 +75,17 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
         }
       });
 
+      const percentage = sessions.length > 0 ? Math.round((totalPresent / sessions.length) * 100) : 0;
+
       return {
         id: player.id,
         name: player.name,
         totalPresent,
         weeklyPresent,
-        weeklyLate
+        weeklyLate,
+        percentage
       };
-    }).sort((a, b) => b.totalPresent - a.totalPresent);
+    }).sort((a, b) => b.percentage - a.percentage);
   }, [players, allAttendance, sessions, currentWeekStart]);
 
   return (
@@ -118,7 +121,7 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
                       <TableHead className="text-[9px] font-black uppercase tracking-widest text-primary dark:text-brand-green px-3">Giocatore</TableHead>
                       <TableHead className="text-[9px] font-black uppercase tracking-widest text-center text-primary dark:text-brand-green px-1">Sett (P)</TableHead>
                       <TableHead className="text-[9px] font-black uppercase tracking-widest text-center text-primary dark:text-brand-green px-1">Sett (R)</TableHead>
-                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-center px-1 text-primary dark:text-brand-green">Totale</TableHead>
+                      <TableHead className="text-[9px] font-black uppercase tracking-widest text-center px-1 text-primary dark:text-brand-green">Tot%</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -141,8 +144,8 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
                         </TableCell>
                         <TableCell className="text-center px-1 py-0">
                           <div className="bg-primary/10 dark:bg-card border border-primary/20 dark:border-brand-green/30 px-2 py-1 rounded-lg inline-block min-w-[32px]">
-                            <span className="text-sm font-black text-primary dark:text-brand-green tabular-nums">
-                              {row.totalPresent}
+                            <span className="text-xs font-black text-primary dark:text-brand-green tabular-nums">
+                              {row.percentage}%
                             </span>
                           </div>
                         </TableCell>
@@ -155,14 +158,17 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
           )}
         </div>
 
-        <div className="p-4 bg-muted/30 dark:bg-black border-t border-border dark:border-brand-green/20 flex items-center justify-center gap-6 transition-colors">
-          <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-primary dark:bg-brand-green shadow-sm dark:shadow-[0_0_6px_rgba(172,229,4,0.5)]" />
-            <span className="text-[8px] font-black text-muted-foreground dark:text-white/40 uppercase">Sett (P): Presenze Settimana</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-yellow-500" />
-            <span className="text-[8px] font-black text-muted-foreground dark:text-white/40 uppercase">Sett (R): Ritardi Settimana</span>
+        <div className="p-4 bg-muted/30 dark:bg-black border-t border-border dark:border-brand-green/20 flex flex-col items-center gap-2 transition-colors shrink-0">
+          <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40">Dati riferiti alla settimana attuale</span>
+          <div className="flex items-center justify-center gap-6">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-primary dark:bg-brand-green shadow-sm dark:shadow-[0_0_6px_rgba(172,229,4,0.5)]" />
+              <span className="text-[8px] font-black text-muted-foreground dark:text-white/40 uppercase">Sett (P): Presenze</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-yellow-500" />
+              <span className="text-[8px] font-black text-muted-foreground dark:text-white/40 uppercase">Sett (R): Ritardi</span>
+            </div>
           </div>
         </div>
       </DialogContent>

@@ -128,6 +128,15 @@ export const seasonRepository = {
         return await writeBatch(db).delete(docRef).commit();
     },
 
+    async rename(id: string, newName: string) {
+        const db = getFirestore();
+        const docRef = doc(db, 'teams', id);
+        return await updateDoc(docRef, { 
+            name: newName, 
+            updatedAt: new Date().toISOString() 
+        });
+    },
+
     async ensureDefaultSeason(userId: string) {
         if (!userId) return undefined;
         

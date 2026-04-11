@@ -47,7 +47,7 @@ export default function HomePage() {
 
   useEffect(() => {
     setMounted(true);
-    
+
     // Check if we navigated back to this page with a request to open the calendar
     if (typeof window !== 'undefined' && window.location.search.includes('dialog=calendar')) {
       setIsFullCalendarOpen(true);
@@ -146,10 +146,10 @@ export default function HomePage() {
     return (
       <div className="min-h-screen flex flex-col">
         <PageHeader title="Dashboard" />
-        <ErrorState 
-          error={parseError(seasonsError)} 
-          onRetry={() => window.location.reload()} 
-          fullScreen 
+        <ErrorState
+          error={parseError(seasonsError)}
+          onRetry={() => window.location.reload()}
+          fullScreen
         />
       </div>
     );
@@ -158,14 +158,23 @@ export default function HomePage() {
   return (
     <div className="space-y-4 pb-24">
       {/* 1. Header */}
-      <div className="space-y-2">
-        <PageHeader title={`Benvenuto, Mister ${userName}`} />
+      <div className="-mt-2">
+        <PageHeader
+          title={
+            <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
+              <span>Benvenuto, Mister {userName}</span>
+              <span className="hidden sm:inline text-muted-foreground/30 font-light">|</span>
+              <span className="text-sm sm:text-lg font-bold text-primary dark:text-white uppercase tracking-widest">{activeSeason?.name}</span>
+            </div>
+          }
+          className="mb-2 md:mb-4"
+        />
       </div>
 
       {/* 2. Prossimo Impegno */}
       <div className="flex items-center justify-between mt-4 mb-2">
         <h3 className="text-sm font-black uppercase tracking-widest text-foreground dark:text-white">Prossimo Impegno</h3>
-        <Button variant="ghost" size="sm" onClick={() => setIsFullCalendarOpen(true)} className="text-[10px] font-black uppercase text-primary dark:text-brand-green hover:bg-primary/10 dark:hover:bg-brand-green/10">
+        <Button variant="ghost" size="sm" onClick={() => setIsFullCalendarOpen(true)} className="text-[10px] font-black uppercase text-primary dark:text-white hover:bg-primary/10 dark:hover:bg-brand-green/10">
           Vedi Calendario <ArrowRight className="ml-1 h-3 w-3" />
         </Button>
       </div>

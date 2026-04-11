@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, RefreshCw, LogOut, User, Trash2, Clock, Dumbbell, Loader2, Bell, Shield, ChevronRight, Shirt, Share2, Copy } from 'lucide-react';
+import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, RefreshCw, LogOut, User, Trash2, Clock, Dumbbell, Loader2, Bell, Shield, ChevronRight, Shirt, Share2, Copy, Pencil } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { playerRepository } from '@/lib/repositories/player-repository';
 import { matchRepository } from '@/lib/repositories/match-repository';
@@ -46,6 +46,9 @@ export default function AltroPage() {
   const [isResetting, setIsResetting] = useState(false);
   const [newSeasonName, setNewSeasonName] = useState('');
   const [seasonToDelete, setSeasonToDelete] = useState<{ id: string, name: string } | null>(null);
+  const [seasonToRename, setSeasonToRename] = useState<{ id: string, name: string } | null>(null);
+  const [renamedName, setRenamedName] = useState('');
+  const [isRenaming, setIsRenaming] = useState(false);
 
   // Dialog states
   const [isAccountOpen, setIsAccountOpen] = useState(false);
@@ -59,7 +62,7 @@ export default function AltroPage() {
   const { toast } = useToast();
   const router = useRouter();
   const { theme, toggleTheme } = useThemeStore();
-  const { seasons, activeSeason, fetchAll: fetchSeasons, addSeason, setActiveSeason, removeSeason, joinSeason } = useSeasonsStore();
+  const { seasons, activeSeason, fetchAll: fetchSeasons, addSeason, setActiveSeason, removeSeason, renameSeason, joinSeason } = useSeasonsStore();
   const { defaultDuration, setDefaultDuration, sessionsPerWeek, setSessionsPerWeek, trainingDays, setTrainingDays, autoSetPresenceOnGenerate, setAutoSetPresenceOnGenerate } = useSettingsStore();
   const { user, logout } = useAuthStore();
   const [mounted, setMounted] = useState(false);
@@ -73,6 +76,21 @@ export default function AltroPage() {
     if (!newSeasonName.trim()) return;
     await addSeason(newSeasonName);
     setNewSeasonName('');
+  };
+
+  const handleRenameSeason = async () => {
+    if (!seasonToRename || !renamedName.trim()) return;
+    setIsRenaming(true);
+    try {
+      await renameSeason(seasonToRename.id, renamedName.trim());
+      setSeasonToRename(null);
+      setRenamedName('');
+      toast({ title: "Stagione Rinomata", description: "Il nome è stato aggiornato correttamente." });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Errore", description: "Impossibile rinominare la stagione." });
+    } finally {
+      setIsRenaming(false);
+    }
   };
 
   const handleSwitchSeason = async (id: string) => {
@@ -480,17 +498,31 @@ export default function AltroPage() {
 
                     <div className="flex items-center gap-2">
                       {s.ownerId === user?.id && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-primary dark:text-brand-green hover:bg-primary/10 dark:hover:bg-brand-green/10"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSeasonToShare(s);
-                          }}
-                        >
-                          <Share2 className="h-4 w-4" />
-                        </Button>
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-primary dark:text-brand-green hover:bg-primary/10 dark:hover:bg-brand-green/10"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSeasonToRename({ id: s.id, name: s.name });
+                              setRenamedName(s.name);
+                            }}
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-primary dark:text-brand-green hover:bg-primary/10 dark:hover:bg-brand-green/10"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSeasonToShare(s);
+                            }}
+                          >
+                            <Share2 className="h-4 w-4" />
+                          </Button>
+                        </>
                       )}
                       {!s.isActive && (
                         <Button
@@ -619,9 +651,9 @@ export default function AltroPage() {
         <AlertDialogContent className="rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-2xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground max-w-[90vw]">
           <AlertDialogHeader>
             <AlertDialogTitle className="uppercase font-black text-destructive">Elimina Stagione?</AlertDialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground font-bold">
+            <AlertDialogDescription className="text-xs text-muted-foreground font-bold">
               Questa azione cancellerà DEFINITIVAMENTE la stagione <strong>{seasonToDelete?.name}</strong> e tutti i relativi dati.
-            </DialogDescription>
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4">
             <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs bg-card/40 hover:bg-card/50 text-foreground border-none">Annulla</AlertDialogCancel>
@@ -631,6 +663,40 @@ export default function AltroPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Season Rename Dialog */}
+      <Dialog open={!!seasonToRename} onOpenChange={(open) => !open && setSeasonToRename(null)}>
+        <DialogContent className="max-w-[90vw] sm:max-w-md rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black text-foreground uppercase tracking-tight">Rinomina Stagione</DialogTitle>
+            <DialogDescription className="text-xs font-bold text-muted-foreground uppercase">Inserisci il nuovo nome per la stagione.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <Input
+              placeholder="Es: 2025/26"
+              value={renamedName}
+              onChange={(e) => setRenamedName(e.target.value)}
+              className="font-black text-lg h-12 bg-muted/30 dark:bg-black border-border dark:border-brand-green/20 focus-visible:ring-brand-green rounded-2xl"
+            />
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                onClick={() => setSeasonToRename(null)}
+                className="flex-1 rounded-xl font-black uppercase text-xs h-12 text-foreground/60 hover:bg-muted"
+              >
+                Annulla
+              </Button>
+              <Button
+                onClick={handleRenameSeason}
+                disabled={isRenaming || !renamedName.trim()}
+                className="flex-1 rounded-xl font-black uppercase h-12 bg-primary dark:bg-black border border-primary dark:border-brand-green text-white shadow-lg dark:shadow-[0_0_15px_rgba(172,229,4,0.2)]"
+              >
+                {isRenaming ? <Loader2 className="h-5 w-5 animate-spin" /> : "Salva Nome"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );

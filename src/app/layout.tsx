@@ -55,7 +55,7 @@ export default function RootLayout({
             <AuthGuard>
               <div className="relative flex min-h-screen w-full flex-col">
                 <AppHeaderWrapper />
-                <main className="flex-1 p-3 pb-20 md:p-4 lg:p-6">
+                <main className="flex-1 p-3 pb-24 md:p-10 lg:p-16">
                     {children}
                 </main>
                 <BottomNavWrapper />

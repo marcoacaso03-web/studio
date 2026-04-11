@@ -187,7 +187,7 @@ export default function TrainingDetailPage() {
               <CardTitle className="text-lg font-black uppercase tracking-tight text-foreground">Esercitazioni e Obiettivi</CardTitle>
               <CardDescription className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">Definisci il piano tecnico della seduta.</CardDescription>
             </CardHeader>
-            <CardContent className="p-6 -mt-4 bg-card dark:bg-background rounded-t-3xl border-t border-border dark:border-brand-green/30 space-y-6">
+            <CardContent className="p-6 bg-card dark:bg-background rounded-t-3xl border-t border-border dark:border-brand-green/30 space-y-6">
               <div className="space-y-3 pb-6 border-b border-border dark:border-brand-green/20">
                 <div className="flex items-center gap-2">
                   <Target className="h-4 w-4 text-primary dark:text-brand-green" />

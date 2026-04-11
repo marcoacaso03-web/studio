@@ -2,15 +2,18 @@
 import type { ReactNode } from 'react';
 import { ChevronLeft } from 'lucide-react';
 
+import { cn } from '@/lib/utils';
+
 type PageHeaderProps = {
   title: ReactNode;
   children?: ReactNode;
   backAction?: () => void;
+  className?: string;
 };
 
-export function PageHeader({ title, children, backAction }: PageHeaderProps) {
+export function PageHeader({ title, children, backAction, className }: PageHeaderProps) {
   return (
-    <div className="flex items-center justify-between mb-4">
+    <div className={cn("flex items-center justify-between mb-6 md:mb-10", className)}>
       <div className="flex items-center gap-3">
         {backAction && (
           <button onClick={backAction} className="text-primary dark:text-brand-green hover:opacity-70 transition-colors -ml-1 flex items-center justify-center p-1 rounded-full">
