@@ -38,7 +38,7 @@ export const eventRepository = {
             if (pA !== pB) {
                 return pA - pB;
             }
-            return a.minute - b.minute;
+            return (a.minute ?? 0) - (b.minute ?? 0);
         });
     },
 

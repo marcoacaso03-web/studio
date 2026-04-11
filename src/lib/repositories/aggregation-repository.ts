@@ -190,8 +190,8 @@ export const aggregationRepository = {
             
             goals.forEach(event => {
                 if (event.period === '1T') {
-                    if (event.minute <= 30) intervals['1-30']++;
-                    else intervals['31-60']++;
+                    if (event.minute !== null && event.minute <= 30) intervals['1-30']++;
+                    else if (event.minute !== null) intervals['31-60']++;
                 } else {
                     intervals['61-90+']++;
                 }

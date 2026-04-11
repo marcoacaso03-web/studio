@@ -234,7 +234,7 @@ export function computeDecisiveGoals(
                 const poA = getPeriodOrder(a.period);
                 const poB = getPeriodOrder(b.period);
                 if (poA !== poB) return poA - poB;
-                return a.minute - b.minute;
+                return (a.minute ?? 0) - (b.minute ?? 0);
             });
 
         // Check if we have opponent goals in the events. If not, confidence is mixed.

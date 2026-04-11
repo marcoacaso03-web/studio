@@ -118,16 +118,17 @@ export const useMatchDetailStore = create<MatchDetailState>()(
         const pitchManTeam = match.isHome ? 'home' : 'away';
 
         const getAbsoluteMinute = (event: MatchEvent) => {
-            if (event.period === '1T') return Math.min(event.minute, halfTime);
-            if (event.period === '2T') return halfTime + Math.min(event.minute, halfTime);
-            return event.minute + duration; 
+            const min = event.minute ?? 0;
+            if (event.period === '1T') return Math.min(min, halfTime);
+            if (event.period === '2T') return halfTime + Math.min(min, halfTime);
+            return min + duration; 
         };
 
         const chronologicalEvents = [...events].sort((a, b) => {
             const pA = periodOrder[a.period] || 0;
             const pB = periodOrder[b.period] || 0;
             if (pA !== pB) return pA - pB;
-            return a.minute - b.minute;
+            return (a.minute ?? 0) - (b.minute ?? 0);
         });
 
         const newStats: PlayerMatchStats[] = allPlayers.map(player => {
@@ -206,7 +207,7 @@ export const useMatchDetailStore = create<MatchDetailState>()(
             const pA = periodOrder[a.period] || 0;
             const pB = periodOrder[b.period] || 0;
             if (pA !== pB) return pA - pB;
-            return a.minute - b.minute;
+            return (a.minute ?? 0) - (b.minute ?? 0);
         });
 
         const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
@@ -248,7 +249,7 @@ export const useMatchDetailStore = create<MatchDetailState>()(
             const pA = periodOrder[a.period] || 0;
             const pB = periodOrder[b.period] || 0;
             if (pA !== pB) return pA - pB;
-            return a.minute - b.minute;
+            return (a.minute ?? 0) - (b.minute ?? 0);
         });
 
         const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;

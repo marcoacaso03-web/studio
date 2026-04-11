@@ -4,13 +4,13 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMatchDetailStore } from "@/store/useMatchDetailStore";
 import { Badge } from "@/components/ui/badge";
-import { Info, Plus, Trash2, ArrowRightLeft } from "lucide-react";
+import { Info, Plus, Trash2, ArrowRightLeft, XCircle } from "lucide-react";
 import { GiSoccerBall, GiSoccerKick } from "react-icons/gi";
 import { IoSquare } from "react-icons/io5";
 import { MatchEventDialog } from "./match-event-dialog";
 import { Button } from "@/components/ui/button";
 import { MatchEventType, MatchEvent } from "@/lib/types";
-import { GiGloves, GiCardMissed, GiTargetPoster, GiLightBulb } from "react-icons/gi";
+import { GiGloves, GiTargetPoster, GiLightBulb } from "react-icons/gi";
 
 export function MatchEventsTab() {
   const { events, deleteEvent, match } = useMatchDetailStore();
@@ -26,7 +26,7 @@ export function MatchEventsTab() {
       case 'sub_in':
       case 'sub_out': return <ArrowRightLeft className="h-5 w-5 text-primary dark:text-brand-green" />;
       case 'penalty_saved': return <GiGloves className="h-5 w-5 text-blue-500" />;
-      case 'penalty_missed': return <GiCardMissed className="h-5 w-5 text-orange-500" />;
+      case 'penalty_missed': return <XCircle className="h-5 w-5 text-orange-500" />;
       case 'chance': return <GiLightBulb className="h-5 w-5 text-purple-500" />;
       case 'woodwork': return <GiTargetPoster className="h-5 w-5 text-emerald-500" />;
       case 'note': return <Info className="h-5 w-5 text-muted-foreground" />;
