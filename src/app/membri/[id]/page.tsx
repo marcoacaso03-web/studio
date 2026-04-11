@@ -385,7 +385,7 @@ export default function PlayerDetailPage() {
             else if (stat && stat.minutesPlayed > 0) subs++;
 
             // Calcolo On-Pitch Goals
-            const chronologicalEvents = [...details.events].sort((a, b) => a.minute - b.minute);
+            const chronologicalEvents = [...details.events].sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0));
             const myTeam = match.isHome ? 'home' : 'away';
             const oppTeam = match.isHome ? 'away' : 'home';
 
@@ -394,14 +394,14 @@ export default function PlayerDetailPage() {
 
             if (!isStarter && stat && stat.minutesPlayed > 0) {
               const subIn = chronologicalEvents.find(e => e.type === 'substitution' && e.playerId === playerId);
-              enterMin = subIn ? subIn.minute : 0;
+              enterMin = subIn ? (subIn.minute ?? 0) : 0;
             }
             const subOut = chronologicalEvents.find(e => e.type === 'substitution' && e.subOutPlayerId === playerId);
-            if (subOut) exitMin = subOut.minute;
+            if (subOut) exitMin = subOut.minute ?? (match.duration || 90);
 
             let matchGoalsConcededCount = 0;
             chronologicalEvents.forEach(e => {
-              if (e.minute >= enterMin && e.minute <= exitMin && e.type === 'goal') {
+              if (e.minute !== null && e.minute >= enterMin && e.minute <= exitMin && e.type === 'goal') {
                 if (e.team === myTeam) goalsScoredOnPitch++;
                 if (e.team === oppTeam) {
                   goalsConcededOnPitch++;
