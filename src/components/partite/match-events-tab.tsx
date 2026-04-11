@@ -209,9 +209,9 @@ export function MatchEventsTab() {
       <EventOptionsDialog
         event={selectedEventOptions}
         open={!!selectedEventOptions}
-        onOpenChange={(open) => !open && setSelectedEventOptions(null)}
+        onOpenChange={(open: boolean) => !open && setSelectedEventOptions(null)}
         onEdit={handleEditEvent}
-        onDelete={(id) => {
+        onDelete={(id: string) => {
             deleteEvent(id);
             setSelectedEventOptions(null);
         }}
