@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMatchDetailStore } from "@/store/useMatchDetailStore";
 import { Badge } from "@/components/ui/badge";
-import { Info, Plus, Trash2, ArrowRightLeft, XCircle } from "lucide-react";
-import { GiSoccerBall, GiSoccerKick } from "react-icons/gi";
+import { Info, Plus, Trash2, ArrowRightLeft, XCircle, Target, Zap, Flag, Handshake } from "lucide-react";
+import { GiSoccerBall } from "react-icons/gi";
 import { IoSquare } from "react-icons/io5";
 import { MatchEventDialog } from "./match-event-dialog";
 import { Button } from "@/components/ui/button";
@@ -16,10 +16,14 @@ export function MatchEventsTab() {
   const { events, deleteEvent, match } = useMatchDetailStore();
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
 
-  const getEventIcon = (type: MatchEventType) => {
-    switch (type) {
-      case 'goal': return <GiSoccerBall className="h-5 w-5 text-primary dark:text-brand-green" />;
-      case 'assist': return <GiSoccerKick className="h-5 w-5 text-primary dark:text-brand-green" />;
+  const getEventIcon = (event: MatchEvent) => {
+    switch (event.type) {
+      case 'goal': 
+        if (event.goalType === 'rigore') return <Target className="h-5 w-5 text-primary dark:text-brand-green" />;
+        if (event.goalType === 'punizione') return <Zap className="h-5 w-5 text-amber-400" />;
+        if (event.goalType === 'calcio_angolo') return <Flag className="h-5 w-5 text-blue-400" />;
+        return <GiSoccerBall className="h-5 w-5 text-primary dark:text-brand-green" />;
+      case 'assist': return <Handshake className="h-5 w-5 text-primary dark:text-brand-green" />;
       case 'yellow_card': return <IoSquare className="h-5 w-5 text-yellow-400 drop-shadow-sm" />;
       case 'red_card': return <IoSquare className="h-5 w-5 text-red-600 drop-shadow-sm" />;
       case 'substitution':
@@ -36,9 +40,10 @@ export function MatchEventsTab() {
 
   const getEventLabel = (event: any) => {
     if (event.type === 'goal') {
+      const typeLabel = event.goalType ? ` (${event.goalType.replace('_', ' ').toUpperCase()})` : '';
       return event.assistPlayerName
-        ? `GOAL (ASSIST: ${event.assistPlayerName.toUpperCase()})`
-        : 'GOAL';
+        ? `GOAL${typeLabel} (ASSIST: ${event.assistPlayerName.toUpperCase()})`
+        : `GOAL${typeLabel}`;
     }
     if (event.type === 'substitution') {
       return 'SOSTITUZIONE';
@@ -131,7 +136,7 @@ function EventRow({ event, match, deleteEvent, getEventIcon, getEventLabel }: an
     <div className="flex items-center justify-between border-b border-brand-green/5 pb-3 last:border-0 group">
       <div className="flex items-center gap-4 flex-1">
         <div className="flex items-center justify-center w-8">
-          {getEventIcon(event.type)}
+          {getEventIcon(event)}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">

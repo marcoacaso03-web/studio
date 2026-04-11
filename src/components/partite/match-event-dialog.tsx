@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MatchEventType, MatchEvent } from "@/lib/types";
+import { MatchEventType, MatchEvent, GoalType } from "@/lib/types";
 
 const periodOrder: Record<string, number> = {
   '1T': 1,
@@ -51,6 +51,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
 
   const [minute, setMinute] = React.useState<number | null>(0);
   const [period, setPeriod] = React.useState<'1T' | '2T' | '1TS' | '2TS'>('1T');
+  const [goalType, setGoalType] = React.useState<GoalType>('azione');
   const [notes, setNotes] = React.useState<string>("");
 
   const [openSelect, setOpenSelect] = React.useState<string | null>(null);
@@ -119,6 +120,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
     setSubOutPlayerName("");
     setMinute(0);
     setPeriod('1T');
+    setGoalType('azione');
     setNotes("");
   };
 
@@ -133,6 +135,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
       const goalEvent: any = {
         ...baseEvent,
         type: 'goal',
+        goalType,
       };
 
       if (isPitchManSide) {
@@ -250,6 +253,29 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
               </SelectContent>
             </Select>
           </div>
+
+          {/* TIPO GOAL (SOTTO TIPO EVENTO) */}
+          {uiType === 'goal' && (
+            <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all animate-in fade-in slide-in-from-top-1 duration-200">
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Tipo Goal</span>
+              <Select 
+                value={goalType} 
+                onValueChange={(v) => setGoalType(v as GoalType)}
+                open={openSelect === 'goalDetail'}
+                onOpenChange={(open) => setOpenSelect(open ? 'goalDetail' : null)}
+              >
+                <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
+                  <SelectItem value="azione" className="text-[10px] font-black uppercase">Azione</SelectItem>
+                  <SelectItem value="rigore" className="text-[10px] font-black uppercase">Rigore</SelectItem>
+                  <SelectItem value="punizione" className="text-[10px] font-black uppercase">Punizione</SelectItem>
+                  <SelectItem value="calcio_angolo" className="text-[10px] font-black uppercase">Calcio d&apos;angolo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* GOAL SECTION */}
           {uiType === 'goal' && (
