@@ -174,7 +174,7 @@ export default function HomePage() {
       {/* 2. Prossimo Impegno */}
       <div className="flex items-center justify-between mt-4 mb-2">
         <h3 className="text-sm font-black uppercase tracking-widest text-foreground dark:text-white">Prossimo Impegno</h3>
-        <Button variant="ghost" size="sm" onClick={() => setIsFullCalendarOpen(true)} className="text-[10px] font-black uppercase text-primary dark:text-white hover:bg-primary/10 dark:hover:bg-brand-green/10">
+        <Button variant="ghost" size="sm" onClick={() => setIsFullCalendarOpen(true)} className="text-[10px] font-black uppercase text-primary dark:text-brand-green hover:bg-primary/10 dark:hover:bg-brand-green/10">
           Vedi Calendario <ArrowRight className="ml-1 h-3 w-3" />
         </Button>
       </div>

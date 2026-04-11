@@ -142,57 +142,53 @@ export default function AllenamentoPage() {
 
   return (
     <div className="space-y-6 pb-20">
-      <PageHeader title="Allenamento">
+      <PageHeader title="" className="mb-2 md:mb-4">
         {!hasPageError && (
-          <div className="flex gap-0.5 sm:gap-2">
-            {/* ... (buttons remain same) */}
+          <div className="flex items-center gap-1 sm:gap-1.5 ml-auto">
             <Button
               variant="ghost"
-              size="icon"
-              className="rounded-xl h-10 w-10 hover:bg-card/30"
+              className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 shrink-0"
               onClick={() => router.push('/allenamento/libreria')}
             >
-              <PiTrafficCone className="h-6 w-6 text-primary dark:text-brand-green" />
+              <PiTrafficCone className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
+              <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Esercizi</span>
             </Button>
 
             <Button
               variant="ghost"
-              size="icon"
-              className="rounded-xl h-10 w-10 hover:bg-card/30"
+              className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 shrink-0"
               onClick={() => setIsStatsOpen(true)}
             >
-              <ClipboardCheck className="h-6 w-6 text-primary dark:text-brand-green" />
+              <ClipboardCheck className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
+              <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Report</span>
             </Button>
 
             <Button
               variant="ghost"
-              size="icon"
-              className="rounded-xl h-10 w-10 hover:bg-card/30"
+              className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 shrink-0"
               onClick={() => setIsGeneratorOpen(true)}
             >
-              <PlusCircle className="h-6 w-6 text-primary dark:text-brand-green" />
+              <PlusCircle className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
+              <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Genera</span>
             </Button>
 
             <Button
               variant="ghost"
-              size="icon"
-              className={cn(
-                "rounded-xl h-10 w-10 transition-all hover:bg-card/30"
-              )}
+              className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 shrink-0"
               onClick={() => setIsArchiveOpen(true)}
             >
-              <Filter className="h-6 w-6 text-primary dark:text-brand-green" />
+              <Filter className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
+              <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Archivio</span>
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-500/10"
+                  className="rounded-xl px-2 h-9 bg-rose-500/5 border border-rose-500/20 hover:bg-rose-500/10 flex items-center gap-1 group transition-all active:scale-95 text-rose-500 shrink-0"
                 >
-                  <PiTrafficCone className="h-6 w-6 rotate-180 opacity-0 absolute" /> {/* Placeholder for layout */}
-                  <Eraser className="h-6 w-6" />
+                  <Trash2 className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
+                  <span className="text-[9px] font-black uppercase tracking-tighter">Elimina</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="rounded-2xl bg-card dark:bg-black border-border dark:border-brand-green/30 backdrop-blur-xl text-foreground dark:text-white p-2">

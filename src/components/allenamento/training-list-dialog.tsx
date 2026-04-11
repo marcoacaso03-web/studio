@@ -58,7 +58,7 @@ export function TrainingListDialog({ open, onOpenChange, sessions }: TrainingLis
                     onOpenChange(false);
                     router.push(`/allenamento/${session.id}`);
                   }}
-                  className="w-full flex items-center justify-between p-4 rounded-2xl transition-all group border border-transparent hover:border-border/50 dark:hover:border-brand-green/30 bg-card/50 dark:bg-white/[0.02] hover:bg-muted/50 dark:hover:bg-brand-green/[0.05] shadow-sm hover:shadow-md dark:shadow-none transition-all duration-300"
+                  className="w-full flex items-center justify-between p-4 rounded-2xl group border border-transparent hover:border-border/50 dark:hover:border-brand-green/30 bg-card/50 dark:bg-white/[0.02] hover:bg-muted/50 dark:hover:bg-brand-green/[0.05] shadow-sm hover:shadow-md dark:shadow-none transition-all duration-300"
                 >
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-xl bg-muted dark:bg-black border border-border dark:border-brand-green/20 flex flex-col items-center justify-center transition-colors group-hover:border-primary/30 dark:group-hover:border-brand-green/50">
