@@ -30,6 +30,7 @@ interface MatchDetailState {
     saveAllStats: (stats: PlayerMatchStats[]) => Promise<void>;
     addEvent: (event: Omit<MatchEvent, 'id'>) => Promise<void>;
     addEvents: (events: Omit<MatchEvent, 'id'>[]) => Promise<void>;
+    updateEvent: (eventId: string, data: Partial<Omit<MatchEvent, 'id' | 'matchId'>>) => Promise<void>;
     deleteEvent: (eventId: string) => Promise<void>;
     syncAndPersistMinutes: () => Promise<void>;
 }
@@ -258,6 +259,31 @@ export const useMatchDetailStore = create<MatchDetailState>()(
 
         set({ events: updatedEvents, match: updatedMatch });
 
+        matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
+        get().syncAndPersistMinutes();
+    },
+
+    updateEvent: async (eventId, eventData) => {
+        const { matchId, match, events: currentEvents } = get();
+        const user = useAuthStore.getState().user;
+        if (!matchId || !match || !user) return;
+
+        const updatedEvents = currentEvents.map(e => 
+          e.id === eventId ? { ...e, ...eventData } : e
+        ).sort((a, b) => {
+            const pA = periodOrder[a.period] || 0;
+            const pB = periodOrder[b.period] || 0;
+            if (pA !== pB) return pA - pB;
+            return (a.minute ?? 0) - (b.minute ?? 0);
+        });
+
+        const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
+        const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
+        const updatedMatch = { ...match, result: { home: homeGoals, away: awayGoals } };
+
+        set({ events: updatedEvents, match: updatedMatch });
+
+        eventRepository.update(eventId, matchId, match.seasonId, eventData);
         matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
         get().syncAndPersistMinutes();
     },

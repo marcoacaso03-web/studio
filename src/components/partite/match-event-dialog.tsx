@@ -31,10 +31,11 @@ type UIEventType = 'goal' | 'yellow_card' | 'red_card' | 'substitution' | 'penal
 interface MatchEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  eventToEdit?: MatchEvent;
 }
 
-export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) {
-  const { allPlayers, events: allEvents, lineup, addEvents, match } = useMatchDetailStore();
+export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEventDialogProps) {
+  const { allPlayers, events: allEvents, lineup, addEvents, updateEvent, match } = useMatchDetailStore();
 
   const [uiType, setUiType] = React.useState<UIEventType>('goal');
   const [team, setTeam] = React.useState<'home' | 'away'>('home');
@@ -55,6 +56,35 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
   const [notes, setNotes] = React.useState<string>("");
 
   const [openSelect, setOpenSelect] = React.useState<string | null>(null);
+
+  // Pre-fill if editing
+  React.useEffect(() => {
+    if (eventToEdit && open) {
+      setUiType(eventToEdit.type as UIEventType);
+      setTeam(eventToEdit.team);
+      setMinute(eventToEdit.minute);
+      setPeriod(eventToEdit.period);
+      setNotes(eventToEdit.notes || "");
+      
+      if (eventToEdit.type === 'goal') {
+        setGoalType(eventToEdit.goalType || 'azione');
+        setPlayerId(eventToEdit.playerId || "");
+        setPlayerName(eventToEdit.playerName || "");
+        setAssistPlayerId(eventToEdit.assistPlayerId || "");
+        setAssistPlayerName(eventToEdit.assistPlayerName || "");
+      } else if (eventToEdit.type === 'substitution') {
+        setSubInPlayerId(eventToEdit.playerId || "");
+        setSubInPlayerName(eventToEdit.playerName || "");
+        setSubOutPlayerId(eventToEdit.subOutPlayerId || "");
+        setSubOutPlayerName(eventToEdit.subOutPlayerName || "");
+      } else {
+        setPlayerId(eventToEdit.playerId || "");
+        setPlayerName(eventToEdit.playerName || "");
+      }
+    } else if (open) {
+      resetForm();
+    }
+  }, [eventToEdit, open]);
 
   const maxMinutes = (period === '1T' || period === '2T') ? 60 : 20;
 
@@ -193,7 +223,13 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
       eventsToSave.push(simpleEvent);
     }
 
-    addEvents(eventsToSave);
+    if (eventToEdit) {
+      const { ...dataToUpdate } = eventsToSave[0];
+      await updateEvent(eventToEdit.id, dataToUpdate);
+    } else {
+      addEvents(eventsToSave);
+    }
+
     onOpenChange(false);
     resetForm();
   };

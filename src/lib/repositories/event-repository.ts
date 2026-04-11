@@ -5,6 +5,7 @@ import {
   getDocs, 
   addDoc, 
   deleteDoc, 
+  updateDoc,
   doc, 
   query,
   where
@@ -64,5 +65,16 @@ export const eventRepository = {
         const db = getFirestore();
         const docRef = doc(db, 'teams', seasonId, 'matches', matchId, 'events', id);
         return await deleteDoc(docRef);
+    },
+
+    async update(id: string, matchId: string, seasonId: string, data: Partial<Omit<MatchEvent, 'id'>>) {
+        const db = getFirestore();
+        const docRef = doc(db, 'teams', seasonId, 'matches', matchId, 'events', id);
+        
+        const cleanedData = Object.fromEntries(
+            Object.entries(data).filter(([_, v]) => v !== undefined)
+        );
+
+        return await updateDoc(docRef, cleanedData);
     }
 };
