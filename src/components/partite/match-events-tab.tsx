@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMatchDetailStore } from "@/store/useMatchDetailStore";
 import { Badge } from "@/components/ui/badge";
-import { Info, Plus, Trash2, ArrowRightLeft, XCircle, Target, Zap, Flag, Handshake, Edit2, User, ExternalLink } from "lucide-react";
+import { Info, Plus, Trash2, ArrowRightLeft, XCircle, Target, Zap, Flag, Handshake, Edit2, User, ExternalLink, ArrowUp, ArrowDown } from "lucide-react";
 import { GiSoccerBall } from "react-icons/gi";
 import { IoSquare } from "react-icons/io5";
 import { MatchEventDialog } from "./match-event-dialog";
@@ -28,50 +28,55 @@ export function MatchEventsTab() {
   const [selectedEventOptions, setSelectedEventOptions] = useState<MatchEvent | null>(null);
 
   const getEventIcon = (event: MatchEvent, size: string = "h-4 w-4") => {
-    const iconClass = cn(size);
+    const iconClass = cn(size, "text-black dark:text-white");
     switch (event.type) {
       case 'goal': 
-        if (event.goalType === 'rigore') return <Target className={cn(iconClass, "text-primary dark:text-brand-green")} />;
-        if (event.goalType === 'punizione') return <Zap className={cn(iconClass, "text-amber-400")} />;
-        if (event.goalType === 'calcio_angolo') return <Flag className={cn(iconClass, "text-blue-400")} />;
-        return <GiSoccerBall className={cn(iconClass, "text-primary dark:text-brand-green")} />;
-      case 'assist': return <Handshake className={cn(iconClass, "text-primary dark:text-brand-green")} />;
-      case 'yellow_card': return <IoSquare className={cn(iconClass, "text-yellow-400 drop-shadow-sm")} />;
-      case 'red_card': return <IoSquare className={cn(iconClass, "text-red-600 drop-shadow-sm")} />;
+        if (event.goalType === 'rigore') return <Target className={iconClass} />;
+        if (event.goalType === 'punizione') return <Zap className={iconClass} />;
+        if (event.goalType === 'calcio_angolo') return <Flag className={iconClass} />;
+        return <GiSoccerBall className={iconClass} />;
+      case 'assist': return <Handshake className={iconClass} />;
+      case 'yellow_card': return <IoSquare className={iconClass} />;
+      case 'red_card': return <IoSquare className={iconClass} />;
       case 'substitution':
       case 'sub_in':
-      case 'sub_out': return <ArrowRightLeft className={cn(iconClass, "text-primary dark:text-brand-green")} />;
-      case 'penalty_saved': return <GiGloves className={cn(iconClass, "text-blue-500")} />;
-      case 'penalty_missed': return <XCircle className={cn(iconClass, "text-orange-500")} />;
-      case 'chance': return <GiLightBulb className={cn(iconClass, "text-purple-500")} />;
-      case 'woodwork': return <GiTargetPoster className={cn(iconClass, "text-emerald-500")} />;
-      case 'note': return <Info className={cn(iconClass, "text-muted-foreground")} />;
-      default: return <Info className={cn(iconClass, "text-muted-foreground")} />;
+      case 'sub_out': return (
+        <div className="flex items-center -space-x-1.5 h-full">
+          <ArrowUp className={cn(size, "text-emerald-500 -translate-y-0.5")} />
+          <ArrowDown className={cn(size, "text-rose-500 translate-y-0.5")} />
+        </div>
+      );
+      case 'penalty_saved': return <GiGloves className={iconClass} />;
+      case 'penalty_missed': return <XCircle className={iconClass} />;
+      case 'chance': return <GiLightBulb className={iconClass} />;
+      case 'woodwork': return <GiTargetPoster className={iconClass} />;
+      case 'note': return <Info className={iconClass} />;
+      default: return <Info className={iconClass} />;
     }
   };
 
   const getEventLabel = (event: any) => {
     if (event.type === 'goal') {
-      const typeLabel = event.goalType ? ` (${event.goalType.replace('_', ' ').toUpperCase()})` : '';
+      const typeLabel = event.goalType && event.goalType !== 'normale' ? ` (${event.goalType.replace('_', ' ').toUpperCase()})` : '';
       return event.assistPlayerName
-        ? `GOAL${typeLabel} (ASSIST: ${event.assistPlayerName.toUpperCase()})`
-        : `GOAL${typeLabel}`;
+        ? `${event.assistPlayerName.toUpperCase()}${typeLabel}`
+        : typeLabel;
     }
     if (event.type === 'substitution') {
-      return 'SOSTITUZIONE';
+      return '';
     }
     switch (event.type) {
-      case 'assist': return 'ASSIST';
+      case 'assist': return '';
       case 'yellow_card': return 'AMMONIZIONE';
       case 'red_card': return 'ESPULSIONE';
-      case 'sub_in': return 'ENTRATA';
-      case 'sub_out': return 'USCITA';
+      case 'sub_in': return '';
+      case 'sub_out': return '';
       case 'penalty_saved': return 'RIGORE PARATO';
       case 'penalty_missed': return 'RIGORE SBAGLIATO';
       case 'chance': return 'OCCASIONE';
       case 'woodwork': return 'PALO / TRAVERSA';
       case 'note': return 'NOTA / ALTRO';
-      default: return event.type.toUpperCase();
+      default: return '';
     }
   };
 
@@ -147,13 +152,22 @@ export function MatchEventsTab() {
                     {timedEvents.map((event, index) => {
                       const isTransitionTo2T = event.period === '2T' && timedEvents[index-1]?.period === '1T';
                       
+                      // Calcola punteggio a fine primo tempo
+                      const halfTimeScore = (() => {
+                        if (!isTransitionTo2T) return "";
+                        const goals1T = timedEvents.filter(e => e.period === '1T' && e.type === 'goal');
+                        const homeGoals = goals1T.filter(e => e.team === 'home').length;
+                        const awayGoals = goals1T.filter(e => e.team === 'away').length;
+                        return `${homeGoals}-${awayGoals}`;
+                      })();
+
                       return (
                         <div key={event.id} className="space-y-3">
                           {isTransitionTo2T && (
                             <div className="relative flex items-center justify-center py-4">
                                 <div className="absolute left-0 right-0 h-px border-t border-dashed border-border dark:border-brand-green/20"></div>
                                 <span className="relative bg-card dark:bg-[#060a02] px-3 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 z-10">
-                                    Fine 1° Tempo
+                                    INT {halfTimeScore}
                                 </span>
                             </div>
                           )}
@@ -245,7 +259,7 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
 
         <button 
           onClick={() => onOptionsClick(event)}
-          className="bg-card dark:bg-[#0a1103] rounded-full p-2 border-2 border-border dark:border-brand-green/40 shadow-sm hover:scale-110 hover:border-brand-green transition-all duration-200 group/icon"
+          className="bg-card dark:bg-[#0a1103] rounded-full p-2 border-2 border-border dark:border-brand-green/40 shadow-sm hover:scale-110 hover:border-sky-500 dark:hover:border-brand-green transition-all duration-200 group/icon"
         >
           {getEventIcon(event, "h-3.5 w-3.5")}
         </button>
@@ -262,14 +276,10 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
           {event.type === 'substitution' ? (
             <div className={cn("flex flex-col", alignLeft ? "items-end text-right" : "items-start text-left")}>
               <div className="flex items-center gap-2">
-                {!alignLeft && <span className="text-[9px] font-black text-brand-green uppercase">In:</span>}
                 <p className="font-black leading-tight uppercase text-xs sm:text-sm">{event.playerName}</p>
-                {alignLeft && <span className="text-[9px] font-black text-brand-green uppercase">In:</span>}
               </div>
               <div className="flex items-center gap-2 mt-0.5 opacity-60">
-                {!alignLeft && <span className="text-[9px] font-black text-rose-500 uppercase">Out:</span>}
                 <p className="text-[10px] sm:text-[11px] font-bold leading-tight uppercase">{event.subOutPlayerName}</p>
-                {alignLeft && <span className="text-[9px] font-black text-rose-500 uppercase">Out:</span>}
               </div>
             </div>
           ) : event.type === 'note' ? (
@@ -282,17 +292,9 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
                     {mainName.toUpperCase()}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
-                    {!alignLeft && (
-                        <Badge variant="outline" className="text-[7px] py-0 px-1 font-black opacity-40 border-primary/20 flex-shrink-0">
-                            {isPitchManTeam ? 'PITCH' : 'AVV.'}
-                        </Badge>
-                    )}
-                    <p className="text-[9px] text-muted-foreground font-black tracking-widest leading-none">{getEventLabel(event)}</p>
-                    {alignLeft && (
-                        <Badge variant="outline" className="text-[7px] py-0 px-1 font-black opacity-40 border-primary/20 flex-shrink-0">
-                            {isPitchManTeam ? 'PITCH' : 'AVV.'}
-                        </Badge>
-                    )}
+                    <p className="text-[9px] text-muted-foreground font-black tracking-widest leading-none">
+                      {getEventLabel(event)}
+                    </p>
                 </div>
             </div>
           )}
