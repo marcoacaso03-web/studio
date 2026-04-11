@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dumbbell, ChevronLeft, ChevronRight, PlusCircle, Trash2, Loader2, Eraser, ClipboardCheck, Target, Users, Filter } from "lucide-react";
+import { Dumbbell, ChevronLeft, ChevronRight, PlusCircle, Trash2, Loader2, Eraser, ClipboardCheck, Target, Users, Filter, CalendarRange } from "lucide-react";
 import { PiTrafficCone } from "react-icons/pi";
 import { useTrainingStore } from "@/store/useTrainingStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
