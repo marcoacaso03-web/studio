@@ -105,7 +105,7 @@ export type PlayerMatchStats = {
   teamOwnerId?: string;
 };
 
-export const EVENT_TYPES = ['goal', 'yellow_card', 'red_card', 'substitution', 'assist', 'sub_in', 'sub_out'] as const;
+export const EVENT_TYPES = ['goal', 'yellow_card', 'red_card', 'substitution', 'assist', 'sub_in', 'sub_out', 'penalty_saved', 'penalty_missed', 'chance', 'woodwork', 'note'] as const;
 export type MatchEventType = typeof EVENT_TYPES[number];
 
 export type MatchEvent = {
@@ -120,8 +120,9 @@ export type MatchEvent = {
   subOutPlayerName?: string; 
   assistPlayerId?: string; 
   assistPlayerName?: string; 
-  minute: number;
+  minute: number | null;
   period: '1T' | '2T' | '1TS' | '2TS';
+  notes?: string;
   teamOwnerId?: string;
 };
 

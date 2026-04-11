@@ -40,7 +40,7 @@ export function AdvancedStatsSection() {
 
     return (
         <div className="space-y-4 pt-4 border-t border-brand-green/10">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary dark:text-brand-green/60 ml-1">Statistiche Pro Advance</h3>
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary dark:text-brand-green/60 ml-1">Statistiche Advanced</h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* 1. BEST DEFENSE (Pair or Trio) */}

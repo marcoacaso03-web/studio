@@ -40,12 +40,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { TrainingStatsDialog } from "@/components/allenamento/training-stats-dialog";
+import { ErrorState } from "@/components/ui/error-state";
+import { parseError, missingSeasonError } from "@/lib/error-utils";
 
 export default function AllenamentoPage() {
   const router = useRouter();
-  const { sessions, loading, fetchAll, generateSessions, deleteSession, deleteSessions, clearAllSessions } = useTrainingStore();
+  const { sessions, loading, error: trainingError, fetchAll, generateSessions, deleteSession, deleteSessions, clearAllSessions } = useTrainingStore();
   const { sessionsPerWeek } = useSettingsStore();
-  const { activeSeason } = useSeasonsStore();
+  const { activeSeason, error: seasonsError } = useSeasonsStore();
   const { players, fetchAll: fetchPlayers } = usePlayersStore();
 
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
@@ -125,101 +127,122 @@ export default function AllenamentoPage() {
   const nextWeek = () => setCurrentWeekStart(addWeeks(currentWeekStart, 1));
   const prevWeek = () => setCurrentWeekStart(subWeeks(currentWeekStart, 1));
 
+  const hasPageError = seasonsError || trainingError;
+
+  if (!loading && !activeSeason && !seasonsError) {
+    return (
+      <div className="pb-24 pt-4">
+        <PageHeader title="Allenamento" />
+        <ErrorState error={missingSeasonError()} />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 pb-20">
       <PageHeader title="Allenamento">
-        <div className="flex gap-0.5 sm:gap-2">
-          {/* Libreria - Cono */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-xl h-10 w-10 hover:bg-card/30"
-            onClick={() => router.push('/allenamento/libreria')}
-          >
-            <PiTrafficCone className="h-6 w-6 text-primary dark:text-brand-green" />
-          </Button>
+        {!hasPageError && (
+          <div className="flex gap-0.5 sm:gap-2">
+            {/* ... (buttons remain same) */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-xl h-10 w-10 hover:bg-card/30"
+              onClick={() => router.push('/allenamento/libreria')}
+            >
+              <PiTrafficCone className="h-6 w-6 text-primary dark:text-brand-green" />
+            </Button>
 
-          {/* Statistiche - Lavagnetta */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-xl h-10 w-10 hover:bg-card/30"
-            onClick={() => setIsStatsOpen(true)}
-          >
-            <ClipboardCheck className="h-6 w-6 text-primary dark:text-brand-green" />
-          </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-xl h-10 w-10 hover:bg-card/30"
+              onClick={() => setIsStatsOpen(true)}
+            >
+              <ClipboardCheck className="h-6 w-6 text-primary dark:text-brand-green" />
+            </Button>
 
-          {/* Genera - Più */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-xl h-10 w-10 hover:bg-card/30"
-            onClick={() => setIsGeneratorOpen(true)}
-          >
-            <PlusCircle className="h-6 w-6 text-primary dark:text-brand-green" />
-          </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-xl h-10 w-10 hover:bg-card/30"
+              onClick={() => setIsGeneratorOpen(true)}
+            >
+              <PlusCircle className="h-6 w-6 text-primary dark:text-brand-green" />
+            </Button>
 
-          {/* Filtra - Imbuto */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "rounded-xl h-10 w-10 transition-all",
-                  focusFilter ? "bg-primary/10 dark:bg-brand-green/10 shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.2)]" : "hover:bg-card/30"
-                )}
-              >
-                <Filter className="h-6 w-6 text-primary dark:text-brand-green" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 rounded-2xl bg-card dark:bg-background border-border dark:border-brand-green/30 backdrop-blur-xl text-foreground dark:text-white p-2">
-              <div className="px-2 py-1.5 mb-1 border-b border-border dark:border-white/5">
-                <span className="text-[10px] font-black uppercase text-muted-foreground/50 tracking-widest">Filtra per Focus</span>
-              </div>
-              <DropdownMenuItem
-                className={cn("text-[10px] font-bold uppercase rounded-xl mb-1 focus:bg-primary/20 dark:focus:bg-brand-green/20", !focusFilter && "bg-primary/10 dark:bg-brand-green/10")}
-                onClick={() => setFocusFilter(null)}
-              >
-                Mostra Tutti
-              </DropdownMenuItem>
-              {uniqueFocuses.map(f => (
-                <DropdownMenuItem
-                  key={f}
-                  className={cn("text-[10px] font-bold uppercase rounded-xl mb-1 focus:bg-primary/20 dark:focus:bg-brand-green/20", focusFilter === f && "bg-primary/10 text-primary dark:bg-brand-green/10 dark:text-brand-green")}
-                  onClick={() => setFocusFilter(f)}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "rounded-xl h-10 w-10 transition-all",
+                    focusFilter ? "bg-primary/10 dark:bg-brand-green/10 shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.2)]" : "hover:bg-card/30"
+                  )}
                 >
-                  <Target className="h-3 w-3 mr-2 opacity-50" />
-                  {f}
+                  <Filter className="h-6 w-6 text-primary dark:text-brand-green" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 rounded-2xl bg-card dark:bg-background border-border dark:border-brand-green/30 backdrop-blur-xl text-foreground dark:text-white p-2">
+                <div className="px-2 py-1.5 mb-1 border-b border-border dark:border-white/5">
+                  <span className="text-[10px] font-black uppercase text-muted-foreground/50 tracking-widest">Filtra per Focus</span>
+                </div>
+                <DropdownMenuItem
+                  className={cn("text-[10px] font-bold uppercase rounded-xl mb-1 focus:bg-primary/20 dark:focus:bg-brand-green/20", !focusFilter && "bg-primary/10 dark:bg-brand-green/10")}
+                  onClick={() => setFocusFilter(null)}
+                >
+                  Mostra Tutti
                 </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                {uniqueFocuses.map(f => (
+                  <DropdownMenuItem
+                    key={f}
+                    className={cn("text-[10px] font-bold uppercase rounded-xl mb-1 focus:bg-primary/20 dark:focus:bg-brand-green/20", focusFilter === f && "bg-primary/10 text-primary dark:bg-brand-green/10 dark:text-brand-green")}
+                    onClick={() => setFocusFilter(f)}
+                  >
+                    <Target className="h-3 w-3 mr-2 opacity-50" />
+                    {f}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-          {/* Cancella - Gomma (Spostato in 4a posizione) */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-500/10"
-              >
-                <Eraser className="h-6 w-6" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-2xl bg-card dark:bg-black border-border dark:border-brand-green/30 backdrop-blur-xl text-foreground dark:text-white p-2">
-              <DropdownMenuItem className="text-[10px] font-black uppercase rounded-xl mb-1 focus:bg-primary/20 hover:bg-primary/10 dark:focus:bg-brand-green/20 dark:hover:bg-brand-green/10 transition-colors" onClick={() => setTimeout(() => setIsClearWeekOpen(true), 100)}>
-                <Eraser className="mr-2 h-4 w-4 text-primary dark:text-brand-green" /> Elimina Settimana
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-[10px] font-black uppercase rounded-xl text-rose-500 focus:bg-rose-500/20 hover:bg-rose-500/10 transition-colors cursor-pointer" onClick={() => setTimeout(() => setIsClearAllOpen(true), 100)}>
-                <Trash2 className="mr-2 h-4 w-4" /> Elimina Tutto
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-xl h-10 w-10 text-rose-500 hover:bg-rose-500/10"
+                >
+                  <PiTrafficCone className="h-6 w-6 rotate-180 opacity-0 absolute" /> {/* Placeholder for layout */}
+                  <Eraser className="h-6 w-6" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="rounded-2xl bg-card dark:bg-black border-border dark:border-brand-green/30 backdrop-blur-xl text-foreground dark:text-white p-2">
+                <DropdownMenuItem className="text-[10px] font-black uppercase rounded-xl mb-1 focus:bg-primary/20 hover:bg-primary/10 dark:focus:bg-brand-green/20 dark:hover:bg-brand-green/10 transition-colors" onClick={() => setTimeout(() => setIsClearWeekOpen(true), 100)}>
+                  <Eraser className="mr-2 h-4 w-4 text-primary dark:text-brand-green" /> Elimina Settimana
+                </DropdownMenuItem>
+                <DropdownMenuItem className="text-[10px] font-black uppercase rounded-xl text-rose-500 focus:bg-rose-500/20 hover:bg-rose-500/10 transition-colors cursor-pointer" onClick={() => setTimeout(() => setIsClearAllOpen(true), 100)}>
+                  <Trash2 className="mr-2 h-4 w-4" /> Elimina Tutto
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
       </PageHeader>
 
-      <div className="flex items-center justify-between border-b border-white/5 pb-4">
+      {hasPageError ? (
+        <ErrorState 
+          error={parseError(seasonsError || trainingError)} 
+          onRetry={() => {
+            useSeasonsStore.getState().fetchAll();
+            fetchAll();
+          }}
+          fullScreen
+        />
+      ) : (
+        <>
+          <div className="flex items-center justify-between border-b border-white/5 pb-4">
         <Button
           variant="ghost"
           size="icon"
@@ -364,6 +387,8 @@ export default function AllenamentoPage() {
           })
         )}
       </div>
+        </>
+      )}
 
       {/* Generator Dialog - Mantenuto Funzionale ma stilizzato scuro */}
       <Dialog open={isGeneratorOpen} onOpenChange={setIsGeneratorOpen}>

@@ -10,6 +10,8 @@ import { TeamRecord } from "@/components/statistiche/team-record";
 import { PlayerLeaderboard } from "@/components/statistiche/player-leaderboard";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/ui/error-state";
+import { parseError, missingSeasonError } from "@/lib/error-utils";
 
 // Dynamic imports for charts to optimize LCP and bundle size
 const VenueStatsCharts = dynamic(() => import("@/components/statistiche/venue-stats-charts").then(mod => mod.VenueStatsCharts), {
@@ -30,8 +32,8 @@ const GoalsIntervalChart = dynamic(() => import("@/components/statistiche/goals-
 });
 
 export default function StatistichePage() {
-  const { loading, loadDetailedStats, loadAdvancedStats } = useStatsStore();
-  const { fetchAll: fetchSeasons } = useSeasonsStore();
+  const { loading, error: statsError, loadDetailedStats, loadAdvancedStats } = useStatsStore();
+  const { activeSeason, error: seasonsError, fetchAll: fetchSeasons } = useSeasonsStore();
 
   useEffect(() => {
     const initialize = async () => {
@@ -47,10 +49,36 @@ export default function StatistichePage() {
     initialize();
   }, [loadDetailedStats, loadAdvancedStats, fetchSeasons]);
 
+  const hasPageError = seasonsError || statsError;
+
+  if (!loading && !activeSeason && !seasonsError) {
+    return (
+      <div className="pb-24 pt-4">
+        <PageHeader title="Statistiche" />
+        <ErrorState error={missingSeasonError()} />
+      </div>
+    );
+  }
+
   return (
     <div>
       <PageHeader title="Statistiche" />
-      <Tabs defaultValue="record" className="w-full">
+      {hasPageError ? (
+        <ErrorState 
+          error={parseError(seasonsError || statsError)} 
+          onRetry={() => {
+            fetchSeasons().then(() => {
+              const activeId = useSeasonsStore.getState().activeSeason?.id;
+              if (activeId) {
+                loadDetailedStats(activeId);
+                loadAdvancedStats(activeId);
+              }
+            });
+          }}
+          fullScreen
+        />
+      ) : (
+        <Tabs defaultValue="record" className="w-full">
         <TabsList className="grid w-full grid-cols-3 mb-6 h-12 bg-muted dark:bg-black/40 border border-border dark:border-brand-green/20 p-1 rounded-2xl transition-colors">
           <TabsTrigger value="record" className="text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-background dark:data-[state=active]:bg-black data-[state=active]:text-primary dark:data-[state=active]:text-brand-green data-[state=active]:border data-[state=active]:border-primary/50 dark:data-[state=active]:border-brand-green data-[state=active]:shadow-sm dark:data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] text-muted-foreground transition-all">Record</TabsTrigger>
           <TabsTrigger value="leaderboard" className="text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-background dark:data-[state=active]:bg-black data-[state=active]:text-primary dark:data-[state=active]:text-brand-green data-[state=active]:border data-[state=active]:border-primary/50 dark:data-[state=active]:border-brand-green data-[state=active]:shadow-sm dark:data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] text-muted-foreground transition-all">Giocatori</TabsTrigger>
@@ -91,6 +119,7 @@ export default function StatistichePage() {
            )}
         </TabsContent>
       </Tabs>
+      )}
     </div>
   );
 }

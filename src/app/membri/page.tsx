@@ -28,6 +28,8 @@ import { useSeasonsStore } from "@/store/useSeasonsStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { ErrorState } from "@/components/ui/error-state";
+import { parseError, missingSeasonError } from "@/lib/error-utils";
 
 const rolesList: Role[] = ["Portiere", "Difensore", "Centrocampista", "Attaccante"];
 const roleColors: Record<Role, string> = {
@@ -39,8 +41,8 @@ const roleColors: Record<Role, string> = {
 
 export default function RosaPage() {
   const router = useRouter();
-  const { players, loading: playersLoading, fetchAll, add, update, remove, bulkAdd, removeAll } = usePlayersStore();
-  const { activeSeason, loading: seasonsLoading, fetchAll: fetchSeasons } = useSeasonsStore();
+  const { players, loading: playersLoading, error: playersError, fetchAll, add, update, remove, bulkAdd, removeAll } = usePlayersStore();
+  const { activeSeason, loading: seasonsLoading, error: seasonsError, fetchAll: fetchSeasons } = useSeasonsStore();
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSmartFormOpen, setIsSmartFormOpen] = useState(false);
@@ -141,6 +143,17 @@ export default function RosaPage() {
     return groups;
   }, [players, searchTerm]);
 
+  if (!loading && !activeSeason && !seasonsError) {
+    return (
+      <div className="pb-24 pt-4">
+        <PageHeader title="Membri" />
+        <ErrorState error={missingSeasonError()} />
+      </div>
+    );
+  }
+
+  const hasPageError = seasonsError || playersError;
+
   return (
     <div className="pb-24 pt-4 space-y-6">
       <div className="flex flex-col items-center justify-center mb-6">
@@ -149,148 +162,160 @@ export default function RosaPage() {
         </h1>
       </div>
 
-      <div className="px-4 flex gap-3 items-center">
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary dark:text-brand-green" />
-          <Input 
-            type="text" 
-            placeholder="Cerca" 
-            className="w-full h-12 pl-12 pr-4 rounded-full bg-background dark:bg-black border border-primary/30 dark:border-brand-green/30 text-foreground placeholder:text-muted-foreground/50 font-medium text-lg focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)]"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div className="flex gap-2">
-          <Button 
-            onClick={() => setIsSmartFormOpen(true)}
-            variant="ghost"
-            className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
-            title="Importazione AI"
-          >
-            <Sparkles className="h-6 w-6" />
-          </Button>
-          <Button 
-            onClick={() => setIsImportTuttocampoOpen(true)}
-            variant="ghost"
-            className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
-            title="Importa da Tuttocampo"
-          >
-            <Globe className="h-6 w-6" />
-          </Button>
-          <Button 
-            onClick={() => handleOpenForm(null)}
-            className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-primary dark:bg-black border-2 border-primary dark:border-brand-green text-white dark:text-brand-green shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.3)] transition-all hover:scale-105 active:scale-95 hover:opacity-90 dark:hover:bg-black/80"
-          >
-            <Plus className="h-7 w-7" />
-          </Button>
-          {players.length > 0 && (
-            <Button 
-              onClick={() => setIsDeleteAllOpen(true)}
-              variant="ghost"
-              className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-destructive/20 text-destructive shadow-sm hover:bg-destructive/5 transition-all hover:scale-105 active:scale-95"
-              title="Svuota Rosa"
-            >
-              <Trash2 className="h-6 w-6" />
-            </Button>
-          )}
-        </div>
-      </div>
-
-      <div className="space-y-4 px-3">
-        {loading ? (
-          <div className="space-y-4 px-2">
-            <Skeleton className="h-14 w-full rounded-2xl bg-card/20" />
-            <Skeleton className="h-14 w-full rounded-2xl bg-card/20" />
-            <Skeleton className="h-14 w-full rounded-2xl bg-card/20" />
-          </div>
-        ) : (
-          rolesList.map(roleKey => {
-            const rolePluralMap: Record<string, string> = {
-                "Portiere": "Portieri",
-                "Difensore": "Difensori",
-                "Centrocampista": "Centrocampisti",
-                "Attaccante": "Attaccanti"
-            };
-            const roleName = rolePluralMap[roleKey];
-            const playersInRole = groupedPlayers[roleKey];
-            const isOpen = openRoles.includes(roleKey);
-            
-            if (playersInRole.length === 0 && searchTerm) return null; // Hide if searching and none found
-
-            return (
-              <div key={roleKey} className="overflow-hidden bg-card dark:bg-black/40 border border-border dark:border-brand-green/20 rounded-2xl shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)]">
-                {/* Accordion Header */}
-                <div 
-                   onClick={() => toggleRole(roleKey)}
-                   className={cn(
-                     "flex items-center justify-between p-4 cursor-pointer select-none transition-all rounded-t-2xl border-b border-border dark:border-brand-green/20",
-                     roleColors[roleKey]
-                   )}
+      {hasPageError ? (
+        <ErrorState 
+          error={parseError(seasonsError || playersError)} 
+          onRetry={() => {
+            fetchSeasons();
+            fetchAll();
+          }}
+        />
+      ) : (
+        <>
+          <div className="px-4 flex gap-3 items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary dark:text-brand-green" />
+              <Input 
+                type="text" 
+                placeholder="Cerca" 
+                className="w-full h-12 pl-12 pr-4 rounded-full bg-background dark:bg-black border border-primary/30 dark:border-brand-green/30 text-foreground placeholder:text-muted-foreground/50 font-medium text-lg focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)]"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => setIsSmartFormOpen(true)}
+                variant="ghost"
+                className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
+                title="Importazione AI"
+              >
+                <Sparkles className="h-6 w-6" />
+              </Button>
+              <Button 
+                onClick={() => setIsImportTuttocampoOpen(true)}
+                variant="ghost"
+                className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
+                title="Importa da Tuttocampo"
+              >
+                <Globe className="h-6 w-6" />
+              </Button>
+              <Button 
+                onClick={() => handleOpenForm(null)}
+                className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-primary dark:bg-black border-2 border-primary dark:border-brand-green text-white dark:text-brand-green shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.3)] transition-all hover:scale-105 active:scale-95 hover:opacity-90 dark:hover:bg-black/80"
+              >
+                <Plus className="h-7 w-7" />
+              </Button>
+              {players.length > 0 && (
+                <Button 
+                  onClick={() => setIsDeleteAllOpen(true)}
+                  variant="ghost"
+                  className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-destructive/20 text-destructive shadow-sm hover:bg-destructive/5 transition-all hover:scale-105 active:scale-95"
+                  title="Svuota Rosa"
                 >
-                  <span className="font-medium text-[17px] tracking-wide">{roleName}</span>
-                  <div className="bg-background dark:bg-black rounded-xl border border-primary/20 dark:border-brand-green/30 p-1 shadow-sm overflow-hidden transition-all hover:border-primary dark:hover:border-brand-green">
-                    {isOpen ? <ChevronUp className="h-5 w-5 text-primary dark:text-brand-green" /> : <ChevronDown className="h-5 w-5 text-primary dark:text-brand-green" />}
-                  </div>
-                </div>
+                  <Trash2 className="h-6 w-6" />
+                </Button>
+              )}
+            </div>
+          </div>
 
-                {/* Accordion Content */}
-                {isOpen && (
-                  <div className="flex flex-col py-2 rounded-b-2xl">
-                    {playersInRole.length === 0 ? (
-                      <div className="py-6 text-center text-muted-foreground text-sm italic">Nessun giocatore in questo ruolo</div>
-                    ) : (
-                      playersInRole.map((player) => (
-                        <div 
-                          key={player.id} 
-                          className="flex items-center justify-between p-4 border-b border-border dark:border-brand-green/10 last:border-b-0 group hover:bg-muted dark:hover:bg-black/60 transition-colors cursor-pointer"
-                          onClick={() => router.push(`/membri/${player.id}`)}
-                        >
-                          <div className="flex flex-col">
-                            <span className="text-foreground font-medium text-[17px]">{player.name}</span>
-                            {player.secondaryRoles && player.secondaryRoles.length > 0 && (
-                              <div className="flex gap-1 mt-0.5">
-                                {player.secondaryRoles.map(r => (
-                                  <span key={r} className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground/60 bg-muted-foreground/5 px-1 rounded">
-                                    {r.substring(0, 3)}
-                                  </span>
-                                ))}
+          <div className="space-y-4 px-3">
+            {loading ? (
+              <div className="space-y-4 px-2">
+                <Skeleton className="h-14 w-full rounded-2xl bg-card/20" />
+                <Skeleton className="h-14 w-full rounded-2xl bg-card/20" />
+                <Skeleton className="h-14 w-full rounded-2xl bg-card/20" />
+              </div>
+            ) : (
+              rolesList.map(roleKey => {
+                const rolePluralMap: Record<string, string> = {
+                    "Portiere": "Portieri",
+                    "Difensore": "Difensori",
+                    "Centrocampista": "Centrocampisti",
+                    "Attaccante": "Attaccanti"
+                };
+                const roleName = rolePluralMap[roleKey];
+                const playersInRole = groupedPlayers[roleKey];
+                const isOpen = openRoles.includes(roleKey);
+                
+                if (playersInRole.length === 0 && searchTerm) return null; // Hide if searching and none found
+
+                return (
+                  <div key={roleKey} className="overflow-hidden bg-card dark:bg-black/40 border border-border dark:border-brand-green/20 rounded-2xl shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)]">
+                    {/* Accordion Header */}
+                    <div 
+                       onClick={() => toggleRole(roleKey)}
+                       className={cn(
+                         "flex items-center justify-between p-4 cursor-pointer select-none transition-all rounded-t-2xl border-b border-border dark:border-brand-green/20",
+                         roleColors[roleKey]
+                       )}
+                    >
+                      <span className="font-medium text-[17px] tracking-wide">{roleName}</span>
+                      <div className="bg-background dark:bg-black rounded-xl border border-primary/20 dark:border-brand-green/30 p-1 shadow-sm overflow-hidden transition-all hover:border-primary dark:hover:border-brand-green">
+                        {isOpen ? <ChevronUp className="h-5 w-5 text-primary dark:text-brand-green" /> : <ChevronDown className="h-5 w-5 text-primary dark:text-brand-green" />}
+                      </div>
+                    </div>
+
+                    {/* Accordion Content */}
+                    {isOpen && (
+                      <div className="flex flex-col py-2 rounded-b-2xl">
+                        {playersInRole.length === 0 ? (
+                          <div className="py-6 text-center text-muted-foreground text-sm italic">Nessun giocatore in questo ruolo</div>
+                        ) : (
+                          playersInRole.map((player) => (
+                            <div 
+                              key={player.id} 
+                              className="flex items-center justify-between p-4 border-b border-border dark:border-brand-green/10 last:border-b-0 group hover:bg-muted dark:hover:bg-black/60 transition-colors cursor-pointer"
+                              onClick={() => router.push(`/membri/${player.id}`)}
+                            >
+                              <div className="flex flex-col">
+                                <span className="text-foreground font-medium text-[17px]">{player.name}</span>
+                                {player.secondaryRoles && player.secondaryRoles.length > 0 && (
+                                  <div className="flex gap-1 mt-0.5">
+                                    {player.secondaryRoles.map(r => (
+                                      <span key={r} className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground/60 bg-muted-foreground/5 px-1 rounded">
+                                        {r.substring(0, 3)}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-muted-foreground dark:text-white/40 hover:text-destructive hover:bg-destructive/10 dark:hover:text-red-500 dark:hover:bg-red-500/10 transition-all opacity-60 dark:opacity-40 group-hover:opacity-100 dark:group-hover:opacity-100"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setPlayerToDelete(player);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-muted-foreground dark:text-white/40 hover:text-primary dark:hover:text-brand-green hover:bg-primary/10 dark:hover:bg-brand-green/10 transition-all opacity-60 dark:opacity-40 group-hover:opacity-100 dark:group-hover:opacity-100"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleOpenForm(player);
-                              }}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-muted-foreground dark:text-white/40 hover:text-destructive hover:bg-destructive/10 dark:hover:text-red-500 dark:hover:bg-red-500/10 transition-all opacity-60 dark:opacity-40 group-hover:opacity-100 dark:group-hover:opacity-100"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPlayerToDelete(player);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-muted-foreground dark:text-white/40 hover:text-primary dark:hover:text-brand-green hover:bg-primary/10 dark:hover:bg-brand-green/10 transition-all opacity-60 dark:opacity-40 group-hover:opacity-100 dark:group-hover:opacity-100"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenForm(player);
+                                  }}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
-              </div>
-            );
-          })
-        )}
-      </div>
+                );
+              })
+            )}
+          </div>
+        </>
+      )}
 
       <PlayerFormDialog 
         open={isFormOpen} 

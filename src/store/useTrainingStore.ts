@@ -9,10 +9,12 @@ import { useAuthStore } from './useAuthStore';
 import { useSeasonsStore } from './useSeasonsStore';
 import { useSettingsStore } from './useSettingsStore';
 import { startOfWeek, addDays, format, startOfDay } from 'date-fns';
+import { getErrorMessage } from '@/lib/error-utils';
 
 interface TrainingState {
   sessions: TrainingSession[];
   loading: boolean;
+  error: string | null;
   fetchAll: () => Promise<void>;
   generateSessions: (startDate: Date, endDate: Date, sessionsPerWeek: number) => Promise<void>;
   deleteSession: (id: string) => Promise<void>;
@@ -26,22 +28,24 @@ export const useTrainingStore = create<TrainingState>()(
     (set, get) => ({
       sessions: [],
       loading: false,
+      error: null,
 
       fetchAll: async () => {
         const user = useAuthStore.getState().user;
         const activeSeason = useSeasonsStore.getState().activeSeason;
         if (!user || !activeSeason) return;
 
-        if (get().sessions.length === 0) set({ loading: true });
+        if (get().sessions.length === 0) set({ loading: true, error: null });
         try {
           const sessions = await trainingRepository.getAll(user.id, activeSeason.id);
           set({ 
             sessions: sessions.sort((a, b) => a.date.localeCompare(b.date)), 
-            loading: false 
+            loading: false,
+            error: null,
           });
         } catch (e) {
           console.error("Fetch all sessions error:", e);
-          set({ loading: false });
+          set({ loading: false, error: getErrorMessage(e) });
         }
       },
 

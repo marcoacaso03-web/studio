@@ -26,7 +26,7 @@ const periodOrder: Record<string, number> = {
   '2TS': 4
 };
 
-type UIEventType = 'goal' | 'yellow_card' | 'red_card' | 'substitution';
+type UIEventType = 'goal' | 'yellow_card' | 'red_card' | 'substitution' | 'penalty_saved' | 'penalty_missed' | 'chance' | 'woodwork' | 'note';
 
 interface MatchEventDialogProps {
   open: boolean;
@@ -35,29 +35,39 @@ interface MatchEventDialogProps {
 
 export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) {
   const { allPlayers, events: allEvents, lineup, addEvents, match } = useMatchDetailStore();
-  
+
   const [uiType, setUiType] = React.useState<UIEventType>('goal');
   const [team, setTeam] = React.useState<'home' | 'away'>('home');
-  
+
   const [playerId, setPlayerId] = React.useState<string>("");
   const [playerName, setPlayerName] = React.useState<string>("");
   const [assistPlayerId, setAssistPlayerId] = React.useState<string>("");
   const [assistPlayerName, setAssistPlayerName] = React.useState<string>("");
-  
+
   const [subInPlayerId, setSubInPlayerId] = React.useState<string>("");
   const [subInPlayerName, setSubInPlayerName] = React.useState<string>("");
   const [subOutPlayerId, setSubOutPlayerId] = React.useState<string>("");
   const [subOutPlayerName, setSubOutPlayerName] = React.useState<string>("");
 
-  const [minute, setMinute] = React.useState<number>(0);
+  const [minute, setMinute] = React.useState<number | null>(0);
   const [period, setPeriod] = React.useState<'1T' | '2T' | '1TS' | '2TS'>('1T');
+  const [notes, setNotes] = React.useState<string>("");
+
+  const [openSelect, setOpenSelect] = React.useState<string | null>(null);
 
   const maxMinutes = (period === '1T' || period === '2T') ? 60 : 20;
 
   const isPitchManSide = match?.isHome ? team === 'home' : team === 'away';
 
   const playersStatus = React.useMemo(() => {
-    if (!isPitchManSide || !lineup) return { onPitch: allPlayers, onBench: [] };
+    if (!isPitchManSide || !lineup) return { onPitch: allPlayers, onBench: [], allInLineup: allPlayers };
+
+    const lineupIds = new Set([
+      ...lineup.starters.map(p => typeof p === "string" ? p : p.playerId),
+      ...lineup.substitutes.map(p => typeof p === "string" ? p : p.playerId)
+    ].filter(Boolean));
+
+    const allInLineup = allPlayers.filter(p => lineupIds.has(p.id));
 
     let currentPitch = new Set<string>(lineup.starters.map(p => typeof p === "string" ? p : p.playerId).filter(id => id !== ""));
     let currentBench = new Set<string>(lineup.substitutes.map(p => typeof p === "string" ? p : p.playerId).filter(id => id !== ""));
@@ -66,34 +76,36 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
       if (periodOrder[a.period] !== periodOrder[b.period]) {
         return periodOrder[a.period] - periodOrder[b.period];
       }
-      return a.minute - b.minute;
+      return (a.minute ?? 0) - (b.minute ?? 0);
     });
 
     for (const event of sortedEvents) {
-      const isBefore = 
-        periodOrder[event.period] < periodOrder[period] || 
-        (event.period === period && event.minute < minute);
-      
+      const isBefore = (event.minute !== null && minute !== null) ? (
+        periodOrder[event.period] < periodOrder[period] ||
+        (event.period === period && event.minute < minute)
+      ) : true;
+
       if (!isBefore) break;
 
       if (event.team === (match?.isHome ? 'home' : 'away')) {
         if (event.type === 'substitution') {
-           if (event.subOutPlayerId) currentPitch.delete(event.subOutPlayerId);
-           if (event.subOutPlayerId) currentBench.add(event.subOutPlayerId);
-           if (event.playerId) currentBench.delete(event.playerId);
-           if (event.playerId) currentPitch.add(event.playerId);
+          if (event.subOutPlayerId) currentPitch.delete(event.subOutPlayerId);
+          if (event.subOutPlayerId) currentBench.add(event.subOutPlayerId);
+          if (event.playerId) currentBench.delete(event.playerId);
+          if (event.playerId) currentPitch.add(event.playerId);
         }
       }
     }
 
     return {
       onPitch: allPlayers.filter(p => currentPitch.has(p.id)),
-      onBench: allPlayers.filter(p => currentBench.has(p.id))
+      onBench: allPlayers.filter(p => currentBench.has(p.id)),
+      allInLineup
     };
-  }, [allPlayers, allEvents, lineup, minute, period, team, isPitchManSide, match?.isHome]);
+  }, [allPlayers, allEvents, lineup, minute, period, team, isPitchManSide, match]);
 
   React.useEffect(() => {
-    if (minute > maxMinutes) setMinute(maxMinutes);
+    if (minute !== null && minute > maxMinutes) setMinute(maxMinutes);
   }, [period, minute, maxMinutes]);
 
   const resetForm = () => {
@@ -107,6 +119,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
     setSubOutPlayerName("");
     setMinute(0);
     setPeriod('1T');
+    setNotes("");
   };
 
   const handleSave = async () => {
@@ -116,7 +129,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
     if (uiType === 'goal') {
       const selectedScorer = allPlayers.find(p => p.id === playerId);
       const selectedAssist = allPlayers.find(p => p.id === assistPlayerId);
-      
+
       const goalEvent: any = {
         ...baseEvent,
         type: 'goal',
@@ -124,7 +137,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
 
       if (isPitchManSide) {
         if (playerId) goalEvent.playerId = playerId;
-        goalEvent.playerName = selectedScorer?.name || "Giocatore";
+        goalEvent.playerName = selectedScorer?.name || "GIOCATORE";
         if (assistPlayerId && assistPlayerId !== "none") {
           goalEvent.assistPlayerId = assistPlayerId;
           if (selectedAssist) goalEvent.assistPlayerName = selectedAssist.name;
@@ -153,11 +166,19 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
         subEvent.subOutPlayerName = subOutPlayerName || "Uscente";
       }
       eventsToSave.push(subEvent);
+    } else if (uiType === 'note') {
+      eventsToSave.push({
+        ...baseEvent,
+        type: 'note',
+        notes: notes || "Nota",
+        playerName: ""
+      });
     } else {
       const selectedPlayer = allPlayers.find(p => p.id === playerId);
       const simpleEvent: any = {
         ...baseEvent,
         type: uiType as MatchEventType,
+        notes: notes || undefined
       };
 
       if (isPitchManSide) {
@@ -188,13 +209,18 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
           {/* SQUADRA */}
           <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Squadra</span>
-            <Select value={team} onValueChange={(v) => { setTeam(v as any); setPlayerId(""); setSubInPlayerId(""); setSubOutPlayerId(""); }}>
-              <SelectTrigger className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
+            <Select
+              value={team}
+              onValueChange={(v) => { setTeam(v as any); setPlayerId(""); setSubInPlayerId(""); setSubOutPlayerId(""); }}
+              open={openSelect === 'team'}
+              onOpenChange={(open) => setOpenSelect(open ? 'team' : null)}
+            >
+              <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
                 <SelectValue placeholder="Seleziona" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
-                <SelectItem value="home" className="text-[10px] font-black uppercase">{match?.isHome ? "Home" : "Away"}</SelectItem>
-                <SelectItem value="away" className="text-[10px] font-black uppercase">{!match?.isHome ? "Home" : "Away"}</SelectItem>
+                <SelectItem value="home" className="text-[10px] font-black uppercase">{match?.isHome ? "PITCHMAN" : match?.opponent || "AVVERSARIO"}</SelectItem>
+                <SelectItem value="away" className="text-[10px] font-black uppercase">{!match?.isHome ? "PITCHMAN" : match?.opponent || "AVVERSARIO"}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -202,8 +228,13 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
           {/* EVENTO */}
           <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Tipo</span>
-            <Select value={uiType} onValueChange={(v) => setUiType(v as UIEventType)}>
-              <SelectTrigger className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
+            <Select
+              value={uiType}
+              onValueChange={(v) => setUiType(v as UIEventType)}
+              open={openSelect === 'type'}
+              onOpenChange={(open) => setOpenSelect(open ? 'type' : null)}
+            >
+              <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
                 <SelectValue placeholder="Seleziona" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
@@ -211,6 +242,11 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
                 <SelectItem value="yellow_card" className="text-[10px] font-black uppercase dark:text-white text-amber-500">Ammonizione</SelectItem>
                 <SelectItem value="red_card" className="text-[10px] font-black uppercase dark:text-white text-rose-500">Espulsione</SelectItem>
                 <SelectItem value="substitution" className="text-[10px] font-black uppercase dark:text-white text-primary">Sostituzione</SelectItem>
+                <SelectItem value="penalty_saved" className="text-[10px] font-black uppercase dark:text-white text-blue-500">Rigore Parato</SelectItem>
+                <SelectItem value="penalty_missed" className="text-[10px] font-black uppercase dark:text-white text-orange-500">Rigore Sbagliato</SelectItem>
+                <SelectItem value="chance" className="text-[10px] font-black uppercase dark:text-white text-purple-500">Occasione</SelectItem>
+                <SelectItem value="woodwork" className="text-[10px] font-black uppercase dark:text-white text-emerald-500">Palo/Traversa</SelectItem>
+                <SelectItem value="note" className="text-[10px] font-black uppercase dark:text-white text-muted-foreground">Nota / Altro</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -219,10 +255,15 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
           {uiType === 'goal' && (
             <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
               <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Scorer</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Marcatore</span>
                 {isPitchManSide ? (
-                  <Select value={playerId} onValueChange={setPlayerId}>
-                    <SelectTrigger className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
+                  <Select
+                    value={playerId}
+                    onValueChange={setPlayerId}
+                    open={openSelect === 'scorer'}
+                    onOpenChange={(open) => setOpenSelect(open ? 'scorer' : null)}
+                  >
+                    <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
                       <SelectValue placeholder="Giocatore" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
@@ -232,15 +273,20 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
                     </SelectContent>
                   </Select>
                 ) : (
-                  <input className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} />
+                  <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} />
                 )}
               </div>
               <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Assist</span>
                 {isPitchManSide ? (
-                  <Select value={assistPlayerId} onValueChange={setAssistPlayerId}>
-                    <SelectTrigger className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
-                      <SelectValue placeholder="opz." />
+                  <Select
+                    value={assistPlayerId}
+                    onValueChange={setAssistPlayerId}
+                    open={openSelect === 'assist'}
+                    onOpenChange={(open) => setOpenSelect(open ? 'assist' : null)}
+                  >
+                    <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
+                      <SelectValue placeholder="OPZIONALE" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
                       <SelectItem value="none" className="text-[10px] font-black uppercase">-- nessuno --</SelectItem>
@@ -250,7 +296,7 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
                     </SelectContent>
                   </Select>
                 ) : (
-                  <input className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green" placeholder="Nome" value={assistPlayerName} onChange={e => setAssistPlayerName(e.target.value)} />
+                  <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8" placeholder="Nome" value={assistPlayerName} onChange={e => setAssistPlayerName(e.target.value)} />
                 )}
               </div>
             </div>
@@ -262,8 +308,13 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
               <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
                 <span className="text-[10px] font-black uppercase tracking-widest text-rose-500/50">Out</span>
                 {isPitchManSide ? (
-                  <Select value={subOutPlayerId} onValueChange={setSubOutPlayerId}>
-                    <SelectTrigger className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0 text-rose-500">
+                  <Select
+                    value={subOutPlayerId}
+                    onValueChange={setSubOutPlayerId}
+                    open={openSelect === 'subOut'}
+                    onOpenChange={(open) => setOpenSelect(open ? 'subOut' : null)}
+                  >
+                    <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0 text-rose-500">
                       <SelectValue placeholder="Esce" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
@@ -273,14 +324,19 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
                     </SelectContent>
                   </Select>
                 ) : (
-                  <input className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-rose-500" placeholder="Esce" value={subOutPlayerName} onChange={e => setSubOutPlayerName(e.target.value)} />
+                  <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-rose-500 pr-8" placeholder="Esce" value={subOutPlayerName} onChange={e => setSubOutPlayerName(e.target.value)} />
                 )}
               </div>
               <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
                 <span className="text-[10px] font-black uppercase tracking-widest text-brand-green/50">In</span>
                 {isPitchManSide ? (
-                  <Select value={subInPlayerId} onValueChange={setSubInPlayerId}>
-                    <SelectTrigger className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0 text-brand-green">
+                  <Select
+                    value={subInPlayerId}
+                    onValueChange={setSubInPlayerId}
+                    open={openSelect === 'subIn'}
+                    onOpenChange={(open) => setOpenSelect(open ? 'subIn' : null)}
+                  >
+                    <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0 text-brand-green">
                       <SelectValue placeholder="Entra" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
@@ -290,72 +346,127 @@ export function MatchEventDialog({ open, onOpenChange }: MatchEventDialogProps) 
                     </SelectContent>
                   </Select>
                 ) : (
-                  <input className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-brand-green" placeholder="Entra" value={subInPlayerName} onChange={e => setSubInPlayerName(e.target.value)} />
+                  <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-brand-green pr-8" placeholder="Entra" value={subInPlayerName} onChange={e => setSubInPlayerName(e.target.value)} />
                 )}
               </div>
             </div>
           )}
 
-          {/* CARDS SECTION */}
-          {(uiType === 'yellow_card' || uiType === 'red_card') && (
+          {/* PLAYER SELECTION FOR OTHERS */}
+          {['penalty_saved', 'penalty_missed', 'chance', 'woodwork'].includes(uiType) && (
             <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
               <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Player</span>
               {isPitchManSide ? (
-                <Select value={playerId} onValueChange={setPlayerId}>
-                  <SelectTrigger className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
-                    <SelectValue placeholder="Seleziona" />
+                <Select
+                  value={playerId}
+                  onValueChange={setPlayerId}
+                  open={openSelect === 'pitchPlayer'}
+                  onOpenChange={(open) => setOpenSelect(open ? 'pitchPlayer' : null)}
+                >
+                  <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
+                    <SelectValue placeholder="NOME" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
-                    {allPlayers.map(p => (
+                    {playersStatus.onPitch.map(p => (
                       <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{p.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               ) : (
-                <input className="w-[180px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} />
+                <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} />
               )}
+            </div>
+          )}
+
+          {/* CARDS SECTION (ALL IN LINEUP) */}
+          {['yellow_card', 'red_card'].includes(uiType) && (
+            <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Giocatore</span>
+              {isPitchManSide ? (
+                <Select
+                  value={playerId}
+                  onValueChange={setPlayerId}
+                  open={openSelect === 'cardPlayer'}
+                  onOpenChange={(open) => setOpenSelect(open ? 'cardPlayer' : null)}
+                >
+                  <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
+                    <SelectValue placeholder="Seleziona" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
+                    {playersStatus.allInLineup.map(p => (
+                      <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} />
+              )}
+            </div>
+          )}
+
+          {/* NOTES FIELD */}
+          {uiType === 'note' && (
+            <div className="bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1 block mb-2">Testo Nota</span>
+              <textarea
+                className="w-full bg-transparent border-none text-[12px] font-medium focus:outline-none text-foreground min-h-[80px] resize-none"
+                placeholder="Inserisci i dettagli dell'evento..."
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+              />
             </div>
           )}
 
           {/* TIME SECTION */}
           <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
-            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Time</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Tempo</span>
             <div className="flex items-center gap-2">
-                <Select value={period} onValueChange={(v) => setPeriod(v as any)}>
-                    <SelectTrigger className="w-16 h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
-                        <SelectItem value="1T" className="text-[10px] font-black uppercase">1T</SelectItem>
-                        <SelectItem value="2T" className="text-[10px] font-black uppercase">2T</SelectItem>
-                        <SelectItem value="1TS" className="text-[10px] font-black uppercase">1TS</SelectItem>
-                        <SelectItem value="2TS" className="text-[10px] font-black uppercase">2TS</SelectItem>
-                    </SelectContent>
-                </Select>
-                <Select value={minute.toString()} onValueChange={(v) => setMinute(parseInt(v))}>
-                    <SelectTrigger className="w-16 h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
-                        {Array.from({length: maxMinutes + 1}, (_, i) => (
-                            <SelectItem key={i} value={i.toString()} className="text-[10px] font-black uppercase">{i}&apos;</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+              <Select
+                value={period}
+                onValueChange={(v) => setPeriod(v as any)}
+                open={openSelect === 'period'}
+                onOpenChange={(open) => setOpenSelect(open ? 'period' : null)}
+              >
+                <SelectTrigger className="w-16 h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
+                  <SelectItem value="1T" className="text-[10px] font-black uppercase">1T</SelectItem>
+                  <SelectItem value="2T" className="text-[10px] font-black uppercase">2T</SelectItem>
+                  <SelectItem value="1TS" className="text-[10px] font-black uppercase">1TS</SelectItem>
+                  <SelectItem value="2TS" className="text-[10px] font-black uppercase">2TS</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value={minute === null ? "none" : minute.toString()}
+                onValueChange={(v) => setMinute(v === "none" ? null : parseInt(v))}
+                open={openSelect === 'minute'}
+                onOpenChange={(open) => setOpenSelect(open ? 'minute' : null)}
+              >
+                <SelectTrigger className="w-24 h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
+                  <SelectItem value="none" className="text-[10px] font-black uppercase">NO MIN.</SelectItem>
+                  {Array.from({ length: maxMinutes + 1 }, (_, i) => (
+                    <SelectItem key={i} value={i.toString()} className="text-[10px] font-black uppercase">{i}&apos;</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
           <div className="flex items-center gap-3 mt-6 pt-2">
-            <Button 
-               variant="ghost" 
-               className="flex-1 rounded-xl font-black uppercase text-[10px] tracking-widest h-12 text-muted-foreground hover:bg-muted dark:hover:bg-white/5 transition-all"
-               onClick={() => onOpenChange(false)}
+            <Button
+              variant="ghost"
+              className="flex-1 rounded-xl font-black uppercase text-[10px] tracking-widest h-12 text-muted-foreground hover:bg-muted dark:hover:bg-white/5 transition-all"
+              onClick={() => onOpenChange(false)}
             >
               Annulla
             </Button>
-            <Button 
-               className="flex-1 bg-primary dark:bg-black border-2 border-primary dark:border-brand-green text-white dark:text-brand-green font-black uppercase text-[10px] tracking-widest h-12 shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.1)] hover:scale-[1.02] active:scale-95 transition-all"
-               onClick={handleSave}
+            <Button
+              className="flex-1 bg-primary dark:bg-black border-2 border-primary dark:border-brand-green text-white dark:text-brand-green font-black uppercase text-[10px] tracking-widest h-12 shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.1)] hover:scale-[1.02] active:scale-95 transition-all"
+              onClick={handleSave}
             >
               Salva
             </Button>

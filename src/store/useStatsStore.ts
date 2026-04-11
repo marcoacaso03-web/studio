@@ -5,6 +5,7 @@ import { aggregationRepository } from '@/lib/repositories/aggregation-repository
 import { useSeasonsStore } from './useSeasonsStore';
 import { useAuthStore } from './useAuthStore';
 import type { AdvancedStatsLeaderboard } from '@/lib/types';
+import { getErrorMessage } from '@/lib/error-utils';
 
 interface TeamRecord {
     wins: number;
@@ -51,6 +52,7 @@ interface StatsState {
     goalsIntervals: IntervalEntry[];
     advancedLeaderboard: AdvancedStatsLeaderboard | null;
     loading: boolean;
+    error: string | null;
     loadSummaryStats: (seasonId?: string) => Promise<void>;
     loadDetailedStats: (seasonId?: string) => Promise<void>;
     loadAdvancedStats: (seasonId?: string) => Promise<void>;
@@ -65,6 +67,7 @@ export const useStatsStore = create<StatsState>((set, get) => ({
     goalsIntervals: [],
     advancedLeaderboard: null,
     loading: true,
+    error: null,
     loadSummaryStats: async (seasonId?: string) => {
         const user = useAuthStore.getState().user;
         const activeSeasonId = seasonId ?? useSeasonsStore.getState().activeSeason?.id;
@@ -74,7 +77,7 @@ export const useStatsStore = create<StatsState>((set, get) => ({
             return;
         }
 
-        if (get().teamRecord === null) set({ loading: true });
+        if (get().teamRecord === null) set({ loading: true, error: null });
         
         try {
             // Carica solo i dati necessari per il riepilogo (velocissimo)
@@ -85,11 +88,12 @@ export const useStatsStore = create<StatsState>((set, get) => ({
                 teamRecord: records.overall, 
                 homeRecord: records.home,
                 awayRecord: records.away,
-                loading: false 
+                loading: false,
+                error: null,
             });
         } catch (error) {
             console.error("Errore nel caricamento summary stats:", error);
-            set({ loading: false });
+            set({ loading: false, error: getErrorMessage(error) });
         }
     },
     loadDetailedStats: async (seasonId?: string) => {
@@ -101,7 +105,7 @@ export const useStatsStore = create<StatsState>((set, get) => ({
             return;
         }
 
-        if (get().playerLeaderboard.length === 0) set({ loading: true });
+        if (get().playerLeaderboard.length === 0) set({ loading: true, error: null });
         
         try {
             // Carica l'intero contesto (più lento, per pagina statistiche)
@@ -129,11 +133,12 @@ export const useStatsStore = create<StatsState>((set, get) => ({
                 playerLeaderboard: sortedLeaderboard as PlayerLeaderboardEntry[], 
                 teamTrend: teamTrend as TrendEntry[], 
                 goalsIntervals,
-                loading: false 
+                loading: false,
+                error: null,
             });
         } catch (error) {
             console.error("Errore nel caricamento detailed stats:", error);
-            set({ loading: false });
+            set({ loading: false, error: getErrorMessage(error) });
         }
     },
     loadAdvancedStats: async (seasonId?: string) => {
@@ -151,9 +156,10 @@ export const useStatsStore = create<StatsState>((set, get) => ({
                 leaderboard = await aggregationRepository.getAdvancedStats(user.id, activeSeasonId);
             }
             
-            set({ advancedLeaderboard: leaderboard });
+            set({ advancedLeaderboard: leaderboard, error: null });
         } catch (error) {
             console.error("Errore nel caricamento advanced stats:", error);
+            set({ error: getErrorMessage(error) });
         }
     },
 }));

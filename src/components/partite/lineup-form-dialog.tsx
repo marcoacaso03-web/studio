@@ -30,6 +30,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
   const [starters, setStarters] = React.useState<string[]>(Array(11).fill(""));
   const [substitutes, setSubstitutes] = React.useState<string[]>(Array(9).fill(""));
   const [modulo, setModulo] = React.useState("4-4-2");
+  const [openSelect, setOpenSelect] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (open) {
@@ -70,11 +71,15 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
     label,
     value,
     onValueChange,
+    open,
+    onOpenChange
   }: {
     label: string | number,
     value: string,
     onValueChange: (val: string) => void,
-    isStarter: boolean
+    isStarter: boolean,
+    open: boolean,
+    onOpenChange: (open: boolean) => void
   }) => {
     const availablePlayers = allPlayers.filter(p =>
       !allSelectedIds.includes(p.id) || p.id === value
@@ -86,7 +91,12 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
           {label}
         </div>
         <div className="flex-1">
-          <Select value={value || "none"} onValueChange={onValueChange}>
+          <Select 
+            value={value || "none"} 
+            onValueChange={onValueChange}
+            open={open}
+            onOpenChange={onOpenChange}
+          >
             <SelectTrigger className="border-none shadow-none h-8 text-foreground/70 dark:text-white/70 focus:ring-0 text-xs font-bold uppercase hover:text-foreground dark:hover:text-white transition-colors">
               <SelectValue placeholder="-- GIOCATORE --" />
             </SelectTrigger>
@@ -120,7 +130,12 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
           </div>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground dark:text-white/60">MODULO</span>
-            <Select value={modulo} onValueChange={setModulo}>
+            <Select 
+              value={modulo} 
+              onValueChange={setModulo}
+              open={openSelect === 'modulo'}
+              onOpenChange={(open) => setOpenSelect(open ? 'modulo' : null)}
+            >
               <SelectTrigger className="bg-background dark:bg-black text-foreground dark:text-white h-8 text-[11px] w-28 py-0 font-black border border-primary/50 dark:border-brand-green/50 shadow-sm uppercase focus:ring-1 focus:ring-primary dark:focus:ring-brand-green">
                 <SelectValue />
               </SelectTrigger>
@@ -150,6 +165,8 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
                   newStarters[i] = val === "none" ? "" : val;
                   setStarters(newStarters);
                 }}
+                open={openSelect === `starter-${i}`}
+                onOpenChange={(open) => setOpenSelect(open ? `starter-${i}` : null)}
               />
             ))}
           </div>
@@ -171,6 +188,8 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
                     newSubs[i] = val === "none" ? "" : val;
                     setSubstitutes(newSubs);
                   }}
+                  open={openSelect === `substitute-${i}`}
+                  onOpenChange={(open) => setOpenSelect(open ? `substitute-${i}` : null)}
                 />
               ))}
             </div>

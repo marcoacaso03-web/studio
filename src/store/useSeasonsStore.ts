@@ -5,11 +5,13 @@ import { create } from 'zustand';
 import { seasonRepository } from '@/lib/repositories/season-repository';
 import type { Season } from '@/lib/types';
 import { useAuthStore } from './useAuthStore';
+import { getErrorMessage } from '@/lib/error-utils';
 
 interface SeasonsState {
     seasons: Season[];
     activeSeason: Season | null;
     loading: boolean;
+    error: string | null;
     fetchAll: () => Promise<void>;
     addSeason: (name: string) => Promise<void>;
     setActiveSeason: (id: string) => Promise<void>;
@@ -21,32 +23,34 @@ export const useSeasonsStore = create<SeasonsState>((set, get) => ({
     seasons: [],
     activeSeason: null,
     loading: true,
+    error: null,
 
     fetchAll: async () => {
         const user = useAuthStore.getState().user;
         if (!user) {
-          set({ loading: false, seasons: [], activeSeason: null });
-          return;
+            set({ loading: false, seasons: [], activeSeason: null, error: null });
+            return;
         }
-        
-        if (get().seasons.length === 0) set({ loading: true });
+
+        if (get().seasons.length === 0) set({ loading: true, error: null });
         try {
             const active = await seasonRepository.ensureDefaultSeason(user.id);
             const all = await seasonRepository.getAll(user.id);
-            
+
             // Ordiniamo le stagioni per data di creazione (dalla più recente alla meno recente)
-            const sortedSeasons = all.sort((a, b) => 
+            const sortedSeasons = all.sort((a, b) =>
                 new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             );
 
-            set({ 
-                seasons: sortedSeasons, 
-                activeSeason: active || (sortedSeasons.length > 0 ? sortedSeasons[0] : null), 
-                loading: false 
+            set({
+                seasons: sortedSeasons,
+                activeSeason: active || (sortedSeasons.length > 0 ? sortedSeasons[0] : null),
+                loading: false,
+                error: null,
             });
         } catch (error) {
             console.error("Error fetching seasons:", error);
-            set({ loading: false });
+            set({ loading: false, error: getErrorMessage(error) });
         }
     },
 

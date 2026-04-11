@@ -9,6 +9,8 @@ import { useTrainingStore } from '@/store/useTrainingStore';
 import { useStatsStore } from '@/store/useStatsStore';
 import { useSeasonsStore } from '@/store/useSeasonsStore';
 import { useAppStore } from '@/store/useAppStore';
+import { ErrorState } from '@/components/ui/error-state';
+import { parseError } from '@/lib/error-utils';
 
 import { SplashScreen } from '@/components/layout/splash-screen';
 import { PageHeader } from '@/components/layout/page-header';
@@ -37,7 +39,7 @@ export default function HomePage() {
   const [isMatchFormOpen, setIsMatchFormOpen] = useState(false);
   const [isFullCalendarOpen, setIsFullCalendarOpen] = useState(false);
 
-  const { activeSeason, fetchAll: fetchSeasons } = useSeasonsStore();
+  const { activeSeason, error: seasonsError, fetchAll: fetchSeasons } = useSeasonsStore();
   const { players, fetchAll: fetchPlayers } = usePlayersStore();
   const { matches, fetchAll: fetchMatches, add: addMatch } = useMatchesStore();
   const { sessions, fetchAll: fetchTrainings } = useTrainingStore();
@@ -139,6 +141,19 @@ export default function HomePage() {
   };
 
   if (!mounted || isInitializing) return <SplashScreen />;
+
+  if (seasonsError) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <PageHeader title="Dashboard" />
+        <ErrorState 
+          error={parseError(seasonsError)} 
+          onRetry={() => window.location.reload()} 
+          fullScreen 
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 pb-24">
