@@ -184,6 +184,7 @@ export type TrainingSession = {
   focus?: string;
   seasonId: string;
   userId: string;
+  exerciseIds?: string[];
   attendances?: TrainingAttendance[];
 };
 

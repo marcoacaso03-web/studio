@@ -7,12 +7,13 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useTrainingStore } from "@/store/useTrainingStore";
 import { trainingRepository } from "@/lib/repositories/training-repository";
 import { useAuthStore } from "@/store/useAuthStore";
 import { usePlayersStore } from "@/store/usePlayersStore";
-import { ArrowLeft, Save, ClipboardList, Users, CheckCircle2, Clock, XCircle, Loader2, Target, Calendar } from "lucide-react";
+import { ArrowLeft, Save, ClipboardList, Users, CheckCircle2, Clock, XCircle, Loader2, Target, Calendar, ExternalLink, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,16 @@ import type { TrainingSession, TrainingAttendance, TrainingStatus } from "@/lib/
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { parseISO } from "date-fns";
+import { useExerciseStore } from "@/store/useExerciseStore";
+import { 
+  Popover, 
+  PopoverContent, 
+  PopoverTrigger 
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ExerciseViewDialog } from "@/components/allenamento/exercise-view-dialog";
+import { Exercise } from "@/lib/types";
+import { Search, Plus as PlusIcon } from "lucide-react";
 
 export default function TrainingDetailPage() {
   const params = useParams();
@@ -32,8 +43,21 @@ export default function TrainingDetailPage() {
   const [attendance, setAttendance] = useState<TrainingAttendance[]>([]);
   const [notes, setNotes] = useState("");
   const [focus, setFocus] = useState("");
+  const [selectedExerciseIds, setSelectedExerciseIds] = useState<string[]>([]);
+  const [viewingExercise, setViewingExercise] = useState<Exercise | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const { exercises, fetchAll: fetchExercises } = useExerciseStore();
+
+  const selectedExercises = exercises.filter(ex => selectedExerciseIds.includes(ex.id));
+  const filteredExercises = exercises.filter(ex => 
+    ex.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    ex.focus.some(f => f.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   useEffect(() => {
     if (!user || !sessionId) return;
@@ -45,11 +69,13 @@ export default function TrainingDetailPage() {
         setSession(s);
         setNotes(s.notes || "");
         setFocus(s.focus || "");
+        setSelectedExerciseIds(s.exerciseIds || []);
         const att = await trainingRepository.getAttendance(user.id, sessionId);
         setAttendance(att);
-        useTrainingStore.getState().updateSessionLocally(sessionId, { notes: s.notes, focus: s.focus, ...s });
+        useTrainingStore.getState().updateSessionLocally(sessionId, { notes: s.notes, focus: s.focus, exerciseIds: s.exerciseIds, ...s });
       }
       await fetchPlayers();
+      await fetchExercises();
       setLoading(false);
     };
     load();
@@ -58,9 +84,15 @@ export default function TrainingDetailPage() {
   const handleSaveNotes = async () => {
     if (!user || !session) return;
     setSaving(true);
-    await trainingRepository.update(user.id, sessionId, { notes, focus });
-    useTrainingStore.getState().updateSessionLocally(sessionId, { notes, focus });
+    await trainingRepository.update(user.id, sessionId, { notes, focus, exerciseIds: selectedExerciseIds });
+    useTrainingStore.getState().updateSessionLocally(sessionId, { notes, focus, exerciseIds: selectedExerciseIds });
     setSaving(false);
+  };
+
+  const toggleExercise = (id: string) => {
+    setSelectedExerciseIds(prev => 
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
   };
 
   const updateAttendance = async (playerId: string, status: TrainingStatus) => {
@@ -183,12 +215,49 @@ export default function TrainingDetailPage() {
                 </div>
               </div>
 
-              <Textarea 
-                placeholder="Inserisci qui gli esercizi (es. Riscaldamento tecnico, Possesso palla 4vs4+3, Partitella finale...)"
-                className="min-h-[400px] text-sm leading-relaxed bg-background dark:bg-black/40 border border-border dark:border-brand-green/30 rounded-2xl p-4 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green resize-none shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)] text-foreground dark:text-white"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-              />
+              {/* Sezione Esercitazioni Aggiunte */}
+              {selectedExercises.length > 0 && (
+                <div className="space-y-3 pb-6 border-b border-border dark:border-brand-green/20">
+                  <div className="flex items-center gap-2">
+                    <ClipboardList className="h-4 w-4 text-primary dark:text-brand-green" />
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary dark:text-brand-green">Esercitazioni Selezionate:</Label>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {selectedExercises.map((ex) => (
+                      <Card 
+                        key={ex.id} 
+                        className="group relative rounded-2xl border border-border dark:border-brand-green/20 hover:border-primary dark:hover:border-brand-green bg-muted/20 dark:bg-black/40 overflow-hidden cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
+                        onClick={() => setViewingExercise(ex)}
+                      >
+                        <CardContent className="p-4 flex flex-col gap-2">
+                           <div className="flex items-center justify-between">
+                              <span className="text-[11px] font-black uppercase text-foreground leading-tight truncate pr-4">{ex.name}</span>
+                              <ExternalLink className="h-3 w-3 opacity-20 group-hover:opacity-100 transition-opacity" />
+                           </div>
+                           <div className="flex flex-wrap gap-1">
+                              {ex.focus.slice(0, 2).map(f => (
+                                <Badge key={f} variant="outline" className="text-[7px] py-0 px-1 border-primary/20 dark:border-brand-green/20 text-muted-foreground uppercase">{f}</Badge>
+                              ))}
+                           </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Info className="h-4 w-4 text-primary dark:text-brand-green" />
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-primary dark:text-brand-green">Note e Programma Dettagliato:</Label>
+                </div>
+                <Textarea 
+                  placeholder="Inserisci qui gli esercizi aggiuntivi o dettagli sul programma (es. Riscaldamento tecnico, Partitella finale...)"
+                  className="min-h-[400px] text-sm leading-relaxed bg-background dark:bg-black/40 border border-border dark:border-brand-green/30 rounded-2xl p-4 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green resize-none shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)] text-foreground dark:text-white"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+              </div>
               <div className="pt-6 border-t border-border dark:border-brand-green/20 mt-6">
                 <Button 
                   className="w-full h-12 bg-primary dark:bg-black border border-primary dark:border-brand-green text-white rounded-2xl font-black uppercase text-xs shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.15)] hover:opacity-90 dark:hover:bg-black/80 transition-all"
@@ -273,6 +342,89 @@ export default function TrainingDetailPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Floating Action Button for Exercises */}
+      <div className="fixed bottom-6 right-6 z-50">
+          <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button 
+                size="icon" 
+                className="h-16 w-16 rounded-full bg-primary dark:bg-black border-4 border-card dark:border-brand-green/20 text-white dark:text-brand-green shadow-2xl hover:scale-110 active:scale-95 transition-all group"
+              >
+                <PlusIcon className="h-8 w-8 group-hover:rotate-90 transition-transform duration-300" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent 
+              side="top" 
+              align="end" 
+              className="w-80 p-0 mr-2 mb-4 bg-card dark:bg-black border border-border dark:border-brand-green/30 rounded-[32px] shadow-2xl overflow-hidden"
+            >
+              <div className="p-5 border-b border-border dark:border-brand-green/20 space-y-4">
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">Aggiungi Esercizi</h3>
+                <div className="relative">
+                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                   <Input 
+                    placeholder="Cerca in libreria..."
+                    className="h-9 pl-9 rounded-xl bg-muted/30 border-none text-[11px] font-bold"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                   />
+                </div>
+              </div>
+              <ScrollArea className="h-72">
+                <div className="p-2 space-y-1">
+                  {filteredExercises.map(ex => {
+                    const isSelected = selectedExerciseIds.includes(ex.id);
+                    return (
+                      <button 
+                        key={ex.id}
+                        onClick={() => toggleExercise(ex.id)}
+                        className={cn(
+                          "w-full flex items-center justify-between p-4 rounded-2xl transition-all text-left group",
+                          isSelected ? "bg-primary/5 dark:bg-brand-green/5 border border-primary/20 dark:border-brand-green/20" : "hover:bg-muted/30 border border-transparent"
+                        )}
+                      >
+                         <div className="flex flex-col gap-0.5 max-w-[80%]">
+                            <span className={cn("text-[11px] font-black uppercase truncate", isSelected ? "text-primary dark:text-brand-green" : "text-foreground")}>
+                              {ex.name}
+                            </span>
+                            <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest truncate">{ex.focus.join(' · ')}</span>
+                         </div>
+                         {isSelected ? (
+                            <div className="h-5 w-5 rounded-full bg-primary dark:bg-brand-green flex items-center justify-center">
+                               <CheckCircle2 className="h-3 w-3 text-white dark:text-black" />
+                            </div>
+                         ) : (
+                            <PlusIcon className="h-4 w-4 text-muted-foreground/30 group-hover:text-foreground" />
+                         )}
+                      </button>
+                    );
+                  })}
+                  {exercises.length === 0 && (
+                     <div className="p-8 text-center">
+                        <p className="text-[10px] font-black uppercase text-muted-foreground opacity-30">Nessun esercizio trovato</p>
+                     </div>
+                  )}
+                </div>
+              </ScrollArea>
+              <div className="p-4 bg-muted/10 dark:bg-brand-green/5 border-t border-border dark:border-brand-green/20">
+                  <Button 
+                    className="w-full h-10 rounded-xl bg-primary dark:bg-brand-green text-white dark:text-black text-[10px] font-black uppercase tracking-widest shadow-lg"
+                    onClick={() => setIsPopoverOpen(false)}
+                  >
+                    Fatto ({selectedExerciseIds.length})
+                  </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+      </div>
+
+      {/* Detail Dialog */}
+      <ExerciseViewDialog 
+        open={!!viewingExercise}
+        onOpenChange={(open) => !open && setViewingExercise(null)}
+        exercise={viewingExercise}
+      />
     </div>
   );
 }

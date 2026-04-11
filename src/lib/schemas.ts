@@ -118,6 +118,7 @@ export const TrainingSessionSchema = z.object({
   focus: z.string().catch('').optional().default(''),
   seasonId: z.string(),
   userId: z.string(),
+  exerciseIds: z.array(z.string()).optional().default([]),
   attendances: z.array(z.any()).optional().default([]), // Denormalized attendances in session doc
 });
 
