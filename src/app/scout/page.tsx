@@ -22,6 +22,7 @@ import * as React from "react";
 import type { ScoutPlayer, ScoutCategory } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "next/navigation";
+import { displayPlayerName } from "@/lib/utils";
 
 // Sub-component to safely use useSearchParams
 function ScoutContent() {
@@ -218,7 +219,7 @@ function ScoutContent() {
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex flex-col">
                       <h4 className="text-sm font-black uppercase tracking-tight text-foreground dark:text-white leading-tight">
-                        {player.name}
+                        {displayPlayerName(player as any)}
                       </h4>
                       <span className="text-[9px] font-bold text-muted-foreground/60 dark:text-white/30 uppercase tracking-wider mt-0.5">
                         {player.role} • {player.currentTeam}

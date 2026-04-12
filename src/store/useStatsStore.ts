@@ -55,7 +55,6 @@ interface StatsState {
     error: string | null;
     loadSummaryStats: (seasonId?: string) => Promise<void>;
     loadDetailedStats: (seasonId?: string) => Promise<void>;
-    loadAdvancedStats: (seasonId?: string) => Promise<void>;
 }
 
 export const useStatsStore = create<StatsState>((set, get) => ({
@@ -116,6 +115,9 @@ export const useStatsStore = create<StatsState>((set, get) => ({
             const teamTrend = aggregationRepository.getTeamTrendFromContext(context);
             const goalsIntervals = aggregationRepository.getGoalsByIntervalFromContext(context);
             
+            // Calcola le statistiche avanzate INSIEME alle altre per ottimizzare
+            const advancedLeaderboard = aggregationRepository.getAdvancedStatsFromContext(context, activeSeasonId);
+            
             const sortedLeaderboard = [...playerLeaderboard].sort((a, b) => {
                 if (b.stats.goals !== a.stats.goals) {
                     return b.stats.goals - a.stats.goals;
@@ -133,33 +135,13 @@ export const useStatsStore = create<StatsState>((set, get) => ({
                 playerLeaderboard: sortedLeaderboard as PlayerLeaderboardEntry[], 
                 teamTrend: teamTrend as TrendEntry[], 
                 goalsIntervals,
+                advancedLeaderboard,
                 loading: false,
                 error: null,
             });
         } catch (error) {
             console.error("Errore nel caricamento detailed stats:", error);
             set({ loading: false, error: getErrorMessage(error) });
-        }
-    },
-    loadAdvancedStats: async (seasonId?: string) => {
-        const user = useAuthStore.getState().user;
-        const activeSeasonId = seasonId ?? useSeasonsStore.getState().activeSeason?.id;
-
-        if (!user || !activeSeasonId) return;
-
-        try {
-            // Verifica se esiste già una leaderboard persistita su Firestore
-            let leaderboard = await aggregationRepository.getPersistedLeaderboard(activeSeasonId);
-            
-            // Se non esiste, calcolala on-demand (e salva se necessario)
-            if (!leaderboard) {
-                leaderboard = await aggregationRepository.getAdvancedStats(user.id, activeSeasonId);
-            }
-            
-            set({ advancedLeaderboard: leaderboard, error: null });
-        } catch (error) {
-            console.error("Errore nel caricamento advanced stats:", error);
-            set({ error: getErrorMessage(error) });
         }
     },
 }));

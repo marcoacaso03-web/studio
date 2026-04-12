@@ -64,13 +64,12 @@ export function TeamRecord() {
                     <CardHeader className="pb-2">
                         <CardTitle className="text-base font-black uppercase tracking-tight flex items-center gap-2 text-primary dark:text-white">
                             <GiSoccerBall className="h-4 w-4" />
-                            Bilancio Reti
+                            DIFFERENZA RETI
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-end justify-between mb-6">
                             <div className="space-y-1">
-                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Differenza Reti</p>
                                 <div className="flex items-center gap-3">
                                     <span className={`text-4xl font-black ${goalDifference > 0 ? 'text-primary dark:text-brand-green' : goalDifference < 0 ? 'text-rose-500' : 'text-foreground dark:text-white'}`}>
                                         {goalDifference > 0 ? `+${goalDifference}` : goalDifference}

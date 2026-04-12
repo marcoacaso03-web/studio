@@ -32,7 +32,7 @@ const GoalsIntervalChart = dynamic(() => import("@/components/statistiche/goals-
 });
 
 export default function StatistichePage() {
-  const { loading, error: statsError, loadDetailedStats, loadAdvancedStats } = useStatsStore();
+  const { loading, error: statsError, loadDetailedStats } = useStatsStore();
   const { activeSeason, error: seasonsError, fetchAll: fetchSeasons } = useSeasonsStore();
 
   useEffect(() => {
@@ -40,21 +40,17 @@ export default function StatistichePage() {
       const seasons = await fetchSeasons();
       const activeId = useSeasonsStore.getState().activeSeason?.id;
       if (activeId) {
-        await Promise.all([
-          loadDetailedStats(activeId),
-          loadAdvancedStats(activeId)
-        ]);
+        await loadDetailedStats(activeId);
       }
     };
     initialize();
-  }, [loadDetailedStats, loadAdvancedStats, fetchSeasons]);
+  }, [loadDetailedStats, fetchSeasons]);
 
   const hasPageError = seasonsError || statsError;
 
   if (!loading && !activeSeason && !seasonsError) {
     return (
       <div className="pb-24 pt-4">
-        <PageHeader title="Statistiche" />
         <ErrorState error={missingSeasonError()} />
       </div>
     );
@@ -62,7 +58,6 @@ export default function StatistichePage() {
 
   return (
     <div>
-      <PageHeader title="Statistiche" />
       {hasPageError ? (
         <ErrorState 
           error={parseError(seasonsError || statsError)} 
@@ -71,7 +66,6 @@ export default function StatistichePage() {
               const activeId = useSeasonsStore.getState().activeSeason?.id;
               if (activeId) {
                 loadDetailedStats(activeId);
-                loadAdvancedStats(activeId);
               }
             });
           }}

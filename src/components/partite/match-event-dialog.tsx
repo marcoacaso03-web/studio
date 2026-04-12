@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MatchEventType, MatchEvent, GoalType } from "@/lib/types";
+import { displayPlayerName } from "@/lib/utils";
 
 const periodOrder: Record<string, number> = {
   '1T': 1,
@@ -26,7 +27,7 @@ const periodOrder: Record<string, number> = {
   '2TS': 4
 };
 
-type UIEventType = 'goal' | 'yellow_card' | 'red_card' | 'substitution' | 'penalty_saved' | 'penalty_missed' | 'chance' | 'woodwork' | 'note';
+type UIEventType = 'goal' | 'own_goal' | 'yellow_card' | 'red_card' | 'substitution' | 'penalty_saved' | 'penalty_missed' | 'chance' | 'woodwork' | 'note';
 
 interface MatchEventDialogProps {
   open: boolean;
@@ -72,6 +73,9 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
         setPlayerName(eventToEdit.playerName || "");
         setAssistPlayerId(eventToEdit.assistPlayerId || "");
         setAssistPlayerName(eventToEdit.assistPlayerName || "");
+      } else if (eventToEdit.type === 'own_goal') {
+        setPlayerId(eventToEdit.playerId || "");
+        setPlayerName(eventToEdit.playerName || "");
       } else if (eventToEdit.type === 'substitution') {
         setSubInPlayerId(eventToEdit.playerId || "");
         setSubInPlayerName(eventToEdit.playerName || "");
@@ -180,6 +184,22 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
         if (assistPlayerName) goalEvent.assistPlayerName = assistPlayerName;
       }
       eventsToSave.push(goalEvent);
+    } else if (uiType === 'own_goal') {
+      // Autogol: team = la squadra del giocatore che ha commesso l'autogol
+      // Il gol verrà accreditato alla squadra avversaria nel conteggio risultato
+      const selectedPlayer = allPlayers.find(p => p.id === playerId);
+      const ownGoalEvent: any = {
+        ...baseEvent,
+        type: 'own_goal',
+      };
+
+      if (isPitchManSide) {
+        if (playerId) ownGoalEvent.playerId = playerId;
+        ownGoalEvent.playerName = selectedPlayer?.name || "GIOCATORE";
+      } else {
+        ownGoalEvent.playerName = playerName || match?.opponent || "Avversario";
+      }
+      eventsToSave.push(ownGoalEvent);
     } else if (uiType === 'substitution') {
       const selectedIn = allPlayers.find(p => p.id === subInPlayerId);
       const selectedOut = allPlayers.find(p => p.id === subOutPlayerId);
@@ -278,6 +298,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
                 <SelectItem value="goal" className="text-[10px] font-black uppercase dark:text-white text-brand-green">Goal</SelectItem>
+                <SelectItem value="own_goal" className="text-[10px] font-black uppercase dark:text-white text-rose-500">Autogol</SelectItem>
                 <SelectItem value="yellow_card" className="text-[10px] font-black uppercase dark:text-white text-amber-500">Ammonizione</SelectItem>
                 <SelectItem value="red_card" className="text-[10px] font-black uppercase dark:text-white text-rose-500">Espulsione</SelectItem>
                 <SelectItem value="substitution" className="text-[10px] font-black uppercase dark:text-white text-primary">Sostituzione</SelectItem>
@@ -336,7 +357,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
                       {playersStatus.onPitch.map(p => (
-                        <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{p.name}</SelectItem>
+                        <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{displayPlayerName(p)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -360,7 +381,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                       <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
                         <SelectItem value="none" className="text-[10px] font-black uppercase">-- nessuno --</SelectItem>
                         {playersStatus.onPitch.filter(p => p.id !== playerId).map(p => (
-                          <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{p.name}</SelectItem>
+                          <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{displayPlayerName(p)}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -369,6 +390,34 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                   )}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* OWN GOAL SECTION */}
+          {uiType === 'own_goal' && (
+            <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1">Autogol di</span>
+                {isPitchManSide ? (
+                  <Select
+                    value={playerId}
+                    onValueChange={setPlayerId}
+                    open={openSelect === 'ownGoalPlayer'}
+                    onOpenChange={(open) => setOpenSelect(open ? 'ownGoalPlayer' : null)}
+                  >
+                    <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
+                      <SelectValue placeholder="Giocatore" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
+                      {playersStatus.allInLineup.map(p => (
+                        <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{displayPlayerName(p)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} />
+                )}
+              </div>
             </div>
           )}
 
@@ -389,7 +438,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
                       {playersStatus.onPitch.map(p => (
-                        <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{p.name}</SelectItem>
+                        <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{displayPlayerName(p)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -411,7 +460,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
                       {playersStatus.onBench.map(p => (
-                        <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{p.name}</SelectItem>
+                        <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{displayPlayerName(p)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -438,7 +487,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
                     {playersStatus.onPitch.map(p => (
-                      <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{p.name}</SelectItem>
+                      <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{displayPlayerName(p)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -464,7 +513,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
                     {playersStatus.allInLineup.map(p => (
-                      <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{p.name}</SelectItem>
+                      <SelectItem key={p.id} value={p.id} className="text-[10px] font-black uppercase">{displayPlayerName(p)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

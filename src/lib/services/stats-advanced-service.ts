@@ -229,7 +229,7 @@ export function computeDecisiveGoals(
         if (normalizedMatch.resultType !== 'W') return;
 
         const matchEvents = (events[m.id] || []).map(e => normalizeEvent(e, m))
-            .filter(e => e.type === 'goal')
+            .filter(e => e.type === 'goal' || e.type === 'own_goal')
             .sort((a, b) => {
                 const poA = getPeriodOrder(a.period);
                 const poB = getPeriodOrder(b.period);
@@ -250,9 +250,13 @@ export function computeDecisiveGoals(
         const history: Array<{ scorerId: string | undefined; teamSide: 'our' | 'opponent'; scoreAfter: [number, number] }> = [];
 
         matchEvents.forEach(e => {
-            if (e.teamSide === 'our') ourScore++;
+            // Per own_goal, il gol va alla squadra avversaria di chi lo segna
+            const effectiveTeamSide = e.type === 'own_goal' 
+                ? (e.teamSide === 'our' ? 'opponent' : 'our')
+                : e.teamSide;
+            if (effectiveTeamSide === 'our') ourScore++;
             else oppScore++;
-            history.push({ scorerId: e.playerId, teamSide: e.teamSide as 'our' | 'opponent', scoreAfter: [ourScore, oppScore] });
+            history.push({ scorerId: e.type === 'goal' ? e.playerId : undefined, teamSide: effectiveTeamSide as 'our' | 'opponent', scoreAfter: [ourScore, oppScore] });
         });
 
         // Search for the first goal after which we stay in the lead until the end.

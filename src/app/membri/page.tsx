@@ -5,13 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, Sparkles, Search, Plus, ChevronRight, Globe } from "lucide-react";
+import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, Sparkles, Search, Plus, ChevronRight, Globe, Hospital } from "lucide-react";
 import type { Player, Role } from "@/lib/types";
 import dynamic from "next/dynamic";
 
 const PlayerFormDialog = dynamic(() => import("@/components/squadra/player-form-dialog").then(mod => mod.PlayerFormDialog), { ssr: false });
 const SmartPlayerDialog = dynamic(() => import("@/components/giocatori/smart-player-dialog").then(mod => mod.SmartPlayerDialog), { ssr: false });
 const ImportTuttocampoDialog = dynamic(() => import("@/components/squadra/import-tuttocampo-dialog").then(mod => mod.ImportTuttocampoDialog), { ssr: false });
+const InjuryFormDialog = dynamic(() => import("@/components/squadra/injury-form-dialog").then(mod => mod.InjuryFormDialog), { ssr: false });
 
 import {
   AlertDialog,
@@ -27,7 +28,7 @@ import { usePlayersStore } from "@/store/usePlayersStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { cn, displayPlayerName } from "@/lib/utils";
 import { ErrorState } from "@/components/ui/error-state";
 import { parseError, missingSeasonError } from "@/lib/error-utils";
 
@@ -50,6 +51,7 @@ export default function RosaPage() {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
   const [isDeleteAllOpen, setIsDeleteAllOpen] = useState(false);
+  const [isInjuryFormOpen, setIsInjuryFormOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   
   // Array per tenere traccia delle sezioni aperte (tipo accordion multiplo)
@@ -146,7 +148,6 @@ export default function RosaPage() {
   if (!loading && !activeSeason && !seasonsError) {
     return (
       <div className="pb-24 pt-4">
-        <PageHeader title="Membri" />
         <ErrorState error={missingSeasonError()} />
       </div>
     );
@@ -156,12 +157,6 @@ export default function RosaPage() {
 
   return (
     <div className="pb-24 pt-4 space-y-6">
-      <div className="flex flex-col items-center justify-center mb-6">
-        <h1 className="text-xl md:text-2xl font-black text-foreground tracking-wide relative after:content-[''] after:absolute after:bottom-[-2px] after:left-1/2 after:-translate-x-1/2 after:w-16 after:h-[2px] after:bg-gradient-to-r after:from-transparent after:via-foreground after:to-transparent">
-          Gestione Rosa Squadra
-        </h1>
-      </div>
-
       {hasPageError ? (
         <ErrorState 
           error={parseError(seasonsError || playersError)} 
@@ -193,6 +188,14 @@ export default function RosaPage() {
                 <Sparkles className="h-6 w-6" />
               </Button>
               <Button 
+                onClick={() => setIsInjuryFormOpen(true)}
+                variant="ghost"
+                className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
+                title="Infermeria"
+              >
+                <Hospital className="h-6 w-6" />
+              </Button>
+              <Button 
                 onClick={() => setIsImportTuttocampoOpen(true)}
                 variant="ghost"
                 className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
@@ -202,7 +205,9 @@ export default function RosaPage() {
               </Button>
               <Button 
                 onClick={() => handleOpenForm(null)}
-                className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-primary dark:bg-black border-2 border-primary dark:border-brand-green text-white dark:text-brand-green shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.3)] transition-all hover:scale-105 active:scale-95 hover:opacity-90 dark:hover:bg-black/80"
+                variant="ghost"
+                className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
+                title="Aggiungi Giocatore"
               >
                 <Plus className="h-7 w-7" />
               </Button>
@@ -269,7 +274,7 @@ export default function RosaPage() {
                               onClick={() => router.push(`/membri/${player.id}`)}
                             >
                               <div className="flex flex-col">
-                                <span className="text-foreground font-medium text-[17px]">{player.name}</span>
+                                <span className="text-foreground font-medium text-[17px]">{displayPlayerName(player)}</span>
                                 {player.secondaryRoles && player.secondaryRoles.length > 0 && (
                                   <div className="flex gap-1 mt-0.5">
                                     {player.secondaryRoles.map(r => (
@@ -369,6 +374,11 @@ export default function RosaPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <InjuryFormDialog
+        open={isInjuryFormOpen}
+        onOpenChange={setIsInjuryFormOpen}
+      />
     </div>
   );
 }

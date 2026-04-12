@@ -10,7 +10,7 @@ import { usePlayersStore } from "@/store/usePlayersStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { aggregationRepository } from "@/lib/repositories/aggregation-repository";
-import { cn } from "@/lib/utils";
+import { cn, displayPlayerName } from "@/lib/utils";
 import type { Player } from "@/lib/types";
 import { useThemeStore } from "@/store/useThemeStore";
 
@@ -92,9 +92,14 @@ function calculatePlayerStats(playerId: string, context: any, player: Player, pS
 
       let matchGoalsConcededCount = 0;
       chronologicalEvents.forEach((e: any) => {
-        if (e.minute >= enterMin && e.minute <= exitMin && e.type === 'goal') {
-          if (e.team === myTeam) goalsScoredOnPitch++;
-          if (e.team === oppTeam) { goalsConcededOnPitch++; matchGoalsConcededCount++; }
+        if (e.minute >= enterMin && e.minute <= exitMin) {
+          if (e.type === 'goal') {
+            if (e.team === myTeam) goalsScoredOnPitch++;
+            if (e.team === oppTeam) { goalsConcededOnPitch++; matchGoalsConcededCount++; }
+          } else if (e.type === 'own_goal') {
+            if (e.team === myTeam) { goalsConcededOnPitch++; matchGoalsConcededCount++; }
+            if (e.team === oppTeam) goalsScoredOnPitch++;
+          }
         }
       });
 
@@ -263,7 +268,7 @@ function ConfrontoContent() {
             <div className="p-3 bg-primary/10 dark:bg-brand-green/10 rounded-2xl mb-2">
               <User className="h-6 w-6 text-primary dark:text-brand-green" />
             </div>
-            <h3 className="font-black text-lg text-foreground dark:text-white leading-tight">{p1?.name ?? "..."}</h3>
+            <h3 className="font-black text-lg text-foreground dark:text-white leading-tight">{p1 ? displayPlayerName(p1) : "..."}</h3>
             <span className="text-[9px] font-black tracking-[0.2em] uppercase text-muted-foreground dark:text-white/30">{p1?.role}</span>
           </CardContent>
         </Card>
@@ -286,7 +291,7 @@ function ConfrontoContent() {
                   <div className="p-3 bg-pink-500/10 rounded-2xl mb-2">
                     <User className="h-6 w-6 text-pink-500" />
                   </div>
-                  <h3 className="font-black text-lg text-foreground dark:text-white leading-tight">{p2.name}</h3>
+                  <h3 className="font-black text-lg text-foreground dark:text-white leading-tight">{displayPlayerName(p2)}</h3>
                   <SelectTrigger className="h-6 text-[8px] font-black uppercase tracking-widest text-pink-500 bg-transparent border border-pink-500/40 hover:bg-pink-500/10 mt-1 shadow-none rounded-xl px-3 outline-none">
                     <span>CAMBIA GIOCATORE</span>
                   </SelectTrigger>
@@ -298,7 +303,7 @@ function ConfrontoContent() {
               )}
               <SelectContent className="bg-card dark:bg-black border-border dark:border-white/10 text-foreground dark:text-white rounded-xl">
                 {eligibleP2s.map(plyr => (
-                  <SelectItem key={plyr.id} value={plyr.id} className="font-bold text-[10px] uppercase focus:bg-primary/20 dark:focus:bg-brand-green/20 focus:text-primary dark:focus:text-brand-green rounded-xl transition-colors">{plyr.name}</SelectItem>
+                  <SelectItem key={plyr.id} value={plyr.id} className="font-bold text-[10px] uppercase focus:bg-primary/20 dark:focus:bg-brand-green/20 focus:text-primary dark:focus:text-brand-green rounded-xl transition-colors">{displayPlayerName(plyr)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

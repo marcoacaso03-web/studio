@@ -76,7 +76,7 @@ export function GoalVenueCharts() {
             <CardHeader className="pb-2">
                 <CardTitle className="font-black uppercase tracking-tight text-base dark:text-white flex items-center gap-2">
                     <GiSoccerBall className="h-4 w-4" />
-                    Bilancio Reti
+                    DIFFERENZA RETI
                 </CardTitle>
                 <CardDescription className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Distribuzione gol fatti e subiti tra casa e trasferta.</CardDescription>
             </CardHeader>

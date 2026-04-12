@@ -22,6 +22,12 @@ export type Season = {
   updatedAt: string;
 };
 
+export type InjuryPeriod = {
+  id: string;
+  startDate: string; // ISO formato YYYY-MM-DD
+  endDate: string; // ISO formato YYYY-MM-DD
+};
+
 export type Player = {
   id: string;
   userId: string;
@@ -34,6 +40,7 @@ export type Player = {
   role: Role;
   secondaryRoles?: Role[];
   stats: PlayerStats;
+  injuries?: InjuryPeriod[];
   createdAt?: string;
   updatedAt?: string;
 };
@@ -105,7 +112,7 @@ export type PlayerMatchStats = {
   teamOwnerId?: string;
 };
 
-export const EVENT_TYPES = ['goal', 'yellow_card', 'red_card', 'substitution', 'assist', 'sub_in', 'sub_out', 'penalty_saved', 'penalty_missed', 'chance', 'woodwork', 'note'] as const;
+export const EVENT_TYPES = ['goal', 'own_goal', 'yellow_card', 'red_card', 'substitution', 'assist', 'sub_in', 'sub_out', 'penalty_saved', 'penalty_missed', 'chance', 'woodwork', 'note'] as const;
 export type MatchEventType = typeof EVENT_TYPES[number];
 
 export const GOAL_TYPES = ['azione', 'rigore', 'punizione', 'calcio_angolo'] as const;

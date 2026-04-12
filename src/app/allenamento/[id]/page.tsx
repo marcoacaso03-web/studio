@@ -22,6 +22,7 @@ import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { parseISO } from "date-fns";
 import { useExerciseStore } from "@/store/useExerciseStore";
+import { displayPlayerName } from "@/lib/utils";
 import { 
   Popover, 
   PopoverContent, 
@@ -293,7 +294,7 @@ export default function TrainingDetailPage() {
                 <Card key={player.id} className="rounded-2xl border border-border dark:border-brand-green/20 overflow-hidden bg-card dark:bg-card/40 backdrop-blur-sm shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)]">
                   <CardContent className="p-4 flex flex-row items-center justify-between gap-4">
                     <div className="flex flex-col justify-center sm:pl-2 flex-1">
-                      <span className="text-[15px] font-black uppercase tracking-tight text-foreground">{player.name}</span>
+                      <span className="text-[15px] font-black uppercase tracking-tight text-foreground">{displayPlayerName(player)}</span>
                       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">{player.role}</span>
                     </div>
 

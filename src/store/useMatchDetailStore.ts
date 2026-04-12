@@ -13,6 +13,7 @@ import { useStatsStore } from './useStatsStore';
 import { useSeasonsStore } from './useSeasonsStore';
 import { useAuthStore } from './useAuthStore';
 import type { Match, Player, MatchLineup, MatchEvent, PlayerMatchStats } from '@/lib/types';
+import { countGoals } from '@/lib/goal-utils';
 
 interface MatchDetailState {
     matchId: string | null;
@@ -140,6 +141,7 @@ export const useMatchDetailStore = create<MatchDetailState>()(
             const redCards = teamEvents.filter(e => e.type === 'red_card' && e.playerId === playerId).length;
             const goals = teamEvents.filter(e => e.type === 'goal' && e.playerId === playerId).length;
             const assists = teamEvents.filter(e => e.type === 'goal' && e.assistPlayerId === playerId).length;
+            // Nota: own_goal NON viene conteggiato come gol del giocatore
 
             let minutesPlayed = 0;
             const isStarter = lineup?.starters.some(p => (typeof p === 'string' ? p : p.playerId) === playerId);
@@ -211,8 +213,7 @@ export const useMatchDetailStore = create<MatchDetailState>()(
             return (a.minute ?? 0) - (b.minute ?? 0);
         });
 
-        const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
-        const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
+        const { home: homeGoals, away: awayGoals } = countGoals(updatedEvents);
         const updatedMatch = { ...match, result: { home: homeGoals, away: awayGoals } };
 
         set({ events: updatedEvents, match: updatedMatch });
@@ -253,8 +254,7 @@ export const useMatchDetailStore = create<MatchDetailState>()(
             return (a.minute ?? 0) - (b.minute ?? 0);
         });
 
-        const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
-        const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
+        const { home: homeGoals, away: awayGoals } = countGoals(updatedEvents);
         const updatedMatch = { ...match, result: { home: homeGoals, away: awayGoals } };
 
         set({ events: updatedEvents, match: updatedMatch });
@@ -277,8 +277,7 @@ export const useMatchDetailStore = create<MatchDetailState>()(
             return (a.minute ?? 0) - (b.minute ?? 0);
         });
 
-        const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
-        const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
+        const { home: homeGoals, away: awayGoals } = countGoals(updatedEvents);
         const updatedMatch = { ...match, result: { home: homeGoals, away: awayGoals } };
 
         set({ events: updatedEvents, match: updatedMatch });
@@ -294,8 +293,7 @@ export const useMatchDetailStore = create<MatchDetailState>()(
         if (!matchId || !match || !user) return;
 
         const updatedEvents = currentEvents.filter(e => e.id !== eventId);
-        const homeGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'home').length;
-        const awayGoals = updatedEvents.filter(e => e.type === 'goal' && e.team === 'away').length;
+        const { home: homeGoals, away: awayGoals } = countGoals(updatedEvents);
         const updatedMatch = { ...match, result: { home: homeGoals, away: awayGoals } };
 
         set({ events: updatedEvents, match: updatedMatch });

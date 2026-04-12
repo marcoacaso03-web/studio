@@ -178,30 +178,66 @@ export const aggregationRepository = {
     },
 
     getGoalsByIntervalFromContext(context: SeasonDataContext) {
-        const intervals = { '1-30': 0, '31-60': 0, '61-90+': 0 };
         const completedMatches = context.matches.filter(m => m.status === 'completed');
+        
+        let duration = 90;
+        if (context.matches.length > 0) {
+            const lastMatch = completedMatches[completedMatches.length - 1] || context.matches[context.matches.length - 1];
+            if (lastMatch && lastMatch.duration) {
+                duration = lastMatch.duration;
+            }
+        }
+
+        const int1Limit = Math.round(duration / 3);
+        const int2Limit = Math.round((duration * 2) / 3);
+
+        const int1Key = `1-${int1Limit}`;
+        const int2Key = `${int1Limit + 1}-${int2Limit}`;
+        const int3Key = `${int2Limit + 1}-${duration}+`;
+
+        const intervals: Record<string, number> = {
+            [int1Key]: 0,
+            [int2Key]: 0,
+            [int3Key]: 0,
+        };
 
         for (const match of completedMatches) {
             const details = context.matchesDetails[match.id];
             if (!details) continue;
 
+            const matchDuration = match.duration || 90;
+            const halfTime = Math.floor(matchDuration / 2);
+
             const isPitchManTeam = match.isHome ? 'home' : 'away';
             const goals = details.events.filter(e => e.type === 'goal' && e.team === isPitchManTeam);
             
             goals.forEach(event => {
-                if (event.period === '1T') {
-                    if (event.minute !== null && event.minute <= 30) intervals['1-30']++;
-                    else if (event.minute !== null) intervals['31-60']++;
-                } else {
-                    intervals['61-90+']++;
+                if (event.minute === null) {
+                    intervals[int3Key]++;
+                    return;
                 }
+
+                const min = event.minute;
+                let absMin = 0;
+                
+                if (event.period === '1T') {
+                    absMin = Math.min(min, halfTime);
+                } else if (event.period === '2T') {
+                    absMin = halfTime + Math.min(min, halfTime);
+                } else {
+                    absMin = matchDuration + min;
+                }
+
+                if (absMin <= int1Limit) intervals[int1Key]++;
+                else if (absMin <= int2Limit) intervals[int2Key]++;
+                else intervals[int3Key]++;
             });
         }
 
         return [
-            { name: "1-30'", value: intervals['1-30'], fill: "#ace504" },
-            { name: "31-60'", value: intervals['31-60'], fill: "rgba(172, 229, 4, 0.6)" },
-            { name: "61-90'+", value: intervals['61-90+'], fill: "rgba(172, 229, 4, 0.3)" }
+            { name: `${int1Key}'`, value: intervals[int1Key], fill: "#ace504" },
+            { name: `${int2Key}'`, value: intervals[int2Key], fill: "rgba(172, 229, 4, 0.6)" },
+            { name: `${int2Limit + 1}-${duration}'+`, value: intervals[int3Key], fill: "rgba(172, 229, 4, 0.3)" }
         ];
     },
 
@@ -234,6 +270,7 @@ export const aggregationRepository = {
                     }
                     
                     const isPitchManSide = match.isHome ? 'home' : 'away';
+                    // Nota: own_goal NON viene conteggiato come gol personale del giocatore
                     goals += details.events.filter(e => e.type === 'goal' && e.playerId === player.id && e.team === isPitchManSide).length;
                     assists += details.events.filter(e => e.type === 'goal' && e.assistPlayerId === player.id && e.team === isPitchManSide).length;
                 }
@@ -266,11 +303,9 @@ export const aggregationRepository = {
     },
 
     /**
-     * Calcola le statistiche avanzate (Leaderboard) per la stagione attuale.
+     * Calcola le statistiche avanzate (Leaderboard) senza ricaricare il contesto dal DB.
      */
-    async getAdvancedStats(userId: string, seasonId: string, options?: AdvancedStatsOptions): Promise<AdvancedStatsLeaderboard> {
-        const context = await this.getDetailedContext(userId, seasonId);
-        
+    getAdvancedStatsFromContext(context: SeasonDataContext, seasonId: string, options?: AdvancedStatsOptions): AdvancedStatsLeaderboard {
         const matches = context.matches;
         const players = context.players;
         const lineups: Record<string, MatchLineup> = {};
@@ -282,6 +317,14 @@ export const aggregationRepository = {
         });
 
         return computeAdvancedStatsBundle(seasonId, matches, lineups, events, players, options);
+    },
+
+    /**
+     * Calcola le statistiche avanzate (Leaderboard) per la stagione attuale ricaricando il DB.
+     */
+    async getAdvancedStats(userId: string, seasonId: string, options?: AdvancedStatsOptions): Promise<AdvancedStatsLeaderboard> {
+        const context = await this.getDetailedContext(userId, seasonId);
+        return this.getAdvancedStatsFromContext(context, seasonId, options);
     },
 
     /**

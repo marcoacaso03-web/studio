@@ -35,6 +35,7 @@ export function MatchEventsTab() {
         if (event.goalType === 'punizione') return <Zap className={iconClass} />;
         if (event.goalType === 'calcio_angolo') return <Flag className={iconClass} />;
         return <GiSoccerBall className={iconClass} />;
+      case 'own_goal': return <GiSoccerBall className={cn(size, "text-rose-500")} />;
       case 'assist': return <Handshake className={iconClass} />;
       case 'yellow_card': return <IoSquare className={iconClass} />;
       case 'red_card': return <IoSquare className={iconClass} />;
@@ -61,6 +62,9 @@ export function MatchEventsTab() {
       return event.assistPlayerName
         ? `${event.assistPlayerName.toUpperCase()}${typeLabel}`
         : typeLabel;
+    }
+    if (event.type === 'own_goal') {
+      return 'AUTOGOL';
     }
     if (event.type === 'substitution') {
       return '';
@@ -153,11 +157,21 @@ export function MatchEventsTab() {
                       const isTransitionTo2T = event.period === '2T' && timedEvents[index-1]?.period === '1T';
                       
                       // Calcola punteggio a fine primo tempo
-                      const halfTimeScore = (() => {
+                       const halfTimeScore = (() => {
                         if (!isTransitionTo2T) return "";
-                        const goals1T = timedEvents.filter(e => e.period === '1T' && e.type === 'goal');
-                        const homeGoals = goals1T.filter(e => e.team === 'home').length;
-                        const awayGoals = goals1T.filter(e => e.team === 'away').length;
+                        const events1T = timedEvents.filter(e => e.period === '1T' && (e.type === 'goal' || e.type === 'own_goal'));
+                        let homeGoals = 0;
+                        let awayGoals = 0;
+                        events1T.forEach(e => {
+                          if (e.type === 'goal') {
+                            if (e.team === 'home') homeGoals++;
+                            else awayGoals++;
+                          } else if (e.type === 'own_goal') {
+                            // Autogol: conta per la squadra avversaria
+                            if (e.team === 'home') awayGoals++;
+                            else homeGoals++;
+                          }
+                        });
                         return `${homeGoals}-${awayGoals}`;
                       })();
 
@@ -176,7 +190,7 @@ export function MatchEventsTab() {
                             match={match} 
                             getEventIcon={getEventIcon} 
                             getEventLabel={getEventLabel} 
-                            isHome={event.team === 'home'}
+                            isHome={event.type === 'own_goal' ? event.team !== 'home' : event.team === 'home'}
                             onOptionsClick={setSelectedEventOptions}
                             formatMinute={formatDisplayMinute}
                           />
@@ -200,7 +214,7 @@ export function MatchEventsTab() {
                         match={match} 
                         getEventIcon={getEventIcon} 
                         getEventLabel={getEventLabel} 
-                        isHome={event.team === 'home'}
+                        isHome={event.type === 'own_goal' ? event.team !== 'home' : event.team === 'home'}
                         onOptionsClick={setSelectedEventOptions}
                         formatMinute={formatDisplayMinute}
                       />
@@ -250,7 +264,7 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
         {/* Minute tag (Side positioned) */}
         {event.minute !== null && (
             <div className={cn(
-                "absolute whitespace-nowrap bg-muted/80 dark:bg-black/80 px-2 py-0.5 rounded-full border border-border dark:border-brand-green/10 text-[9px] font-black tabular-nums shadow-sm z-20",
+                "absolute whitespace-nowrap bg-muted/80 dark:bg-black/80 px-2.5 py-1 rounded-full border border-border dark:border-brand-green/10 text-[11px] font-black tabular-nums shadow-sm z-20",
                 alignLeft ? "left-full ml-4" : "right-full mr-4"
             )}>
                 {formatMinute(event.minute, event.period)}

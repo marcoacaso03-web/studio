@@ -139,7 +139,7 @@ interface TrainingRecord {
 
 interface MatchRecord {
   match: Match;
-  status: "titolare" | "entrato" | "inutilizzato" | "non_convocato" | "da_giocare";
+  status: "titolare" | "entrato" | "inutilizzato" | "non_convocato" | "da_giocare" | "infortunato";
 }
 
 const roleLabel: Record<string, string> = {
@@ -180,11 +180,13 @@ function TrainingHeatmap({ records }: { records: TrainingRecord[] }) {
     presente: "bg-emerald-500",
     ritardo: "bg-amber-400",
     assente: "bg-red-500",
+    infortunato: "bg-fuchsia-500"
   };
   const statusLabel: Record<string, string> = {
     presente: "Presente",
     ritardo: "In ritardo",
     assente: "Assente",
+    infortunato: "Infortunato"
   };
 
   if (records.length === 0) {
@@ -253,14 +255,16 @@ function MatchHeatmap({ records }: { records: MatchRecord[] }) {
     entrato: "bg-amber-400",
     inutilizzato: "bg-orange-500",
     non_convocato: "bg-red-500",
-    da_giocare: "bg-muted"
+    da_giocare: "bg-muted",
+    infortunato: "bg-fuchsia-500"
   };
   const statusLabel: Record<string, string> = {
     titolare: "Titolare",
     entrato: "Subentrato",
     inutilizzato: "Panchina",
     non_convocato: "Non convoc.",
-    da_giocare: "Da giocare"
+    da_giocare: "Da giocare",
+    infortunato: "Infortunato"
   };
 
   if (records.length === 0) {
@@ -357,6 +361,15 @@ export default function PlayerDetailPage() {
     const loadStats = async () => {
       setLoadingData(true);
       try {
+        const isInjuredAtDate = (dateStr: string, injuries?: {startDate: string, endDate: string}[]) => {
+          if (!injuries || injuries.length === 0) return false;
+          const d = new Date(dateStr);
+          return injuries.some(inj => {
+            const s = new Date(inj.startDate);
+            const e = new Date(inj.endDate);
+            return d >= s && d <= e;
+          });
+        };
         // Aggregazione completa stagionale (già ottimizzata con Batch)
         const context = await aggregationRepository.getDetailedContext(user.id, activeSeason.id);
         const allStats = aggregationRepository.getPlayersAggregatedStatsFromContext(context);
@@ -401,11 +414,20 @@ export default function PlayerDetailPage() {
 
             let matchGoalsConcededCount = 0;
             chronologicalEvents.forEach(e => {
-              if (e.minute !== null && e.minute >= enterMin && e.minute <= exitMin && e.type === 'goal') {
-                if (e.team === myTeam) goalsScoredOnPitch++;
-                if (e.team === oppTeam) {
-                  goalsConcededOnPitch++;
-                  matchGoalsConcededCount++;
+              if (e.minute !== null && e.minute >= enterMin && e.minute <= exitMin) {
+                if (e.type === 'goal') {
+                  if (e.team === myTeam) goalsScoredOnPitch++;
+                  if (e.team === oppTeam) {
+                    goalsConcededOnPitch++;
+                    matchGoalsConcededCount++;
+                  }
+                } else if (e.type === 'own_goal') {
+                  // Autogol: un own_goal della mia squadra = gol subito, dell'avversario = gol fatto
+                  if (e.team === myTeam) {
+                    goalsConcededOnPitch++;
+                    matchGoalsConcededCount++;
+                  }
+                  if (e.team === oppTeam) goalsScoredOnPitch++;
                 }
               }
             });
@@ -461,6 +483,10 @@ export default function PlayerDetailPage() {
             if (minutesPlayed > 0) return { match, status: "entrato" };
             return { match, status: "inutilizzato" };
           }
+          
+          if (isInjuredAtDate(match.date, player?.injuries)) {
+            return { match, status: "infortunato" };
+          }
           return { match, status: "non_convocato" };
         });
         setMatchRecords(mRecords);
@@ -474,7 +500,13 @@ export default function PlayerDetailPage() {
         const records: TrainingRecord[] = sortedSessions.map((session) => {
           const attRecord = allAtt.find((a) => a.sessionId === session.id);
           const playerAtt = attRecord?.attendance.find((a) => a.playerId === playerId);
-          return { session, status: playerAtt?.status ?? null };
+          let status = playerAtt?.status ?? null;
+          
+          if (isInjuredAtDate(session.date, player?.injuries) && (!status || status === "assente" || status === "giustificato")) {
+             status = "infortunato" as any;
+          }
+          
+          return { session, status };
         });
         setTrainingRecords(records);
       } catch (e) {

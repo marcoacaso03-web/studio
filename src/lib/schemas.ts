@@ -12,6 +12,12 @@ export const PlayerStatsSchema = z.object({
   redCards: z.number().optional().default(0),
 });
 
+export const InjuryPeriodSchema = z.object({
+  id: z.string(),
+  startDate: z.string(),
+  endDate: z.string(),
+});
+
 export const PlayerSchema = z.object({
   id: z.string(),
   userId: z.string(),
@@ -24,6 +30,7 @@ export const PlayerSchema = z.object({
   role: RoleSchema,
   secondaryRoles: z.array(RoleSchema).optional().default([]),
   stats: PlayerStatsSchema,
+  injuries: z.array(InjuryPeriodSchema).optional().default([]),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });

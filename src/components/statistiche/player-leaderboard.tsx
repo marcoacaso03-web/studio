@@ -21,6 +21,7 @@ import {
 import { ChevronUp, ChevronDown, ArrowUpDown, Info } from "lucide-react";
 import { GiSoccerBall, GiSoccerKick } from "react-icons/gi";
 import { IoSquare } from "react-icons/io5";
+import { displayPlayerName } from "@/lib/utils";
 
 type SortKey = 'name' | 'appearances' | 'goals' | 'assists' | 'avgMinutes' | 'yellowCards' | 'redCards';
 type SortOrder = 'asc' | 'desc' | null;
@@ -152,7 +153,7 @@ export function PlayerLeaderboard() {
               {sortedData.map((player) => (
                 <TableRow key={player.playerId} className="h-14 hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all border-b border-divider dark:border-white/5 last:border-none group">
                   <TableCell className="font-black whitespace-nowrap text-sm px-6 uppercase tracking-tight text-foreground dark:text-white group-hover:text-primary dark:group-hover:text-brand-green transition-colors">
-                    {player.name}
+                    {displayPlayerName(player as any)}
                   </TableCell>
                   <TableCell className="text-center text-xs font-bold px-2 text-muted-foreground dark:text-white/80">{player.stats.appearances}</TableCell>
                   <TableCell className="text-center font-black text-sm text-primary dark:text-brand-green px-2">{player.stats.goals}</TableCell>

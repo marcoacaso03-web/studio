@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { ChevronLeft } from "lucide-react";
 import { getJerseyNumber, getSubstituteNumber, FORMATION_POSITIONS, getPositionAcronym } from "@/lib/lineup-mapping";
+import { displayPlayerName } from "@/lib/utils";
 
 
 interface LineupFormDialogProps {
@@ -103,7 +104,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
             <SelectContent className="bg-card dark:bg-black border-border dark:border-white/20 text-foreground dark:text-white">
               <SelectItem value="none" className="text-xs uppercase font-bold text-muted-foreground dark:text-white/50">-- nessuno --</SelectItem>
               {availablePlayers.map(p => (
-                <SelectItem key={p.id} value={p.id} className="text-xs uppercase font-black text-foreground dark:text-white">{p.name}</SelectItem>
+                <SelectItem key={p.id} value={p.id} className="text-xs uppercase font-black text-foreground dark:text-white">{displayPlayerName(p)}</SelectItem>
               ))}
             </SelectContent>
           </Select>

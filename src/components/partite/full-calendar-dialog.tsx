@@ -138,6 +138,7 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-[95vw] h-[90vh] md:max-w-3xl rounded-3xl p-0 overflow-hidden flex flex-col border-none shadow-2xl [&>button]:hidden">
           <DialogHeader className="p-4 md:p-6 bg-card dark:bg-background border-b border-border dark:border-white/5 flex-row items-center justify-between space-y-0 shrink-0 transition-colors">
+            <DialogTitle className="sr-only">Calendario</DialogTitle>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1">
                 <Button variant="ghost" size="icon" className="text-foreground hover:bg-primary/10 dark:hover:bg-white/10 h-8 w-8 transition-colors" onClick={() => onOpenChange(false)}>
@@ -145,7 +146,6 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
                 </Button>
               </div>
               <div>
-                <DialogTitle className="text-xl font-black uppercase tracking-tight text-foreground">Calendario</DialogTitle>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Stagione {activeSeason?.name}</p>
               </div>
             </div>

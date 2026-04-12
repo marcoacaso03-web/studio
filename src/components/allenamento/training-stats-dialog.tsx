@@ -24,6 +24,7 @@ import { trainingRepository } from "@/lib/repositories/training-repository";
 import { Loader2, ClipboardCheck, ChevronLeft, CalendarRange } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { isSameWeek, parseISO } from "date-fns";
+import { displayPlayerName } from "@/lib/utils";
 
 interface TrainingStatsDialogProps {
   open: boolean;
@@ -129,7 +130,7 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
                       <TableRow key={row.id} className="h-12 border-b border-border dark:border-brand-green/10 hover:bg-muted dark:hover:bg-card/50 transition-all">
                         <TableCell className="px-3 py-0">
                           <span className="text-xs font-black uppercase text-foreground leading-tight block truncate max-w-[120px]">
-                            {row.name}
+                            {displayPlayerName(row as any)}
                           </span>
                         </TableCell>
                         <TableCell className="text-center px-1 py-0">
