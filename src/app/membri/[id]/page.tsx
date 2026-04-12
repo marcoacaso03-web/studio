@@ -502,7 +502,7 @@ export default function PlayerDetailPage() {
           const playerAtt = attRecord?.attendance.find((a) => a.playerId === playerId);
           let status = playerAtt?.status ?? null;
           
-          if (isInjuredAtDate(session.date, player?.injuries) && (!status || status === "assente" || status === "giustificato")) {
+          if (isInjuredAtDate(session.date, player?.injuries) && (!status || status === "assente")) {
              status = "infortunato" as any;
           }
           

@@ -19,7 +19,7 @@ interface PlayerState {
     fetchAll: (seasonId?: string) => Promise<void>;
     add: (data: Omit<PlayerCreateData, 'seasonId' | 'userId'>) => Promise<Player | undefined>;
     bulkAdd: (data: { name: string, role: Role }[]) => Promise<void>;
-    update: (id: string, updates: Partial<Omit<PlayerCreateData, 'seasonId' | 'userId'>>) => Promise<void>;
+    update: (id: string, updates: Partial<Omit<Player, 'id' | 'userId' | 'seasonId' | 'teamId' | 'teamOwnerId'>>) => Promise<void>;
     remove: (id: string) => Promise<void>;
     removeAll: () => Promise<void>;
 }
