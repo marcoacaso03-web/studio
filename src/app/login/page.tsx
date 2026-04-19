@@ -45,9 +45,14 @@ export default function LoginPage() {
         <div className="flex flex-col items-center space-y-4">
           <div className="w-48 h-48 relative">
             <img 
+              src="/favicon-16x16_light.png" 
+              alt="PitchMan Logo" 
+              className="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(0,128,255,0.3)] dark:hidden" 
+            />
+            <img 
               src="/favicon-16x16.png" 
               alt="PitchMan Logo" 
-              className="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(0,128,255,0.3)] dark:drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]" 
+              className="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(52,211,153,0.3)] hidden dark:block" 
             />
           </div>
           <h1 className="text-4xl font-bold tracking-tight">PitchMan</h1>

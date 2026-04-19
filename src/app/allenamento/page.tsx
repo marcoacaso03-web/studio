@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dumbbell, ChevronLeft, ChevronRight, PlusCircle, Trash2, Loader2, Eraser, ClipboardCheck, Target, Users, Filter, CalendarRange } from "lucide-react";
+import { Dumbbell, ChevronLeft, ChevronRight, PlusCircle, Trash2, Loader2, Eraser, ClipboardCheck, Target, Users, Filter, CalendarRange, Archive } from "lucide-react";
 import { PiTrafficCone } from "react-icons/pi";
 import { useTrainingStore } from "@/store/useTrainingStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
@@ -177,7 +177,7 @@ export default function AllenamentoPage() {
               className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 shrink-0"
               onClick={() => setIsArchiveOpen(true)}
             >
-              <Filter className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
+              <Archive className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
               <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Archivio</span>
             </Button>
 

@@ -24,13 +24,13 @@ export function MatchEventsTab() {
   const { events, deleteEvent, match } = useMatchDetailStore();
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [eventToEdit, setEventToEdit] = useState<MatchEvent | undefined>(undefined);
-  
+
   const [selectedEventOptions, setSelectedEventOptions] = useState<MatchEvent | null>(null);
 
   const getEventIcon = (event: MatchEvent, size: string = "h-4 w-4") => {
     const iconClass = cn(size, "text-black dark:text-white");
     switch (event.type) {
-      case 'goal': 
+      case 'goal':
         if (event.goalType === 'rigore') return <Target className={iconClass} />;
         if (event.goalType === 'punizione') return <Zap className={iconClass} />;
         if (event.goalType === 'calcio_angolo') return <Flag className={iconClass} />;
@@ -104,19 +104,19 @@ export function MatchEventsTab() {
 
   const formatDisplayMinute = (minute: number | null, period: string) => {
     if (minute === null) return "";
-    
+
     const totalDuration = match?.duration || 90;
     const halfTime = Math.floor(totalDuration / 2);
-    
-    switch(period) {
+
+    switch (period) {
       case '1T':
-        return minute > halfTime ? `${halfTime}+${minute-halfTime}'` : `${minute}'`;
+        return minute > halfTime ? `${halfTime}+${minute - halfTime}'` : `${minute}'`;
       case '2T':
-        return minute > halfTime ? `${totalDuration}+${minute-halfTime}'` : `${halfTime + minute}'`;
+        return minute > halfTime ? `${totalDuration}+${minute - halfTime}'` : `${halfTime + minute}'`;
       case '1TS':
-        return minute > 15 ? `${totalDuration}+15+${minute-15}'` : `${totalDuration + minute}'`;
+        return minute > 15 ? `${totalDuration}+15+${minute - 15}'` : `${totalDuration + minute}'`;
       case '2TS':
-        return minute > 15 ? `${totalDuration}+30+${minute-15}'` : `${totalDuration + 15 + minute}'`;
+        return minute > 15 ? `${totalDuration}+30+${minute - 15}'` : `${totalDuration + 15 + minute}'`;
       default:
         return `${minute}'`;
     }
@@ -154,10 +154,10 @@ export function MatchEventsTab() {
                 {timedEvents.length > 0 && (
                   <div className="space-y-3">
                     {timedEvents.map((event, index) => {
-                      const isTransitionTo2T = event.period === '2T' && timedEvents[index-1]?.period === '1T';
-                      
+                      const isTransitionTo2T = event.period === '2T' && timedEvents[index - 1]?.period === '1T';
+
                       // Calcola punteggio a fine primo tempo
-                       const halfTimeScore = (() => {
+                      const halfTimeScore = (() => {
                         if (!isTransitionTo2T) return "";
                         const events1T = timedEvents.filter(e => e.period === '1T' && (e.type === 'goal' || e.type === 'own_goal'));
                         let homeGoals = 0;
@@ -179,17 +179,17 @@ export function MatchEventsTab() {
                         <div key={event.id} className="space-y-3">
                           {isTransitionTo2T && (
                             <div className="relative flex items-center justify-center py-4">
-                                <div className="absolute left-0 right-0 h-px border-t border-dashed border-border dark:border-brand-green/20"></div>
-                                <span className="relative bg-card dark:bg-[#060a02] px-3 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 z-10">
-                                    INT {halfTimeScore}
-                                </span>
+                              <div className="absolute left-0 right-0 h-px border-t border-dashed border-border dark:border-brand-green/20"></div>
+                              <span className="relative bg-card dark:bg-[#060a02] px-3 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 z-10">
+                                INT {halfTimeScore}
+                              </span>
                             </div>
                           )}
-                          <TimelineEvent 
-                            event={event} 
-                            match={match} 
-                            getEventIcon={getEventIcon} 
-                            getEventLabel={getEventLabel} 
+                          <TimelineEvent
+                            event={event}
+                            match={match}
+                            getEventIcon={getEventIcon}
+                            getEventLabel={getEventLabel}
                             isHome={event.type === 'own_goal' ? event.team !== 'home' : event.team === 'home'}
                             onOptionsClick={setSelectedEventOptions}
                             formatMinute={formatDisplayMinute}
@@ -203,17 +203,17 @@ export function MatchEventsTab() {
                 {unTimedEvents.length > 0 && (
                   <div className="space-y-6 pt-8">
                     <div className="relative flex justify-center mb-8">
-                         <span className="bg-card dark:bg-background px-4 py-1 rounded-full border border-border dark:border-brand-green/30 text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 z-10 shadow-sm">
-                            Eventi Extra
-                         </span>
+                      <span className="bg-card dark:bg-background px-4 py-1 rounded-full border border-border dark:border-brand-green/30 text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 z-10 shadow-sm">
+                        Senza minutaggio
+                      </span>
                     </div>
                     {unTimedEvents.map((event) => (
-                      <TimelineEvent 
-                        key={event.id} 
-                        event={event} 
-                        match={match} 
-                        getEventIcon={getEventIcon} 
-                        getEventLabel={getEventLabel} 
+                      <TimelineEvent
+                        key={event.id}
+                        event={event}
+                        match={match}
+                        getEventIcon={getEventIcon}
+                        getEventLabel={getEventLabel}
                         isHome={event.type === 'own_goal' ? event.team !== 'home' : event.team === 'home'}
                         onOptionsClick={setSelectedEventOptions}
                         formatMinute={formatDisplayMinute}
@@ -240,8 +240,8 @@ export function MatchEventsTab() {
         onOpenChange={(open: boolean) => !open && setSelectedEventOptions(null)}
         onEdit={handleEditEvent}
         onDelete={(id: string) => {
-            deleteEvent(id);
-            setSelectedEventOptions(null);
+          deleteEvent(id);
+          setSelectedEventOptions(null);
         }}
         getEventIcon={getEventIcon}
         getEventLabel={getEventLabel}
@@ -263,15 +263,15 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
       <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center z-10">
         {/* Minute tag (Side positioned) */}
         {event.minute !== null && (
-            <div className={cn(
-                "absolute whitespace-nowrap bg-muted/80 dark:bg-black/80 px-2.5 py-1 rounded-full border border-border dark:border-brand-green/10 text-[11px] font-black tabular-nums shadow-sm z-20",
-                alignLeft ? "left-full ml-4" : "right-full mr-4"
-            )}>
-                {formatMinute(event.minute, event.period)}
-            </div>
+          <div className={cn(
+            "absolute whitespace-nowrap bg-muted/80 dark:bg-black/80 px-2.5 py-1 rounded-full border border-border dark:border-brand-green/10 text-[11px] font-black tabular-nums shadow-sm z-20",
+            alignLeft ? "left-full ml-4" : "right-full mr-4"
+          )}>
+            {formatMinute(event.minute, event.period)}
+          </div>
         )}
 
-        <button 
+        <button
           onClick={() => onOptionsClick(event)}
           className="bg-card dark:bg-[#0a1103] rounded-full p-2 border-2 border-border dark:border-brand-green/40 shadow-sm hover:scale-110 hover:border-sky-500 dark:hover:border-brand-green transition-all duration-200 group/icon"
         >
@@ -284,8 +284,8 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
         alignLeft ? "text-right" : "text-left"
       )}>
         <div className={cn(
-            "inline-flex flex-col",
-            alignLeft ? "items-end" : "items-start"
+          "inline-flex flex-col",
+          alignLeft ? "items-end" : "items-start"
         )}>
           {event.type === 'substitution' ? (
             <div className={cn("flex flex-col", alignLeft ? "items-end text-right" : "items-start text-left")}>
@@ -297,19 +297,19 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
               </div>
             </div>
           ) : event.type === 'note' ? (
-              <p className="text-[11px] sm:text-xs font-medium tracking-tight text-foreground/80 break-words italic max-w-[140px] sm:max-w-[200px]">
-                &quot;{event.notes}&quot;
-              </p>
+            <p className="text-[11px] sm:text-xs font-medium tracking-tight text-foreground/80 break-words italic max-w-[140px] sm:max-w-[200px]">
+              &quot;{event.notes}&quot;
+            </p>
           ) : (
             <div className={cn("flex flex-col", alignLeft ? "items-end" : "items-start")}>
-                <p className="font-black leading-tight uppercase text-xs sm:text-sm truncate max-w-[120px] sm:max-w-none">
-                    {mainName.toUpperCase()}
+              <p className="font-black leading-tight uppercase text-xs sm:text-sm truncate max-w-[120px] sm:max-w-none">
+                {mainName.toUpperCase()}
+              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-[9px] text-muted-foreground font-black tracking-widest leading-none">
+                  {getEventLabel(event)}
                 </p>
-                <div className="flex items-center gap-2 mt-1">
-                    <p className="text-[9px] text-muted-foreground font-black tracking-widest leading-none">
-                      {getEventLabel(event)}
-                    </p>
-                </div>
+              </div>
             </div>
           )}
         </div>
@@ -319,73 +319,73 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
 }
 
 function EventOptionsDialog({ event, open, onOpenChange, onEdit, onDelete, getEventIcon, getEventLabel }: any) {
-    const router = useRouter();
-    if (!event) return null;
+  const router = useRouter();
+  if (!event) return null;
 
-    const involvedPlayers = [
-        { id: event.playerId, name: event.playerName },
-        { id: event.assistPlayerId, name: event.assistPlayerName },
-        { id: event.subOutPlayerId, name: event.subOutPlayerName }
-    ].filter(p => p.id && p.id !== "none");
+  const involvedPlayers = [
+    { id: event.playerId, name: event.playerName },
+    { id: event.assistPlayerId, name: event.assistPlayerName },
+    { id: event.subOutPlayerId, name: event.subOutPlayerName }
+  ].filter(p => p.id && p.id !== "none");
 
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-[90vw] sm:max-w-xs bg-card dark:bg-black border border-border dark:border-brand-green/30 p-6 rounded-[28px] shadow-2xl">
-                <DialogHeader className="items-center text-center">
-                    <div className="bg-muted/10 dark:bg-brand-green/5 p-4 rounded-full border border-brand-green/20 mb-3">
-                        {getEventIcon(event, "h-8 w-8")}
-                    </div>
-                    <DialogTitle className="text-xl font-black uppercase tracking-tight leading-none mb-1">
-                        Gestione Evento
-                    </DialogTitle>
-                    <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">{getEventLabel(event)}</p>
-                </DialogHeader>
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[90vw] sm:max-w-xs bg-card dark:bg-black border border-border dark:border-brand-green/30 p-6 rounded-[28px] shadow-2xl">
+        <DialogHeader className="items-center text-center">
+          <div className="bg-muted/10 dark:bg-brand-green/5 p-4 rounded-full border border-brand-green/20 mb-3">
+            {getEventIcon(event, "h-8 w-8")}
+          </div>
+          <DialogTitle className="text-xl font-black uppercase tracking-tight leading-none mb-1">
+            Gestione Evento
+          </DialogTitle>
+          <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">{getEventLabel(event)}</p>
+        </DialogHeader>
 
-                <div className="space-y-2 mt-6">
-                    <button 
-                        onClick={() => onEdit(event)}
-                        className="w-full flex items-center justify-between p-4 bg-muted/20 dark:bg-white/5 hover:bg-muted/30 dark:hover:bg-white/10 rounded-2xl transition-all group"
-                    >
-                        <span className="text-xs font-black uppercase tracking-widest">Modifica Evento</span>
-                        <Edit2 className="h-4 w-4 text-brand-green opacity-40 group-hover:opacity-100" />
-                    </button>
+        <div className="space-y-2 mt-6">
+          <button
+            onClick={() => onEdit(event)}
+            className="w-full flex items-center justify-between p-4 bg-muted/20 dark:bg-white/5 hover:bg-muted/30 dark:hover:bg-white/10 rounded-2xl transition-all group"
+          >
+            <span className="text-xs font-black uppercase tracking-widest">Modifica Evento</span>
+            <Edit2 className="h-4 w-4 text-brand-green opacity-40 group-hover:opacity-100" />
+          </button>
 
-                    <button 
-                        onClick={() => onDelete(event.id)}
-                        className="w-full flex items-center justify-between p-4 bg-rose-500/10 hover:bg-rose-500/20 rounded-2xl transition-all group"
-                    >
-                        <span className="text-xs font-black uppercase tracking-widest text-rose-500">Elimina Evento</span>
-                        <Trash2 className="h-4 w-4 text-rose-500 opacity-40 group-hover:opacity-100" />
-                    </button>
+          <button
+            onClick={() => onDelete(event.id)}
+            className="w-full flex items-center justify-between p-4 bg-rose-500/10 hover:bg-rose-500/20 rounded-2xl transition-all group"
+          >
+            <span className="text-xs font-black uppercase tracking-widest text-rose-500">Elimina Evento</span>
+            <Trash2 className="h-4 w-4 text-rose-500 opacity-40 group-hover:opacity-100" />
+          </button>
 
-                    {involvedPlayers.length > 0 && (
-                        <div className="pt-4 space-y-2">
-                             <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.3em] ml-2 mb-2">Vai alla scheda</p>
-                             {involvedPlayers.map(p => (
-                                <button 
-                                    key={p.id}
-                                    onClick={() => router.push(`/membri/${p.id}`)}
-                                    className="w-full flex items-center justify-between p-4 bg-primary/10 dark:bg-brand-green/10 hover:bg-primary/20 dark:hover:bg-brand-green/20 rounded-2xl transition-all group"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <User className="h-4 w-4 text-primary dark:text-brand-green opacity-40" />
-                                        <span className="text-xs font-black uppercase tracking-widest truncate max-w-[150px]">{p.name}</span>
-                                    </div>
-                                    <ExternalLink className="h-3 w-3 opacity-20 group-hover:opacity-100" />
-                                </button>
-                             ))}
-                        </div>
-                    )}
-                </div>
-                
-                <Button 
-                    variant="ghost" 
-                    className="w-full mt-6 rounded-2xl font-black uppercase text-[10px] tracking-widest py-6"
-                    onClick={() => onOpenChange(false)}
+          {involvedPlayers.length > 0 && (
+            <div className="pt-4 space-y-2">
+              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.3em] ml-2 mb-2">Vai alla scheda</p>
+              {involvedPlayers.map(p => (
+                <button
+                  key={p.id}
+                  onClick={() => router.push(`/membri/${p.id}`)}
+                  className="w-full flex items-center justify-between p-4 bg-primary/10 dark:bg-brand-green/10 hover:bg-primary/20 dark:hover:bg-brand-green/20 rounded-2xl transition-all group"
                 >
-                    Chiudi
-                </Button>
-            </DialogContent>
-        </Dialog>
-    );
+                  <div className="flex items-center gap-3">
+                    <User className="h-4 w-4 text-primary dark:text-brand-green opacity-40" />
+                    <span className="text-xs font-black uppercase tracking-widest truncate max-w-[150px]">{p.name}</span>
+                  </div>
+                  <ExternalLink className="h-3 w-3 opacity-20 group-hover:opacity-100" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <Button
+          variant="ghost"
+          className="w-full mt-6 rounded-2xl font-black uppercase text-[10px] tracking-widest py-6"
+          onClick={() => onOpenChange(false)}
+        >
+          Chiudi
+        </Button>
+      </DialogContent>
+    </Dialog>
+  );
 }

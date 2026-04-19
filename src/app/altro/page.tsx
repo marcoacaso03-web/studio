@@ -63,7 +63,37 @@ export default function AltroPage() {
   const router = useRouter();
   const { theme, toggleTheme } = useThemeStore();
   const { seasons, activeSeason, fetchAll: fetchSeasons, addSeason, setActiveSeason, removeSeason, renameSeason, joinSeason } = useSeasonsStore();
-  const { defaultDuration, setDefaultDuration, sessionsPerWeek, setSessionsPerWeek, trainingDays, setTrainingDays, autoSetPresenceOnGenerate, setAutoSetPresenceOnGenerate } = useSettingsStore();
+  const { 
+    defaultDuration, setDefaultDuration, 
+    sessionsPerWeek, setSessionsPerWeek, 
+    trainingDays, setTrainingDays, 
+    autoSetPresenceOnGenerate, setAutoSetPresenceOnGenerate,
+    teamName, setTeamName
+  } = useSettingsStore();
+
+  const [localTeamName, setLocalTeamName] = useState('');
+  const [localDefaultDuration, setLocalDefaultDuration] = useState(90);
+  const [localTrainingDays, setLocalTrainingDays] = useState<number[]>([]);
+  const [localAutoSetPresenceOnGenerate, setLocalAutoSetPresenceOnGenerate] = useState(false);
+
+  useEffect(() => {
+    if (isSquadraOpen) {
+      setLocalTeamName(teamName);
+      setLocalDefaultDuration(defaultDuration);
+      setLocalTrainingDays(trainingDays);
+      setLocalAutoSetPresenceOnGenerate(autoSetPresenceOnGenerate);
+    }
+  }, [isSquadraOpen, teamName, defaultDuration, trainingDays, autoSetPresenceOnGenerate]);
+
+  const handleSaveSettings = () => {
+    setTeamName(localTeamName);
+    setDefaultDuration(localDefaultDuration);
+    setTrainingDays(localTrainingDays);
+    setSessionsPerWeek(localTrainingDays.length);
+    setAutoSetPresenceOnGenerate(localAutoSetPresenceOnGenerate);
+    setIsSquadraOpen(false);
+    toast({ title: "Impostazioni Salvate", description: "Le modifiche alla squadra sono state applicate." });
+  };
   const { user, logout } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
@@ -373,6 +403,17 @@ export default function AltroPage() {
           </DialogHeader>
 
           <div className="space-y-6 pt-4">
+            {/* Nome Squadra */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Nome Squadra</h3>
+              <Input
+                placeholder="Es: PitchMan FC"
+                value={localTeamName}
+                onChange={(e) => setLocalTeamName(e.target.value)}
+                className="font-bold uppercase text-xs bg-background dark:bg-black border border-border dark:border-brand-green/30 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green h-12 rounded-xl text-foreground"
+              />
+            </div>
+
             {/* Allenamenti / Gare */}
             <div className="space-y-3">
               <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Preferenze</h3>
@@ -382,7 +423,7 @@ export default function AltroPage() {
                   <Clock className="w-4 h-4 text-primary dark:text-brand-green" />
                   <Label className="text-sm font-bold">Durata Partite</Label>
                 </div>
-                <Select value={defaultDuration.toString()} onValueChange={(v) => setDefaultDuration(parseInt(v))}>
+                <Select value={localDefaultDuration.toString()} onValueChange={(v) => setLocalDefaultDuration(parseInt(v))}>
                   <SelectTrigger className="w-32 h-9 text-xs font-bold uppercase bg-background dark:bg-black border border-border dark:border-brand-green/30 focus:ring-1 focus:ring-primary dark:focus:ring-brand-green">
                     <SelectValue />
                   </SelectTrigger>
@@ -409,16 +450,15 @@ export default function AltroPage() {
                     { label: 'S', value: 6 },
                     { label: 'D', value: 0 },
                   ].map((day) => {
-                    const isSelected = trainingDays?.includes(day.value);
+                    const isSelected = localTrainingDays?.includes(day.value);
                     return (
                       <button
                         key={day.value}
                         onClick={() => {
                           const newDays = isSelected
-                            ? trainingDays.filter(d => d !== day.value)
-                            : [...(trainingDays || []), day.value];
-                          setTrainingDays(newDays);
-                          setSessionsPerWeek(newDays.length);
+                            ? localTrainingDays.filter(d => d !== day.value)
+                            : [...(localTrainingDays || []), day.value];
+                          setLocalTrainingDays(newDays);
                         }}
                         className={cn(
                           "w-10 h-10 rounded-xl flex items-center justify-center font-black transition-all",
@@ -441,14 +481,21 @@ export default function AltroPage() {
                     <Label className="text-sm font-bold">Auto-Compila Presenze</Label>
                   </div>
                   <Switch
-                    checked={autoSetPresenceOnGenerate}
-                    onCheckedChange={setAutoSetPresenceOnGenerate}
+                    checked={localAutoSetPresenceOnGenerate}
+                    onCheckedChange={setLocalAutoSetPresenceOnGenerate}
                     className="data-[state=checked]:bg-primary dark:data-[state=checked]:bg-brand-green"
                   />
                 </div>
                 <p className="text-[10px] text-muted-foreground/60 font-medium">Marcare tutti come presenti alla creazione automatica degli allenamenti.</p>
               </div>
             </div>
+
+            <Button 
+                onClick={handleSaveSettings}
+                className="w-full bg-primary dark:bg-black border border-primary dark:border-brand-green text-white dark:text-brand-green hover:opacity-90 dark:hover:bg-brand-green/10 h-12 rounded-2xl font-black uppercase shadow-lg dark:shadow-[0_0_15px_rgba(172,229,4,0.2)]"
+            >
+                Salva Modifiche
+            </Button>
 
             {/* Stagioni */}
             <div className="space-y-3">

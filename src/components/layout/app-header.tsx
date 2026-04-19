@@ -1,15 +1,16 @@
-
 "use client";
 
 
 import Link from 'next/link';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { GuideDialog } from './guide-dialog';
 
 const navItems = [
   { href: "/", label: "Dashboard" },
+  { href: "/calendario", label: "Calendario" },
   { href: "/allenamento", label: "Allenamento" },
   { href: "/scout", label: "Scout" },
   { href: "/altro", label: "Impostazioni" },
@@ -17,6 +18,7 @@ const navItems = [
 
 export function AppHeader() {
   const user = useAuthStore((state) => state.user);
+  const teamName = useSettingsStore((state) => state.teamName);
   const pathname = usePathname();
   
   return (
@@ -24,10 +26,11 @@ export function AppHeader() {
       <div className="flex items-center gap-10">
         <Link href="/" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
           <div className="p-1.5 bg-muted dark:bg-black border border-border dark:border-brand-green/20 rounded-xl transition-colors">
-            <img src="/favicon-16x16.png" alt="App Logo" className="h-7 w-7 object-contain drop-shadow" />
+            <img src="/favicon-16x16_light.png" alt="App Logo" className="h-7 w-7 object-contain drop-shadow dark:hidden" />
+            <img src="/favicon-16x16.png" alt="App Logo" className="h-7 w-7 object-contain drop-shadow hidden dark:block" />
           </div>
           <div className="flex flex-col">
-            <span className="text-xl font-black tracking-tighter leading-none text-foreground dark:text-white">PitchMan</span>
+            <span className="text-xl font-black tracking-tighter leading-none text-foreground dark:text-white">{teamName || 'PitchMan'}</span>
             <span className="text-[7px] uppercase font-bold tracking-[0.3em] text-muted-foreground dark:text-white/30 mt-0.5">Tactical Manager</span>
           </div>
         </Link>

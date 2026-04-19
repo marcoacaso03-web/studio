@@ -19,6 +19,7 @@ import {
 import { ChevronLeft } from "lucide-react";
 import { getJerseyNumber, getSubstituteNumber, FORMATION_POSITIONS, getPositionAcronym } from "@/lib/lineup-mapping";
 import { displayPlayerName } from "@/lib/utils";
+import { useSettingsStore } from "@/store/useSettingsStore";
 
 
 interface LineupFormDialogProps {
@@ -28,6 +29,7 @@ interface LineupFormDialogProps {
 
 export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) {
   const { allPlayers, lineup, saveLineup, match } = useMatchDetailStore();
+  const teamName = useSettingsStore((state) => state.teamName);
   const [starters, setStarters] = React.useState<string[]>(Array(11).fill(""));
   const [substitutes, setSubstitutes] = React.useState<string[]>(Array(9).fill(""));
   const [modulo, setModulo] = React.useState("4-4-2");
@@ -127,7 +129,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
         <div className="bg-card dark:bg-card/50 border-b border-border dark:border-white/10 px-4 py-3 flex items-center justify-between text-[10px] uppercase font-black tracking-widest shadow-inner shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-5 h-5 bg-primary dark:bg-brand-green rounded-full shadow-sm dark:shadow-[0_0_8px_rgba(172,229,4,0.4)]" />
-            <span className="text-foreground dark:text-white font-black">PITCHMAN</span>
+            <span className="text-foreground dark:text-white font-black uppercase">{teamName || 'PITCHMAN'}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground dark:text-white/60">MODULO</span>

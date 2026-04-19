@@ -3,6 +3,7 @@
 
 import * as React from "react";
 import { useMatchDetailStore } from "@/store/useMatchDetailStore";
+import { useSettingsStore } from "@/store/useSettingsStore";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -37,6 +38,7 @@ interface MatchEventDialogProps {
 
 export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEventDialogProps) {
   const { allPlayers, events: allEvents, lineup, addEvents, updateEvent, match } = useMatchDetailStore();
+  const teamName = useSettingsStore((state) => state.teamName);
 
   const [uiType, setUiType] = React.useState<UIEventType>('goal');
   const [team, setTeam] = React.useState<'home' | 'away'>('home');
@@ -278,8 +280,8 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                 <SelectValue placeholder="Seleziona" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
-                <SelectItem value="home" className="text-[10px] font-black uppercase">{match?.isHome ? "PITCHMAN" : match?.opponent || "AVVERSARIO"}</SelectItem>
-                <SelectItem value="away" className="text-[10px] font-black uppercase">{!match?.isHome ? "PITCHMAN" : match?.opponent || "AVVERSARIO"}</SelectItem>
+                <SelectItem value="home" className="text-[10px] font-black uppercase">{match?.isHome ? (teamName || "PITCHMAN") : match?.opponent || "AVVERSARIO"}</SelectItem>
+                <SelectItem value="away" className="text-[10px] font-black uppercase">{!match?.isHome ? (teamName || "PITCHMAN") : match?.opponent || "AVVERSARIO"}</SelectItem>
               </SelectContent>
             </Select>
           </div>

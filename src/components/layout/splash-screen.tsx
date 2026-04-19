@@ -9,7 +9,8 @@ export function SplashScreen() {
           {/* Glow attorno al logo */}
           <div className="absolute -inset-6 bg-primary/10 dark:bg-brand-green/10 rounded-full blur-3xl animate-pulse" />
           <div className="absolute -inset-2 bg-primary/5 dark:bg-brand-green/5 rounded-full blur-xl" />
-          <img src="/favicon-16x16.png" alt="App Logo" className="h-24 w-24 object-contain relative drop-shadow-[0_0_20px_rgba(0,128,255,0.3)] dark:drop-shadow-[0_0_20px_rgba(172,229,4,0.5)]" />
+          <img src="/favicon-16x16_light.png" alt="App Logo" className="h-24 w-24 object-contain relative drop-shadow-[0_0_20px_rgba(0,128,255,0.3)] dark:hidden" />
+          <img src="/favicon-16x16.png" alt="App Logo" className="h-24 w-24 object-contain relative drop-shadow-[0_0_20px_rgba(172,229,4,0.5)] hidden dark:block" />
         </div>
 
         <div className="flex flex-col items-center gap-2">

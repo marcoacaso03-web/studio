@@ -22,12 +22,13 @@ import {
   Home, Plane
 } from "lucide-react";
 import { GiWhistle, GiSoccerBall, GiSoccerKick } from "react-icons/gi";
-import { MatchFormDialog } from '@/components/partite/match-form-dialog';
 import { format, isAfter, parseISO, startOfDay } from "date-fns";
 import { it } from "date-fns/locale";
 import dynamic from "next/dynamic";
 
-const FullCalendarDialog = dynamic(() => import("@/components/partite/full-calendar-dialog").then(mod => mod.FullCalendarDialog), { ssr: false });
+const MatchFormDialog = dynamic(() => import("@/components/partite/match-form-dialog").then(mod => mod.MatchFormDialog), {
+  ssr: false
+});
 
 export default function HomePage() {
   const { user, isAuthenticated } = useAuthStore();
@@ -37,7 +38,6 @@ export default function HomePage() {
   const { hasInitialized, setHasInitialized } = useAppStore();
   const [isInitializing, setIsInitializing] = useState(!hasInitialized);
   const [isMatchFormOpen, setIsMatchFormOpen] = useState(false);
-  const [isFullCalendarOpen, setIsFullCalendarOpen] = useState(false);
 
   const { activeSeason, error: seasonsError, fetchAll: fetchSeasons } = useSeasonsStore();
   const { players, fetchAll: fetchPlayers } = usePlayersStore();
@@ -48,12 +48,7 @@ export default function HomePage() {
   useEffect(() => {
     setMounted(true);
 
-    // Check if we navigated back to this page with a request to open the calendar
-    if (typeof window !== 'undefined' && window.location.search.includes('dialog=calendar')) {
-      setIsFullCalendarOpen(true);
-      // Clean up the URL
-      window.history.replaceState(null, '', '/');
-    }
+    setMounted(true);
   }, []);
 
   useEffect(() => {
@@ -174,9 +169,6 @@ export default function HomePage() {
       {/* 2. Prossimo Impegno */}
       <div className="flex items-center justify-between mt-4 mb-2">
         <h3 className="text-sm font-black uppercase tracking-widest text-foreground dark:text-white">Prossimo Impegno</h3>
-        <Button variant="ghost" size="sm" onClick={() => setIsFullCalendarOpen(true)} className="text-[10px] font-black uppercase text-primary dark:text-brand-green hover:bg-primary/10 dark:hover:bg-brand-green/10">
-          Vedi Calendario <ArrowRight className="ml-1 h-3 w-3" />
-        </Button>
       </div>
 
       {nextMatch ? (
@@ -223,11 +215,11 @@ export default function HomePage() {
       <h3 className="text-sm font-black uppercase tracking-widest text-foreground dark:text-white mt-5 mb-2">Azioni Rapide</h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         <Button
-          onClick={() => setIsMatchFormOpen(true)}
+          onClick={() => nextMatch ? router.push(`/calendario/${nextMatch.id}?s=${nextMatch.seasonId}&tab=formazione`) : router.push('/calendario')}
           className="h-auto flex-col items-center justify-center p-3 bg-card dark:bg-white/5 border border-border dark:border-white/10 hover:bg-muted dark:hover:bg-white/10 hover:border-primary dark:hover:border-brand-green/50 text-foreground dark:text-white rounded-2xl transition-all shadow-sm gap-2"
         >
-          <CalendarPlus className="h-5 w-5 text-primary dark:text-brand-green" />
-          <span className="text-xs font-black uppercase text-center">Aggiungi Gara</span>
+          <Shield className="h-5 w-5 text-primary dark:text-brand-green" />
+          <span className="text-[10px] font-black uppercase text-center leading-tight">Prossima<br />Formazione</span>
         </Button>
 
         <Button
@@ -340,10 +332,6 @@ export default function HomePage() {
         open={isMatchFormOpen}
         onOpenChange={setIsMatchFormOpen}
         onSave={handleCreateMatch}
-      />
-      <FullCalendarDialog
-        open={isFullCalendarOpen}
-        onOpenChange={setIsFullCalendarOpen}
       />
     </div>
   );

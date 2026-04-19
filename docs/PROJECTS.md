@@ -5,8 +5,6 @@
 ---
 
 ## 🔴 Bug & Fix Immediati
-
-- [ ] **Gestione Fallback e Rate-Limit API Genkit**: Se un prompt a Genkit fallisce o va in timeout, l'interfaccia non sempre gestisce l'errore o offre modalità di "degrado assecondato" (graceful degradation) per l'utente, bloccando il flow.
 - [ ] **Hydration Errors nei Modali**: Con React 18 / Next.js e componenti headless (Radix UI), verificare e prevenire avvisi di mismatch HTML tra il server rendering e la visualizzazione locale.
 
 ---
@@ -28,14 +26,48 @@
 ---
 
 ## 🟢 Nuove Funzionalità
+Scheda percentuali di lavoro per focus minuti/su totale allenamento.
+Aggiungi minuti per esercitazione modificabile da ogni utente quando è nel proprio allenamento, per ogni minuto aggiunto si deve colorare una barra di completamento a seconda di quanto durano gli allenamenti, scelto nella schermata di gestione squadra.
+FIX: float button + per aggiungere le esercitazioni deve essere visibile solo nella schermata dell'allenamento non in presenze.
+
+Elabora logica quando nascondere navbar e barra sopra
+
+Aggiungi freccia in basso dettagli aggiuntivi in cronaca: Aggiungi dove è entrato il pallone per gol
+Aggiungi da dove è partito il tiro
+
+Test toolbar vercel
+
+Offline-first reale
+Hai già IndexedDB via Dexie e sei una PWA, ma il valore si realizza solo se la formazione si può inserire e inviare anche senza connessione, con sync automatico al ritorno online. Un allenatore in uno spogliatoio spesso non ha segnale. Zustand + Dexie sono già lì — manca la logica di sync queue.
+
+ inserire la formazione è un'operazione puramente testuale con dropdown. Il campo visivo non è un nice-to-have, è la metafora mentale con cui un allenatore ragiona. Hai già i dati, manca solo la rappresentazione pitchside.
+
+Stato disponibilità giocatori integrato nel flusso
+Da membri/ gestisci la rosa, ma al momento dell'inserimento formazione probabilmente non vedi subito chi è infortunato o diffidato. Quell'informazione deve entrare dentro la schermata di formazione, non stare su un'altra pagina.
+
+allenamenti e formazioni non si linkano tra loro (es. clicchi una partita → vedi formazione usata → vedi allenamento pre-gara)
+
+Tasto rapido inserisci formazione prossima partita
+
+Heatmap di utilizzo rosa
+Visualizzazione stagionale: asse X = giornate, asse Y = giocatori, colore = minuti giocati. Rivela immediatamente chi stai sovraccaricando e chi non sta giocando abbastanza. Hai già tutti i dati, manca solo la visualizzazione.
+
+"Formazione tipo" emergente
+Analisi automatica delle ultime N partite per rilevare qual è la formazione che statisticamente hai usato di più, con quali giocatori fissi e quali variabili. Presentata come insight nella dashboard.
+
+Chatbot a cui chiedere sull'utilizzo dell'app e statistiche. L'unico rischio residuo è se un utente manipola seasonId nel body della richiesta — per blindarlo al 100% puoi leggere seasonId direttamente dalla sessione Firebase Admin server-side invece che dal body.
+
+Opzionale:
+Visualizza gli allenamenti su un calendario con all'interno del giorno la scheda allenamento, clicca sul giorno per vedere la scheda sotto al calendario con anteprima presenza e focus oppure se riusciamo a mettere direttamente dentro al giorno questi dati.
+
+Futuro app:
+Editor esercizi
+Crea esercizi con AI, addestra un vision e un replica
+Modalità spogliatoio con sondaggi e questionari privati
 
 ### ⚽ Gestione Partite
 - [ ] **Condivisione formazione** — Generare un'immagine PNG del layout tattico (campo con nomi) da condividere su WhatsApp/Telegram.
 - [ ] **Storico formazioni** — Mostrare le formazioni delle ultime N partite per confronto tattico.
-
-### Codice di condivisione della stagione
-- Nella schermata gestione stagione ci deve essere un bottone per mostrare il codice della stagione, crea quindi una sezione nella gestione stagione in cui inserendo il codice della stagione che è una sequenza di lettere e numeri che potrebbe anche coincidere con l'ID, se lo ritieni ragionevole(tu intelligenza artificiale), inserendo tale codice l'utente ottiene l'accesso alla stagione con quell 'id dal proprio account
-
 
 ### 📊 Statistiche Avanzate
 - [ ] **Export statistiche in PDF** — Report di fine stagione stampabile.
@@ -48,7 +80,7 @@
 
 ### 🔧 Impostazioni & UX
 - [x] **Redesign Neon High-Viz** — Applicare il nuovo tema scuro/chiaro con i colori ufficiali del brand a tutte le schermate principali.
-- [ ] **Profilo allenatore** — Aggiungere nome squadra, logo, colori sociali personalizzabili nelle impostazioni.
+- [ ] **Profilo allenatore** — Aggiungere logo, colori sociali personalizzabili nelle impostazioni.
 - [ ] **Multi-lingua** — L'app è tutta in italiano. Aggiungere supporto `i18n` (almeno IT/EN) con `next-intl`.
 - [ ] **Onboarding automatizzato** — Tour interattivo alla prima apertura con micro-animazioni.
 - [ ] **Esportazioni Dati Aggregate** — Pulsante di Export Excel / CSV immediato basato sulle tabelle statistiche, necessario per presidenti / scouting manager che preferiscono la carta.
@@ -59,48 +91,17 @@
 ## 🚀 Feature Rivoluzionarie (Game Changers)
 
 ### 🧩 Automazione & Campo
-- [ ] **Lavagna Tattica Interattiva** — Un campo trascinabile (whiteboard digitale) per spiegare schemi e movimenti durante l'allenamento.
 - [ ] **Cronometro Match con Eventi** — Gestione live della partita con tasti rapidi "Gol/Cartellino" che registrano l'ora esatta automaticamente.
 
 ### 🧠 Intelligenza Artificiale
 - [ ] **AI Assistant "Best 11"** — Suggerimento automatico della formazione titolare incrociando presenze agli allenamenti e performance nelle ultime gare.
-- [ ] **Match Flow Timeline** — Generazione automatica di una timeline visiva degli eventi della partita con icone e momenti chiave.
-
----
 
 ## 🛠️ Ottimizzazioni Tecniche e Architetturali
 
 ### 🎨 Design System
-- [x] **Standardizzazione Design Tokens** — Centralizzare tutti i colori neon in variabili CSS (`--brand-yellow`, etc.) per evitare duplicazioni di hex code sparsi nei componenti.
-- [x] **Skeleton Loaders Neon** — Implementare caricamenti a impulsi neon coerenti in ogni pagina per migliorare la percezione della velocità.
-- [ ] **Responsive Grid Layouts** — Sostituire le tabelle classiche con layout a griglia/flex per una leggibilità perfetta su smartphone (formato "card-list").
+- [ ] **Standardizzazione Design Tokens** — Centralizzare tutti i colori neon in variabili CSS (`--brand-yellow`, etc.) per evitare duplicazioni di hex code sparsi nei componenti.
 
 ### 🏗️ Codice & Stabilità
-- [x] **Zod Schema Validation** — Proteggere le letture da Firestore con schemi Zod per evitare crash se un campo (es. `focus`) è mancante o malformato.
-- [x] **Offline-First Strategy** — Ottimizzare il Service Worker per garantire che il registro presenze e il live match funzionino perfettamente anche con campo senza segnale.
-- [x] **Refactoring Store Persistence** — Implementare `persist` di Zustand per salvare lo stato locale (es. filtri selezionati) tra un ricaricamento e l'altro.
-
----
-
-## 🎨 Re-design App 
-- [x] **Schermata di Login**:
-  - Implementare tema scuro totale (sfondo molto scuro/nero).
-  - Mostrare il nuovo logo "PitchMan" con font font sans-serif bianco.
-  - Input "Email" e "Password" con bordo a gradiente neon (dal giallo, al verde, al blu).
-  - Bottone "ACCEDI" arrotondato (pillola) con gradiente di sfondo e glow effect neon.
-  - Link "Password dimenticata?" posizionato sotto con gradiente neon/ciano su testo.
-- [ ] **Tema Globale (Future modifiche)**:
-  - Estendere il tema neon scuro nell'app intera, modificando `tailwind.config.ts`.
-  - Introdurre gradini di sfondi molto scuri e bordi/elementi attenzionali neon.
-- [x] **Home / Calendario / Dashboard**:
-  - Adattare layout dei panel e card per usare lo sfondo scuro mantenendo un forte contrasto con bordi e icone neon.
-- [x] **Bottom Navigation**:
-  - Implementare tema scuro con icone neon glow per l'elemento attivo.
-- [x] **Altre Pagine (Rosa, Impostazioni, Allenamenti)**:
-  - Convertire tabelle, menu e finestre modali.
-  - Applicare il nuovo stile coerente (accordion illuminati, gradienti neon, ecc.).
-- [ ] **Altre Pagine (Partite, Scouting, ecc.)**:
-  - Applicare il nuovo stile coerente in tutta l'applicazione passo passo.
 
 ---
 

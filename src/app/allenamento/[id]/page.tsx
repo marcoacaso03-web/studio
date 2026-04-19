@@ -51,6 +51,7 @@ export default function TrainingDetailPage() {
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState("programma");
 
   const { exercises, fetchAll: fetchExercises } = useExerciseStore();
 
@@ -172,7 +173,7 @@ export default function TrainingDetailPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="programma" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-6 h-12 bg-muted dark:bg-black/40 p-1 rounded-2xl border border-border dark:border-brand-green/30 shadow-none dark:shadow-[0_0_10px_rgba(172,229,4,0.1)]">
           <TabsTrigger value="programma" className="flex items-center gap-2 text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-card dark:data-[state=active]:bg-black data-[state=active]:border data-[state=active]:border-primary/30 dark:data-[state=active]:border-brand-green data-[state=active]:text-foreground dark:data-[state=active]:text-white data-[state=active]:shadow-sm dark:data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] transition-all">
             <ClipboardList className="h-4 w-4 text-primary dark:text-brand-green" /> Programma
@@ -308,7 +309,6 @@ export default function TrainingDetailPage() {
                         )}
                         onClick={() => updateAttendance(player.id, 'presente')}
                       >
-                        <CheckCircle2 className={cn("h-3.5 w-3.5 mr-1.5", currentStatus === 'presente' ? "block" : "hidden")} />
                         Presente
                       </Button>
                       <Button 
@@ -320,7 +320,6 @@ export default function TrainingDetailPage() {
                         )}
                         onClick={() => updateAttendance(player.id, 'ritardo')}
                       >
-                        <Clock className={cn("h-3.5 w-3.5 mr-1.5", currentStatus === 'ritardo' ? "block" : "hidden")} />
                         Ritardo
                       </Button>
                       <Button 
@@ -332,7 +331,6 @@ export default function TrainingDetailPage() {
                         )}
                         onClick={() => updateAttendance(player.id, 'assente')}
                       >
-                        <XCircle className={cn("h-3.5 w-3.5 mr-1.5", currentStatus === 'assente' ? "block" : "hidden")} />
                         Assente
                       </Button>
                     </div>
@@ -344,81 +342,83 @@ export default function TrainingDetailPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Floating Action Button for Exercises */}
-      <div className="fixed bottom-6 right-6 z-50">
-          <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-            <PopoverTrigger asChild>
-              <Button 
-                size="icon" 
-                className="h-16 w-16 rounded-full bg-primary dark:bg-black border-4 border-card dark:border-brand-green/20 text-white dark:text-brand-green shadow-2xl hover:scale-110 active:scale-95 transition-all group"
+      {/* Floating Action Button for Exercises - Visible only in Programma tab */}
+      {activeTab === "programma" && (
+        <div className="fixed bottom-6 right-6 z-50">
+            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button 
+                  size="icon" 
+                  className="h-16 w-16 rounded-full bg-primary dark:bg-black border-4 border-card dark:border-brand-green/20 text-white dark:text-brand-green shadow-2xl hover:scale-110 active:scale-95 transition-all group"
+                >
+                  <PlusIcon className="h-8 w-8 group-hover:rotate-90 transition-transform duration-300" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent 
+                side="top" 
+                align="end" 
+                className="w-80 p-0 mr-2 mb-4 bg-card dark:bg-black border border-border dark:border-brand-green/30 rounded-[32px] shadow-2xl overflow-hidden"
               >
-                <PlusIcon className="h-8 w-8 group-hover:rotate-90 transition-transform duration-300" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent 
-              side="top" 
-              align="end" 
-              className="w-80 p-0 mr-2 mb-4 bg-card dark:bg-black border border-border dark:border-brand-green/30 rounded-[32px] shadow-2xl overflow-hidden"
-            >
-              <div className="p-5 border-b border-border dark:border-brand-green/20 space-y-4">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">Aggiungi Esercizi</h3>
-                <div className="relative">
-                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                   <Input 
-                    placeholder="Cerca in libreria..."
-                    className="h-9 pl-9 rounded-xl bg-muted/30 border-none text-[11px] font-bold"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                   />
+                <div className="p-5 border-b border-border dark:border-brand-green/20 space-y-4">
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">Aggiungi Esercizi</h3>
+                  <div className="relative">
+                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                     <Input 
+                      placeholder="Cerca in libreria..."
+                      className="h-9 pl-9 rounded-xl bg-muted/30 border-none text-[11px] font-bold"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                     />
+                  </div>
                 </div>
-              </div>
-              <ScrollArea className="h-72">
-                <div className="p-2 space-y-1">
-                  {filteredExercises.map(ex => {
-                    const isSelected = selectedExerciseIds.includes(ex.id);
-                    return (
-                      <button 
-                        key={ex.id}
-                        onClick={() => toggleExercise(ex.id)}
-                        className={cn(
-                          "w-full flex items-center justify-between p-4 rounded-2xl transition-all text-left group",
-                          isSelected ? "bg-primary/5 dark:bg-brand-green/5 border border-primary/20 dark:border-brand-green/20" : "hover:bg-muted/30 border border-transparent"
-                        )}
-                      >
-                         <div className="flex flex-col gap-0.5 max-w-[80%]">
-                            <span className={cn("text-[11px] font-black uppercase truncate", isSelected ? "text-primary dark:text-brand-green" : "text-foreground")}>
-                              {ex.name}
-                            </span>
-                            <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest truncate">{ex.focus.join(' · ')}</span>
-                         </div>
-                         {isSelected ? (
-                            <div className="h-5 w-5 rounded-full bg-primary dark:bg-brand-green flex items-center justify-center">
-                               <CheckCircle2 className="h-3 w-3 text-white dark:text-black" />
-                            </div>
-                         ) : (
-                            <PlusIcon className="h-4 w-4 text-muted-foreground/30 group-hover:text-foreground" />
-                         )}
-                      </button>
-                    );
-                  })}
-                  {exercises.length === 0 && (
-                     <div className="p-8 text-center">
-                        <p className="text-[10px] font-black uppercase text-muted-foreground opacity-30">Nessun esercizio trovato</p>
-                     </div>
-                  )}
+                <ScrollArea className="h-72">
+                  <div className="p-2 space-y-1">
+                    {filteredExercises.map(ex => {
+                      const isSelected = selectedExerciseIds.includes(ex.id);
+                      return (
+                        <button 
+                          key={ex.id}
+                          onClick={() => toggleExercise(ex.id)}
+                          className={cn(
+                            "w-full flex items-center justify-between p-4 rounded-2xl transition-all text-left group",
+                            isSelected ? "bg-primary/5 dark:bg-brand-green/5 border border-primary/20 dark:border-brand-green/20" : "hover:bg-muted/30 border border-transparent"
+                          )}
+                        >
+                           <div className="flex flex-col gap-0.5 max-w-[80%]">
+                              <span className={cn("text-[11px] font-black uppercase truncate", isSelected ? "text-primary dark:text-brand-green" : "text-foreground")}>
+                                {ex.name}
+                              </span>
+                              <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest truncate">{ex.focus.join(' · ')}</span>
+                           </div>
+                           {isSelected ? (
+                              <div className="h-5 w-5 rounded-full bg-primary dark:bg-brand-green flex items-center justify-center">
+                                 <CheckCircle2 className="h-3 w-3 text-white dark:text-black" />
+                              </div>
+                           ) : (
+                              <PlusIcon className="h-4 w-4 text-muted-foreground/30 group-hover:text-foreground" />
+                           )}
+                        </button>
+                      );
+                    })}
+                    {exercises.length === 0 && (
+                       <div className="p-8 text-center">
+                          <p className="text-[10px] font-black uppercase text-muted-foreground opacity-30">Nessun esercizio trovato</p>
+                       </div>
+                    )}
+                  </div>
+                </ScrollArea>
+                <div className="p-4 bg-muted/10 dark:bg-brand-green/5 border-t border-border dark:border-brand-green/20">
+                    <Button 
+                      className="w-full h-10 rounded-xl bg-primary dark:bg-brand-green text-white dark:text-black text-[10px] font-black uppercase tracking-widest shadow-lg"
+                      onClick={() => setIsPopoverOpen(false)}
+                    >
+                      Fatto ({selectedExerciseIds.length})
+                    </Button>
                 </div>
-              </ScrollArea>
-              <div className="p-4 bg-muted/10 dark:bg-brand-green/5 border-t border-border dark:border-brand-green/20">
-                  <Button 
-                    className="w-full h-10 rounded-xl bg-primary dark:bg-brand-green text-white dark:text-black text-[10px] font-black uppercase tracking-widest shadow-lg"
-                    onClick={() => setIsPopoverOpen(false)}
-                  >
-                    Fatto ({selectedExerciseIds.length})
-                  </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-      </div>
+              </PopoverContent>
+            </Popover>
+        </div>
+      )}
 
       {/* Detail Dialog */}
       <ExerciseViewDialog 

@@ -7,14 +7,16 @@ import {
   Search,
   LayoutGrid,
   Settings,
-  TrendingUp
+  TrendingUp,
+  Calendar
 } from "lucide-react";
 import { PiTrafficCone } from "react-icons/pi";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutGrid },
   { href: "/allenamento", label: "Allenamento", icon: PiTrafficCone },
+  { href: "/calendario", label: "Calendario", icon: Calendar },
+  { href: "/", label: "Dashboard", icon: LayoutGrid },
   { href: "/scout", label: "Scout", icon: Search },
   { href: "/altro", label: "Impostazioni", icon: Settings },
 ];
