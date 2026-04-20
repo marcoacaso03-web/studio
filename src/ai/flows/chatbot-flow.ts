@@ -2,7 +2,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { getTeamRecordTool, getPlayerLeaderboardTool, getSquadUsageTool } from '../tools/secure-stats-tools';
+import { aggregationRepository } from '@/lib/repositories/aggregation-repository';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 
 const ChatInputSchema = z.object({
