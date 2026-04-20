@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/components/layout/theme-provider';
 import { AuthGuard } from '@/components/layout/auth-guard';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { PT_Sans } from 'next/font/google';
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const ptSans = PT_Sans({ 
   weight: ['400', '700'], 
@@ -40,8 +41,6 @@ export const metadata: Metadata = {
     telephone: false,
   },
 };
-
-import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default function RootLayout({
   children,
