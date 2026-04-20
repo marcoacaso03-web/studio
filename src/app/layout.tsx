@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/components/layout/theme-provider';
 import { AuthGuard } from '@/components/layout/auth-guard';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { PT_Sans } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
 
 const ptSans = PT_Sans({ 
   weight: ['400', '700'], 
@@ -64,6 +65,7 @@ export default function RootLayout({
             <Toaster />
           </ThemeProvider>
         </FirebaseClientProvider>
+        <Analytics />
       </body>
     </html>
   );
