@@ -33,6 +33,7 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
   const [media, setMedia] = useState<ExerciseMedia[]>([]);
   const [newMediaUrl, setNewMediaUrl] = useState("");
   const [newMediaType, setNewMediaType] = useState<ExerciseMediaType>('image');
+  const [uploadLoading, setUploadLoading] = useState(false);
 
   useEffect(() => {
     if (exercise) {
@@ -258,6 +259,56 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
                       />
                     </div>
                   )}
+
+                  <div className="pt-1">
+                    <input 
+                      type="file" 
+                      id="exercise-image-upload" 
+                      className="hidden" 
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        
+                        setUploadLoading(true);
+                        try {
+                          const formData = new FormData();
+                          formData.append('image', file);
+                          
+                          // Mostriamo anteprima locale immediata
+                          const localUrl = URL.createObjectURL(file);
+                          setNewMediaUrl(localUrl);
+                          setNewMediaType('image');
+
+                          const { uploadExerciseImage } = await import('@/app/actions/blob-actions');
+                          const blobUrl = await uploadExerciseImage(formData);
+                          
+                          setMedia(prev => [...prev, { type: 'image', url: blobUrl }]);
+                          setNewMediaUrl("");
+                          // Puliamo l'input per permettere lo stesso file dopo
+                          e.target.value = '';
+                        } catch (err: any) {
+                          console.error("Upload error:", err);
+                        } finally {
+                          setUploadLoading(false);
+                        }
+                      }}
+                    />
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      className="w-full h-11 rounded-xl border-dashed border-primary/40 dark:border-brand-green/40 bg-primary/5 dark:bg-brand-green/5 hover:bg-primary/10 dark:hover:bg-brand-green/10 text-[10px] font-black uppercase tracking-widest gap-2"
+                      onClick={() => document.getElementById('exercise-image-upload')?.click()}
+                      disabled={uploadLoading}
+                    >
+                      {uploadLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <ImageIcon className="h-4 w-4" />
+                      )}
+                      {uploadLoading ? "Caricamento..." : "Carica file dal dispositivo"}
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="space-y-1.5 max-h-[260px] overflow-y-auto px-1 scrollbar-hide py-1 border border-border/40 dark:border-brand-green/5 rounded-2xl bg-black/5 dark:bg-black/20">

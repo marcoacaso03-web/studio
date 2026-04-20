@@ -29,111 +29,137 @@ interface ExerciseCardProps {
 export function ExerciseCard({ exercise, isOwner, onEdit, onDelete, onView }: ExerciseCardProps) {
   return (
     <Card 
-      className="group overflow-hidden bg-card dark:bg-black/40 border-border dark:border-brand-green/10 transition-all hover:bg-muted/30 dark:hover:bg-brand-green/5 hover:border-primary/30 dark:hover:border-brand-green/20 rounded-[24px] shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.02)] flex flex-col h-full relative cursor-pointer active:scale-[0.98]"
+      className="group overflow-hidden bg-white/50 dark:bg-black/40 backdrop-blur-xl border-border dark:border-brand-green/10 transition-all hover:bg-white/80 dark:hover:bg-brand-green/5 hover:border-primary/40 dark:hover:border-brand-green/30 rounded-[32px] shadow-sm hover:shadow-2xl hover:shadow-primary/5 dark:hover:shadow-brand-green/10 flex flex-col h-full relative cursor-pointer active:scale-[0.98] outline-none"
       onClick={() => onView(exercise)}
     >
-      {/* Top Actions Overlay */}
-      {isOwner && (
-        <div className="absolute top-2 right-2 z-20 flex gap-1 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-primary dark:hover:bg-brand-green hover:text-black transition-all"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(exercise);
-            }}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-rose-500 transition-all"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent 
-              className="rounded-[32px] border border-border dark:border-brand-green/20 bg-card dark:bg-zinc-950 p-6 md:p-8"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <AlertDialogHeader className="mb-4">
-                <AlertDialogTitle className="text-xl font-black uppercase tracking-tighter text-foreground dark:text-white">Elimina Esercizio?</AlertDialogTitle>
-                <AlertDialogDescription className="text-xs font-bold text-muted-foreground/60 leading-relaxed uppercase tracking-wider">
-                  Questa azione non può essere annullata. L'esercizio verrà rimosso permanentemente.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="gap-2 sm:gap-0 mt-4 flex-row sm:flex-row-reverse sm:justify-start">
-                <div className="flex gap-2 w-full">
-                  <AlertDialogCancel className="flex-1 h-12 rounded-2xl font-black uppercase text-[10px] bg-muted/10 border-border dark:border-white/5 hover:bg-muted/20">Annulla</AlertDialogCancel>
-                  <AlertDialogAction 
-                    onClick={() => onDelete(exercise.id)}
-                    className="flex-1 h-12 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-black uppercase text-[10px] shadow-lg shadow-rose-500/20"
-                  >
-                    Conferma
-                  </AlertDialogAction>
-                </div>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      )}
-
-      {exercise.media.find(m => m.type === 'image') && (
-        <div className="w-full h-24 overflow-hidden border-b border-border dark:border-brand-green/10 relative">
+      {/* Media Header */}
+      <div className="relative h-44 w-full overflow-hidden">
+        {exercise.media.find(m => m.type === 'image') ? (
           <img 
             src={exercise.media.find(m => m.type === 'image')?.url} 
             alt={exercise.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        </div>
-      )}
-      
-      <CardHeader className="p-3 pb-1">
-        <div className="flex justify-between items-start gap-2 pr-16 group-hover:pr-0 transition-all">
-          <CardTitle className="text-xs font-black uppercase tracking-tight text-foreground line-clamp-1">{exercise.name}</CardTitle>
-        </div>
-        <div className="flex flex-wrap gap-1 mt-1">
-          {exercise.focus.map((f) => (
-            <span key={f} className="text-[7px] font-bold px-1.5 py-0.5 rounded-md bg-primary/10 dark:bg-brand-green/10 text-primary dark:text-brand-green border border-primary/20 dark:border-brand-green/20 uppercase tracking-widest">{f}</span>
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 dark:from-brand-green/10 dark:to-transparent flex items-center justify-center">
+            <Dumbbell className="h-10 w-10 text-primary/20 dark:text-brand-green/20" />
+          </div>
+        )}
+        
+        {/* Overlay Gradients */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+        
+        {/* badges overlay */}
+        <div className="absolute top-4 left-4 flex flex-col gap-2">
+          {exercise.focus.slice(0, 1).map((f) => (
+            <Badge key={f} className="bg-primary/90 dark:bg-brand-green shadow-xl text-white dark:text-black font-black uppercase text-[8px] px-2.5 py-1 border-none tracking-widest">
+              {f}
+            </Badge>
           ))}
         </div>
-      </CardHeader>
 
-      <CardContent className="p-3 pt-1 flex-1">
-        <p className="text-[10px] text-muted-foreground line-clamp-2 leading-tight mb-3 italic">{exercise.description}</p>
+        {/* Actions Overlay */}
+        {isOwner && (
+          <div className="absolute top-4 right-4 z-20 flex gap-2 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300 translate-y-[-10px] lg:group-hover:translate-y-0">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-9 w-9 rounded-2xl bg-white/80 dark:bg-black/60 backdrop-blur-md border border-white/20 dark:border-white/10 text-foreground dark:text-white hover:bg-primary dark:hover:bg-brand-green hover:text-white dark:hover:text-black transition-all"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(exercise);
+              }}
+            >
+              <Pencil className="h-4.5 w-4.5" />
+            </Button>
+            
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-9 w-9 rounded-2xl bg-white/80 dark:bg-black/60 backdrop-blur-md border border-white/20 dark:border-white/10 text-foreground dark:text-white hover:bg-rose-500 hover:text-white transition-all"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Trash2 className="h-4.5 w-4.5" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent 
+                className="rounded-[40px] border border-border dark:border-brand-green/20 bg-card dark:bg-zinc-950 p-8 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <AlertDialogHeader className="mb-4">
+                  <div className="h-14 w-14 rounded-2xl bg-rose-500/10 flex items-center justify-center mb-4 border border-rose-500/20">
+                    <Trash2 className="h-7 w-7 text-rose-500" />
+                  </div>
+                  <AlertDialogTitle className="text-2xl font-black uppercase tracking-tighter text-foreground dark:text-white">Elimina Esercizio?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-sm font-bold text-muted-foreground/60 leading-relaxed uppercase tracking-widest">
+                    Questa azione non può essere annullata. L'esercizio verrà rimosso permanentemente dal tuo archivio tecnico.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="gap-3 mt-6">
+                  <AlertDialogCancel className="h-14 rounded-[20px] font-black uppercase text-[10px] bg-muted/10 border-border dark:border-white/5 hover:bg-muted/20 tracking-widest">Annulla</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={() => onDelete(exercise.id)}
+                    className="h-14 rounded-[20px] bg-rose-500 hover:bg-rose-600 text-white font-black uppercase text-[10px] shadow-xl shadow-rose-500/20 tracking-widest"
+                  >
+                    Conferma Eliminazione
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
+      </div>
+      
+      <CardHeader className="p-6 pt-2 pb-2">
+        <CardTitle className="text-xl font-black uppercase tracking-tighter text-foreground line-clamp-1 group-hover:text-primary dark:group-hover:text-brand-green transition-colors">
+          {exercise.name}
+        </CardTitle>
+        <div className="flex items-center gap-4 mt-1 text-muted-foreground/40">
+           <div className="flex items-center gap-1.5">
+              <Users className="h-3 w-3" />
+              <span className="text-[9px] font-black uppercase tracking-widest">{exercise.playerCount.slice(0,2).join(', ')} {exercise.playerCount.length > 2 ? '+' : ''}</span>
+           </div>
+           <div className="flex items-center gap-1.5">
+              <Globe className={cn("h-3 w-3", exercise.visibility === 'global' ? "text-blue-500" : "text-amber-500")} />
+              <span className="text-[9px] font-black uppercase tracking-widest">{exercise.visibility}</span>
+           </div>
+        </div>
+      </CardHeader> mosque
+
+      <CardContent className="px-6 py-4 flex-1 flex flex-col justify-between">
+        <p className="text-[11px] text-muted-foreground/80 line-clamp-3 leading-relaxed font-medium mb-4 italic">
+          {exercise.description}
+        </p>
         
-        <div className="flex items-center justify-between">
-          <div className="flex -space-x-1">
-            {exercise.media.map((m, i) => (
-              <div key={i} className={cn(
-                "h-5 w-5 rounded-md flex items-center justify-center border border-background shadow-sm overflow-hidden bg-background dark:bg-zinc-800",
-                m.type !== 'image' && (m.type === 'video' ? "text-rose-500" : "text-amber-500")
-              )}>
-                {m.type === 'image' ? (
-                  <img src={m.url} alt="res" className="h-full w-full object-cover" onError={(e) => {
-                    (e.target as any).src = 'https://placehold.co/50x50?text=x';
-                  }} />
-                ) : m.type === 'video' ? (
-                  <Video className="h-2.5 w-2.5" />
-                ) : (
-                  <LinkIcon className="h-2.5 w-2.5" />
-                )}
+        <div className="flex items-center justify-between pt-4 border-t border-border/50 dark:border-brand-green/5">
+          <div className="flex -space-x-2">
+            {exercise.media.length > 0 ? (
+              exercise.media.map((m, i) => (
+                <div key={i} className={cn(
+                  "h-8 w-8 rounded-xl flex items-center justify-center border-2 border-background dark:border-zinc-950 shadow-sm overflow-hidden bg-muted dark:bg-zinc-800 transition-transform hover:z-10 hover:scale-110",
+                  m.type !== 'image' && (m.type === 'video' ? "text-rose-500" : "text-amber-500")
+                )}>
+                  {m.type === 'image' ? (
+                    <img src={m.url} alt="res" className="h-full w-full object-cover" />
+                  ) : m.type === 'video' ? (
+                    <Video className="h-3.5 w-3.5" />
+                  ) : (
+                    <LinkIcon className="h-3.5 w-3.5" />
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="h-8 w-8 rounded-xl bg-muted/20 flex items-center justify-center">
+                <ImageIcon className="h-3.5 w-3.5 text-muted-foreground/20" />
               </div>
-            ))}
+            )}
           </div>
           
-          <div className="flex gap-1">
-            {exercise.playerCount.slice(0, 3).map(c => (
-              <span key={c} className="text-[7px] font-black bg-muted/30 dark:bg-black/40 px-1 py-0.5 rounded-md border border-border dark:border-brand-green/10 text-muted-foreground/60">{c}</span>
-            ))}
-          </div>
+          <Button variant="ghost" className="h-8 rounded-xl text-[9px] font-black uppercase tracking-widest text-primary dark:text-brand-green hover:bg-primary/5 dark:hover:bg-brand-green/5">
+            Dettagli <ExternalLink className="h-3 w-3 ml-1.5" />
+          </Button>
         </div>
       </CardContent>
     </Card>

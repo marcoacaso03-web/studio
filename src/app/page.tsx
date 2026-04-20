@@ -29,6 +29,7 @@ import dynamic from "next/dynamic";
 const MatchFormDialog = dynamic(() => import("@/components/partite/match-form-dialog").then(mod => mod.MatchFormDialog), {
   ssr: false
 });
+import { FloatingAssistant } from '@/components/ai/floating-assistant';
 
 export default function HomePage() {
   const { user, isAuthenticated } = useAuthStore();
@@ -333,6 +334,7 @@ export default function HomePage() {
         onOpenChange={setIsMatchFormOpen}
         onSave={handleCreateMatch}
       />
+      <FloatingAssistant />
     </div>
   );
 }

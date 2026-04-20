@@ -30,6 +30,10 @@ const GoalsIntervalChart = dynamic(() => import("@/components/statistiche/goals-
   loading: () => <Skeleton className="h-80 w-full" />,
   ssr: false
 });
+const SquadUsageChart = dynamic(() => import("@/components/statistiche/squad-usage-chart").then(mod => mod.SquadUsageChart), {
+  loading: () => <Skeleton className="h-[420px] w-full" />,
+  ssr: false
+});
 
 export default function StatistichePage() {
   const { loading, error: statsError, loadDetailedStats } = useStatsStore();
@@ -73,9 +77,10 @@ export default function StatistichePage() {
         />
       ) : (
         <Tabs defaultValue="record" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6 h-12 bg-muted dark:bg-black/40 border border-border dark:border-brand-green/20 p-1 rounded-2xl transition-colors">
+        <TabsList className="grid w-full grid-cols-4 mb-6 h-12 bg-muted dark:bg-black/40 border border-border dark:border-brand-green/20 p-1 rounded-2xl transition-colors">
           <TabsTrigger value="record" className="text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-background dark:data-[state=active]:bg-black data-[state=active]:text-primary dark:data-[state=active]:text-brand-green data-[state=active]:border data-[state=active]:border-primary/50 dark:data-[state=active]:border-brand-green data-[state=active]:shadow-sm dark:data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] text-muted-foreground transition-all">Record</TabsTrigger>
           <TabsTrigger value="leaderboard" className="text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-background dark:data-[state=active]:bg-black data-[state=active]:text-primary dark:data-[state=active]:text-brand-green data-[state=active]:border data-[state=active]:border-primary/50 dark:data-[state=active]:border-brand-green data-[state=active]:shadow-sm dark:data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] text-muted-foreground transition-all">Giocatori</TabsTrigger>
+          <TabsTrigger value="utilizzo" className="text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-background dark:data-[state=active]:bg-black data-[state=active]:text-primary dark:data-[state=active]:text-brand-green data-[state=active]:border data-[state=active]:border-primary/50 dark:data-[state=active]:border-brand-green data-[state=active]:shadow-sm dark:data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] text-muted-foreground transition-all">Utilizzo</TabsTrigger>
           <TabsTrigger value="grafici" className="text-[10px] font-black uppercase rounded-xl data-[state=active]:bg-background dark:data-[state=active]:bg-black data-[state=active]:text-primary dark:data-[state=active]:text-brand-green data-[state=active]:border data-[state=active]:border-primary/50 dark:data-[state=active]:border-brand-green data-[state=active]:shadow-sm dark:data-[state=active]:shadow-[0_0_10px_rgba(172,229,4,0.15)] text-muted-foreground transition-all">Grafici</TabsTrigger>
         </TabsList>
         <TabsContent value="record">
@@ -95,6 +100,13 @@ export default function StatistichePage() {
            ) : (
             <PlayerLeaderboard />
            )}
+        </TabsContent>
+        <TabsContent value="utilizzo">
+          {loading ? (
+            <Skeleton className="h-[420px] w-full" />
+          ) : (
+            <SquadUsageChart />
+          )}
         </TabsContent>
         <TabsContent value="grafici">
            {loading ? (

@@ -8,10 +8,11 @@ Questo documento descrive sinteticamente tutti i file del progetto per facilitar
 - `next.config.ts` / `tailwind.config.ts` / `tsconfig.json` / `postcss.config.mjs`: File di configurazione di Next.js, Tailwind CSS e TypeScript.
 - `jest.config.js` / `jest.setup.js`: Configurazione e setup automatico per i test (Jest).
 - `next-env.d.ts`: Dichiarazioni TypeScript auto-generate da Next.js.
+- `.vercel/` / `.env.local`: Configurazioni e variabili d'ambiente gestite via Vercel CLI.
 - `temp_files_list_utf8.txt`: File generato temporaneamente per elencare la struttura.
 
 ## Root & Assets (public, docs)
-- `docs/`: Documentazione dettagliata (PROJECTS.md, Pages.md, Stili.md, backend.json).
+- `docs/`: Documentazione dettagliata (PROJECTS.md, Pages.md, Stili.md, backend.json, vercel.md).
 - `public/`: Manifest per PWA, favicon, icone e asset statici.
 
 ## Pagine dell'Applicazione (src/app)
@@ -23,7 +24,7 @@ Questo documento descrive sinteticamente tutti i file del progetto per facilitar
 - `login/`: Schermata di autenticazione Firebase.
 - `membri/`: Gestione della rosa giocatori, `confronto/` tra giocatori e `[id]` per la scheda tecnica singola.
 - `scout/`: Scouting di talenti e gestione categorie di osservazione.
-- `statistiche/`: Dashboard analitica con grafici Recharts su performance, gol e record.
+- `statistiche/`: Dashboard analitica con grafici Recharts su performance, gol e record. Monitoraggio performance reale via Vercel Speed Insights e Analytics.
 
 ## Intelligenza Artificiale (src/ai)
 - `dev.ts` / `genkit.ts`: Inizializzazione Google Genkit per modelli Gemini.

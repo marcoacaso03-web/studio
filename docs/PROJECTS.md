@@ -50,10 +50,10 @@ allenamenti e formazioni non si linkano tra loro (es. clicchi una partita → ve
 Tasto rapido inserisci formazione prossima partita
 
 Heatmap di utilizzo rosa
-Visualizzazione stagionale: asse X = giornate, asse Y = giocatori, colore = minuti giocati. Rivela immediatamente chi stai sovraccaricando e chi non sta giocando abbastanza. Hai già tutti i dati, manca solo la visualizzazione.
+Visualizzazione stagionale: asse X = giornate, asse Y = minuti giocati, dimensione = giocatori. Rivela immediatamente chi stai sovraccaricando e chi non sta giocando abbastanza. Hai già tutti i dati, manca solo la visualizzazione.
 
 "Formazione tipo" emergente
-Analisi automatica delle ultime N partite per rilevare qual è la formazione che statisticamente hai usato di più, con quali giocatori fissi e quali variabili. Presentata come insight nella dashboard.
+Analisi automatica delle ultime N partite per rilevare qual è la formazione che statisticamente hai usato di più, con quali giocatori fissi e quali variabili. Presentata come insight in statistiche in un tab 11.
 
 Chatbot a cui chiedere sull'utilizzo dell'app e statistiche. L'unico rischio residuo è se un utente manipola seasonId nel body della richiesta — per blindarlo al 100% puoi leggere seasonId direttamente dalla sessione Firebase Admin server-side invece che dal body.
 
