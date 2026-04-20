@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dumbbell, ChevronLeft, ChevronRight, PlusCircle, Trash2, Loader2, Eraser, ClipboardCheck, Target, Users, Filter, CalendarRange, Archive } from "lucide-react";
+import { Cone, ChevronLeft, ChevronRight, PlusCircle, Trash2, Loader2, Eraser, ClipboardCheck, Target, Users, Filter, CalendarRange, Archive } from "lucide-react";
 import { PiTrafficCone } from "react-icons/pi";
 import { useTrainingStore } from "@/store/useTrainingStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
@@ -284,7 +284,7 @@ export default function AllenamentoPage() {
           </div>
         ) : weekSessions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center border-dashed border-2 border-primary/30 dark:border-brand-green/30 rounded-3xl bg-card/20 hover:bg-card/30">
-            <Dumbbell className="h-16 w-16 text-primary dark:text-brand-green opacity-40 mb-6" />
+            <Cone className="h-16 w-16 text-primary dark:text-brand-green opacity-40 mb-6" />
             <h3 className="text-lg font-black uppercase tracking-tight text-foreground">Nessuna sessione</h3>
             <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-2 max-w-[200px]">
               Usa le opzioni in alto per generare allenamenti.
@@ -301,7 +301,7 @@ export default function AllenamentoPage() {
             const focus = sessionData.focus && sessionData.focus.trim() !== "" ? sessionData.focus : "Nessuno";
 
             let FocusIcon = Target;
-            if (focus.toLowerCase().includes('fisic')) FocusIcon = Dumbbell;
+            if (focus.toLowerCase().includes('fisic')) FocusIcon = Cone;
 
             const totalPlayers = players.length > 0 ? players.length : 20;
             const presentPlayers = sessionData.attendances && sessionData.attendances.length > 0

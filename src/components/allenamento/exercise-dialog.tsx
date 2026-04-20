@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Globe, Lock, Image as ImageIcon, Video, Link as LinkIcon, Save, X, Target, Users, Dumbbell, Loader2 } from "lucide-react";
+import { Plus, Trash2, Globe, Lock, Image as ImageIcon, Video, Link as LinkIcon, Save, X, Target, Users, Cone, Loader2 } from "lucide-react";
 import { Exercise, ExerciseMedia, ExerciseMediaType } from "@/lib/types";
 import { useExerciseStore } from "@/store/useExerciseStore";
 import { cn } from "@/lib/utils";
@@ -100,7 +100,7 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
         <DialogHeader className="mb-3 px-1">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-primary/10 dark:bg-brand-green/10 flex items-center justify-center border border-primary/20 dark:border-brand-green/20">
-              <Dumbbell className="h-5 w-5 text-primary dark:text-brand-green" />
+              <Cone className="h-5 w-5 text-primary dark:text-brand-green" />
             </div>
             <div className="space-y-0.5">
               <DialogTitle className="text-xl font-black uppercase tracking-tighter text-foreground dark:text-white leading-none">

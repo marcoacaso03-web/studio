@@ -193,7 +193,6 @@ export function SquadUsageChart() {
               tick={{
                 fontSize: 10,
                 fontWeight: 700,
-                textTransform: "uppercase",
                 fill: "currentColor",
                 opacity: 0.5,
               }}
@@ -206,7 +205,6 @@ export function SquadUsageChart() {
                 style: {
                   fontSize: 9,
                   fontWeight: 900,
-                  textTransform: "uppercase",
                   letterSpacing: "0.15em",
                   fill: "currentColor",
                   opacity: 0.35,
@@ -223,7 +221,6 @@ export function SquadUsageChart() {
               tick={{
                 fontSize: 10,
                 fontWeight: 700,
-                textTransform: "uppercase",
                 fill: "currentColor",
                 opacity: 0.5,
               }}
@@ -238,7 +235,6 @@ export function SquadUsageChart() {
                 style: {
                   fontSize: 9,
                   fontWeight: 900,
-                  textTransform: "uppercase",
                   letterSpacing: "0.15em",
                   fill: "currentColor",
                   opacity: 0.35,

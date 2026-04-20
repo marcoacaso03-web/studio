@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { X, Target, Users, Dumbbell, ExternalLink, ImageIcon, Video, Link as LinkIcon, Calendar } from "lucide-react";
+import { X, Target, Users, Cone, ExternalLink, ImageIcon, Video, Link as LinkIcon, Calendar } from "lucide-react";
 import { Exercise } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -90,7 +90,7 @@ export function ExerciseViewDialog({ open, onOpenChange, exercise }: ExerciseVie
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <div className="h-8 w-8 rounded-lg bg-primary/5 dark:bg-brand-green/5 flex items-center justify-center border border-primary/10 dark:border-brand-green/10">
-                        <Dumbbell className="h-4 w-4 text-primary dark:text-brand-green" />
+                        <Cone className="h-4 w-4 text-primary dark:text-brand-green" />
                       </div>
                       <h3 className="text-xs font-black uppercase tracking-widest text-foreground">Svolgimento dell'Esercizio</h3>
                     </div>

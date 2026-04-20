@@ -4,7 +4,7 @@ import { Exercise } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Globe, Lock, Image as ImageIcon, Video, Link as LinkIcon } from "lucide-react";
+import { Pencil, Trash2, Globe, Lock, Image as ImageIcon, Video, Link as LinkIcon, Users, ExternalLink, Cone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { 
   AlertDialog, 
@@ -42,7 +42,7 @@ export function ExerciseCard({ exercise, isOwner, onEdit, onDelete, onView }: Ex
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 dark:from-brand-green/10 dark:to-transparent flex items-center justify-center">
-            <Dumbbell className="h-10 w-10 text-primary/20 dark:text-brand-green/20" />
+            <Cone className="h-10 w-10 text-primary/20 dark:text-brand-green/20" />
           </div>
         )}
         
@@ -126,7 +126,7 @@ export function ExerciseCard({ exercise, isOwner, onEdit, onDelete, onView }: Ex
               <span className="text-[9px] font-black uppercase tracking-widest">{exercise.visibility}</span>
            </div>
         </div>
-      </CardHeader> mosque
+      </CardHeader>
 
       <CardContent className="px-6 py-4 flex-1 flex flex-col justify-between">
         <p className="text-[11px] text-muted-foreground/80 line-clamp-3 leading-relaxed font-medium mb-4 italic">
