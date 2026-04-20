@@ -2,3 +2,4 @@
 import './flows/import-matches-flow';
 import './flows/suggest-lineup-flow';
 import './flows/import-players-flow';
+import './flows/chatbot-flow';
