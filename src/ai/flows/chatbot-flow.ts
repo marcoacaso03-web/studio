@@ -60,8 +60,22 @@ export const chatbotFlow = ai.defineFlow(
         description: 'Ottiene il riepilogo della stagione: vittorie, pareggi, sconfitte e gol.',
         inputSchema: z.object({}),
       }, async () => {
-        const context = await aggregationRepository.getSummaryContext(userId, activeSeasonId!);
-        return aggregationRepository.getTeamRecordFromContext(context);
+        const matchesSnap = await adminDb.collection('teams').doc(activeSeasonId!).collection('matches').where('status', '==', 'completed').get();
+        let wins = 0, draws = 0, losses = 0, goalsFor = 0, goalsAgainst = 0;
+        matchesSnap.forEach(doc => {
+            const data = doc.data();
+            const result = data.result || { home: 0, away: 0 };
+            const home = result.home || 0;
+            const away = result.away || 0;
+            if (data.isHome) {
+                goalsFor += home; goalsAgainst += away;
+                if (home > away) wins++; else if (home < away) losses++; else draws++;
+            } else {
+                goalsFor += away; goalsAgainst += home;
+                if (away > home) wins++; else if (away < home) losses++; else draws++;
+            }
+        });
+        return { matchesPlayed: matchesSnap.size, wins, draws, losses, goalsFor, goalsAgainst };
       });
 
       const localGetPlayerLeaderboard = ai.defineTool({
@@ -69,8 +83,14 @@ export const chatbotFlow = ai.defineFlow(
         description: 'Ottiene gol, assist e presenze dei giocatori.',
         inputSchema: z.object({}),
       }, async () => {
-        const context = await aggregationRepository.getDetailedContext(userId, activeSeasonId!);
-        return aggregationRepository.getPlayersAggregatedStatsFromContext(context);
+        const playersSnap = await adminDb.collection('teams').doc(activeSeasonId!).collection('players').get();
+        return playersSnap.docs.map(d => {
+            const p = d.data();
+            return {
+                name: p.name,
+                stats: p.stats || { appearances: 0, goals: 0, assists: 0 }
+            };
+        });
       });
 
       const localGetSquadUsage = ai.defineTool({
@@ -78,19 +98,22 @@ export const chatbotFlow = ai.defineFlow(
         description: 'Ottiene dati sull\'utilizzo e minuti della rosa.',
         inputSchema: z.object({}),
       }, async () => {
-        const context = await aggregationRepository.getDetailedContext(userId, activeSeasonId!);
-        const stats = aggregationRepository.getPlayersAggregatedStatsFromContext(context);
-        return stats.map(p => ({
-          name: p.name,
-          appearances: p.stats.appearances,
-          totalMinutes: Math.round(p.stats.appearances * p.stats.avgMinutes),
-          avgMinutes: p.stats.avgMinutes
-        }));
+        const playersSnap = await adminDb.collection('teams').doc(activeSeasonId!).collection('players').get();
+        return playersSnap.docs.map(d => {
+            const p = d.data();
+            const stats = p.stats || { appearances: 0, avgMinutes: 0 };
+            return {
+                name: p.name,
+                appearances: stats.appearances,
+                totalMinutes: Math.round(stats.appearances * stats.avgMinutes),
+                avgMinutes: stats.avgMinutes
+            };
+        });
       });
 
       // 4. Esecuzione con AI
       const result = await ai.generate({
-        model: 'googleai/gemini-2.0-flash',
+        model: 'googleai/gemini-2.5-flash',
         prompt: input.message,
         system: `Sei "Pitchman Coach AI", l'assistente virtuale dell'app PitchMan. 
         Il tuo compito è aiutare l'allenatore ad analizzare le statistiche della squadra.
