@@ -172,10 +172,10 @@ STILE:
           errorString.includes('overloaded') ||
           errorString.includes('service unavailable')
         ) {
-          console.warn("[Chatbot] Gemini 2.5 Flash 503 Error, falling back to 1.5 Flash", genError);
+          console.warn("[Chatbot] Gemini 2.5 Flash 503 Error, falling back to gemini-flash-latest", genError);
           
           const fallbackResult = await ai.generate({
-            model: 'googleai/gemini-1.5-flash',
+            model: 'googleai/gemini-flash-latest',
             prompt: input.message,
             system: systemPrompt,
           });
