@@ -154,14 +154,40 @@ STILE:
 - Usa emoji e formattazione strutturata per chiarezza
 - Quando analizzi dati, fornisci insight tattici e suggerimenti concreti`;
 
-      // ── Chiamata a Gemini 2.5 Flash ──
-      const result = await ai.generate({
-        model: 'googleai/gemini-2.5-flash',
-        prompt: input.message,
-        system: systemPrompt,
-      });
+      // ── Chiamata a Gemini 2.5 Flash con Fallback ──
+      try {
+        const result = await ai.generate({
+          model: 'googleai/gemini-2.5-flash',
+          prompt: input.message,
+          system: systemPrompt,
+        });
 
-      return { text: result.text };
+        return { text: result.text };
+      } catch (genError: any) {
+        // Verifica se è un errore 503 / high demand
+        const errorString = String(genError).toLowerCase();
+        if (
+          errorString.includes('503') || 
+          errorString.includes('high demand') || 
+          errorString.includes('overloaded') ||
+          errorString.includes('service unavailable')
+        ) {
+          console.warn("[Chatbot] Gemini 2.5 Flash 503 Error, falling back to 1.5 Flash", genError);
+          
+          const fallbackResult = await ai.generate({
+            model: 'googleai/gemini-1.5-flash',
+            prompt: input.message,
+            system: systemPrompt,
+          });
+
+          return { 
+            text: fallbackResult.text + "\n\n*(Risposta generata tramite modello di fallback per elevato traffico sui server)*"
+          };
+        }
+        
+        // Se non è un 503, rilanciamo l'errore per farlo catturare dal handler generico
+        throw genError;
+      }
     } catch (error: any) {
       console.error("[Chatbot Flow Error]", error);
       return { text: RESPONSES.GENERIC_ERROR(error.message || 'errore sconosciuto') };
