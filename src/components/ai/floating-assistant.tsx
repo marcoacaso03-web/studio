@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { getAuth } from "firebase/auth";
 import { chatbotFlow } from "@/ai/flows/chatbot-flow";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useMatchesStore } from "@/store/useMatchesStore";
+import { usePlayersStore } from "@/store/usePlayersStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
 
 interface Message {
@@ -25,7 +25,10 @@ export function FloatingAssistant() {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const user = useAuthStore(state => state.user);
+
+  // Dati dal client Firebase SDK (già autenticato)
+  const matches = useMatchesStore(state => state.matches);
+  const players = usePlayersStore(state => state.players);
   const activeSeason = useSeasonsStore(state => state.activeSeason);
 
   useEffect(() => {
@@ -43,19 +46,34 @@ export function FloatingAssistant() {
     setIsLoading(true);
 
     try {
-      const auth = getAuth();
-      const idToken = await auth.currentUser?.getIdToken(true);
-      
-      if (!idToken) {
-        throw new Error("Sessione non valida");
-      }
+      // Prepara il contesto dati dal client (dati che l'utente vede già nella UI)
+      const teamContext = {
+        seasonName: activeSeason?.name,
+        matches: matches.map(m => ({
+          opponent: m.opponent,
+          date: m.date,
+          isHome: m.isHome,
+          status: m.status,
+          result: m.result ? { home: m.result.home, away: m.result.away } : undefined,
+        })),
+        players: players.map(p => ({
+          name: p.name,
+          role: p.role || undefined,
+          stats: p.stats ? {
+            appearances: p.stats.appearances || 0,
+            goals: p.stats.goals || 0,
+            assists: p.stats.assists || 0,
+            avgMinutes: p.stats.avgMinutes || 0,
+            yellowCards: p.stats.yellowCards || 0,
+            redCards: p.stats.redCards || 0,
+          } : undefined,
+        })),
+      };
 
-      // Chiamata alla Server Action del chatbot con fallback userId/seasonId
+      // Chiamata alla Server Action: messaggio + dati → Gemini 2.5 Flash
       const response = await chatbotFlow({
         message: userMessage,
-        idToken: idToken,
-        userId: user?.id,
-        seasonId: activeSeason?.id,
+        teamContext,
       });
 
       setMessages(prev => [...prev, { role: "assistant", content: response.text }]);
