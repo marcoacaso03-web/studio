@@ -93,21 +93,33 @@ function MatchDetailContent() {
     <div className="max-w-4xl mx-auto space-y-4 pb-20">
       <div className="flex flex-col gap-3">
         <PageHeader 
-          title={`Vs ${match.opponent}`} 
+          title={
+            <button 
+              onClick={() => setIsFormOpen(true)}
+              className="flex items-center gap-2.5 group hover:opacity-80 transition-all active:scale-[0.98] text-left"
+            >
+              <span className="text-foreground dark:text-white">Vs {match.opponent}</span>
+              <div className="p-1.5 rounded-xl bg-primary/10 dark:bg-brand-green/10 border border-primary/20 dark:border-brand-green/20 group-hover:border-primary/40 dark:group-hover:border-brand-green/40 transition-colors">
+                <Settings2 className="h-5 w-5 text-primary dark:text-brand-green group-hover:rotate-90 transition-transform duration-500" />
+              </div>
+            </button>
+          } 
           backAction={() => router.push('/calendario')}
         />
 
         <Card className="bg-card dark:bg-black border border-border dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] overflow-hidden rounded-3xl text-foreground">
           <CardContent className="p-5 md:p-8">
             <div className="flex flex-col items-center justify-center space-y-6">
-              <div className="flex items-center justify-center gap-6 md:gap-20">
-                <div className="text-center">
-                  <p className="text-[9px] opacity-60 mb-1 font-black uppercase tracking-widest text-foreground dark:text-brand-green">{match.isHome ? (teamName || "PITCHMAN") : match.opponent.toUpperCase()}</p>
+              <div className="flex items-center justify-between w-full gap-2 md:gap-4">
+                <div className="flex-1 text-center min-w-0">
+                  <p className="text-[9px] opacity-60 mb-1 font-black uppercase tracking-widest text-foreground dark:text-brand-green truncate">{match.isHome ? (teamName || "PITCHMAN") : match.opponent.toUpperCase()}</p>
                   <p className="text-5xl md:text-7xl font-black tabular-nums text-foreground">{match.result?.home ?? "-"}</p>
                 </div>
-                <div className="text-3xl md:text-5xl font-thin opacity-20 text-primary dark:text-brand-green">VS</div>
-                <div className="text-center">
-                  <p className="text-[9px] opacity-60 mb-1 font-black uppercase tracking-widest text-foreground dark:text-brand-green">{!match.isHome ? (teamName || "PITCHMAN") : match.opponent.toUpperCase()}</p>
+                
+                <div className="text-2xl md:text-4xl font-thin opacity-20 text-primary dark:text-brand-green px-2 self-center pt-6 shrink-0">VS</div>
+                
+                <div className="flex-1 text-center min-w-0">
+                  <p className="text-[9px] opacity-60 mb-1 font-black uppercase tracking-widest text-foreground dark:text-brand-green truncate">{!match.isHome ? (teamName || "PITCHMAN") : match.opponent.toUpperCase()}</p>
                   <p className="text-5xl md:text-7xl font-black tabular-nums text-foreground dark:text-white">{match.result?.away ?? "-"}</p>
                 </div>
               </div>
@@ -127,14 +139,7 @@ function MatchDetailContent() {
                 </div>
               </div>
 
-              <Button
-                size="sm"
-                className="w-full bg-primary dark:bg-black border border-primary dark:border-brand-green text-white hover:opacity-90 dark:hover:bg-black/80 shadow-md dark:shadow-[0_0_10px_rgba(172,229,4,0.15)] font-black uppercase text-[10px] h-10 rounded-xl transition-all"
-                onClick={() => setIsFormOpen(true)}
-              >
-                <Settings2 className="mr-2 h-3.5 w-3.5 text-white dark:text-brand-green" />
-                Modifica Gara
-              </Button>
+
             </div>
           </CardContent>
         </Card>

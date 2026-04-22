@@ -20,7 +20,7 @@ export function PageHeader({ title, children, backAction, className }: PageHeade
             <ChevronLeft className="h-8 w-8 sm:h-10 sm:w-10" />
           </button>
         )}
-        <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-foreground dark:text-white">{title}</h1>
+        <div className="text-2xl md:text-3xl font-black uppercase tracking-tight text-foreground dark:text-white">{title}</div>
       </div>
       <div className="flex items-center gap-2">{children}</div>
     </div>

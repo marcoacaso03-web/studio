@@ -192,6 +192,7 @@ export type TrainingSession = {
   seasonId: string;
   userId: string;
   exerciseIds?: string[];
+  exercises?: { id: string; duration?: string }[];
   attendances?: TrainingAttendance[];
 };
 
@@ -233,6 +234,7 @@ export interface Exercise {
   visibility: 'private' | 'global';
   media: ExerciseMedia[];
   playerCount: string[];
+  duration?: string;
   createdAt: string;
   updatedAt: string;
 }

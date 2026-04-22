@@ -8,6 +8,7 @@ import { Info, Plus, Trash2, ArrowRightLeft, XCircle, Target, Zap, Flag, Handsha
 import { GiSoccerBall } from "react-icons/gi";
 import { IoSquare } from "react-icons/io5";
 import { MatchEventDialog } from "./match-event-dialog";
+import { LiveMatchTracker } from "./live-match-tracker";
 import { Button } from "@/components/ui/button";
 import { MatchEventType, MatchEvent } from "@/lib/types";
 import { GiGloves, GiTargetPoster, GiLightBulb } from "react-icons/gi";
@@ -23,6 +24,7 @@ import { useRouter } from "next/navigation";
 export function MatchEventsTab() {
   const { events, deleteEvent, match } = useMatchDetailStore();
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
+  const [isLiveTrackerOpen, setIsLiveTrackerOpen] = useState(false);
   const [eventToEdit, setEventToEdit] = useState<MatchEvent | undefined>(undefined);
 
   const [selectedEventOptions, setSelectedEventOptions] = useState<MatchEvent | null>(null);
@@ -143,7 +145,13 @@ export function MatchEventsTab() {
             <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-border dark:border-brand-green/20 rounded-xl bg-muted/20 dark:bg-transparent">
               <Info className="h-10 w-10 text-primary dark:text-brand-green mb-3 opacity-30" />
               <p className="text-xs font-black uppercase text-foreground/40 dark:text-muted-foreground">Nessun evento registrato</p>
-              <p className="text-[10px] font-bold text-foreground/30 dark:text-muted-foreground mt-2 uppercase">Usa il + per aggiungere eventi alla partita.</p>
+              <p className="text-[10px] font-bold text-foreground/30 dark:text-muted-foreground mt-2 uppercase mb-6">Usa il + per aggiungere eventi alla partita.</p>
+              <Button
+                onClick={() => setIsLiveTrackerOpen(true)}
+                className="h-12 px-8 rounded-full bg-primary dark:bg-brand-green text-white dark:text-black font-black uppercase tracking-widest shadow-lg dark:shadow-[0_0_20px_rgba(172,229,4,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-2 animate-pulse hover:animate-none"
+              >
+                <Zap className="h-5 w-5" /> Inizia Live
+              </Button>
             </div>
           ) : (
             <div className="relative pt-4">
@@ -245,6 +253,11 @@ export function MatchEventsTab() {
         }}
         getEventIcon={getEventIcon}
         getEventLabel={getEventLabel}
+      />
+
+      <LiveMatchTracker 
+        open={isLiveTrackerOpen}
+        onOpenChange={setIsLiveTrackerOpen}
       />
     </div>
   );

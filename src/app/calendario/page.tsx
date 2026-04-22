@@ -381,7 +381,7 @@ export default function CalendarioPage() {
                 onClick={() => setIsEditMode(true)}
                 title="Modifica Lista"
               >
-                <Pencil className="h-3.5 w-3.5" />
+                <Pencil className="h-3.5 w-3.5 text-sky-500 dark:text-brand-green" />
               </Button>
             </div>
           ) : (
@@ -438,15 +438,15 @@ export default function CalendarioPage() {
                   })()}
 
                   <div className={cn(
-                    "w-10 h-10 rounded-xl flex flex-col items-center justify-center font-black text-[9px] shrink-0",
+                    "w-12 h-12 rounded-xl flex flex-col items-center justify-center font-black shrink-0",
                     m.status === 'completed' ? "bg-muted dark:bg-zinc-900 text-muted-foreground" : "bg-primary/20 dark:bg-brand-green/20 text-primary dark:text-brand-green"
                   )}>
-                    <span className="leading-none">{format(parseISO(m.date), "dd")}</span>
-                    <span className="uppercase text-[7px] opacity-70">{format(parseISO(m.date), "MMM", { locale: it })}</span>
+                    <span className="leading-none text-base">{format(parseISO(m.date), "dd")}</span>
+                    <span className="uppercase text-[9px] opacity-70 mt-0.5">{format(parseISO(m.date), "MMM", { locale: it })}</span>
                   </div>
 
-                  <div>
-                    <h5 className="text-sm font-black uppercase tracking-tight text-foreground dark:text-white group-hover:text-primary dark:group-hover:text-brand-green transition-colors">
+                  <div className="min-w-0 flex-1">
+                    <h5 className="text-sm font-black uppercase tracking-tight text-foreground dark:text-white group-hover:text-primary dark:group-hover:text-brand-green transition-colors truncate">
                       {m.opponent}
                     </h5>
                     <div className="flex items-center gap-2 mt-0.5">
@@ -459,9 +459,9 @@ export default function CalendarioPage() {
 
                 <div className="flex items-center gap-4">
                   {m.status === 'completed' || !!m.result ? (
-                    <div className="flex items-center gap-1.5 bg-muted/50 dark:bg-white/5 px-2.5 py-1 rounded-lg">
+                    <div className="flex items-center gap-1.5 bg-muted/50 dark:bg-white/5 px-2.5 py-1 rounded-lg shrink-0 whitespace-nowrap">
                       <span className={cn(
-                        "text-xs font-black",
+                        "text-xs font-black whitespace-nowrap",
                         m.resultType === 'W' ? "text-brand-green" : m.resultType === 'L' ? "text-rose-500" : "text-foreground dark:text-white"
                       )}>
                         {m.teamGoals ?? (m.isHome ? m.result?.home : m.result?.away) ?? 0} - {m.opponentGoals ?? (m.isHome ? m.result?.away : m.result?.home) ?? 0}

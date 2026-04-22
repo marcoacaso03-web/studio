@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { X, Target, Users, Cone, ExternalLink, ImageIcon, Video, Link as LinkIcon, Calendar } from "lucide-react";
+import { X, Target, Users, Cone, ExternalLink, ImageIcon, Video, Link as LinkIcon, Calendar, Clock } from "lucide-react";
 import { Exercise } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -64,6 +64,12 @@ export function ExerciseViewDialog({ open, onOpenChange, exercise }: ExerciseVie
                       <Calendar className="h-3.5 w-3.5" />
                       <span className="text-[10px] font-bold uppercase tracking-widest">Autore: {exercise.ownerName}</span>
                     </div>
+                    {exercise.duration && (
+                      <div className="flex items-center gap-1.5 text-primary dark:text-brand-green">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Durata: {exercise.duration}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -159,14 +165,6 @@ export function ExerciseViewDialog({ open, onOpenChange, exercise }: ExerciseVie
         <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 overflow-hidden bg-transparent border-none shadow-none flex items-center justify-center">
           <div className="relative group">
             <img src={selectedImage || ""} alt="Full view" className="max-w-full max-h-[85vh] rounded-2xl shadow-2xl border border-white/10" />
-            <Button 
-              size="icon" 
-              variant="ghost" 
-              onClick={() => setSelectedImage(null)}
-              className="absolute -top-4 -right-4 h-10 w-10 rounded-full bg-black/80 text-white hover:bg-black border border-white/20 shadow-xl"
-            >
-              <X className="h-5 w-5" />
-            </Button>
           </div>
         </DialogContent>
       </Dialog>

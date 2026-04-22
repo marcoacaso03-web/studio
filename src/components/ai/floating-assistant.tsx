@@ -86,7 +86,7 @@ export function FloatingAssistant() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4 pointer-events-none">
+    <div className="fixed bottom-24 right-6 z-50 flex flex-col items-end gap-4 pointer-events-none">
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
@@ -188,7 +188,7 @@ export function FloatingAssistant() {
         whileHover={{ scale: 1.05, rotate: 5 }}
         whileTap={{ scale: 0.95 }}
         className={cn(
-          "h-16 w-16 rounded-[24px] flex items-center justify-center transition-all shadow-2xl relative pointer-events-auto",
+          "h-12 w-12 rounded-[18px] flex items-center justify-center transition-all shadow-2xl relative pointer-events-auto",
           isOpen 
             ? "bg-white dark:bg-zinc-900 text-foreground dark:text-white border border-divider dark:border-brand-green/20" 
             : "bg-primary dark:bg-brand-green text-white dark:text-black"
@@ -197,13 +197,13 @@ export function FloatingAssistant() {
         <AnimatePresence mode="wait">
           {isOpen ? (
             <motion.div key="close" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <X className="h-7 w-7" />
+              <X className="h-5 w-5" />
             </motion.div>
           ) : (
             <motion.div key="bot" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }} className="relative">
               <div className="absolute -inset-4 bg-white/20 dark:bg-black/20 rounded-full blur-xl animate-pulse" />
-              <Bot className="h-8 w-8 relative" />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-primary dark:border-brand-green rounded-full shadow-sm" />
+              <Bot className="h-6 w-6 relative" />
+              <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 border-2 border-primary dark:border-brand-green rounded-full shadow-sm" />
             </motion.div>
           )}
         </AnimatePresence>

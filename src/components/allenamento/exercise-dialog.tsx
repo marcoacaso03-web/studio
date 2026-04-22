@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Globe, Lock, Image as ImageIcon, Video, Link as LinkIcon, Save, X, Target, Users, Cone, Loader2 } from "lucide-react";
+import { Plus, Trash2, Globe, Lock, Image as ImageIcon, Video, Link as LinkIcon, Save, X, Target, Users, Cone, Loader2, Clock } from "lucide-react";
 import { Exercise, ExerciseMedia, ExerciseMediaType } from "@/lib/types";
 import { useExerciseStore } from "@/store/useExerciseStore";
 import { cn } from "@/lib/utils";
@@ -32,6 +32,7 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
   const [playerCount, setPlayerCount] = useState<string[]>([]);
   const [media, setMedia] = useState<ExerciseMedia[]>([]);
   const [newMediaUrl, setNewMediaUrl] = useState("");
+  const [duration, setDuration] = useState("");
   const [newMediaType, setNewMediaType] = useState<ExerciseMediaType>('image');
   const [uploadLoading, setUploadLoading] = useState(false);
 
@@ -44,6 +45,7 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
       setVisibility(exercise.visibility);
       setPlayerCount(exercise.playerCount || []);
       setMedia(exercise.media);
+      setDuration(exercise.duration || "");
     } else {
       setName("");
       setDescription("");
@@ -52,6 +54,7 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
       setVisibility('private');
       setPlayerCount([]);
       setMedia([]);
+      setDuration("");
     }
   }, [exercise, open]);
 
@@ -83,7 +86,8 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
       focus,
       visibility,
       playerCount: playerCount.length > 0 ? playerCount : ['Qualsiasi'],
-      media
+      media,
+      duration
     };
 
     if (exercise) {
@@ -128,6 +132,18 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
                   value={name}
                   onChange={e => setName(e.target.value)}
                 />
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 mb-0.5 mt-2">
+                    <Clock className="h-3.5 w-3.5 text-primary dark:text-brand-green" />
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Durata Stimata</Label>
+                  </div>
+                  <Input 
+                    placeholder="Es: 15' o 5x3..." 
+                    className="h-10 rounded-xl bg-background dark:bg-black/40 border-border dark:border-brand-green/10 focus-visible:ring-primary dark:focus-visible:ring-brand-green text-xs font-bold"
+                    value={duration}
+                    onChange={e => setDuration(e.target.value)}
+                  />
+                </div>
                 <div className="space-y-1">
                   <Label className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground/40 ml-1">Obiettivi</Label>
                   <Textarea 

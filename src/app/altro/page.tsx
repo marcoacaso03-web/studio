@@ -11,6 +11,7 @@ import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, Refres
 import { useToast } from '@/hooks/use-toast';
 import { playerRepository } from '@/lib/repositories/player-repository';
 import { matchRepository } from '@/lib/repositories/match-repository';
+import { GiSoccerBall } from "react-icons/gi";
 import { useThemeStore } from '@/store/useThemeStore';
 import { useSeasonsStore } from '@/store/useSeasonsStore';
 import { useMatchesStore } from '@/store/useMatchesStore';
@@ -53,6 +54,7 @@ export default function AltroPage() {
   // Dialog states
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isSquadraOpen, setIsSquadraOpen] = useState(false);
+  const [isNotificheOpen, setIsNotificheOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isJoinDialogOpen, setIsJoinDialogOpen] = useState(false);
   const [joinCode, setJoinCode] = useState('');
@@ -68,13 +70,19 @@ export default function AltroPage() {
     sessionsPerWeek, setSessionsPerWeek, 
     trainingDays, setTrainingDays, 
     autoSetPresenceOnGenerate, setAutoSetPresenceOnGenerate,
-    teamName, setTeamName
+    teamName, setTeamName, saveSettings, fetchSettings,
+    matchNotificationEnabled, matchNotificationTime,
+    trainingNotificationEnabled, trainingNotificationTime
   } = useSettingsStore();
 
   const [localTeamName, setLocalTeamName] = useState('');
   const [localDefaultDuration, setLocalDefaultDuration] = useState(90);
   const [localTrainingDays, setLocalTrainingDays] = useState<number[]>([]);
   const [localAutoSetPresenceOnGenerate, setLocalAutoSetPresenceOnGenerate] = useState(false);
+  const [localMatchNotificationEnabled, setLocalMatchNotificationEnabled] = useState(false);
+  const [localMatchNotificationTime, setLocalMatchNotificationTime] = useState('20:00');
+  const [localTrainingNotificationEnabled, setLocalTrainingNotificationEnabled] = useState(false);
+  const [localTrainingNotificationTime, setLocalTrainingNotificationTime] = useState('20:00');
 
   useEffect(() => {
     if (isSquadraOpen) {
@@ -85,22 +93,50 @@ export default function AltroPage() {
     }
   }, [isSquadraOpen, teamName, defaultDuration, trainingDays, autoSetPresenceOnGenerate]);
 
-  const handleSaveSettings = () => {
-    setTeamName(localTeamName);
-    setDefaultDuration(localDefaultDuration);
-    setTrainingDays(localTrainingDays);
-    setSessionsPerWeek(localTrainingDays.length);
-    setAutoSetPresenceOnGenerate(localAutoSetPresenceOnGenerate);
+  useEffect(() => {
+    if (isNotificheOpen) {
+      setLocalMatchNotificationEnabled(matchNotificationEnabled || false);
+      setLocalMatchNotificationTime(matchNotificationTime || '20:00');
+      setLocalTrainingNotificationEnabled(trainingNotificationEnabled || false);
+      setLocalTrainingNotificationTime(trainingNotificationTime || '20:00');
+    }
+  }, [isNotificheOpen, matchNotificationEnabled, matchNotificationTime, trainingNotificationEnabled, trainingNotificationTime]);
+
+  const { user, logout } = useAuthStore();
+
+  const handleSaveSettings = async () => {
+    if (!user) return;
+    await saveSettings(user.id, {
+      teamName: localTeamName,
+      defaultDuration: localDefaultDuration,
+      trainingDays: localTrainingDays,
+      sessionsPerWeek: localTrainingDays.length,
+      autoSetPresenceOnGenerate: localAutoSetPresenceOnGenerate
+    });
     setIsSquadraOpen(false);
     toast({ title: "Impostazioni Salvate", description: "Le modifiche alla squadra sono state applicate." });
   };
-  const { user, logout } = useAuthStore();
+
+  const handleSaveNotifications = async () => {
+    if (!user) return;
+    await saveSettings(user.id, {
+      matchNotificationEnabled: localMatchNotificationEnabled,
+      matchNotificationTime: localMatchNotificationTime,
+      trainingNotificationEnabled: localTrainingNotificationEnabled,
+      trainingNotificationTime: localTrainingNotificationTime
+    });
+    setIsNotificheOpen(false);
+    toast({ title: "Notifiche Salvate", description: "Le preferenze di notifica sono state applicate." });
+  };
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     fetchSeasons();
-  }, [fetchSeasons]);
+    if (user) {
+      fetchSettings(user.id);
+    }
+  }, [fetchSeasons, user, fetchSettings]);
 
   const handleAddSeason = async () => {
     if (!newSeasonName.trim()) return;
@@ -306,7 +342,7 @@ export default function AltroPage() {
 
         {/* Notifiche */}
         <div
-          onClick={() => toast({ title: "Presto disponibile", description: "Le notifiche push arriveranno in futuro." })}
+          onClick={() => setIsNotificheOpen(true)}
           className="flex items-center gap-4 bg-card border border-border dark:bg-black/40 dark:border-brand-green/30 rounded-3xl p-3 cursor-pointer hover:bg-muted/50 dark:hover:bg-black/60 transition-all shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)] active:scale-[0.98]"
         >
           <div className="w-14 h-14 rounded-2xl bg-muted dark:bg-black border border-border dark:border-brand-green flex items-center justify-center shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.1)]">
@@ -589,6 +625,83 @@ export default function AltroPage() {
                 ))}
               </div>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Notifiche Dialog */}
+      <Dialog open={isNotificheOpen} onOpenChange={setIsNotificheOpen}>
+        <DialogContent className="max-w-[95vw] sm:max-w-lg rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black text-foreground">Notifiche Push</DialogTitle>
+            <DialogDescription className="text-muted-foreground">Configura gli avvisi pre-gara e pre-allenamento.</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 pt-4">
+            {/* Notifica Partita */}
+            <div className="flex flex-col gap-3 p-3 rounded-2xl bg-muted/30 dark:bg-card/20 border border-border dark:border-transparent">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <GiSoccerBall className="w-4 h-4 text-primary dark:text-brand-green" />
+                  <Label className="text-sm font-bold uppercase tracking-tight">Giorno della Partita</Label>
+                </div>
+                <Switch
+                  checked={localMatchNotificationEnabled}
+                  onCheckedChange={setLocalMatchNotificationEnabled}
+                  className="data-[state=checked]:bg-primary dark:data-[state=checked]:bg-brand-green"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                <span>⚽</span> "Prendi nota della formazione e inserisci il risultato!"
+              </p>
+              {localMatchNotificationEnabled && (
+                <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                  <Label className="text-xs font-bold text-muted-foreground uppercase">Orario Notifica</Label>
+                  <Input 
+                    type="time" 
+                    value={localMatchNotificationTime}
+                    onChange={(e) => setLocalMatchNotificationTime(e.target.value)}
+                    className="w-28 h-8 text-xs font-bold bg-background dark:bg-black border-border dark:border-brand-green/30"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Notifica Allenamento */}
+            <div className="flex flex-col gap-3 p-3 rounded-2xl bg-muted/30 dark:bg-card/20 border border-border dark:border-transparent">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Cone className="w-4 h-4 text-primary dark:text-brand-green" />
+                  <Label className="text-sm font-bold uppercase tracking-tight">Giorno dell'Allenamento</Label>
+                </div>
+                <Switch
+                  checked={localTrainingNotificationEnabled}
+                  onCheckedChange={setLocalTrainingNotificationEnabled}
+                  className="data-[state=checked]:bg-primary dark:data-[state=checked]:bg-brand-green"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                <span>🏃‍♂️</span> "Chi c'era oggi? Segna le presenze e gli esercizi svolti!"
+              </p>
+              {localTrainingNotificationEnabled && (
+                <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                  <Label className="text-xs font-bold text-muted-foreground uppercase">Orario Notifica</Label>
+                  <Input 
+                    type="time" 
+                    value={localTrainingNotificationTime}
+                    onChange={(e) => setLocalTrainingNotificationTime(e.target.value)}
+                    className="w-28 h-8 text-xs font-bold bg-background dark:bg-black border-border dark:border-brand-green/30"
+                  />
+                </div>
+              )}
+            </div>
+
+            <Button 
+                onClick={handleSaveNotifications}
+                className="w-full bg-primary dark:bg-black border border-primary dark:border-brand-green text-white dark:text-brand-green hover:opacity-90 dark:hover:bg-brand-green/10 h-12 rounded-2xl font-black uppercase shadow-lg dark:shadow-[0_0_15px_rgba(172,229,4,0.2)]"
+            >
+                Salva Notifiche
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

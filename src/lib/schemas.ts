@@ -126,7 +126,32 @@ export const TrainingSessionSchema = z.object({
   seasonId: z.string(),
   userId: z.string(),
   exerciseIds: z.array(z.string()).optional().default([]),
+  exercises: z.array(z.object({
+    id: z.string(),
+    duration: z.string().optional()
+  })).optional().default([]),
   attendances: z.array(z.any()).optional().default([]), // Denormalized attendances in session doc
+});
+
+export const ExerciseMediaSchema = z.object({
+  type: z.enum(['image', 'video', 'link']),
+  url: z.string(),
+});
+
+export const ExerciseSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  ownerName: z.string(),
+  name: z.string(),
+  description: z.string(),
+  objectives: z.string().optional().default(''),
+  focus: z.array(z.string()),
+  visibility: z.enum(['private', 'global']),
+  media: z.array(ExerciseMediaSchema),
+  playerCount: z.array(z.string()),
+  duration: z.string().optional().default(''),
+  createdAt: z.string(),
+  updatedAt: z.string(),
 });
 
 export const SeasonSchema = z.object({

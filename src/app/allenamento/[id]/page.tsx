@@ -44,7 +44,7 @@ export default function TrainingDetailPage() {
   const [attendance, setAttendance] = useState<TrainingAttendance[]>([]);
   const [notes, setNotes] = useState("");
   const [focus, setFocus] = useState("");
-  const [selectedExerciseIds, setSelectedExerciseIds] = useState<string[]>([]);
+  const [sessionExercises, setSessionExercises] = useState<{ id: string; duration?: string }[]>([]);
   const [viewingExercise, setViewingExercise] = useState<Exercise | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -54,12 +54,32 @@ export default function TrainingDetailPage() {
   const [activeTab, setActiveTab] = useState("programma");
 
   const { exercises, fetchAll: fetchExercises } = useExerciseStore();
-
+  
+  const selectedExerciseIds = sessionExercises.map(e => e.id);
   const selectedExercises = exercises.filter(ex => selectedExerciseIds.includes(ex.id));
   const filteredExercises = exercises.filter(ex => 
     ex.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     ex.focus.some(f => f.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  const parseDuration = (dur: string): number => {
+    if (!dur) return 0;
+    const clean = dur.toLowerCase().replace(/['min]/g, '').trim();
+    if (clean.includes('x')) {
+      const parts = clean.split('x');
+      return (parseFloat(parts[0]) || 0) * (parseFloat(parts[1]) || 0);
+    }
+    return parseFloat(clean) || 0;
+  };
+
+  const totalDuration = sessionExercises.reduce((acc, curr) => {
+    const exercise = exercises.find(ex => ex.id === curr.id);
+    const durStr = curr.duration || exercise?.duration || "0";
+    return acc + parseDuration(durStr);
+  }, 0);
+
+  const targetDuration = 90; // 1h30
+  const progressPercentage = Math.min(100, (totalDuration / targetDuration) * 100);
 
   useEffect(() => {
     if (!user || !sessionId) return;
@@ -71,7 +91,7 @@ export default function TrainingDetailPage() {
         setSession(s);
         setNotes(s.notes || "");
         setFocus(s.focus || "");
-        setSelectedExerciseIds(s.exerciseIds || []);
+        setSessionExercises(s.exercises || (s.exerciseIds || []).map(id => ({ id })));
         const att = await trainingRepository.getAttendance(user.id, sessionId);
         setAttendance(att);
         useTrainingStore.getState().updateSessionLocally(sessionId, { notes: s.notes, focus: s.focus, exerciseIds: s.exerciseIds, ...s });
@@ -86,15 +106,24 @@ export default function TrainingDetailPage() {
   const handleSaveNotes = async () => {
     if (!user || !session) return;
     setSaving(true);
-    await trainingRepository.update(user.id, sessionId, { notes, focus, exerciseIds: selectedExerciseIds });
-    useTrainingStore.getState().updateSessionLocally(sessionId, { notes, focus, exerciseIds: selectedExerciseIds });
+    await trainingRepository.update(user.id, sessionId, { notes, focus, exercises: sessionExercises });
+    useTrainingStore.getState().updateSessionLocally(sessionId, { notes, focus, exercises: sessionExercises });
     setSaving(false);
   };
 
   const toggleExercise = (id: string) => {
-    setSelectedExerciseIds(prev => 
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-    );
+    const exercise = exercises.find(ex => ex.id === id);
+    setSessionExercises(prev => {
+      const exists = prev.find(x => x.id === id);
+      if (exists) return prev.filter(x => x.id !== id);
+      return [...prev, { id, duration: exercise?.duration || "" }];
+    });
+  };
+
+  const updateExerciseDuration = (id: string, newDuration: string) => {
+    setSessionExercises(prev => prev.map(ex => 
+      ex.id === id ? { ...ex, duration: newDuration } : ex
+    ));
   };
 
   const updateAttendance = async (playerId: string, status: TrainingStatus) => {
@@ -188,6 +217,24 @@ export default function TrainingDetailPage() {
             <CardHeader className="bg-muted dark:bg-black/60 border-b border-border dark:border-brand-green/30 p-6 pb-8">
               <CardTitle className="text-lg font-black uppercase tracking-tight text-foreground">Esercitazioni e Obiettivi</CardTitle>
               <CardDescription className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">Definisci il piano tecnico della seduta.</CardDescription>
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-foreground/60">Carico Sessione (Target 1h30)</span>
+                  <span className={cn(
+                    "text-[10px] font-black uppercase",
+                    totalDuration > targetDuration ? "text-rose-500" : "text-primary dark:text-brand-green"
+                  )}>{totalDuration} / {targetDuration} MIN</span>
+                </div>
+                <div className="h-2 w-full bg-muted dark:bg-zinc-900 rounded-full overflow-hidden border border-border dark:border-brand-green/10">
+                  <div 
+                    className={cn(
+                      "h-full transition-all duration-500 rounded-full shadow-[0_0_10px_rgba(var(--primary),0.3)]",
+                      totalDuration > targetDuration ? "bg-rose-500" : "bg-primary dark:bg-brand-green"
+                    )}
+                    style={{ width: `${progressPercentage}%` }}
+                  />
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="p-6 bg-card dark:bg-background rounded-t-3xl border-t border-border dark:border-brand-green/30 space-y-6">
               <div className="space-y-3 pb-6 border-b border-border dark:border-brand-green/20">
@@ -225,25 +272,47 @@ export default function TrainingDetailPage() {
                     <Label className="text-[10px] font-black uppercase tracking-widest text-primary dark:text-brand-green">Esercitazioni Selezionate:</Label>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {selectedExercises.map((ex) => (
-                      <Card 
-                        key={ex.id} 
-                        className="group relative rounded-2xl border border-border dark:border-brand-green/20 hover:border-primary dark:hover:border-brand-green bg-muted/20 dark:bg-black/40 overflow-hidden cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
-                        onClick={() => setViewingExercise(ex)}
-                      >
-                        <CardContent className="p-4 flex flex-col gap-2">
-                           <div className="flex items-center justify-between">
-                              <span className="text-[11px] font-black uppercase text-foreground leading-tight truncate pr-4">{ex.name}</span>
-                              <ExternalLink className="h-3 w-3 opacity-20 group-hover:opacity-100 transition-opacity" />
-                           </div>
-                           <div className="flex flex-wrap gap-1">
-                              {ex.focus.slice(0, 2).map(f => (
-                                <Badge key={f} variant="outline" className="text-[7px] py-0 px-1 border-primary/20 dark:border-brand-green/20 text-muted-foreground uppercase">{f}</Badge>
-                              ))}
-                           </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                    {selectedExercises.map((ex) => {
+                      const sessionEx = sessionExercises.find(s => s.id === ex.id);
+                      return (
+                        <Card 
+                          key={ex.id} 
+                          className="group relative rounded-2xl border border-border dark:border-brand-green/20 hover:border-primary dark:hover:border-brand-green bg-muted/20 dark:bg-black/40 overflow-hidden transition-all shadow-sm"
+                        >
+                          <CardContent className="p-4 flex flex-col gap-3">
+                             <div className="flex items-center justify-between">
+                                <div className="flex flex-col min-w-0" onClick={() => setViewingExercise(ex)}>
+                                   <span className="text-[11px] font-black uppercase text-foreground leading-tight truncate pr-2 hover:text-primary dark:hover:text-brand-green cursor-pointer">{ex.name}</span>
+                                   <div className="flex flex-wrap gap-1 mt-1">
+                                      {ex.focus.slice(0, 1).map(f => (
+                                        <Badge key={f} variant="outline" className="text-[7px] py-0 px-1 border-primary/20 dark:border-brand-green/20 text-muted-foreground uppercase">{f}</Badge>
+                                      ))}
+                                   </div>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <div className="flex flex-col items-end">
+                                    <Label className="text-[8px] font-black uppercase text-muted-foreground/50 mb-1">Durata</Label>
+                                    <Input 
+                                      className="h-8 w-16 text-center text-[10px] font-black uppercase bg-background dark:bg-black border-border dark:border-brand-green/20 focus-visible:ring-brand-green"
+                                      value={sessionEx?.duration || ""}
+                                      onChange={(e) => updateExerciseDuration(ex.id, e.target.value)}
+                                      placeholder="Es: 5x3"
+                                    />
+                                  </div>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-8 w-8 rounded-lg text-rose-500 hover:bg-rose-500/10"
+                                    onClick={() => toggleExercise(ex.id)}
+                                  >
+                                    <XCircle className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                             </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -344,20 +413,20 @@ export default function TrainingDetailPage() {
 
       {/* Floating Action Button for Exercises - Visible only in Programma tab */}
       {activeTab === "programma" && (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-24 right-6 z-50">
             <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
               <PopoverTrigger asChild>
                 <Button 
                   size="icon" 
-                  className="h-16 w-16 rounded-full bg-primary dark:bg-black border-4 border-card dark:border-brand-green/20 text-white dark:text-brand-green shadow-2xl hover:scale-110 active:scale-95 transition-all group"
+                  className="h-12 w-12 rounded-full bg-primary dark:bg-black border-4 border-card dark:border-brand-green/20 text-white dark:text-brand-green shadow-2xl hover:scale-110 active:scale-95 transition-all group"
                 >
-                  <PlusIcon className="h-8 w-8 group-hover:rotate-90 transition-transform duration-300" />
+                  <PlusIcon className="h-6 w-6 group-hover:rotate-90 transition-transform duration-300" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent 
                 side="top" 
                 align="end" 
-                className="w-80 p-0 mr-2 mb-4 bg-card dark:bg-black border border-border dark:border-brand-green/30 rounded-[32px] shadow-2xl overflow-hidden"
+                className="w-80 p-0 mr-2 mb-2 bg-card dark:bg-black border border-border dark:border-brand-green/30 rounded-[32px] shadow-2xl overflow-hidden"
               >
                 <div className="p-5 border-b border-border dark:border-brand-green/20 space-y-4">
                   <h3 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">Aggiungi Esercizi</h3>
@@ -388,7 +457,15 @@ export default function TrainingDetailPage() {
                               <span className={cn("text-[11px] font-black uppercase truncate", isSelected ? "text-primary dark:text-brand-green" : "text-foreground")}>
                                 {ex.name}
                               </span>
-                              <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest truncate">{ex.focus.join(' · ')}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest truncate">{ex.focus.join(' · ')}</span>
+                                {ex.duration && (
+                                  <>
+                                    <span className="text-[8px] text-muted-foreground opacity-30">•</span>
+                                    <span className="text-[8px] font-black text-primary dark:text-brand-green uppercase tracking-widest">{ex.duration}</span>
+                                  </>
+                                )}
+                              </div>
                            </div>
                            {isSelected ? (
                               <div className="h-5 w-5 rounded-full bg-primary dark:bg-brand-green flex items-center justify-center">

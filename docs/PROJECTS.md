@@ -1,13 +1,10 @@
 # 🗺️ PitchMan — Roadmap & Miglioramenti
-
-> Documento generato dall'analisi completa del codebase. Ogni voce è concreta e attuabile.
-
 ---
 
 ## 🔴 Bug & Fix Immediati
 - [ ] **Hydration Errors nei Modali**: Con React 18 / Next.js e componenti headless (Radix UI), verificare e prevenire avvisi di mismatch HTML tra il server rendering e la visualizzazione locale.
 
----
+--- 
 
 ## 🟡 Ottimizzazioni
 
@@ -47,15 +44,8 @@ Da membri/ gestisci la rosa, ma al momento dell'inserimento formazione probabilm
 
 allenamenti e formazioni non si linkano tra loro (es. clicchi una partita → vedi formazione usata → vedi allenamento pre-gara)
 
-Tasto rapido inserisci formazione prossima partita
-
-Heatmap di utilizzo rosa
-Visualizzazione stagionale: asse X = giornate, asse Y = minuti giocati, dimensione = giocatori. Rivela immediatamente chi stai sovraccaricando e chi non sta giocando abbastanza. Hai già tutti i dati, manca solo la visualizzazione.
-
 "Formazione tipo" emergente
 Analisi automatica delle ultime N partite per rilevare qual è la formazione che statisticamente hai usato di più, con quali giocatori fissi e quali variabili. Presentata come insight in statistiche in un tab 11.
-
-Chatbot a cui chiedere sull'utilizzo dell'app e statistiche. L'unico rischio residuo è se un utente manipola seasonId nel body della richiesta — per blindarlo al 100% puoi leggere seasonId direttamente dalla sessione Firebase Admin server-side invece che dal body.
 
 Opzionale:
 Visualizza gli allenamenti su un calendario con all'interno del giorno la scheda allenamento, clicca sul giorno per vedere la scheda sotto al calendario con anteprima presenza e focus oppure se riusciamo a mettere direttamente dentro al giorno questi dati.

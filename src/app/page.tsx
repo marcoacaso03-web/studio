@@ -8,6 +8,7 @@ import { useMatchesStore } from '@/store/useMatchesStore';
 import { useTrainingStore } from '@/store/useTrainingStore';
 import { useStatsStore } from '@/store/useStatsStore';
 import { useSeasonsStore } from '@/store/useSeasonsStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { useAppStore } from '@/store/useAppStore';
 import { ErrorState } from '@/components/ui/error-state';
 import { parseError } from '@/lib/error-utils';
@@ -40,6 +41,7 @@ export default function HomePage() {
   const [isInitializing, setIsInitializing] = useState(!hasInitialized);
   const [isMatchFormOpen, setIsMatchFormOpen] = useState(false);
 
+  const { fetchSettings } = useSettingsStore();
   const { activeSeason, error: seasonsError, fetchAll: fetchSeasons } = useSeasonsStore();
   const { players, fetchAll: fetchPlayers } = usePlayersStore();
   const { matches, fetchAll: fetchMatches, add: addMatch } = useMatchesStore();
@@ -61,7 +63,10 @@ export default function HomePage() {
       }
 
       try {
-        await fetchSeasons();
+        await Promise.all([
+          fetchSettings(user.id),
+          fetchSeasons()
+        ]);
         const season = useSeasonsStore.getState().activeSeason;
         if (season) {
           await Promise.all([
@@ -83,7 +88,7 @@ export default function HomePage() {
     if (mounted) {
       initializeDashboard();
     }
-  }, [mounted, isAuthenticated, user, fetchSeasons, fetchPlayers, fetchMatches, fetchTrainings, loadDetailedStats, router]);
+  }, [mounted, isAuthenticated, user, fetchSettings, fetchSeasons, fetchPlayers, fetchMatches, fetchTrainings, loadDetailedStats, router]);
 
   const userName = user?.username || user?.email?.split('@')[0] || "Mister";
 
