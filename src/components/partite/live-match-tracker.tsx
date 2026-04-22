@@ -48,12 +48,14 @@ export function LiveMatchTracker({ open, onOpenChange }: { open: boolean, onOpen
   };
 
   const handleEvent = async (type: string, team: 'home' | 'away') => {
+    if (!match) return;
     const minute = Math.floor(seconds / 60);
     
     // In simple mode, just add the event. 
     // If we wanted detailed mode, we would maybe open the normal dialog, 
     // but the request asks to record them instantly in simple mode.
     await addEvent({
+      matchId: match.id,
       type: type as any,
       team,
       minute,
