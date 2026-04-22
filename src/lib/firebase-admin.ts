@@ -1,42 +1,42 @@
 import * as admin from 'firebase-admin';
 
+// Flag che indica se l'inizializzazione è avvenuta con credenziali reali
+let _initializedWithCredentials = false;
+
 // Inizializzazione Singleton per Firebase Admin
-function getAdminApp() {
-  if (admin.apps.length > 0) return admin.apps[0];
+function getAdminApp(): admin.app.App | null {
+  if (admin.apps.length > 0) return admin.apps[0]!;
+
+  const rawServiceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
+
+  if (!rawServiceAccount) {
+    console.warn('[Firebase Admin] FIREBASE_SERVICE_ACCOUNT non definita. Admin SDK non disponibile.');
+    return null;
+  }
 
   try {
-    const rawServiceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
-    
-    if (rawServiceAccount) {
-      // Rimuove eventuali apici singoli o doppi che circondano l'intero JSON (comune in alcuni .env)
-      const cleanServiceAccount = rawServiceAccount.trim().replace(/^['"]|['"]$/g, '');
-      
-      try {
-        const serviceAccount = JSON.parse(cleanServiceAccount);
-        return admin.initializeApp({
-          credential: admin.credential.cert(serviceAccount),
-          projectId: serviceAccount.project_id
-        });
-      } catch (parseError) {
-        console.error('ERROR: FIREBASE_SERVICE_ACCOUNT is not a valid JSON. Falling back to default project init...', parseError);
-      }
-    } else {
-      console.warn('WARNING: FIREBASE_SERVICE_ACCOUNT is not defined. Attempting default project init...');
-    }
-    
-    // Fallback: Tentativo di inizializzazione con variabili pubbliche
-    // NOTA: Se arriviamo qui senza credenziali, le operazioni privilegiate (come verifyIdToken o Firestore write)
-    // probabilmente falliranno con "Could not load the default credentials".
-    return admin.initializeApp({
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    // Rimuove eventuali apici singoli o doppi che circondano l'intero JSON (comune in alcuni .env)
+    const cleanServiceAccount = rawServiceAccount.trim().replace(/^['"]|['"]$/g, '');
+    const serviceAccount = JSON.parse(cleanServiceAccount);
+
+    const app = admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      projectId: serviceAccount.project_id,
     });
+
+    _initializedWithCredentials = true;
+    console.log('[Firebase Admin] Inizializzato con successo per il progetto:', serviceAccount.project_id);
+    return app;
   } catch (error) {
-    console.error('CRITICAL: Firebase Admin initialization failed entirely.', error);
+    console.error('[Firebase Admin] ERRORE CRITICO durante l\'inizializzazione:', error);
     return null;
   }
 }
 
-getAdminApp();
+const adminApp = getAdminApp();
 
-export const adminAuth = admin.apps.length ? admin.auth() : null as unknown as admin.auth.Auth;
-export const adminDb = admin.apps.length ? admin.firestore() : null as unknown as admin.firestore.Firestore;
+// Esporta auth e db SOLO se l'app è stata inizializzata con credenziali reali.
+// Altrimenti esporta null per evitare errori "Could not load the default credentials".
+export const adminAuth = adminApp && _initializedWithCredentials ? admin.auth() : null;
+export const adminDb = adminApp && _initializedWithCredentials ? admin.firestore() : null;
+export const isAdminReady = _initializedWithCredentials;

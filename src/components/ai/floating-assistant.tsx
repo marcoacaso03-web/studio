@@ -9,6 +9,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { getAuth } from "firebase/auth";
 import { chatbotFlow } from "@/ai/flows/chatbot-flow";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useSeasonsStore } from "@/store/useSeasonsStore";
 
 interface Message {
   role: "user" | "assistant";
@@ -23,6 +25,8 @@ export function FloatingAssistant() {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const user = useAuthStore(state => state.user);
+  const activeSeason = useSeasonsStore(state => state.activeSeason);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -46,10 +50,12 @@ export function FloatingAssistant() {
         throw new Error("Sessione non valida");
       }
 
-      // Chiamata alla Server Action del chatbot
+      // Chiamata alla Server Action del chatbot con fallback userId/seasonId
       const response = await chatbotFlow({
         message: userMessage,
-        idToken: idToken
+        idToken: idToken,
+        userId: user?.id,
+        seasonId: activeSeason?.id,
       });
 
       setMessages(prev => [...prev, { role: "assistant", content: response.text }]);
