@@ -368,7 +368,7 @@ export default function CalendarioPage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between gap-4 px-1">
           <div className="flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-primary dark:text-brand-green" />
+            <CalendarIcon className="h-4 w-4 text-primary dark:text-brand-green" />
             <h3 className="text-xs font-black uppercase tracking-widest text-foreground/70 dark:text-white/50">Tutte le Partite</h3>
           </div>
           {!isEditMode ? (
@@ -429,8 +429,8 @@ export default function CalendarioPage() {
                 m.status === 'scheduled' && "border-l-4 border-l-primary dark:border-l-brand-green"
               )}
             >
-              <CardContent className="p-4 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
+              <CardContent className="p-4 pl-2 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
                   {(() => {
                     const sameTypeMatches = sortedMatches.filter(match => match.type === m.type);
                     const autoRound = sameTypeMatches.findIndex(match => match.id === m.id) + 1;
@@ -457,7 +457,7 @@ export default function CalendarioPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 shrink-0 min-w-[85px] justify-end">
                   {m.status === 'completed' || !!m.result ? (
                     <div className="flex items-center gap-1.5 bg-muted/50 dark:bg-white/5 px-2.5 py-1 rounded-lg shrink-0 whitespace-nowrap">
                       <span className={cn(
