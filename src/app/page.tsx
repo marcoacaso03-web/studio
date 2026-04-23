@@ -142,7 +142,8 @@ export default function HomePage() {
     await addMatch(data);
   };
 
-  if (!mounted || isInitializing) return <SplashScreen />;
+  if (isInitializing) return <SplashScreen />;
+  if (!mounted) return null;
 
   if (seasonsError) {
     return (
