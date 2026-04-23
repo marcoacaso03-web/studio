@@ -300,7 +300,7 @@ export default function AllenamentoPage() {
             const sessionData = session as any;
             const focus = sessionData.focus && sessionData.focus.trim() !== "" ? sessionData.focus : "Nessuno";
 
-            let FocusIcon = Target;
+            let FocusIcon: any = Target;
             if (focus.toLowerCase().includes('fisic')) FocusIcon = PiTrafficCone;
 
             const totalPlayers = players.length > 0 ? players.length : 20;
