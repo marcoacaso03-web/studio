@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Sparkles, Globe } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -57,9 +58,11 @@ interface PlayerFormDialogProps {
   onOpenChange: (open: boolean) => void;
   onSave: (data: PlayerSaveData, playerId?: string) => void;
   player?: Player | null;
+  onAIImport?: () => void;
+  onTuttocampoImport?: () => void;
 }
 
-export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerFormDialogProps) {
+export function PlayerFormDialog({ open, onOpenChange, onSave, player, onAIImport, onTuttocampoImport }: PlayerFormDialogProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -107,14 +110,38 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player }: PlayerF
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] rounded-[28px] bg-card dark:bg-black border border-border dark:border-brand-green/30 shadow-xl dark:shadow-[0_0_25px_rgba(172,229,4,0.05)] p-6 overflow-hidden">
-        <DialogHeader className="space-y-1">
-          <DialogTitle className="text-foreground dark:text-white font-black uppercase text-xl md:text-2xl tracking-tight">
-            {player ? "Modifica Giocatore" : "Nuovo Giocatore"}
-          </DialogTitle>
-          <DialogDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-            Dettagli anagrafici e ruolo tecnico in rosa.
-          </DialogDescription>
+      <DialogContent hideClose className="sm:max-w-[425px] rounded-[28px] bg-card dark:bg-black border border-border dark:border-brand-green/30 shadow-xl dark:shadow-[0_0_25px_rgba(172,229,4,0.05)] p-6 overflow-hidden">
+        <DialogHeader className="flex-row items-start justify-between space-y-0">
+          <div className="space-y-1 text-left">
+            <DialogTitle className="text-foreground dark:text-white font-black uppercase text-xl md:text-2xl tracking-tight">
+              {player ? "Modifica Giocatore" : "Nuovo Giocatore"}
+            </DialogTitle>
+            <DialogDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+              Dettagli anagrafici e ruolo tecnico in rosa.
+            </DialogDescription>
+          </div>
+          {!player && (
+            <div className="flex gap-2 ml-4">
+              <Button 
+                onClick={onAIImport}
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-full bg-primary/10 dark:bg-brand-green/10 text-primary dark:text-brand-green hover:bg-primary/20 dark:hover:bg-brand-green/20"
+                title="Importazione AI"
+              >
+                <Sparkles className="h-5 w-5" />
+              </Button>
+              <Button 
+                onClick={onTuttocampoImport}
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-full bg-primary/10 dark:bg-brand-green/10 text-primary dark:text-brand-green hover:bg-primary/20 dark:hover:bg-brand-green/20"
+                title="Importa da Tuttocampo"
+              >
+                <Globe className="h-5 w-5" />
+              </Button>
+            </div>
+          )}
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 pt-4">

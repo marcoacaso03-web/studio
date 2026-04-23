@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, Sparkles, Search, Plus, ChevronRight, Globe, Hospital } from "lucide-react";
+import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, Sparkles, Search, Plus, ChevronRight, Globe, Hospital, Save } from "lucide-react";
 import type { Player, Role } from "@/lib/types";
 import dynamic from "next/dynamic";
 
@@ -53,6 +53,7 @@ export default function RosaPage() {
   const [isDeleteAllOpen, setIsDeleteAllOpen] = useState(false);
   const [isInjuryFormOpen, setIsInjuryFormOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isEditMode, setIsEditMode] = useState(false);
   
   // Array per tenere traccia delle sezioni aperte (tipo accordion multiplo)
   const [openRoles, setOpenRoles] = useState<string[]>(["Portiere", "Difensore", "Centrocampista", "Attaccante"]);
@@ -167,60 +168,59 @@ export default function RosaPage() {
         />
       ) : (
         <>
-          <div className="px-4 flex gap-3 items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary dark:text-brand-green" />
-              <Input 
-                type="text" 
-                placeholder="Cerca" 
-                className="w-full h-12 pl-12 pr-4 rounded-full bg-background dark:bg-black border border-primary/30 dark:border-brand-green/30 text-foreground placeholder:text-muted-foreground/50 font-medium text-lg focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)]"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                onClick={() => setIsSmartFormOpen(true)}
-                variant="ghost"
-                className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
-                title="Importazione AI"
-              >
-                <Sparkles className="h-6 w-6" />
-              </Button>
-              <Button 
-                onClick={() => setIsInjuryFormOpen(true)}
-                variant="ghost"
-                className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
-                title="Infermeria"
-              >
-                <Hospital className="h-6 w-6" />
-              </Button>
-              <Button 
-                onClick={() => setIsImportTuttocampoOpen(true)}
-                variant="ghost"
-                className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
-                title="Importa da Tuttocampo"
-              >
-                <Globe className="h-6 w-6" />
-              </Button>
-              <Button 
-                onClick={() => handleOpenForm(null)}
-                variant="ghost"
-                className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
-                title="Aggiungi Giocatore"
-              >
-                <Plus className="h-7 w-7" />
-              </Button>
-              {players.length > 0 && (
-                <Button 
-                  onClick={() => setIsDeleteAllOpen(true)}
-                  variant="ghost"
-                  className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-destructive/20 text-destructive shadow-sm hover:bg-destructive/5 transition-all hover:scale-105 active:scale-95"
-                  title="Svuota Rosa"
-                >
-                  <Trash2 className="h-6 w-6" />
-                </Button>
-              )}
+          <div className="px-4">
+            <div className="flex gap-3 items-center">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary dark:text-brand-green" />
+                <Input 
+                  type="text" 
+                  placeholder="Cerca" 
+                  className="w-full h-12 pl-12 pr-4 rounded-full bg-background dark:bg-black border border-primary/30 dark:border-brand-green/30 text-foreground placeholder:text-muted-foreground/50 font-medium text-lg focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)]"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2">
+                {!isEditMode ? (
+                  <>
+                    <Button 
+                      onClick={() => handleOpenForm(null)}
+                      variant="ghost"
+                      className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
+                      title="Aggiungi Giocatore"
+                    >
+                      <Plus className="h-7 w-7" />
+                    </Button>
+                    <Button 
+                      onClick={() => setIsEditMode(true)}
+                      variant="ghost"
+                      className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
+                      title="Modalità Modifica"
+                    >
+                      <Edit className="h-5 w-5" />
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button 
+                      onClick={() => setIsEditMode(false)}
+                      variant="ghost"
+                      className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-primary dark:bg-brand-green border border-primary/20 dark:border-brand-green/20 text-white dark:text-black shadow-sm hover:opacity-90 transition-all hover:scale-105 active:scale-95"
+                      title="Salva"
+                    >
+                      <Save className="h-6 w-6" /> 
+                    </Button>
+                    <Button 
+                      onClick={() => setIsDeleteAllOpen(true)}
+                      variant="ghost"
+                      className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-destructive/10 border border-destructive/20 text-destructive shadow-sm hover:bg-destructive/20 transition-all hover:scale-105 active:scale-95"
+                      title="Svuota Rosa"
+                    >
+                      <Trash2 className="h-6 w-6" />
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
@@ -285,30 +285,33 @@ export default function RosaPage() {
                                   </div>
                                 )}
                               </div>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-muted-foreground dark:text-white/40 hover:text-destructive hover:bg-destructive/10 dark:hover:text-red-500 dark:hover:bg-red-500/10 transition-all opacity-60 dark:opacity-40 group-hover:opacity-100 dark:group-hover:opacity-100"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setPlayerToDelete(player);
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-muted-foreground dark:text-white/40 hover:text-primary dark:hover:text-brand-green hover:bg-primary/10 dark:hover:bg-brand-green/10 transition-all opacity-60 dark:opacity-40 group-hover:opacity-100 dark:group-hover:opacity-100"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleOpenForm(player);
-                                  }}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                              </div>
+                              {isEditMode && (
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-muted-foreground dark:text-white/40 hover:text-destructive hover:bg-destructive/10 dark:hover:text-red-500 dark:hover:bg-red-500/10 transition-all opacity-60 dark:opacity-40"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPlayerToDelete(player);
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-muted-foreground dark:text-white/40 hover:text-primary dark:hover:text-brand-green hover:bg-primary/10 dark:hover:bg-brand-green/10 transition-all opacity-60 dark:opacity-40"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOpenForm(player);
+                                    }}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )}
+                              {!isEditMode && <ChevronRight className="h-4 w-4 text-muted-foreground/30" />}
                             </div>
                           ))
                         )}
@@ -327,6 +330,14 @@ export default function RosaPage() {
         onOpenChange={setIsFormOpen} 
         onSave={handleSavePlayer} 
         player={selectedPlayer}
+        onAIImport={() => {
+          setIsFormOpen(false);
+          setIsSmartFormOpen(true);
+        }}
+        onTuttocampoImport={() => {
+          setIsFormOpen(false);
+          setIsImportTuttocampoOpen(true);
+        }}
       />
 
       <SmartPlayerDialog

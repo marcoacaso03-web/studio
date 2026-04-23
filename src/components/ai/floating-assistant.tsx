@@ -24,17 +24,19 @@ export function FloatingAssistant() {
     { role: "assistant", content: "Ciao coach! Sono il tuo assistente PitchMan. Come posso aiutarti con le statistiche della squadra oggi?" }
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Dati dal client Firebase SDK (già autenticato)
   const matches = useMatchesStore(state => state.matches);
   const players = usePlayersStore(state => state.players);
   const activeSeason = useSeasonsStore(state => state.activeSeason);
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    scrollToBottom();
   }, [messages, isLoading]);
 
   const handleSend = async () => {
@@ -121,7 +123,7 @@ export function FloatingAssistant() {
             </div>
 
             {/* Chat Content */}
-            <ScrollArea className="flex-1 p-5" ref={scrollRef}>
+            <ScrollArea className="flex-1 p-5">
               <div className="space-y-4">
                 {messages.map((msg, i) => (
                   <motion.div
@@ -155,6 +157,7 @@ export function FloatingAssistant() {
                     <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/40 animate-pulse">Analisi dati in corso...</span>
                   </div>
                 )}
+                <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
 

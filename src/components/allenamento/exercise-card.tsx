@@ -4,7 +4,8 @@ import { Exercise } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Globe, Lock, Image as ImageIcon, Video, Link as LinkIcon, Users, ExternalLink, Cone } from "lucide-react";
+import { Pencil, Trash2, Globe, Lock, Image as ImageIcon, Video, Link as LinkIcon, Users, ExternalLink } from "lucide-react";
+import { PiTrafficCone } from "react-icons/pi";
 import { cn } from "@/lib/utils";
 import { 
   AlertDialog, 
@@ -42,7 +43,7 @@ export function ExerciseCard({ exercise, isOwner, onEdit, onDelete, onView }: Ex
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 dark:from-brand-green/10 dark:to-transparent flex items-center justify-center">
-            <Cone className="h-10 w-10 text-primary/20 dark:text-brand-green/20" />
+            <PiTrafficCone className="h-10 w-10 text-primary/20 dark:text-brand-green/20" />
           </div>
         )}
         

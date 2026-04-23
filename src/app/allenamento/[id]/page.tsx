@@ -290,19 +290,43 @@ export default function TrainingDetailPage() {
                                    </div>
                                 </div>
                                 <div className="flex items-center gap-2 shrink-0">
-                                  <div className="flex flex-col items-end">
-                                    <Label className="text-[8px] font-black uppercase text-muted-foreground/50 mb-1">Durata</Label>
-                                    <Input 
-                                      className="h-8 w-16 text-center text-[10px] font-black uppercase bg-background dark:bg-black border-border dark:border-brand-green/20 focus-visible:ring-brand-green"
-                                      value={sessionEx?.duration || ""}
-                                      onChange={(e) => updateExerciseDuration(ex.id, e.target.value)}
-                                      placeholder="Es: 5x3"
-                                    />
+                                  <div className="flex items-center gap-1.5">
+                                    <div className="flex flex-col items-center">
+                                      <Label className="text-[8px] font-black uppercase text-muted-foreground/50 mb-0.5">Serie</Label>
+                                      <Input 
+                                        type="number"
+                                        className="h-8 w-12 text-center text-[10px] font-black uppercase bg-background dark:bg-black border-border dark:border-brand-green/20 p-0 focus-visible:ring-brand-green"
+                                        value={(sessionEx?.duration || "").includes('x') ? (sessionEx?.duration || "").split('x')[0] : ""}
+                                        onChange={(e) => {
+                                          const val = e.target.value;
+                                          const parts = (sessionEx?.duration || "").split('x');
+                                          const mins = parts.length > 1 ? parts[1] : (sessionEx?.duration || "");
+                                          updateExerciseDuration(ex.id, val ? `${val}x${mins}` : mins);
+                                        }}
+                                        placeholder="1"
+                                      />
+                                    </div>
+                                    <span className="text-muted-foreground/30 font-black text-xs mt-3">x</span>
+                                    <div className="flex flex-col items-center">
+                                      <Label className="text-[8px] font-black uppercase text-muted-foreground/50 mb-0.5">Minuti</Label>
+                                      <Input 
+                                        type="number"
+                                        className="h-8 w-14 text-center text-[10px] font-black uppercase bg-background dark:bg-black border-border dark:border-brand-green/20 p-0 focus-visible:ring-brand-green"
+                                        value={(sessionEx?.duration || "").includes('x') ? (sessionEx?.duration || "").split('x')[1] : (sessionEx?.duration || "")}
+                                        onChange={(e) => {
+                                          const val = e.target.value;
+                                          const parts = (sessionEx?.duration || "").split('x');
+                                          const sets = parts.length > 1 ? parts[0] : "";
+                                          updateExerciseDuration(ex.id, sets ? `${sets}x${val}` : val);
+                                        }}
+                                        placeholder="15"
+                                      />
+                                    </div>
                                   </div>
                                   <Button 
                                     variant="ghost" 
                                     size="icon" 
-                                    className="h-8 w-8 rounded-lg text-rose-500 hover:bg-rose-500/10"
+                                    className="h-8 w-8 rounded-lg text-rose-500 hover:bg-rose-500/10 mt-3"
                                     onClick={() => toggleExercise(ex.id)}
                                   >
                                     <XCircle className="h-4 w-4" />

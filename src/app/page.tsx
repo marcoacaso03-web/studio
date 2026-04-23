@@ -18,11 +18,12 @@ import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  Users, Cone, Trophy, CalendarPlus,
+  Users, Trophy, CalendarPlus,
   Search, ArrowRight, Star, PlusCircle, Shield,
   Home, Plane
 } from "lucide-react";
 import { GiWhistle, GiSoccerBall, GiSoccerKick } from "react-icons/gi";
+import { PiTrafficCone } from "react-icons/pi";
 import { format, isAfter, parseISO, startOfDay } from "date-fns";
 import { it } from "date-fns/locale";
 import dynamic from "next/dynamic";
@@ -232,7 +233,7 @@ export default function HomePage() {
           onClick={() => nextTraining ? router.push(`/allenamento/${nextTraining.id}`) : router.push('/allenamento')}
           className="h-auto flex-col items-center justify-center p-3 bg-card dark:bg-white/5 border border-border dark:border-white/10 hover:bg-muted dark:hover:bg-white/10 hover:border-primary dark:hover:border-brand-green/50 text-foreground dark:text-white rounded-2xl transition-all shadow-sm gap-2"
         >
-          <Cone className="h-5 w-5 text-primary dark:text-brand-green" />
+          <PiTrafficCone className="h-5 w-5 text-primary dark:text-brand-green" />
           <span className="text-xs font-black uppercase text-center leading-tight">
             {nextTraining ? format(parseISO(nextTraining.date), "dd/MM") : "Prox"}<br />Allenamento
           </span>

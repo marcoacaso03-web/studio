@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Globe, Lock, Image as ImageIcon, Video, Link as LinkIcon, Save, X, Target, Users, Cone, Loader2, Clock } from "lucide-react";
+import { Plus, Trash2, Globe, Lock, Image as ImageIcon, Video, Link as LinkIcon, Save, X, Target, Users, Loader2, Clock } from "lucide-react";
+import { PiTrafficCone } from "react-icons/pi";
 import { Exercise, ExerciseMedia, ExerciseMediaType } from "@/lib/types";
 import { useExerciseStore } from "@/store/useExerciseStore";
 import { cn } from "@/lib/utils";
@@ -32,7 +33,8 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
   const [playerCount, setPlayerCount] = useState<string[]>([]);
   const [media, setMedia] = useState<ExerciseMedia[]>([]);
   const [newMediaUrl, setNewMediaUrl] = useState("");
-  const [duration, setDuration] = useState("");
+  const [durationMin, setDurationMin] = useState("");
+  const [durationSets, setDurationSets] = useState("");
   const [newMediaType, setNewMediaType] = useState<ExerciseMediaType>('image');
   const [uploadLoading, setUploadLoading] = useState(false);
 
@@ -45,7 +47,15 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
       setVisibility(exercise.visibility);
       setPlayerCount(exercise.playerCount || []);
       setMedia(exercise.media);
-      setDuration(exercise.duration || "");
+      const dur = exercise.duration || "";
+      if (dur.toLowerCase().includes('x')) {
+        const [s, m] = dur.toLowerCase().split('x');
+        setDurationSets(s.replace(/[^0-9]/g, ''));
+        setDurationMin(m.replace(/[^0-9]/g, ''));
+      } else {
+        setDurationSets("");
+        setDurationMin(dur.replace(/[^0-9]/g, ''));
+      }
     } else {
       setName("");
       setDescription("");
@@ -54,7 +64,8 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
       setVisibility('private');
       setPlayerCount([]);
       setMedia([]);
-      setDuration("");
+      setDurationMin("");
+      setDurationSets("");
     }
   }, [exercise, open]);
 
@@ -79,6 +90,13 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
   const handleSave = async () => {
     if (!name) return;
     
+    let finalDuration = "";
+    if (durationSets && durationMin) {
+      finalDuration = `${durationSets}x${durationMin}`;
+    } else if (durationMin) {
+      finalDuration = durationMin;
+    }
+
     const data = {
       name,
       description,
@@ -87,7 +105,7 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
       visibility,
       playerCount: playerCount.length > 0 ? playerCount : ['Qualsiasi'],
       media,
-      duration
+      duration: finalDuration
     };
 
     if (exercise) {
@@ -104,7 +122,7 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
         <DialogHeader className="mb-3 px-1">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-primary/10 dark:bg-brand-green/10 flex items-center justify-center border border-primary/20 dark:border-brand-green/20">
-              <Cone className="h-5 w-5 text-primary dark:text-brand-green" />
+              <PiTrafficCone className="h-5 w-5 text-primary dark:text-brand-green" />
             </div>
             <div className="space-y-0.5">
               <DialogTitle className="text-xl font-black uppercase tracking-tighter text-foreground dark:text-white leading-none">
@@ -132,17 +150,32 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
                   value={name}
                   onChange={e => setName(e.target.value)}
                 />
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 mb-0.5 mt-2">
-                    <Clock className="h-3.5 w-3.5 text-primary dark:text-brand-green" />
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Durata Stimata</Label>
+                <div className="flex gap-3">
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center gap-2 mb-0.5 mt-2">
+                      <Clock className="h-3.5 w-3.5 text-primary dark:text-brand-green" />
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Minuti</Label>
+                    </div>
+                    <Input 
+                      type="number"
+                      placeholder="Es: 15" 
+                      className="h-10 rounded-xl bg-background dark:bg-black/40 border-border dark:border-brand-green/10 focus-visible:ring-primary dark:focus-visible:ring-brand-green text-xs font-bold"
+                      value={durationMin}
+                      onChange={e => setDurationMin(e.target.value)}
+                    />
                   </div>
-                  <Input 
-                    placeholder="Es: 15' o 5x3..." 
-                    className="h-10 rounded-xl bg-background dark:bg-black/40 border-border dark:border-brand-green/10 focus-visible:ring-primary dark:focus-visible:ring-brand-green text-xs font-bold"
-                    value={duration}
-                    onChange={e => setDuration(e.target.value)}
-                  />
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center gap-2 mb-0.5 mt-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Serie</Label>
+                    </div>
+                    <Input 
+                      type="number"
+                      placeholder="Es: 3" 
+                      className="h-10 rounded-xl bg-background dark:bg-black/40 border-border dark:border-brand-green/10 focus-visible:ring-primary dark:focus-visible:ring-brand-green text-xs font-bold"
+                      value={durationSets}
+                      onChange={e => setDurationSets(e.target.value)}
+                    />
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <Label className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground/40 ml-1">Obiettivi</Label>

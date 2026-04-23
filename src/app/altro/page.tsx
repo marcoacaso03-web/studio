@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, RefreshCw, LogOut, User, Trash2, Clock, Cone, Loader2, Bell, Shield, ChevronRight, Shirt, Share2, Copy, Pencil } from 'lucide-react';
+import { Download, Moon, Sun, Plus, CheckCircle2, History, AlertTriangle, RefreshCw, LogOut, User, Trash2, Clock, Loader2, Bell, Shield, ChevronRight, Shirt, Share2, Copy, Pencil } from 'lucide-react';
+import { PiTrafficCone } from "react-icons/pi";
 import { useToast } from '@/hooks/use-toast';
 import { playerRepository } from '@/lib/repositories/player-repository';
 import { matchRepository } from '@/lib/repositories/match-repository';
@@ -473,7 +474,7 @@ export default function AltroPage() {
 
               <div className="flex flex-col gap-3 p-3 rounded-2xl bg-muted/30 dark:bg-card/20 hover:bg-muted/50 dark:hover:bg-card/30 border border-border dark:border-transparent">
                 <div className="flex items-center gap-2">
-                  <Cone className="w-4 h-4 text-primary dark:text-brand-green" />
+                  <PiTrafficCone className="w-4 h-4 text-primary dark:text-brand-green" />
                   <Label className="text-sm font-bold">Giorni di Allenamento</Label>
                 </div>
                 <div className="flex justify-between gap-1 mt-1">
@@ -642,7 +643,6 @@ export default function AltroPage() {
             <div className="flex flex-col gap-3 p-3 rounded-2xl bg-muted/30 dark:bg-card/20 border border-border dark:border-transparent">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <GiSoccerBall className="w-4 h-4 text-primary dark:text-brand-green" />
                   <Label className="text-sm font-bold uppercase tracking-tight">Giorno della Partita</Label>
                 </div>
                 <Switch
@@ -652,7 +652,7 @@ export default function AltroPage() {
                 />
               </div>
               <p className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-                <span>⚽</span> "Prendi nota della formazione e inserisci il risultato!"
+                "Prendi nota della formazione e inserisci il risultato!"
               </p>
               {localMatchNotificationEnabled && (
                 <div className="flex items-center justify-between pt-2 border-t border-border/50">
@@ -671,7 +671,6 @@ export default function AltroPage() {
             <div className="flex flex-col gap-3 p-3 rounded-2xl bg-muted/30 dark:bg-card/20 border border-border dark:border-transparent">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Cone className="w-4 h-4 text-primary dark:text-brand-green" />
                   <Label className="text-sm font-bold uppercase tracking-tight">Giorno dell'Allenamento</Label>
                 </div>
                 <Switch
@@ -681,7 +680,7 @@ export default function AltroPage() {
                 />
               </div>
               <p className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-                <span>🏃‍♂️</span> "Chi c'era oggi? Segna le presenze e gli esercizi svolti!"
+                "Chi c'era oggi? Segna le presenze e gli esercizi svolti!"
               </p>
               {localTrainingNotificationEnabled && (
                 <div className="flex items-center justify-between pt-2 border-t border-border/50">
