@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Search, User, Check, Star } from "lucide-react";
+import { Search, User, Check, Star, Activity } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Player, Role } from "@/lib/types";
 import { displayPlayerName, cn } from "@/lib/utils";
@@ -22,6 +22,7 @@ interface SmartPlayerSelectDialogProps {
   selectedPlayerIds: string[];
   formation: string;
   slotIndex: number;
+  matchDate?: string;
 }
 
 const mapAcronymToRole = (acronym: string): Role => {
@@ -41,10 +42,23 @@ export function SmartPlayerSelectDialog({
   selectedPlayerIds,
   formation,
   slotIndex,
+  matchDate,
 }: SmartPlayerSelectDialogProps) {
   const [search, setSearch] = React.useState("");
   const acronym = getPositionAcronym(formation, slotIndex);
   const targetRole = mapAcronymToRole(acronym);
+  const isInjured = React.useCallback((player: Player) => {
+    if (!matchDate || !player.injuries || player.injuries.length === 0) return false;
+    const target = new Date(matchDate);
+    target.setHours(0, 0, 0, 0);
+    return player.injuries.some((inj: any) => {
+      const start = new Date(inj.startDate);
+      const end = new Date(inj.endDate);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      return target >= start && target <= end;
+    });
+  }, [matchDate]);
 
   const sortedPlayers = React.useMemo(() => {
     // Filter out players already selected in OTHER slots
@@ -111,6 +125,7 @@ export function SmartPlayerSelectDialog({
             const isMatch = player.role === targetRole;
             const isSecondary = player.secondaryRoles?.includes(targetRole);
             const isSelected = selectedPlayerIds[slotIndex] === player.id;
+            const injured = isInjured(player);
 
             return (
               <Button
@@ -120,7 +135,9 @@ export function SmartPlayerSelectDialog({
                   "w-full justify-between h-14 px-3 rounded-xl border border-transparent transition-all",
                   isSelected 
                     ? "bg-primary/10 dark:bg-brand-green/10 border-primary/20 dark:border-brand-green/20" 
-                    : "hover:bg-muted dark:hover:bg-white/5"
+                    : injured
+                      ? "bg-red-500/5 hover:bg-red-500/10 border-red-500/20"
+                      : "hover:bg-muted dark:hover:bg-white/5"
                 )}
                 onClick={() => {
                   onSelect(player.id);
@@ -130,15 +147,17 @@ export function SmartPlayerSelectDialog({
                 <div className="flex items-center gap-3">
                   <div className={cn(
                     "w-10 h-10 rounded-full flex items-center justify-center border-2",
-                    isMatch 
-                      ? "bg-primary/20 dark:bg-brand-green/20 border-primary dark:border-brand-green" 
-                      : isSecondary
-                        ? "bg-amber-500/20 border-amber-500"
-                        : "bg-muted dark:bg-white/5 border-border dark:border-white/10"
+                    injured
+                      ? "bg-red-500/10 border-red-500"
+                      : isMatch 
+                        ? "bg-primary/20 dark:bg-brand-green/20 border-primary dark:border-brand-green" 
+                        : isSecondary
+                          ? "bg-amber-500/20 border-amber-500"
+                          : "bg-muted dark:bg-white/5 border-border dark:border-white/10"
                   )}>
                     <User className={cn(
                       "w-5 h-5",
-                      isMatch ? "text-primary dark:text-brand-green" : isSecondary ? "text-amber-500" : "text-muted-foreground"
+                      injured ? "text-red-500" : isMatch ? "text-primary dark:text-brand-green" : isSecondary ? "text-amber-500" : "text-muted-foreground"
                     )} />
                   </div>
                   <div className="text-left">
@@ -146,7 +165,7 @@ export function SmartPlayerSelectDialog({
                       {displayPlayerName(player)}
                     </p>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase">
-                      {player.role} {isSecondary && `• ${targetRole}`}
+                      {injured ? "Infortunato" : `${player.role} ${isSecondary ? `• ${targetRole}` : ""}`}
                     </p>
                   </div>
                 </div>

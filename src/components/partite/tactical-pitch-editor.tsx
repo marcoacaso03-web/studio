@@ -3,7 +3,7 @@
 import * as React from "react";
 import { cn, displayPlayerName } from "@/lib/utils";
 import { getPositionAcronym, getPositionCoordinates } from "@/lib/lineup-mapping";
-import { Plus, User } from "lucide-react";
+import { Plus, User, Activity } from "lucide-react";
 import { Player } from "@/lib/types";
 
 interface TacticalPitchEditorProps {
@@ -11,6 +11,7 @@ interface TacticalPitchEditorProps {
   starters: string[];
   allPlayers: Player[];
   onSlotClick: (index: number) => void;
+  matchDate?: string;
 }
 
 export function TacticalPitchEditor({
@@ -18,7 +19,20 @@ export function TacticalPitchEditor({
   starters,
   allPlayers,
   onSlotClick,
+  matchDate,
 }: TacticalPitchEditorProps) {
+  const isPlayerInjured = (player: Player) => {
+    if (!matchDate || !player.injuries || player.injuries.length === 0) return false;
+    const target = new Date(matchDate);
+    target.setHours(0, 0, 0, 0);
+    return player.injuries.some((inj: any) => {
+      const start = new Date(inj.startDate);
+      const end = new Date(inj.endDate);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      return target >= start && target <= end;
+    });
+  };
   return (
     <div className="relative aspect-[3/4] w-full max-w-lg mx-auto rounded-3xl bg-neutral-900 dark:bg-black overflow-hidden border-4 border-white/5 shadow-2xl flex flex-col p-4 touch-none select-none">
       {/* Linee del campo */}
@@ -60,7 +74,10 @@ export function TacticalPitchEditor({
                   <Plus className="w-5 h-5" />
                 )}
               </div>
-              <div className="w-full bg-black/60 backdrop-blur-sm px-1 py-0.5 rounded border border-white/10 text-center overflow-hidden min-h-[1.2rem] flex items-center justify-center">
+              <div className="w-full bg-black/60 backdrop-blur-sm px-1 py-0.5 rounded border border-white/10 text-center overflow-hidden min-h-[1.2rem] flex items-center justify-center gap-1">
+                {player && isPlayerInjured(player) && (
+                  <Activity className="w-2 h-2 text-red-500 shrink-0" />
+                )}
                 <p className="text-[8px] sm:text-[9px] font-black text-white uppercase truncate">
                   {player ? displayPlayerName(player) : acronym}
                 </p>

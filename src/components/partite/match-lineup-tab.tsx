@@ -13,7 +13,10 @@ import {
   RotateCcw,
   Settings2,
   ChevronRight,
-  UserCheck
+  UserCheck,
+  AlertCircle,
+  Activity,
+  Ban
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { TacticalPitchEditor } from "./tactical-pitch-editor";
@@ -34,6 +37,7 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 export function MatchLineupTab() {
   const { lineup, allPlayers, saveLineup, loading } = useMatchDetailStore();
   const teamName = useSettingsStore((state) => state.teamName);
+  const { match } = useMatchDetailStore();
   const { toast } = useToast();
   
   const [starters, setStarters] = useState<string[]>(Array(11).fill(""));
@@ -41,7 +45,6 @@ export function MatchLineupTab() {
   const [modulo, setModulo] = useState("4-4-2");
   const [isSmartOpen, setIsSmartOpen] = useState(false);
   const [editingSlot, setEditingSlot] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState("starters");
   const [isDirty, setIsDirty] = useState(false);
 
   // Inizializza lo stato locale dal lineup dello store
@@ -108,6 +111,24 @@ export function MatchLineupTab() {
   const allSelectedIds = useMemo(() => {
     return [...starters, ...substitutes].filter(id => id !== "" && id !== "none");
   }, [starters, substitutes]);
+
+  const isPlayerInjured = (player: any, dateStr: string) => {
+    if (!player.injuries || player.injuries.length === 0) return false;
+    const target = new Date(dateStr);
+    target.setHours(0, 0, 0, 0);
+    return player.injuries.some((inj: any) => {
+      const start = new Date(inj.startDate);
+      const end = new Date(inj.endDate);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      return target >= start && target <= end;
+    });
+  };
+
+  const unavailablePlayers = useMemo(() => {
+    if (!match?.date) return [];
+    return allPlayers.filter(p => isPlayerInjured(p, match.date));
+  }, [allPlayers, match?.date]);
 
   const handlePlayerChange = (idx: number, isStarter: boolean, playerId: string) => {
     if (isStarter) {
@@ -188,118 +209,99 @@ export function MatchLineupTab() {
           )}
         </div>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Editor Area */}
-        <div className="lg:col-span-3 space-y-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-2 bg-muted/50 dark:bg-black/40 h-12 p-1 rounded-2xl border border-border dark:border-white/5 mb-4">
-              <TabsTrigger value="starters" className="rounded-xl font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-background dark:data-[state=active]:bg-black data-[state=active]:text-primary dark:data-[state=active]:text-brand-green data-[state=active]:shadow-sm">
-                <LayoutGrid className="w-4 h-4 mr-2" />
-                Campo
-              </TabsTrigger>
-              <TabsTrigger value="substitutes" className="rounded-xl font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-background dark:data-[state=active]:bg-black data-[state=active]:text-primary dark:data-[state=active]:text-brand-green data-[state=active]:shadow-sm">
-                <Users className="w-4 h-4 mr-2" />
-                Panchina ({substitutes.filter(s => s).length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="starters" className="m-0 focus-visible:ring-0">
-              <div className="animate-in fade-in zoom-in-95 duration-500">
-                <TacticalPitchEditor
-                  formation={modulo}
-                  starters={starters}
-                  allPlayers={allPlayers}
-                  onSlotClick={(idx) => setEditingSlot(idx)}
-                />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="substitutes" className="m-0 focus-visible:ring-0">
-              <Card className="bg-card dark:bg-black/40 border-border dark:border-white/5 rounded-3xl overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
-                <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {substitutes.map((s, i) => {
-                    const player = allPlayers.find(p => p.id === s);
-                    const availablePlayers = allPlayers.filter(p => !allSelectedIds.includes(p.id) || p.id === s);
-
-                    return (
-                      <div key={i} className="flex items-center gap-3 p-3 bg-muted/30 dark:bg-white/5 rounded-2xl border border-transparent hover:border-primary/20 dark:hover:border-brand-green/20 transition-all group">
-                        <div className="w-8 h-8 rounded-full bg-background dark:bg-black flex items-center justify-center text-[10px] font-black text-muted-foreground border border-border dark:border-white/10">
-                          R{i + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <Select 
-                            value={s || "none"} 
-                            onValueChange={(val) => handlePlayerChange(i, false, val)}
-                          >
-                            <SelectTrigger className="border-none shadow-none h-8 p-0 bg-transparent focus:ring-0 text-[11px] font-black uppercase text-foreground dark:text-white">
-                              <SelectValue placeholder="-- SELEZIONA --" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-card dark:bg-black border-border dark:border-brand-green/50">
-                              <SelectItem value="none" className="text-[10px] font-bold uppercase text-muted-foreground">-- Nessuno --</SelectItem>
-                              {availablePlayers.map(p => (
-                                <SelectItem key={p.id} value={p.id} className="text-[11px] font-black uppercase">{displayPlayerName(p)}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </Card>
-            </TabsContent>
-          </Tabs>
+      <div className="max-w-5xl mx-auto space-y-10">
+        {/* Campo Area */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 px-2">
+            <LayoutGrid className="w-4 h-4 text-primary dark:text-brand-green" />
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Titolari in Campo</h4>
+          </div>
+          <div className="animate-in fade-in zoom-in-95 duration-500">
+            <TacticalPitchEditor
+              formation={modulo}
+              starters={starters}
+              allPlayers={allPlayers}
+              matchDate={match?.date}
+              onSlotClick={(idx) => setEditingSlot(idx)}
+            />
+          </div>
         </div>
 
-        {/* Info Area */}
-        <div className="lg:col-span-1 space-y-4">
+        {/* Panchina Area */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 px-2">
+            <Users className="w-4 h-4 text-primary dark:text-brand-green" />
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Panchina ({substitutes.filter(s => s).length})</h4>
+          </div>
           <Card className="bg-card dark:bg-black/40 border-border dark:border-white/5 rounded-3xl overflow-hidden shadow-sm">
-            <div className="p-5 border-b border-border dark:border-white/5 bg-muted/30 dark:bg-black/60 flex items-center gap-2">
-              <UserCheck className="w-4 h-4 text-primary dark:text-brand-green" />
-              <h4 className="text-xs font-black uppercase tracking-widest">Riepilogo</h4>
+            <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {substitutes.map((s, i) => {
+                const player = allPlayers.find(p => p.id === s);
+                const availablePlayers = allPlayers.filter(p => !allSelectedIds.includes(p.id) || p.id === s);
+
+                return (
+                  <div key={i} className="flex items-center gap-3 p-2 bg-muted/30 dark:bg-white/5 rounded-xl border border-transparent hover:border-primary/20 dark:hover:border-brand-green/20 transition-all">
+                    <div className="w-7 h-7 rounded-full bg-background dark:bg-black flex items-center justify-center text-[9px] font-black text-muted-foreground border border-border dark:border-white/10 shrink-0">
+                      R{i + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <Select 
+                        value={s || "none"} 
+                        onValueChange={(val) => handlePlayerChange(i, false, val)}
+                      >
+                        <SelectTrigger className="border-none shadow-none h-7 p-0 bg-transparent focus:ring-0 text-[11px] font-black uppercase text-foreground dark:text-white flex items-center gap-2">
+                          {player && isPlayerInjured(player, match?.date || "") && (
+                            <Activity className="w-3 h-3 text-red-500 shrink-0" />
+                          )}
+                          <SelectValue placeholder="-- SELEZIONA --" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-card dark:bg-black border-border dark:border-brand-green/50">
+                          <SelectItem value="none" className="text-[10px] font-bold uppercase text-muted-foreground">-- Nessuno --</SelectItem>
+                          {availablePlayers.map(p => (
+                            <SelectItem key={p.id} value={p.id} className="text-[11px] font-black uppercase">{displayPlayerName(p)}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            <CardContent className="p-5 space-y-4">
-              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-tight">
-                <span className="text-muted-foreground">Titolari</span>
-                <span className={cn(starters.filter(s => s).length === 11 ? "text-primary dark:text-brand-green" : "text-amber-500")}>
-                  {starters.filter(s => s).length} / 11
-                </span>
-              </div>
-              <div className="w-full h-1.5 bg-muted dark:bg-white/5 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary dark:bg-brand-green transition-all duration-500" 
-                  style={{ width: `${(starters.filter(s => s).length / 11) * 100}%` }}
-                />
-              </div>
-
-              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-tight pt-2">
-                <span className="text-muted-foreground">Panchina</span>
-                <span className="text-foreground dark:text-white">
-                  {substitutes.filter(s => s).length} / 9
-                </span>
-              </div>
-              <div className="w-full h-1.5 bg-muted dark:bg-white/5 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary/40 dark:bg-brand-green/40 transition-all duration-500" 
-                  style={{ width: `${(substitutes.filter(s => s).length / 9) * 100}%` }}
-                />
-              </div>
-            </CardContent>
           </Card>
+        </div>
 
-          <Card className="bg-primary/5 dark:bg-brand-green/5 border-dashed border-primary/20 dark:border-brand-green/20 rounded-3xl p-5">
-            <div className="flex gap-3">
-              <Settings2 className="w-5 h-5 text-primary dark:text-brand-green shrink-0" />
-              <div className="space-y-1">
-                <h5 className="text-[10px] font-black uppercase tracking-tight">Suggerimento</h5>
-                <p className="text-[10px] font-bold text-muted-foreground dark:text-white/40 uppercase leading-relaxed">
-                  Usa la <strong>AI Smart Mode</strong> per incollare la formazione da una lista esterna (es. WhatsApp).
+        {/* Indisponibili Area */}
+        {unavailablePlayers.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 px-2">
+              <AlertCircle className="w-4 h-4 text-red-500" />
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-red-500">Giocatori Indisponibili</h4>
+            </div>
+            <Card className="bg-card dark:bg-black/40 border-border dark:border-white/5 rounded-3xl overflow-hidden shadow-sm">
+              <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {unavailablePlayers.map(p => (
+                  <div key={p.id} className="flex items-center justify-between p-2 rounded-xl bg-muted/20 dark:bg-white/5 border border-transparent">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
+                      <span className="text-[10px] font-black uppercase truncate text-foreground dark:text-white/80">
+                        {displayPlayerName(p)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Activity className="w-3 h-3 text-red-500/70" />
+                      <span className="text-[8px] font-black uppercase text-muted-foreground">Infortunio</span>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+              <div className="px-4 py-2 bg-muted/10 dark:bg-black/40 border-t border-border dark:border-white/5">
+                <p className="text-[8px] font-bold text-muted-foreground/40 uppercase text-center italic">
+                  La logica delle squalifiche sarà aggiunta prossimamente
                 </p>
               </div>
-            </div>
-          </Card>
-        </div>
+            </Card>
+          </div>
+        )}
       </div>
 
       {editingSlot !== null && (
@@ -310,6 +312,7 @@ export function MatchLineupTab() {
           formation={modulo}
           allPlayers={allPlayers}
           selectedPlayerIds={[...starters, ...substitutes]}
+          matchDate={match?.date}
           onSelect={(playerId) => handlePlayerChange(editingSlot, true, playerId)}
         />
       )}
