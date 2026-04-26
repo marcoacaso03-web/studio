@@ -51,7 +51,7 @@
     --popover: 0 0% 5%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 100 100% 46%;
+    --primary: 74 96% 46%;
     /* #4eeb00 Original Neon */
     --primary-foreground: 0 0% 100%;
     /* White text as requested */
@@ -71,14 +71,14 @@
 
     --border: 220 25% 20%;
     --input: 220 25% 20%;
-    --ring: 100 100% 46%;
+    --ring: 74 96% 46%;
     
     --brand-yellow: 59 100% 70%;
     --brand-green: 74 96% 46%;
     --brand-cyan: 192 100% 22%;
     --brand-pink: 340 73% 55%;
 
-    --win: 100 100% 46%;
+    --win: 74 96% 46%;
     --loss: 350 89% 60%;
     --draw: 210 10% 40%;
 
