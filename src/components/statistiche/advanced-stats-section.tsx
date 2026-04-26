@@ -303,15 +303,27 @@ export function AdvancedStatsSection() {
                             </div>
                         </div>
                         {selectedRanking === 'defense' && (
-                            <div className="flex items-center gap-1 bg-black/20 p-0.5 rounded-lg border border-white/5 mr-8">
-                                <button
-                                    onClick={() => setDefenseType('4')}
-                                    className={`text-[8px] font-black px-1.5 py-0.5 rounded-md transition-all ${defenseType === '4' ? 'bg-brand-green text-black' : 'text-muted-foreground hover:text-white'}`}
-                                >DIF A 4</button>
-                                <button
-                                    onClick={() => setDefenseType('3')}
-                                    className={`text-[8px] font-black px-1.5 py-0.5 rounded-md transition-all ${defenseType === '3' ? 'bg-brand-green text-black' : 'text-muted-foreground hover:text-white'}`}
-                                >DIF A 3</button>
+                            <div className="mr-8">
+                                <div className="flex items-center gap-1 bg-muted/50 dark:bg-black/40 p-1 rounded-xl border border-divider dark:border-white/5">
+                                    <button
+                                        onClick={() => setDefenseType('4')}
+                                        className={cn(
+                                            "text-[10px] font-black px-3 py-1.5 rounded-lg transition-all uppercase tracking-widest",
+                                            defenseType === '4' 
+                                                ? "bg-brand-green text-black shadow-sm" 
+                                                : "text-muted-foreground hover:text-foreground dark:hover:text-white"
+                                        )}
+                                    >DIF A 4</button>
+                                    <button
+                                        onClick={() => setDefenseType('3')}
+                                        className={cn(
+                                            "text-[10px] font-black px-3 py-1.5 rounded-lg transition-all uppercase tracking-widest",
+                                            defenseType === '3' 
+                                                ? "bg-brand-green text-black shadow-sm" 
+                                                : "text-muted-foreground hover:text-foreground dark:hover:text-white"
+                                        )}
+                                    >DIF A 3</button>
+                                </div>
                             </div>
                         )}
                     </DialogHeader>

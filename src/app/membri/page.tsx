@@ -184,6 +184,14 @@ export default function RosaPage() {
                 {!isEditMode ? (
                   <>
                     <Button 
+                      onClick={() => setIsInjuryFormOpen(true)}
+                      variant="ghost"
+                      className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
+                      title="Gestisci Infortuni"
+                    >
+                      <Hospital className="h-6 w-6" />
+                    </Button>
+                    <Button 
                       onClick={() => handleOpenForm(null)}
                       variant="ghost"
                       className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
@@ -273,18 +281,32 @@ export default function RosaPage() {
                               className="flex items-center justify-between p-4 border-b border-border dark:border-brand-green/10 last:border-b-0 group hover:bg-muted dark:hover:bg-black/60 transition-colors cursor-pointer"
                               onClick={() => router.push(`/membri/${player.id}`)}
                             >
-                              <div className="flex flex-col">
-                                <span className="text-foreground font-medium text-[17px]">{displayPlayerName(player)}</span>
-                                {player.secondaryRoles && player.secondaryRoles.length > 0 && (
-                                  <div className="flex gap-1 mt-0.5">
-                                    {player.secondaryRoles.map(r => (
-                                      <span key={r} className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground/60 bg-muted-foreground/5 px-1 rounded">
-                                        {r.substring(0, 3)}
-                                      </span>
-                                    ))}
+                                <div className="flex flex-col">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-foreground font-medium text-[17px]">{displayPlayerName(player)}</span>
+                                    {(() => {
+                                      const today = new Date();
+                                      today.setHours(0,0,0,0);
+                                      const isInjured = player.injuries?.some(inj => {
+                                        const start = new Date(inj.startDate);
+                                        const end = new Date(inj.endDate);
+                                        start.setHours(0,0,0,0);
+                                        end.setHours(23,59,59,999);
+                                        return today >= start && today <= end;
+                                      });
+                                      return isInjured ? <Hospital className="h-4 w-4 text-rose-500" /> : null;
+                                    })()}
                                   </div>
-                                )}
-                              </div>
+                                  {player.secondaryRoles && player.secondaryRoles.length > 0 && (
+                                    <div className="flex gap-1 mt-0.5">
+                                      {player.secondaryRoles.map(r => (
+                                        <span key={r} className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground/60 bg-muted-foreground/5 px-1 rounded">
+                                          {r.substring(0, 3)}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
                               {isEditMode && (
                                 <div className="flex items-center gap-2">
                                   <Button

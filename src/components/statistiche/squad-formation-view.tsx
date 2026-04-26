@@ -153,7 +153,7 @@ export function SquadFormationView() {
             </div>
           </div>
 
-          <div className="relative aspect-[3/4] md:aspect-[4/3] w-full max-w-2xl mx-auto rounded-3xl bg-neutral-900 dark:bg-black overflow-hidden border-4 border-white/5 shadow-2xl flex flex-col p-4 md:p-8">
+          <div className="relative aspect-[3/4] w-full max-w-lg mx-auto rounded-[32px] bg-neutral-900 dark:bg-black overflow-hidden border-4 border-white/5 shadow-2xl flex flex-col p-4 md:p-8">
             {/* Linee del campo */}
             <div className="absolute inset-4 border-2 border-white/10 pointer-events-none rounded-sm">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-16 border-b-2 border-x-2 border-white/10" />
@@ -173,10 +173,10 @@ export function SquadFormationView() {
                     return (
                       <div key={starterIdx} className="flex flex-col items-center gap-1 sm:gap-1.5 w-[52px] sm:w-[70px] md:w-[80px]">
                         <div className={cn(
-                          "w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 shrink-0 rounded-full flex items-center justify-center border-2 md:border-4 shadow-xl transition-transform hover:scale-110",
+                          "w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 shrink-0 rounded-full flex items-center justify-center border-2 md:border-2 shadow-xl transition-transform hover:scale-110",
                           isPOR
-                            ? "bg-amber-700 border-amber-600 text-black shadow-[0_0_15px_rgba(180,100,0,0.4)]"
-                            : "bg-neutral-800 border-neutral-700 text-white"
+                            ? "bg-amber-600 border-amber-400 text-black shadow-[0_0_15px_rgba(245,158,11,0.4)]"
+                            : "bg-primary/90 dark:bg-brand-green/90 border-primary dark:border-brand-green text-white dark:text-black shadow-[0_0_15px_rgba(172,229,4,0.3)]"
                         )}>
                           <span className="text-[8px] md:text-[11px] font-black uppercase text-center leading-none">
                             {getPositionAcronym(bestLineup.formation, starterIdx)}

@@ -32,7 +32,6 @@ export function MatchEventsTab() {
   const getEventIcon = (event: MatchEvent, size: string = "h-4 w-4", forceNeutral = false) => {
     const neutralClass = "text-black dark:text-white";
     
-    // Helper to determine class based on forceNeutral, but ALWAYS preserving colors for cards
     const getFinalClass = (specificClass: string, isCard = false) => {
       if (isCard) return cn(size, specificClass);
       return forceNeutral ? cn(size, neutralClass) : cn(size, specificClass);
@@ -277,6 +276,7 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
   const isPitchManTeam = match?.isHome ? isHome : !isHome;
   const mainName = event.playerName || (isPitchManTeam ? 'GIOCATORE' : (match?.opponent || 'AVVERSARIO'));
   const alignLeft = isHome;
+  const isCard = event.type === 'yellow_card' || event.type === 'red_card';
 
   return (
     <div className={cn(
@@ -296,9 +296,14 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
 
         <button
           onClick={() => onOptionsClick(event)}
-          className="bg-card dark:bg-[#0a1103] rounded-full p-2 border-2 border-border dark:border-brand-green/40 shadow-sm hover:scale-110 hover:border-sky-500 dark:hover:border-brand-green transition-all duration-200 group/icon"
+          className={cn(
+            "h-9 w-9 rounded-xl flex items-center justify-center border-2 shadow-sm transition-all duration-300 hover:scale-110 active:scale-95 bg-card dark:bg-black",
+            isCard 
+              ? (event.type === 'yellow_card' ? "border-yellow-400/30 shadow-[0_0_10px_rgba(250,204,21,0.1)]" : "border-red-600/30 shadow-[0_0_10px_rgba(220,38,38,0.1)]")
+              : "border-border dark:border-brand-green/20"
+          )}
         >
-          {getEventIcon(event, "h-3.5 w-3.5")}
+          {getEventIcon(event, "h-4 w-4", !isCard)}
         </button>
       </div>
 
