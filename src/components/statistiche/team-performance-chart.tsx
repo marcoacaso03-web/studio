@@ -5,20 +5,21 @@ import { Line, LineChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tool
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
 import { useThemeStore } from "@/store/useThemeStore";
+import { COLORS } from "@/lib/design-tokens";
 
 export function TeamPerformanceChart() {
     const { teamTrend } = useStatsStore();
     const { theme } = useThemeStore();
     const isDark = theme === "dark";
 
-    // Colori adattivi
-    const LINE_COLOR = isDark ? "#ace504" : "hsl(210 100% 45%)";
-    const GRID_COLOR = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.07)";
-    const REF_COLOR = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.12)";
+    // Colori adattivi centralizzati
+    const LINE_COLOR = COLORS.charts.primary(isDark);
+    const GRID_COLOR = COLORS.charts.grid(isDark);
+    const REF_COLOR = COLORS.charts.grid(isDark);
     const TICK_COLOR = isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.4)";
     const TOOLTIP_BG = isDark ? "rgba(0,0,0,0.92)" : "rgba(255,255,255,0.97)";
-    const TOOLTIP_BORDER = isDark ? "rgba(172,229,4,0.3)" : "rgba(0,128,255,0.25)";
-    const TOOLTIP_TEXT = isDark ? "#fff" : "#000";
+    const TOOLTIP_BORDER = COLORS.charts.grid(isDark);
+    const TOOLTIP_TEXT = COLORS.charts.text(isDark);
     const TOOLTIP_SUB = isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)";
 
     if (!teamTrend || teamTrend.length === 0) {
@@ -78,8 +79,8 @@ export function TeamPerformanceChart() {
                                             data.value === 1 ? "Vittoria" :
                                                 data.value === -1 ? "Sconfitta" : "Pareggio";
                                         const resultColor =
-                                            data.value === 1 ? LINE_COLOR :
-                                                data.value === -1 ? "#f43f5e" : TOOLTIP_SUB;
+                                            data.value === 1 ? COLORS.functional.win :
+                                                data.value === -1 ? COLORS.functional.loss : COLORS.functional.draw;
 
                                         return (
                                             <div style={{

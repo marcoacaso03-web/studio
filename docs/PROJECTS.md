@@ -24,8 +24,6 @@
 
 ## 🟢 Nuove Funzionalità
 Scheda percentuali di lavoro per focus minuti/su totale allenamento.
-Aggiungi minuti per esercitazione modificabile da ogni utente quando è nel proprio allenamento, per ogni minuto aggiunto si deve colorare una barra di completamento a seconda di quanto durano gli allenamenti, scelto nella schermata di gestione squadra.
-FIX: float button + per aggiungere le esercitazioni deve essere visibile solo nella schermata dell'allenamento non in presenze.
 
 Elabora logica quando nascondere navbar e barra sopra
 
@@ -36,8 +34,6 @@ Test toolbar vercel
 
 Offline-first reale
 Hai già IndexedDB via Dexie e sei una PWA, ma il valore si realizza solo se la formazione si può inserire e inviare anche senza connessione, con sync automatico al ritorno online. Un allenatore in uno spogliatoio spesso non ha segnale. Zustand + Dexie sono già lì — manca la logica di sync queue.
-
- inserire la formazione è un'operazione puramente testuale con dropdown. Il campo visivo non è un nice-to-have, è la metafora mentale con cui un allenatore ragiona. Hai già i dati, manca solo la rappresentazione pitchside.
 
 Stato disponibilità giocatori integrato nel flusso
 Da membri/ gestisci la rosa, ma al momento dell'inserimento formazione probabilmente non vedi subito chi è infortunato o diffidato. Quell'informazione deve entrare dentro la schermata di formazione, non stare su un'altra pagina.

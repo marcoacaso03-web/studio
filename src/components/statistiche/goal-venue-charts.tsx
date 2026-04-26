@@ -7,17 +7,19 @@ import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import { useThemeStore } from "@/store/useThemeStore";
 import { GiSoccerBall } from "react-icons/gi";
 
+import { COLORS } from "@/lib/design-tokens";
+
 export function GoalVenueCharts() {
     const { homeRecord, awayRecord } = useStatsStore();
     const { theme } = useThemeStore();
     const isDark = theme === "dark";
 
-    const HOME_COLOR = isDark ? "#ace504" : "hsl(210 100% 45%)";
-    const AWAY_COLOR = isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.15)";
+    const HOME_COLOR = COLORS.charts.primary(isDark);
+    const AWAY_COLOR = COLORS.functional.draw;
 
     const TOOLTIP_BG = isDark ? "rgba(0,0,0,0.92)" : "rgba(255,255,255,0.97)";
-    const TOOLTIP_BORDER = isDark ? "rgba(172,229,4,0.3)" : "rgba(0,128,255,0.25)";
-    const TOOLTIP_COLOR = isDark ? "#fff" : "#000";
+    const TOOLTIP_BORDER = COLORS.charts.grid(isDark);
+    const TOOLTIP_COLOR = COLORS.charts.text(isDark);
 
     if (!homeRecord || !awayRecord) return null;
     if (homeRecord.matchesPlayed === 0 && awayRecord.matchesPlayed === 0) return null;
@@ -88,11 +90,11 @@ export function GoalVenueCharts() {
                 {/* Legenda */}
                 <div className="flex justify-center gap-6 mt-6 border-t border-border pt-4">
                     <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-primary" />
+                        <div className="w-3 h-3 rounded-full bg-brand-green dark:bg-primary" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">In Casa</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-foreground/20" />
+                        <div className="w-3 h-3 rounded-full bg-draw" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">Trasferta</span>
                     </div>
                 </div>

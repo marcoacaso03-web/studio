@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2, FileText, AlertCircle, RefreshCw, ClipboardCopy, Info } from 'lucide-react';
-import { importMatchesFromText } from '@/ai/flows/import-matches-flow';
+import * as AIService from '@/services/ai.service';
 import { useToast } from '@/hooks/use-toast';
 import { useMatchesStore } from '@/store/useMatchesStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
@@ -42,7 +42,7 @@ export function ImportTuttocampoDialog({ open, onOpenChange }: ImportTuttocampoD
 
     setIsLoading(true);
     try {
-      const result = await importMatchesFromText({ rawContent: rawText.trim() });
+      const result = await AIService.importMatches({ rawContent: rawText.trim() });
 
       const matchesToSave = result.matches.map(match => ({
         opponent: match.opponent,

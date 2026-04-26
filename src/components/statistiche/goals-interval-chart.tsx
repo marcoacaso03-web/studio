@@ -6,14 +6,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ChartContainer } from "@/components/ui/chart";
 import { useThemeStore } from "@/store/useThemeStore";
 
+import { COLORS as DesignTokens } from "@/lib/design-tokens";
+
 export function GoalsIntervalChart() {
     const { goalsIntervals } = useStatsStore();
     const { theme } = useThemeStore();
     const isDark = theme === "dark";
 
     const TOOLTIP_BG = isDark ? "rgba(0,0,0,0.92)" : "rgba(255,255,255,0.97)";
-    const TOOLTIP_BORDER = isDark ? "rgba(172,229,4,0.3)" : "rgba(0,128,255,0.25)";
-    const TOOLTIP_COLOR = isDark ? "#fff" : "#000";
+    const TOOLTIP_BORDER = DesignTokens.charts.grid(isDark);
+    const TOOLTIP_COLOR = DesignTokens.charts.text(isDark);
     const LEGEND_COLOR = isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.55)";
 
     const hasData = goalsIntervals.some(item => item.value > 0);
@@ -33,9 +35,9 @@ export function GoalsIntervalChart() {
 
     const chartConfig = { value: { label: "Gol" } };
 
-    const COLORS = isDark
-        ? ["#ace504", "rgba(172, 229, 4, 0.7)", "rgba(172, 229, 4, 0.4)"]
-        : ["hsl(210 100% 45%)", "rgba(0, 120, 255, 0.6)", "rgba(0, 120, 255, 0.3)"];
+    const INTERVAL_COLORS = isDark
+        ? [DesignTokens.brand.green, "rgba(172, 229, 4, 0.7)", "rgba(172, 229, 4, 0.4)"]
+        : [DesignTokens.charts.primary(false), "rgba(0, 120, 255, 0.6)", "rgba(0, 120, 255, 0.3)"];
 
     return (
         <Card className="bg-card border border-primary/20 dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm">
@@ -63,7 +65,7 @@ export function GoalsIntervalChart() {
                                 {goalsIntervals.map((entry, index) => (
                                     <Cell
                                         key={`cell-${index}`}
-                                        fill={COLORS[index % COLORS.length]}
+                                        fill={INTERVAL_COLORS[index % INTERVAL_COLORS.length]}
                                         className="hover:opacity-80 transition-opacity cursor-pointer"
                                     />
                                 ))}

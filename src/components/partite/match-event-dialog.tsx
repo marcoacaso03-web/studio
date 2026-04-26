@@ -21,12 +21,7 @@ import {
 import { MatchEventType, MatchEvent, GoalType } from "@/lib/types";
 import { displayPlayerName } from "@/lib/utils";
 
-const periodOrder: Record<string, number> = {
-  '1T': 1,
-  '2T': 2,
-  '1TS': 3,
-  '2TS': 4
-};
+import { PERIOD_ORDER } from "@/lib/match-events";
 
 type UIEventType = 'goal' | 'own_goal' | 'yellow_card' | 'red_card' | 'substitution' | 'penalty_saved' | 'penalty_missed' | 'chance' | 'woodwork' | 'note';
 
@@ -110,15 +105,15 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
     let currentBench = new Set<string>(lineup.substitutes.map(p => typeof p === "string" ? p : p.playerId).filter(id => id !== ""));
 
     const sortedEvents = [...allEvents].sort((a, b) => {
-      if (periodOrder[a.period] !== periodOrder[b.period]) {
-        return periodOrder[a.period] - periodOrder[b.period];
+      if (PERIOD_ORDER[a.period] !== PERIOD_ORDER[b.period]) {
+        return PERIOD_ORDER[a.period] - PERIOD_ORDER[b.period];
       }
       return (a.minute ?? 0) - (b.minute ?? 0);
     });
 
     for (const event of sortedEvents) {
       const isBefore = (event.minute !== null && minute !== null) ? (
-        periodOrder[event.period] < periodOrder[period] ||
+        PERIOD_ORDER[event.period] < PERIOD_ORDER[period] ||
         (event.period === period && event.minute < minute)
       ) : true;
 
@@ -299,15 +294,15 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                 <SelectValue placeholder="Seleziona" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
-                <SelectItem value="goal" className="text-[10px] font-black uppercase text-brand-green">Goal</SelectItem>
-                <SelectItem value="own_goal" className="text-[10px] font-black uppercase text-rose-500">Autogol</SelectItem>
-                <SelectItem value="yellow_card" className="text-[10px] font-black uppercase text-amber-500">Ammonizione</SelectItem>
-                <SelectItem value="red_card" className="text-[10px] font-black uppercase text-rose-500">Espulsione</SelectItem>
-                <SelectItem value="substitution" className="text-[10px] font-black uppercase text-primary">Sostituzione</SelectItem>
-                <SelectItem value="penalty_saved" className="text-[10px] font-black uppercase text-blue-500">Rigore Parato</SelectItem>
-                <SelectItem value="penalty_missed" className="text-[10px] font-black uppercase text-orange-500">Rigore Sbagliato</SelectItem>
-                <SelectItem value="chance" className="text-[10px] font-black uppercase text-purple-500">Occasione</SelectItem>
-                <SelectItem value="woodwork" className="text-[10px] font-black uppercase text-emerald-500">Palo/Traversa</SelectItem>
+                <SelectItem value="goal" className="text-[10px] font-black uppercase text-foreground">Goal</SelectItem>
+                <SelectItem value="own_goal" className="text-[10px] font-black uppercase text-foreground">Autogol</SelectItem>
+                <SelectItem value="yellow_card" className="text-[10px] font-black uppercase text-brand-card-yellow">Ammonizione</SelectItem>
+                <SelectItem value="red_card" className="text-[10px] font-black uppercase text-brand-card-red">Espulsione</SelectItem>
+                <SelectItem value="substitution" className="text-[10px] font-black uppercase text-foreground">Sostituzione</SelectItem>
+                <SelectItem value="penalty_saved" className="text-[10px] font-black uppercase text-foreground">Rigore Parato</SelectItem>
+                <SelectItem value="penalty_missed" className="text-[10px] font-black uppercase text-foreground">Rigore Sbagliato</SelectItem>
+                <SelectItem value="chance" className="text-[10px] font-black uppercase text-foreground">Occasione</SelectItem>
+                <SelectItem value="woodwork" className="text-[10px] font-black uppercase text-foreground">Palo/Traversa</SelectItem>
                 <SelectItem value="note" className="text-[10px] font-black uppercase text-muted-foreground">Nota / Altro</SelectItem>
               </SelectContent>
             </Select>

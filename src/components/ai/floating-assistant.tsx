@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { chatbotFlow } from "@/ai/flows/chatbot-flow";
+import * as AIService from '@/services/ai.service';
 import { useMatchesStore } from "@/store/useMatchesStore";
 import { usePlayersStore } from "@/store/usePlayersStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
@@ -73,7 +73,7 @@ export function FloatingAssistant() {
       };
 
       // Chiamata alla Server Action: messaggio + dati → Gemini 2.5 Flash
-      const response = await chatbotFlow({
+      const response = await AIService.chatbot({
         message: userMessage,
         teamContext,
       });
@@ -99,9 +99,9 @@ export function FloatingAssistant() {
             className="w-[340px] sm:w-[380px] h-[520px] bg-white/95 dark:bg-black/90 backdrop-blur-xl border border-divider dark:border-brand-green/30 rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden pointer-events-auto"
           >
             {/* Header */}
-            <div className="p-5 border-b border-divider dark:border-brand-green/20 flex items-center justify-between bg-white/50 dark:bg-brand-green/5">
+            <div className="p-5 border-b border-divider dark:border-brand-green/20 flex items-center justify-between bg-card dark:bg-black transition-colors">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-primary dark:bg-brand-green flex items-center justify-center shadow-lg shadow-primary/20 dark:shadow-brand-green/20">
+                <div className="w-10 h-10 rounded-2xl bg-black dark:bg-white flex items-center justify-center shadow-lg border border-border dark:border-white/10">
                   <Bot className="text-white dark:text-black h-5 w-5" />
                 </div>
                 <div>

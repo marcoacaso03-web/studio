@@ -1,0 +1,63 @@
+'use server';
+
+import { chatbotFlow, type ChatInput, type ChatOutput } from "@/ai/flows/chatbot-flow";
+import { importMatchesFromText, type ImportMatchesInput, type ImportMatchesOutput } from "@/ai/flows/import-matches-flow";
+import { importPlayersFromText, type ImportPlayersInput, type ImportPlayersOutput } from "@/ai/flows/import-players-flow";
+import { suggestLineup as suggestLineupFlow, type SuggestLineupInput, type SuggestLineupOutput } from "@/ai/flows/suggest-lineup-flow";
+
+/**
+ * Service Layer per le funzionalità AI dell'applicazione.
+ * 
+ * Questo layer astrae le chiamate dirette ai flussi Genkit, permettendo:
+ * 1. Mocking facile per i test unitari.
+ * 2. Codice DRY (non ripetiamo la logica di chiamata in ogni componente).
+ * 3. Punto unico per aggiungere logica trasversale (telemetria, logging extra, etc).
+ */
+
+/**
+ * Avvia una conversazione con l'assistente tattico.
+ */
+export async function chatbot(input: ChatInput): Promise<ChatOutput> {
+  try {
+    return await chatbotFlow(input);
+  } catch (error) {
+    console.error("[AIService] Error in chatbot:", error);
+    throw error;
+  }
+}
+
+/**
+ * Importa il calendario delle partite da testo grezzo (Copia-Incolla).
+ */
+export async function importMatches(input: ImportMatchesInput): Promise<ImportMatchesOutput> {
+  try {
+    return await importMatchesFromText(input);
+  } catch (error) {
+    console.error("[AIService] Error in importMatches:", error);
+    throw error;
+  }
+}
+
+/**
+ * Analizza una lista di giocatori da testo per importarli nella rosa.
+ */
+export async function importPlayers(input: ImportPlayersInput): Promise<ImportPlayersOutput> {
+  try {
+    return await importPlayersFromText(input);
+  } catch (error) {
+    console.error("[AIService] Error in importPlayers:", error);
+    throw error;
+  }
+}
+
+/**
+ * Suggerisce la formazione mappando nomi testuali agli ID del database.
+ */
+export async function suggestLineup(input: SuggestLineupInput): Promise<SuggestLineupOutput> {
+  try {
+    return await suggestLineupFlow(input);
+  } catch (error) {
+    console.error("[AIService] Error in suggestLineup:", error);
+    throw error;
+  }
+}

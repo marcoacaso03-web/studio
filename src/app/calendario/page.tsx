@@ -242,13 +242,13 @@ export default function CalendarioPage() {
       </div>
 
       {/* PROSSIMO INCONTRO */}
-      <section className="space-y-3">
-        <div className="flex items-center gap-2 px-1">
-          <CalendarIcon className="h-4 w-4 text-primary dark:text-brand-green" />
-          <h3 className="text-xs font-black uppercase tracking-widest text-foreground/70 dark:text-white/50">Prossimo Incontro</h3>
-        </div>
+      {nextMatch && (
+        <section className="space-y-3">
+          <div className="flex items-center gap-2 px-1">
+            <CalendarIcon className="h-4 w-4 text-primary dark:text-brand-green" />
+            <h3 className="text-xs font-black uppercase tracking-widest text-foreground/70 dark:text-white/50">Prossimo Incontro</h3>
+          </div>
 
-        {nextMatch ? (
           <Card
             onClick={() => router.push(`/calendario/${nextMatch.id}`)}
             className="relative overflow-hidden border-2 border-primary/50 dark:border-brand-green bg-primary/10 dark:bg-brand-green/5 rounded-3xl cursor-pointer group hover:bg-primary/20 dark:hover:bg-brand-green/10 transition-all shadow-lg dark:shadow-[0_0_20px_rgba(172,229,4,0.1)]"
@@ -291,12 +291,8 @@ export default function CalendarioPage() {
               </div>
             </CardContent>
           </Card>
-        ) : (
-          <div className="p-10 border-2 border-dashed border-border dark:border-brand-green/20 rounded-[32px] text-center bg-muted/20 dark:bg-black/20">
-            <p className="text-sm font-black uppercase tracking-widest text-muted-foreground">Nessun incontro programmato</p>
-          </div>
-        )}
-      </section>
+        </section>
+      )}
 
       {/* ULTIMO INCONTRO & ANDAMENTO */}
       <section className="space-y-3">
@@ -381,14 +377,14 @@ export default function CalendarioPage() {
                 onClick={() => setIsEditMode(true)}
                 title="Modifica Lista"
               >
-                <Pencil className="h-3.5 w-3.5 text-sky-500 dark:text-brand-green" />
+                <Pencil className="h-3.5 w-3.5 text-foreground dark:text-white" />
               </Button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
-                className="h-7 px-3 text-[10px] font-black uppercase border-sky-400 dark:border-brand-green/50 text-foreground dark:text-white hover:bg-sky-50 dark:hover:bg-brand-green/10 rounded-xl transition-all"
+                className="h-7 px-3 text-[10px] font-black uppercase border-border dark:border-brand-green/50 text-foreground dark:text-white hover:bg-muted dark:hover:bg-brand-green/10 rounded-xl transition-all"
                 onClick={handleCancelChanges}
               >
                 Annulla

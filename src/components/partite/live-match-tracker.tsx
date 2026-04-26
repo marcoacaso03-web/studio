@@ -12,11 +12,11 @@ import { cn } from "@/lib/utils";
 
 const EVENT_BUTTONS = [
   { type: "goal", label: "GOL", color: "bg-brand-green text-black hover:bg-brand-green/80 border-transparent" },
-  { type: "chance", label: "OCCASIONE", color: "bg-purple-500 text-white hover:bg-purple-600 border-transparent" },
-  { type: "woodwork", label: "PALO / TRAVERSA", color: "bg-emerald-500 text-white hover:bg-emerald-600 border-transparent" },
-  { type: "yellow_card", label: "AMMONIZIONE", color: "bg-amber-500 text-white hover:bg-amber-600 border-transparent" },
-  { type: "red_card", label: "ESPULSIONE", color: "bg-rose-500 text-white hover:bg-rose-600 border-transparent" },
-  { type: "substitution", label: "SOSTITUZIONE", color: "bg-sky-500 text-white hover:bg-sky-600 border-transparent" },
+  { type: "chance", label: "OCCASIONE", color: "bg-muted/50 text-foreground hover:bg-muted border-border" },
+  { type: "woodwork", label: "PALO / TRAVERSA", color: "bg-muted/50 text-foreground hover:bg-muted border-border" },
+  { type: "yellow_card", label: "AMMONIZIONE", color: "bg-brand-card-yellow text-white hover:opacity-90 border-transparent" },
+  { type: "red_card", label: "ESPULSIONE", color: "bg-brand-card-red text-white hover:opacity-90 border-transparent" },
+  { type: "substitution", label: "SOSTITUZIONE", color: "bg-muted/50 text-foreground hover:bg-muted border-border" },
 ];
 
 export function LiveMatchTracker({ open, onOpenChange }: { open: boolean, onOpenChange: (o: boolean) => void }) {

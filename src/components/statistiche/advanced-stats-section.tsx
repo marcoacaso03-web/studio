@@ -9,7 +9,8 @@ import {
     Target,
     Users,
     Trophy,
-    X
+    X,
+    TrendingUp
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -18,6 +19,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 type RankingType = 'defense' | 'efficiency' | 'decisive' | 'amulet';
@@ -81,7 +83,7 @@ export function AdvancedStatsSection() {
                 return (
                     <div className="space-y-2 mt-4">
                         {bestGaPerStarter.map((item, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-3 bg-muted/20 dark:bg-white/5 rounded-2xl border border-transparent hover:border-amber-500/30 transition-all">
+                            <div key={idx} className="flex items-center justify-between p-3 bg-muted/20 dark:bg-white/5 rounded-2xl border border-transparent hover:border-primary/30 dark:hover:border-brand-green/30 transition-all">
                                 <div className="flex items-center gap-3">
                                     <span className="text-[10px] font-black w-4 text-muted-foreground">#{idx + 1}</span>
                                     <div className="space-y-0.5">
@@ -90,7 +92,7 @@ export function AdvancedStatsSection() {
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-black text-amber-500">{item.gaPerStarter.toFixed(2)}</p>
+                                    <p className="text-sm font-black text-primary dark:text-brand-green">{item.gaPerStarter.toFixed(2)}</p>
                                     <p className="text-[8px] font-bold text-muted-foreground uppercase">G+A / Start</p>
                                 </div>
                             </div>
@@ -101,13 +103,13 @@ export function AdvancedStatsSection() {
                 return (
                     <div className="space-y-2 mt-4">
                         {decisiveGoalsLeaders.map((item, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-3 bg-muted/20 dark:bg-white/5 rounded-2xl border border-transparent hover:border-rose-500/30 transition-all">
+                            <div key={idx} className="flex items-center justify-between p-3 bg-muted/20 dark:bg-white/5 rounded-2xl border border-transparent hover:border-primary/30 dark:hover:border-brand-green/30 transition-all">
                                 <div className="flex items-center gap-3">
                                     <span className="text-[10px] font-black w-4 text-muted-foreground">#{idx + 1}</span>
                                     <p className="text-[11px] font-black uppercase tracking-tight text-foreground dark:text-white">{getPlayerName(item.playerId)}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-black text-rose-500">{item.decisiveGoals}</p>
+                                    <p className="text-sm font-black text-primary dark:text-brand-green">{item.decisiveGoals}</p>
                                     <p className="text-[8px] font-bold text-muted-foreground uppercase">Gol Decisivi</p>
                                 </div>
                             </div>
@@ -118,7 +120,7 @@ export function AdvancedStatsSection() {
                 return (
                     <div className="space-y-2 mt-4">
                         {lowestStarterLossRate.map((item, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-3 bg-muted/20 dark:bg-white/5 rounded-2xl border border-transparent hover:border-cyan-500/30 transition-all">
+                            <div key={idx} className="flex items-center justify-between p-3 bg-muted/20 dark:bg-white/5 rounded-2xl border border-transparent hover:border-primary/30 dark:hover:border-brand-green/30 transition-all">
                                 <div className="flex items-center gap-3">
                                     <span className="text-[10px] font-black w-4 text-muted-foreground">#{idx + 1}</span>
                                     <div className="space-y-0.5">
@@ -127,7 +129,7 @@ export function AdvancedStatsSection() {
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-black text-cyan-500">{Math.round(item.lossRate * 100)}%</p>
+                                    <p className="text-sm font-black text-primary dark:text-brand-green">{Math.round(item.lossRate * 100)}%</p>
                                     <p className="text-[8px] font-bold text-muted-foreground uppercase">Loss Rate</p>
                                 </div>
                             </div>
@@ -150,12 +152,13 @@ export function AdvancedStatsSection() {
     };
 
     const getRankingIcon = () => {
+        const iconClass = "h-5 w-5 text-foreground dark:text-white";
         switch (selectedRanking) {
-            case 'defense': return <ShieldCheck className="h-5 w-5 text-brand-green" />;
-            case 'efficiency': return <Zap className="h-5 w-5 text-amber-500" />;
-            case 'decisive': return <Target className="h-5 w-5 text-rose-500" />;
-            case 'amulet': return <Users className="h-5 w-5 text-cyan-500" />;
-            default: return <Trophy className="h-5 w-5" />;
+            case 'defense': return <ShieldCheck className={iconClass} />;
+            case 'efficiency': return <Zap className={iconClass} />;
+            case 'decisive': return <Target className={iconClass} />;
+            case 'amulet': return <Users className={iconClass} />;
+            default: return <Trophy className={iconClass} />;
         }
     };
 
@@ -174,15 +177,27 @@ export function AdvancedStatsSection() {
                             <ShieldCheck className="h-3 w-3" />
                             Muro Difensivo
                         </CardTitle>
-                        <div className="flex items-center gap-1 bg-black/20 p-0.5 rounded-lg border border-white/5 relative z-10" onClick={(e) => e.stopPropagation()}>
-                            <button
-                                onClick={() => setDefenseType('4')}
-                                className={`text-[8px] font-black px-1.5 py-0.5 rounded-md transition-all ${defenseType === '4' ? 'bg-brand-green text-black' : 'text-muted-foreground hover:text-white'}`}
-                            >DIF A 4</button>
-                            <button
-                                onClick={() => setDefenseType('3')}
-                                className={`text-[8px] font-black px-1.5 py-0.5 rounded-md transition-all ${defenseType === '3' ? 'bg-brand-green text-black' : 'text-muted-foreground hover:text-white'}`}
-                            >DIF A 3</button>
+                        <div className="relative z-10" onClick={(e) => e.stopPropagation()}>
+                            <Tabs 
+                                value={defenseType} 
+                                onValueChange={(v) => setDefenseType(v as '3' | '4')}
+                                className="h-7"
+                            >
+                                <TabsList className="bg-black/20 border border-white/5 h-7 p-0.5 rounded-lg">
+                                    <TabsTrigger 
+                                        value="4" 
+                                        className="text-[8px] font-black h-6 px-2 data-[state=active]:bg-brand-green data-[state=active]:text-black uppercase"
+                                    >
+                                        DIF A 4
+                                    </TabsTrigger>
+                                    <TabsTrigger 
+                                        value="3" 
+                                        className="text-[8px] font-black h-6 px-2 data-[state=active]:bg-brand-green data-[state=active]:text-black uppercase"
+                                    >
+                                        DIF A 3
+                                    </TabsTrigger>
+                                </TabsList>
+                            </Tabs>
                         </div>
                     </CardHeader>
                     <CardContent className="pb-4">
@@ -205,10 +220,10 @@ export function AdvancedStatsSection() {
                 {/* 2. BEST G/A PER STARTER */}
                 <Card 
                     onClick={() => setSelectedRanking('efficiency')}
-                    className="cursor-pointer bg-card dark:bg-black/40 border-border dark:border-brand-green/30 shadow-sm rounded-3xl overflow-hidden transition-all hover:border-amber-500/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.1)] group"
+                    className="cursor-pointer bg-card dark:bg-black/40 border-border dark:border-brand-green/30 shadow-sm rounded-3xl overflow-hidden transition-all hover:border-primary/50 dark:hover:border-brand-green/50 hover:shadow-[0_0_20px_rgba(172,229,4,0.1)] group"
                 >
                     <CardHeader className="pb-1">
-                        <CardTitle className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-muted-foreground group-hover:text-amber-500 transition-colors">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">
                             <Zap className="h-3 w-3" />
                             Efficiency Index
                         </CardTitle>
@@ -220,7 +235,7 @@ export function AdvancedStatsSection() {
                                     {getPlayerName(bestGaPlayer.playerId)}
                                 </p>
                                 <div className="flex items-baseline gap-2">
-                                    <span className="text-2xl font-black text-amber-500">{bestGaPlayer.gaPerStarter.toFixed(2)}</span>
+                                    <span className="text-2xl font-black text-primary dark:text-brand-green">{bestGaPlayer.gaPerStarter.toFixed(2)}</span>
                                     <span className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">G+A / Start</span>
                                 </div>
                             </div>
@@ -233,10 +248,10 @@ export function AdvancedStatsSection() {
                 {/* 3. MOST DECISIVE GOALS */}
                 <Card 
                     onClick={() => setSelectedRanking('decisive')}
-                    className="cursor-pointer bg-card dark:bg-black/40 border-border dark:border-brand-green/30 shadow-sm rounded-3xl overflow-hidden transition-all hover:border-rose-500/50 hover:shadow-[0_0_20px_rgba(244,63,94,0.1)] group"
+                    className="cursor-pointer bg-card dark:bg-black/40 border-border dark:border-brand-green/30 shadow-sm rounded-3xl overflow-hidden transition-all hover:border-primary/50 dark:hover:border-brand-green/50 hover:shadow-[0_0_20px_rgba(172,229,4,0.1)] group"
                 >
                     <CardHeader className="pb-1">
-                        <CardTitle className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-muted-foreground group-hover:text-rose-500 transition-colors">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">
                             <Target className="h-3 w-3" />
                             RISOLUTORE
                         </CardTitle>
@@ -248,7 +263,7 @@ export function AdvancedStatsSection() {
                                     {getPlayerName(topDecisive.playerId)}
                                 </p>
                                 <div className="flex items-baseline gap-2">
-                                    <span className="text-2xl font-black text-rose-500">{topDecisive.decisiveGoals}</span>
+                                    <span className="text-2xl font-black text-primary dark:text-brand-green">{topDecisive.decisiveGoals}</span>
                                     <span className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Gol decisivi</span>
                                 </div>
                             </div>
@@ -261,10 +276,10 @@ export function AdvancedStatsSection() {
                 {/* 4. LOWEST LOSS RATE */}
                 <Card 
                     onClick={() => setSelectedRanking('amulet')}
-                    className="cursor-pointer bg-card dark:bg-black/40 border-border dark:border-brand-green/30 shadow-sm rounded-3xl overflow-hidden transition-all hover:border-cyan-500/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.1)] group"
+                    className="cursor-pointer bg-card dark:bg-black/40 border-border dark:border-brand-green/30 shadow-sm rounded-3xl overflow-hidden transition-all hover:border-primary/50 dark:hover:border-brand-green/50 hover:shadow-[0_0_20px_rgba(172,229,4,0.1)] group"
                 >
                     <CardHeader className="pb-1">
-                        <CardTitle className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-muted-foreground group-hover:text-cyan-500 transition-colors">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">
                             <Users className="h-3 w-3" />
                             Amuleto Squadra
                         </CardTitle>
@@ -276,7 +291,7 @@ export function AdvancedStatsSection() {
                                     {getPlayerName(bestLossRatePlayer.playerId)}
                                 </p>
                                 <div className="flex items-baseline gap-2">
-                                    <span className="text-2xl font-black text-cyan-500">{Math.round(bestLossRatePlayer.lossRate * 100)}%</span>
+                                    <span className="text-2xl font-black text-primary dark:text-brand-green">{Math.round(bestLossRatePlayer.lossRate * 100)}%</span>
                                     <span className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">% partite perse</span>
                                 </div>
                             </div>
@@ -304,26 +319,26 @@ export function AdvancedStatsSection() {
                         </div>
                         {selectedRanking === 'defense' && (
                             <div className="mr-8">
-                                <div className="flex items-center gap-1 bg-muted/50 dark:bg-black/40 p-1 rounded-xl border border-divider dark:border-white/5">
-                                    <button
-                                        onClick={() => setDefenseType('4')}
-                                        className={cn(
-                                            "text-[10px] font-black px-3 py-1.5 rounded-lg transition-all uppercase tracking-widest",
-                                            defenseType === '4' 
-                                                ? "bg-brand-green text-black shadow-sm" 
-                                                : "text-muted-foreground hover:text-foreground dark:hover:text-white"
-                                        )}
-                                    >DIF A 4</button>
-                                    <button
-                                        onClick={() => setDefenseType('3')}
-                                        className={cn(
-                                            "text-[10px] font-black px-3 py-1.5 rounded-lg transition-all uppercase tracking-widest",
-                                            defenseType === '3' 
-                                                ? "bg-brand-green text-black shadow-sm" 
-                                                : "text-muted-foreground hover:text-foreground dark:hover:text-white"
-                                        )}
-                                    >DIF A 3</button>
-                                </div>
+                                <Tabs 
+                                    value={defenseType} 
+                                    onValueChange={(v) => setDefenseType(v as '3' | '4')}
+                                    className="h-9"
+                                >
+                                    <TabsList className="bg-muted/50 dark:bg-black/40 border border-divider dark:border-white/5 h-9 p-1 rounded-xl">
+                                        <TabsTrigger 
+                                            value="4" 
+                                            className="text-[10px] font-black h-7 px-3 data-[state=active]:bg-brand-green data-[state=active]:text-black uppercase tracking-widest"
+                                        >
+                                            DIF A 4
+                                        </TabsTrigger>
+                                        <TabsTrigger 
+                                            value="3" 
+                                            className="text-[10px] font-black h-7 px-3 data-[state=active]:bg-brand-green data-[state=active]:text-black uppercase tracking-widest"
+                                        >
+                                            DIF A 3
+                                        </TabsTrigger>
+                                    </TabsList>
+                                </Tabs>
                             </div>
                         )}
                     </DialogHeader>

@@ -23,7 +23,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { trainingRepository } from "@/lib/repositories/training-repository";
 import { Loader2, ClipboardCheck, ChevronLeft, CalendarRange } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { isSameWeek, parseISO, isAfter, startOfDay } from "date-fns";
+import { isSameWeek, parseISO, isAfter, startOfDay, isBefore, isSameDay } from "date-fns";
 import { displayPlayerName } from "@/lib/utils";
 
 interface TrainingStatsDialogProps {
@@ -55,12 +55,21 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
   const stats = useMemo(() => {
     const today = startOfDay(new Date());
     
-    // Filtriamo le sessioni passate (incluso oggi) per il denominatore
-    const pastSessions = sessions.filter(s => {
+    // Filtriamo le sessioni passate per il denominatore.
+    // Includiamo "oggi" solo se sono state effettivamente prese le presenze.
+    const sessionsToCount = sessions.filter(s => {
       const sDate = s.date.includes('T') ? parseISO(s.date) : new Date(s.date);
-      return !isAfter(startOfDay(sDate), today);
+      const sDay = startOfDay(sDate);
+      
+      if (isBefore(sDay, today)) return true;
+      if (isSameDay(sDay, today)) {
+        const sessionData = allAttendance.find(a => a.sessionId === s.id);
+        return sessionData && sessionData.attendance.length > 0;
+      }
+      return false;
     });
-    const pastSessionsCount = pastSessions.length;
+    
+    const pastSessionsCount = sessionsToCount.length;
 
     return players.map(player => {
       let totalPresent = 0;

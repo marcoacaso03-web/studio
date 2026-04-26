@@ -20,26 +20,8 @@ import {
 } from "@/components/ui/card";
 import { displayPlayerName } from "@/lib/utils";
 import { Activity } from "lucide-react";
+import { useChartColors } from "@/lib/design-tokens";
 
-// Rileva il colore del tema in modo reattivo
-function useThemeColor() {
-  const [dotColor, setDotColor] = useState("#2563eb");
-  const [glowColor, setGlowColor] = useState("rgba(37,99,235,0.4)");
-
-  useEffect(() => {
-    const update = () => {
-      const isDark = document.documentElement.classList.contains("dark");
-      setDotColor(isDark ? "#ace504" : "#2563eb");
-      setGlowColor(isDark ? "rgba(172,229,4,0.5)" : "rgba(37,99,235,0.3)");
-    };
-    update();
-    const observer = new MutationObserver(update);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
-    return () => observer.disconnect();
-  }, []);
-
-  return { dotColor, glowColor };
-}
 
 // Dot custom con nome giocatore sopra
 function PlayerDot(props: {
@@ -122,7 +104,7 @@ function CustomTooltip({
 
 export function SquadUsageChart() {
   const { playerLeaderboard } = useStatsStore();
-  const { dotColor, glowColor } = useThemeColor();
+  const { dotColor, glowColor } = useChartColors();
 
   const chartData = useMemo(() => {
     return playerLeaderboard

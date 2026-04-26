@@ -175,48 +175,43 @@ export default function HomePage() {
       </div>
 
       {/* 2. Prossimo Impegno */}
-      <div className="flex items-center justify-between mt-4 mb-2">
-        <h3 className="text-sm font-black uppercase tracking-widest text-foreground dark:text-white">Prossimo Impegno</h3>
-      </div>
-
-      {nextMatch ? (
-        <Card
-          onClick={() => router.push(`/calendario/${nextMatch.id}?s=${nextMatch.seasonId}`)}
-          className="bg-primary/20 dark:bg-brand-green/10 border-2 border-primary/50 dark:border-brand-green shadow-xl dark:shadow-[0_0_25px_rgba(172,229,4,0.15)] rounded-3xl cursor-pointer hover:bg-primary/30 dark:hover:bg-brand-green/20 transition-all overflow-hidden relative group"
-        >
-          <div className="absolute -right-4 -bottom-4 opacity-5">
-            {nextMatch.isHome ? <Home className="w-32 h-32" /> : <Plane className="w-32 h-32" />}
+      {nextMatch && (
+        <>
+          <div className="flex items-center justify-between mt-4 mb-2">
+            <h3 className="text-sm font-black uppercase tracking-widest text-foreground dark:text-white">Prossimo Impegno</h3>
           </div>
-          <CardContent className="p-4 sm:p-5">
-            <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="flex gap-4 items-center">
-                <div className="bg-primary dark:bg-brand-green text-white dark:text-black p-2.5 sm:p-3 rounded-2xl shadow-lg">
-                  <GiWhistle className="h-6 w-6 sm:h-8 sm:w-8" />
-                </div>
-                <div>
-                  <p className="text-[10px] sm:text-xs font-black uppercase text-primary dark:text-brand-green tracking-[0.2em] mb-0.5">Partita in Arrivo</p>
-                  <h4 className="text-lg sm:text-xl font-black uppercase tracking-tight text-foreground dark:text-white">VS {nextMatch.opponent}</h4>
-                  <p className="text-sm font-bold text-muted-foreground dark:text-white/60">
-                    {format(parseISO(nextMatch.date), "dd MMMM yyyy", { locale: it })}
-                  </p>
-                </div>
-              </div>
 
-              <div className="w-full sm:w-auto text-right">
-                <div className="inline-block px-3 py-1.5 bg-background/50 dark:bg-black/60 rounded-xl border border-primary/30 dark:border-brand-green/30 backdrop-blur-md">
-                  <p className="text-xs font-black text-foreground dark:text-white uppercase tracking-wider">{nextMatch.isHome ? "Casa" : "Trasferta"}</p>
+          <Card
+            onClick={() => router.push(`/calendario/${nextMatch.id}?s=${nextMatch.seasonId}`)}
+            className="bg-primary/20 dark:bg-brand-green/10 border-2 border-primary/50 dark:border-brand-green shadow-xl dark:shadow-[0_0_25px_rgba(172,229,4,0.15)] rounded-3xl cursor-pointer hover:bg-primary/30 dark:hover:bg-brand-green/20 transition-all overflow-hidden relative group"
+          >
+            <div className="absolute -right-4 -bottom-4 opacity-5">
+              {nextMatch.isHome ? <Home className="w-32 h-32" /> : <Plane className="w-32 h-32" />}
+            </div>
+            <CardContent className="p-4 sm:p-5">
+              <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex gap-4 items-center">
+                  <div className="bg-primary dark:bg-brand-green text-white dark:text-black p-2.5 sm:p-3 rounded-2xl shadow-lg">
+                    <GiWhistle className="h-6 w-6 sm:h-8 sm:w-8" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] sm:text-xs font-black uppercase text-primary dark:text-brand-green tracking-[0.2em] mb-0.5">Partita in Arrivo</p>
+                    <h4 className="text-lg sm:text-xl font-black uppercase tracking-tight text-foreground dark:text-white">VS {nextMatch.opponent}</h4>
+                    <p className="text-sm font-bold text-muted-foreground dark:text-white/60">
+                      {format(parseISO(nextMatch.date), "dd MMMM yyyy", { locale: it })}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="w-full sm:w-auto text-right">
+                  <div className="inline-block px-3 py-1.5 bg-background/50 dark:bg-black/60 rounded-xl border border-primary/30 dark:border-brand-green/30 backdrop-blur-md">
+                    <p className="text-xs font-black text-foreground dark:text-white uppercase tracking-wider">{nextMatch.isHome ? "Casa" : "Trasferta"}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="bg-card dark:bg-black/40 border border-border dark:border-white/10 border-dashed rounded-3xl">
-          <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-            <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground dark:text-white/40">Nessuna gara in programma</h4>
-            <Button variant="link" onClick={() => setIsMatchFormOpen(true)} className="text-primary dark:text-brand-green font-bold text-xs uppercase mt-1">Aggiungi ora</Button>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </>
       )}
 
       {/* 3. Azioni Rapide */}

@@ -38,10 +38,12 @@ const ChatInputSchema = z.object({
     players: z.array(PlayerDataSchema).optional(),
   }).optional(),
 });
+export type ChatInput = z.infer<typeof ChatInputSchema>;
 
 const ChatOutputSchema = z.object({
   text: z.string(),
 });
+export type ChatOutput = z.infer<typeof ChatOutputSchema>;
 
 // ── Risposte predefinite ──
 const RESPONSES = {

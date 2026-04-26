@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useMatchDetailStore } from "@/store/useMatchDetailStore";
 import { Badge } from "@/components/ui/badge";
 import { Info, Plus, Trash2, ArrowRightLeft, XCircle, Target, Zap, Flag, Handshake, Edit2, User, ExternalLink, ArrowUp, ArrowDown } from "lucide-react";
@@ -12,14 +13,9 @@ import { LiveMatchTracker } from "./live-match-tracker";
 import { Button } from "@/components/ui/button";
 import { MatchEventType, MatchEvent } from "@/lib/types";
 import { GiGloves, GiTargetPoster, GiLightBulb } from "react-icons/gi";
-import { cn } from "@/lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
+import { getEventIcon, getEventLabel, formatDisplayMinute, PERIOD_ORDER } from "@/lib/match-events";
+import { cn } from "@/lib/utils";
 
 export function MatchEventsTab() {
   const { events, deleteEvent, match } = useMatchDetailStore();
@@ -29,74 +25,9 @@ export function MatchEventsTab() {
 
   const [selectedEventOptions, setSelectedEventOptions] = useState<MatchEvent | null>(null);
 
-  const getEventIcon = (event: MatchEvent, size: string = "h-4 w-4", forceNeutral = false) => {
-    const neutralClass = "text-black dark:text-white";
-    
-    const getFinalClass = (specificClass: string, isCard = false) => {
-      if (isCard) return cn(size, specificClass);
-      return forceNeutral ? cn(size, neutralClass) : cn(size, specificClass);
-    };
-
-    switch (event.type) {
-      case 'goal':
-        if (event.goalType === 'rigore') return <Target className={getFinalClass("text-black dark:text-white")} />;
-        if (event.goalType === 'punizione') return <Zap className={getFinalClass("text-black dark:text-white")} />;
-        if (event.goalType === 'calcio_angolo') return <Flag className={getFinalClass("text-black dark:text-white")} />;
-        return <GiSoccerBall className={getFinalClass("text-black dark:text-white")} />;
-      case 'own_goal': return <GiSoccerBall className={getFinalClass("text-rose-500")} />;
-      case 'assist': return <Handshake className={getFinalClass("text-black dark:text-white")} />;
-      case 'yellow_card': return <IoSquare className={getFinalClass("text-yellow-400", true)} />;
-      case 'red_card': return <IoSquare className={getFinalClass("text-red-600", true)} />;
-      case 'substitution':
-      case 'sub_in':
-      case 'sub_out': 
-        if (forceNeutral) return <ArrowRightLeft className={cn(size, neutralClass)} />;
-        return (
-          <div className="flex items-center -space-x-1.5 h-full">
-            <ArrowUp className={cn(size, "text-emerald-500 -translate-y-0.5")} />
-            <ArrowDown className={cn(size, "text-rose-500 translate-y-0.5")} />
-          </div>
-        );
-      case 'penalty_saved': return <GiGloves className={getFinalClass("text-black dark:text-white")} />;
-      case 'penalty_missed': return <XCircle className={getFinalClass("text-black dark:text-white")} />;
-      case 'chance': return <GiLightBulb className={getFinalClass("text-black dark:text-white")} />;
-      case 'woodwork': return <GiTargetPoster className={getFinalClass("text-black dark:text-white")} />;
-      case 'note': return <Info className={getFinalClass("text-black dark:text-white")} />;
-      default: return <Info className={getFinalClass("text-black dark:text-white")} />;
-    }
-  };
-
-  const getEventLabel = (event: any) => {
-    if (event.type === 'goal') {
-      const typeLabel = event.goalType && event.goalType !== 'normale' ? ` (${event.goalType.replace('_', ' ').toUpperCase()})` : '';
-      return event.assistPlayerName
-        ? `${event.assistPlayerName.toUpperCase()}${typeLabel}`
-        : typeLabel;
-    }
-    if (event.type === 'own_goal') {
-      return 'AUTOGOL';
-    }
-    if (event.type === 'substitution') {
-      return '';
-    }
-    switch (event.type) {
-      case 'assist': return '';
-      case 'yellow_card': return 'AMMONIZIONE';
-      case 'red_card': return 'ESPULSIONE';
-      case 'sub_in': return '';
-      case 'sub_out': return '';
-      case 'penalty_saved': return 'RIGORE PARATO';
-      case 'penalty_missed': return 'RIGORE SBAGLIATO';
-      case 'chance': return 'OCCASIONE';
-      case 'woodwork': return 'PALO / TRAVERSA';
-      case 'note': return 'NOTA / ALTRO';
-      default: return '';
-    }
-  };
 
   const timedEvents = events.filter(e => e.minute !== null).sort((a, b) => {
-    const periodOrder: Record<string, number> = { '1T': 1, '2T': 2, '1TS': 3, '2TS': 4 };
-    if (periodOrder[a.period] !== periodOrder[b.period]) return periodOrder[a.period] - periodOrder[b.period];
+    if (PERIOD_ORDER[a.period] !== PERIOD_ORDER[b.period]) return PERIOD_ORDER[a.period] - PERIOD_ORDER[b.period];
     return (a.minute ?? 0) - (b.minute ?? 0);
   });
   const unTimedEvents = events.filter(e => e.minute === null);
@@ -112,25 +43,6 @@ export function MatchEventsTab() {
     setIsEventDialogOpen(true);
   };
 
-  const formatDisplayMinute = (minute: number | null, period: string) => {
-    if (minute === null) return "";
-
-    const totalDuration = match?.duration || 90;
-    const halfTime = Math.floor(totalDuration / 2);
-
-    switch (period) {
-      case '1T':
-        return minute > halfTime ? `${halfTime}+${minute - halfTime}'` : `${minute}'`;
-      case '2T':
-        return minute > halfTime ? `${totalDuration}+${minute - halfTime}'` : `${halfTime + minute}'`;
-      case '1TS':
-        return minute > 15 ? `${totalDuration}+15+${minute - 15}'` : `${totalDuration + minute}'`;
-      case '2TS':
-        return minute > 15 ? `${totalDuration}+30+${minute - 15}'` : `${totalDuration + 15 + minute}'`;
-      default:
-        return `${minute}'`;
-    }
-  };
 
   return (
     <div className="space-y-6 relative">
@@ -290,7 +202,7 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
             "absolute whitespace-nowrap bg-muted/80 dark:bg-black/80 px-2.5 py-1 rounded-full border border-border dark:border-brand-green/10 text-[11px] font-black tabular-nums shadow-sm z-20",
             alignLeft ? "left-full ml-4" : "right-full mr-4"
           )}>
-            {formatMinute(event.minute, event.period)}
+            {formatDisplayMinute(event.minute, event.period, match?.duration)}
           </div>
         )}
 

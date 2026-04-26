@@ -24,10 +24,19 @@
     --input: 210 15% 90%;
     --ring: 210 100% 45%;
     --radius: 0.75rem;
+
+    /* Brand & Functional Colors */
     --brand-yellow: 59 100% 70%;
     --brand-green: 74 96% 46%;
     --brand-cyan: 192 100% 22%;
     --brand-pink: 340 73% 55%;
+    
+    --win: 74 96% 46%;
+    --loss: 350 89% 60%;
+    --draw: 210 10% 60%;
+    
+    --card-yellow: 48 96% 53%;
+    --card-red: 0 84% 60%;
   }
 
   .dark {
@@ -63,10 +72,18 @@
     --border: 220 25% 20%;
     --input: 220 25% 20%;
     --ring: 100 100% 46%;
+    
     --brand-yellow: 59 100% 70%;
     --brand-green: 74 96% 46%;
     --brand-cyan: 192 100% 22%;
     --brand-pink: 340 73% 55%;
+
+    --win: 100 100% 46%;
+    --loss: 350 89% 60%;
+    --draw: 210 10% 40%;
+
+    --card-yellow: 48 96% 53%;
+    --card-red: 0 84% 60%;
   }
 }
 

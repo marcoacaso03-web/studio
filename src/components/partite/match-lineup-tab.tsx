@@ -238,43 +238,51 @@ export function MatchLineupTab() {
             <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Panchina ({substitutes.filter(s => s).length})</h4>
           </div>
           <Card className="bg-card dark:bg-black/40 border-border dark:border-white/5 rounded-3xl overflow-hidden shadow-sm">
-            <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {substitutes.map((s, i) => {
-                const player = allPlayers.find(p => p.id === s);
-                const availablePlayers = allPlayers.filter(p => !allSelectedIds.includes(p.id) || p.id === s);
+            {!isEditing && substitutes.filter(s => s).length === 0 ? (
+              <div className="p-8 text-center text-[10px] font-black uppercase text-muted-foreground/50 tracking-widest">
+                Nessun giocatore in panchina
+              </div>
+            ) : (
+              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {substitutes.map((s, i) => {
+                  if (!isEditing && !s) return null;
 
-                return (
-                  <div key={i} className="flex items-center gap-3 p-2 bg-muted/30 dark:bg-white/5 rounded-xl border border-transparent hover:border-primary/20 dark:hover:border-brand-green/20 transition-all">
-                    <div className="w-7 h-7 rounded-full bg-background dark:bg-black flex items-center justify-center text-[9px] font-black text-muted-foreground border border-border dark:border-white/10 shrink-0">
-                      R{i + 1}
+                  const player = allPlayers.find(p => p.id === s);
+                  const availablePlayers = allPlayers.filter(p => !allSelectedIds.includes(p.id) || p.id === s);
+
+                  return (
+                    <div key={i} className="flex items-center gap-3 p-2 bg-muted/30 dark:bg-white/5 rounded-xl border border-transparent hover:border-primary/20 dark:hover:border-brand-green/20 transition-all">
+                      <div className="w-7 h-7 rounded-full bg-background dark:bg-black flex items-center justify-center text-[9px] font-black text-muted-foreground border border-border dark:border-white/10 shrink-0">
+                        R{i + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <Select 
+                          value={s || "none"} 
+                          onValueChange={(val) => handlePlayerChange(i, false, val)}
+                          disabled={!isEditing}
+                        >
+                          <SelectTrigger className={cn(
+                            "border-none shadow-none h-7 p-0 bg-transparent focus:ring-0 text-[11px] font-black uppercase flex items-center gap-2",
+                            isEditing ? "text-foreground dark:text-white" : "text-muted-foreground cursor-default"
+                          )}>
+                            {player && isPlayerInjured(player, match?.date || "") && (
+                              <Activity className="w-3 h-3 text-red-500 shrink-0" />
+                            )}
+                            <SelectValue placeholder="-- SELEZIONA --" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-card dark:bg-black border-border dark:border-brand-green/50">
+                            <SelectItem value="none" className="text-[10px] font-bold uppercase text-muted-foreground">-- Nessuno --</SelectItem>
+                            {availablePlayers.map(p => (
+                              <SelectItem key={p.id} value={p.id} className="text-[11px] font-black uppercase">{displayPlayerName(p)}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <Select 
-                        value={s || "none"} 
-                        onValueChange={(val) => handlePlayerChange(i, false, val)}
-                        disabled={!isEditing}
-                      >
-                        <SelectTrigger className={cn(
-                          "border-none shadow-none h-7 p-0 bg-transparent focus:ring-0 text-[11px] font-black uppercase flex items-center gap-2",
-                          isEditing ? "text-foreground dark:text-white" : "text-muted-foreground cursor-default"
-                        )}>
-                          {player && isPlayerInjured(player, match?.date || "") && (
-                            <Activity className="w-3 h-3 text-red-500 shrink-0" />
-                          )}
-                          <SelectValue placeholder="-- SELEZIONA --" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-card dark:bg-black border-border dark:border-brand-green/50">
-                          <SelectItem value="none" className="text-[10px] font-bold uppercase text-muted-foreground">-- Nessuno --</SelectItem>
-                          {availablePlayers.map(p => (
-                            <SelectItem key={p.id} value={p.id} className="text-[11px] font-black uppercase">{displayPlayerName(p)}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </Card>
         </div>
 

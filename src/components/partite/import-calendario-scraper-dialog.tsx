@@ -85,14 +85,14 @@ export function ImportCalendarioScraperDialog({ open, onOpenChange }: ImportCale
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] md:max-w-xl rounded-[32px] p-0 overflow-hidden border border-border dark:border-brand-green/30 shadow-2xl flex flex-col max-h-[90vh] bg-card dark:bg-black">
-        <DialogHeader className="p-8 bg-primary dark:bg-black text-white dark:text-brand-green shrink-0 shadow-sm border-b border-white/10 dark:border-brand-green/20">
+        <DialogHeader className="p-8 bg-card dark:bg-black text-foreground dark:text-white shrink-0 shadow-sm border-b border-border dark:border-brand-green/20">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-white/10 dark:bg-brand-green/10 rounded-2xl shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.1)]">
-              <CalendarCheck className="h-7 w-7 text-white dark:text-brand-green" />
+            <div className="p-3 bg-muted dark:bg-brand-green/10 rounded-2xl shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.1)]">
+              <CalendarCheck className="h-7 w-7 text-primary dark:text-brand-green" />
             </div>
             <div>
               <DialogTitle className="uppercase font-black text-2xl tracking-tighter text-white dark:text-white">Scraping Calendario</DialogTitle>
-              <DialogDescription className="text-white/70 dark:text-brand-green/60 text-[10px] font-black uppercase tracking-[0.3em] mt-1">
+              <DialogDescription className="text-muted-foreground dark:text-brand-green/60 text-[10px] font-black uppercase tracking-[0.3em] mt-1">
                 Importazione Automatica Stagione 25/26
               </DialogDescription>
             </div>

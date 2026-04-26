@@ -5,20 +5,21 @@ import { Pie, PieChart, ResponsiveContainer, Cell, Tooltip } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import { useThemeStore } from "@/store/useThemeStore";
+import { COLORS } from "@/lib/design-tokens";
 
 export function VenueStatsCharts() {
     const { teamRecord, homeRecord, awayRecord } = useStatsStore();
     const { theme } = useThemeStore();
     const isDark = theme === "dark";
 
-    // Colori adattivi al tema
-    const WIN_COLOR = isDark ? "#ace504" : "hsl(210 100% 45%)";   // neon green / azzurro
-    const DRAW_COLOR = isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.15)"; // grigio chiaro / grigio scuro
-    const LOSS_COLOR = "#f43f5e";                                    // rosso invariante
+    // Colori centralizzati
+    const WIN_COLOR = COLORS.functional.win;
+    const DRAW_COLOR = COLORS.functional.draw;
+    const LOSS_COLOR = COLORS.functional.loss;
 
     const TOOLTIP_BG = isDark ? "rgba(0,0,0,0.92)" : "rgba(255,255,255,0.97)";
-    const TOOLTIP_BORDER = isDark ? "rgba(172,229,4,0.3)" : "rgba(0,128,255,0.25)";
-    const TOOLTIP_COLOR = isDark ? "#fff" : "#000";
+    const TOOLTIP_BORDER = COLORS.charts.grid(isDark);
+    const TOOLTIP_COLOR = COLORS.charts.text(isDark);
 
     if (!teamRecord || teamRecord.matchesPlayed === 0) return null;
 
@@ -81,15 +82,15 @@ export function VenueStatsCharts() {
                 {/* Legenda */}
                 <div className="flex justify-center gap-4 mt-6">
                     <div className="flex items-center gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-brand-green dark:bg-primary" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">Vittoria</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-foreground/20" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-draw" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">Pareggio</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-loss" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">Sconfitta</span>
                     </div>
                 </div>

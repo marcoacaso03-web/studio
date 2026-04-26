@@ -20,7 +20,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Sparkles, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useMatchDetailStore } from '@/store/useMatchDetailStore';
-import { suggestLineup } from '@/ai/flows/suggest-lineup-flow';
+import * as AIService from '@/services/ai.service';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -49,7 +49,7 @@ export function SmartLineupDialog({ open, onOpenChange }: SmartLineupDialogProps
     setIsAnalyzing(true);
     try {
       const availablePlayers = allPlayers.map(p => ({ id: p.id, name: p.name }));
-      const result = await suggestLineup({ rawList, availablePlayers, formation: modulo });
+      const result = await AIService.suggestLineup({ rawList, availablePlayers, formation: modulo });
 
       // Salviamo la formazione suggerita
       await saveLineup({
@@ -79,14 +79,14 @@ export function SmartLineupDialog({ open, onOpenChange }: SmartLineupDialogProps
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] md:max-w-xl rounded-3xl p-0 overflow-hidden border-none shadow-2xl flex flex-col max-h-[90vh] bg-background dark:bg-black">
-        <DialogHeader className="p-6 bg-primary dark:bg-yellow-300 text-white dark:text-black shrink-0 relative transition-colors">
+        <DialogHeader className="p-6 bg-card dark:bg-black border-b border-border dark:border-brand-green/30 text-foreground dark:text-white shrink-0 relative transition-colors">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/10 dark:bg-black/10 rounded-xl">
-              <Sparkles className="h-6 w-6" />
+            <div className="p-2 bg-muted dark:bg-white/5 border border-border dark:border-white/10 rounded-xl">
+              <Sparkles className="h-6 w-6 text-primary dark:text-brand-green" />
             </div>
             <div>
               <DialogTitle className="uppercase font-black tracking-tight">AI Smart Lineup</DialogTitle>
-              <DialogDescription className="text-white/60 dark:text-black/60 text-[10px] font-bold uppercase tracking-widest mt-1">
+              <DialogDescription className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest mt-1">
                 Associazione Automatica Giocatori
               </DialogDescription>
             </div>
