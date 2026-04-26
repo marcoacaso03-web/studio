@@ -15,6 +15,7 @@ import { useThemeStore } from "@/store/useThemeStore";
 import { aggregationRepository } from "@/lib/repositories/aggregation-repository";
 import { trainingRepository } from "@/lib/repositories/training-repository";
 import type { Player, TrainingSession, TrainingAttendance, TrainingStatus, Match } from "@/lib/types";
+import { parseISO, isAfter, startOfDay } from "date-fns";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -197,8 +198,14 @@ function TrainingHeatmap({ records }: { records: TrainingRecord[] }) {
     );
   }
 
-  const presenti = records.filter((r) => r.status === "presente").length;
-  const totale = records.length;
+  const today = startOfDay(new Date());
+  const pastRecords = records.filter(r => {
+    const d = r.session.date.includes('T') ? parseISO(r.session.date) : new Date(r.session.date);
+    return !isAfter(startOfDay(d), today);
+  });
+  
+  const presenti = pastRecords.filter((r) => r.status === "presente" || r.status === "ritardo").length;
+  const totale = pastRecords.length;
   const percentuale = totale > 0 ? Math.round((presenti / totale) * 100) : 0;
 
   return (
@@ -214,7 +221,7 @@ function TrainingHeatmap({ records }: { records: TrainingRecord[] }) {
         <span className="text-xs font-black text-primary dark:text-brand-green min-w-[3rem] text-right">{percentuale}%</span>
       </div>
       <p className="text-[9px] text-muted-foreground dark:text-white/30 font-black uppercase tracking-widest mt-1">
-        {presenti} presenze su {totale} allenamenti
+        {presenti} presenze su {totale} allenamenti svolti
       </p>
 
       {/* Griglia dot */}

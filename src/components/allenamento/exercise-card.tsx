@@ -40,6 +40,9 @@ export function ExerciseCard({ exercise, isOwner, onEdit, onDelete, onView }: Ex
             src={exercise.media.find(m => m.type === 'image')?.url} 
             alt={exercise.name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            onError={(e) => {
+              (e.target as any).src = 'https://placehold.co/400x200?text=Immagine+non+disponibile';
+            }}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 dark:from-brand-green/10 dark:to-transparent flex items-center justify-center">

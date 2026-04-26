@@ -157,23 +157,7 @@ export function SquadUsageChart() {
 
   return (
     <Card className="bg-card dark:bg-black/40 border-border dark:border-brand-green/30 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.05)] rounded-3xl overflow-hidden backdrop-blur-sm transition-colors">
-      <CardHeader className="pb-4">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-2xl bg-card dark:bg-black border border-primary/30 dark:border-brand-green flex items-center justify-center shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.15)]">
-            <Activity className="h-5 w-5 text-primary dark:text-brand-green" />
-          </div>
-          <div>
-            <CardTitle className="text-lg font-black uppercase tracking-tight text-foreground dark:text-white">
-              Utilizzo Rosa
-            </CardTitle>
-            <CardDescription className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">
-              Asse X: Partite giocate · Asse Y: Minuti totali stagione
-            </CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className="pr-2 pb-6">
+      <CardContent className="pr-2 pt-6 pb-6">
         <ResponsiveContainer width="100%" height={420}>
           <ScatterChart
             margin={{ top: 30, right: 30, left: 10, bottom: 40 }}

@@ -23,7 +23,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { trainingRepository } from "@/lib/repositories/training-repository";
 import { Loader2, ClipboardCheck, ChevronLeft, CalendarRange } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { isSameWeek, parseISO } from "date-fns";
+import { isSameWeek, parseISO, isAfter, startOfDay } from "date-fns";
 import { displayPlayerName } from "@/lib/utils";
 
 interface TrainingStatsDialogProps {
@@ -53,6 +53,15 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
   }, [open, user, sessions]);
 
   const stats = useMemo(() => {
+    const today = startOfDay(new Date());
+    
+    // Filtriamo le sessioni passate (incluso oggi) per il denominatore
+    const pastSessions = sessions.filter(s => {
+      const sDate = s.date.includes('T') ? parseISO(s.date) : new Date(s.date);
+      return !isAfter(startOfDay(sDate), today);
+    });
+    const pastSessionsCount = pastSessions.length;
+
     return players.map(player => {
       let totalPresent = 0;
       let weeklyPresent = 0;
@@ -62,12 +71,16 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
         const session = sessions.find(s => s.id === sessionData.sessionId);
         if (!session) return;
 
+        // Consideriamo solo le sessioni già avvenute (o oggi) per il totale
+        const sessionDate = session.date.includes('T') ? parseISO(session.date) : new Date(session.date);
+        const isPastOrToday = !isAfter(startOfDay(sessionDate), today);
+
         const record = sessionData.attendance.find(a => a.playerId === player.id);
-        const isInCurrentWeek = isSameWeek(parseISO(session.date), currentWeekStart, { weekStartsOn: 1 });
+        const isInCurrentWeek = isSameWeek(sessionDate, currentWeekStart, { weekStartsOn: 1 });
 
         if (record) {
           if (record.status === 'presente' || record.status === 'ritardo') {
-            totalPresent++;
+            if (isPastOrToday) totalPresent++;
             if (isInCurrentWeek) weeklyPresent++;
           }
           if (record.status === 'ritardo' && isInCurrentWeek) {
@@ -76,7 +89,7 @@ export function TrainingStatsDialog({ open, onOpenChange, currentWeekStart }: Tr
         }
       });
 
-      const percentage = sessions.length > 0 ? Math.round((totalPresent / sessions.length) * 100) : 0;
+      const percentage = pastSessionsCount > 0 ? Math.round((totalPresent / pastSessionsCount) * 100) : 0;
 
       return {
         id: player.id,

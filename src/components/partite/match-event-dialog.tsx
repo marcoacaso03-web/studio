@@ -299,16 +299,16 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                 <SelectValue placeholder="Seleziona" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
-                <SelectItem value="goal" className="text-[10px] font-black uppercase dark:text-white text-brand-green">Goal</SelectItem>
-                <SelectItem value="own_goal" className="text-[10px] font-black uppercase dark:text-white text-rose-500">Autogol</SelectItem>
-                <SelectItem value="yellow_card" className="text-[10px] font-black uppercase dark:text-white text-amber-500">Ammonizione</SelectItem>
-                <SelectItem value="red_card" className="text-[10px] font-black uppercase dark:text-white text-rose-500">Espulsione</SelectItem>
-                <SelectItem value="substitution" className="text-[10px] font-black uppercase dark:text-white text-primary">Sostituzione</SelectItem>
-                <SelectItem value="penalty_saved" className="text-[10px] font-black uppercase dark:text-white text-blue-500">Rigore Parato</SelectItem>
-                <SelectItem value="penalty_missed" className="text-[10px] font-black uppercase dark:text-white text-orange-500">Rigore Sbagliato</SelectItem>
-                <SelectItem value="chance" className="text-[10px] font-black uppercase dark:text-white text-purple-500">Occasione</SelectItem>
-                <SelectItem value="woodwork" className="text-[10px] font-black uppercase dark:text-white text-emerald-500">Palo/Traversa</SelectItem>
-                <SelectItem value="note" className="text-[10px] font-black uppercase dark:text-white text-muted-foreground">Nota / Altro</SelectItem>
+                <SelectItem value="goal" className="text-[10px] font-black uppercase text-brand-green">Goal</SelectItem>
+                <SelectItem value="own_goal" className="text-[10px] font-black uppercase text-rose-500">Autogol</SelectItem>
+                <SelectItem value="yellow_card" className="text-[10px] font-black uppercase text-amber-500">Ammonizione</SelectItem>
+                <SelectItem value="red_card" className="text-[10px] font-black uppercase text-rose-500">Espulsione</SelectItem>
+                <SelectItem value="substitution" className="text-[10px] font-black uppercase text-primary">Sostituzione</SelectItem>
+                <SelectItem value="penalty_saved" className="text-[10px] font-black uppercase text-blue-500">Rigore Parato</SelectItem>
+                <SelectItem value="penalty_missed" className="text-[10px] font-black uppercase text-orange-500">Rigore Sbagliato</SelectItem>
+                <SelectItem value="chance" className="text-[10px] font-black uppercase text-purple-500">Occasione</SelectItem>
+                <SelectItem value="woodwork" className="text-[10px] font-black uppercase text-emerald-500">Palo/Traversa</SelectItem>
+                <SelectItem value="note" className="text-[10px] font-black uppercase text-muted-foreground">Nota / Altro</SelectItem>
               </SelectContent>
             </Select>
           </div>

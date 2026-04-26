@@ -79,6 +79,8 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
 
   const addMedia = () => {
     if (!newMediaUrl) return;
+    // Prevent adding local blob URLs manually
+    if (newMediaUrl.startsWith('blob:')) return;
     setMedia(prev => [...prev, { type: newMediaType, url: newMediaUrl }]);
     setNewMediaUrl("");
   };
@@ -405,7 +407,7 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
           <Button 
             className="flex-[2] h-12 rounded-xl bg-primary dark:bg-black border-2 border-primary dark:border-brand-green text-white dark:text-brand-green font-black uppercase text-xs shadow-xl dark:shadow-[0_0_20px_rgba(172,229,4,0.1)] hover:scale-[1.01] transition-all"
             onClick={handleSave}
-            disabled={loading || !name}
+            disabled={loading || !name || uploadLoading}
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
             {exercise ? "Aggiorna" : "Pubblica Esercizio"}

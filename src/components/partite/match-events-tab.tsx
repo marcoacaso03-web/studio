@@ -29,32 +29,41 @@ export function MatchEventsTab() {
 
   const [selectedEventOptions, setSelectedEventOptions] = useState<MatchEvent | null>(null);
 
-  const getEventIcon = (event: MatchEvent, size: string = "h-4 w-4") => {
-    const iconClass = cn(size, "text-black dark:text-white");
+  const getEventIcon = (event: MatchEvent, size: string = "h-4 w-4", forceNeutral = false) => {
+    const neutralClass = "text-black dark:text-white";
+    
+    // Helper to determine class based on forceNeutral, but ALWAYS preserving colors for cards
+    const getFinalClass = (specificClass: string, isCard = false) => {
+      if (isCard) return cn(size, specificClass);
+      return forceNeutral ? cn(size, neutralClass) : cn(size, specificClass);
+    };
+
     switch (event.type) {
       case 'goal':
-        if (event.goalType === 'rigore') return <Target className={iconClass} />;
-        if (event.goalType === 'punizione') return <Zap className={iconClass} />;
-        if (event.goalType === 'calcio_angolo') return <Flag className={iconClass} />;
-        return <GiSoccerBall className={iconClass} />;
-      case 'own_goal': return <GiSoccerBall className={cn(size, "text-rose-500")} />;
-      case 'assist': return <Handshake className={iconClass} />;
-      case 'yellow_card': return <IoSquare className={iconClass} />;
-      case 'red_card': return <IoSquare className={iconClass} />;
+        if (event.goalType === 'rigore') return <Target className={getFinalClass("text-black dark:text-white")} />;
+        if (event.goalType === 'punizione') return <Zap className={getFinalClass("text-black dark:text-white")} />;
+        if (event.goalType === 'calcio_angolo') return <Flag className={getFinalClass("text-black dark:text-white")} />;
+        return <GiSoccerBall className={getFinalClass("text-black dark:text-white")} />;
+      case 'own_goal': return <GiSoccerBall className={getFinalClass("text-rose-500")} />;
+      case 'assist': return <Handshake className={getFinalClass("text-black dark:text-white")} />;
+      case 'yellow_card': return <IoSquare className={getFinalClass("text-yellow-400", true)} />;
+      case 'red_card': return <IoSquare className={getFinalClass("text-red-600", true)} />;
       case 'substitution':
       case 'sub_in':
-      case 'sub_out': return (
-        <div className="flex items-center -space-x-1.5 h-full">
-          <ArrowUp className={cn(size, "text-emerald-500 -translate-y-0.5")} />
-          <ArrowDown className={cn(size, "text-rose-500 translate-y-0.5")} />
-        </div>
-      );
-      case 'penalty_saved': return <GiGloves className={iconClass} />;
-      case 'penalty_missed': return <XCircle className={iconClass} />;
-      case 'chance': return <GiLightBulb className={iconClass} />;
-      case 'woodwork': return <GiTargetPoster className={iconClass} />;
-      case 'note': return <Info className={iconClass} />;
-      default: return <Info className={iconClass} />;
+      case 'sub_out': 
+        if (forceNeutral) return <ArrowRightLeft className={cn(size, neutralClass)} />;
+        return (
+          <div className="flex items-center -space-x-1.5 h-full">
+            <ArrowUp className={cn(size, "text-emerald-500 -translate-y-0.5")} />
+            <ArrowDown className={cn(size, "text-rose-500 translate-y-0.5")} />
+          </div>
+        );
+      case 'penalty_saved': return <GiGloves className={getFinalClass("text-black dark:text-white")} />;
+      case 'penalty_missed': return <XCircle className={getFinalClass("text-black dark:text-white")} />;
+      case 'chance': return <GiLightBulb className={getFinalClass("text-black dark:text-white")} />;
+      case 'woodwork': return <GiTargetPoster className={getFinalClass("text-black dark:text-white")} />;
+      case 'note': return <Info className={getFinalClass("text-black dark:text-white")} />;
+      default: return <Info className={getFinalClass("text-black dark:text-white")} />;
     }
   };
 
@@ -346,13 +355,13 @@ function EventOptionsDialog({ event, open, onOpenChange, onEdit, onDelete, getEv
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[90vw] sm:max-w-xs bg-card dark:bg-black border border-border dark:border-brand-green/30 p-6 rounded-[28px] shadow-2xl">
         <DialogHeader className="items-center text-center">
-          <div className="bg-muted/10 dark:bg-brand-green/5 p-4 rounded-full border border-brand-green/20 mb-3">
-            {getEventIcon(event, "h-8 w-8")}
+          <div className="p-4 rounded-full border border-border dark:border-white/10 bg-white dark:bg-black mb-3 shadow-sm">
+            {getEventIcon(event, "h-8 w-8", true)}
           </div>
           <DialogTitle className="text-xl font-black uppercase tracking-tight leading-none mb-1">
             Gestione Evento
           </DialogTitle>
-          <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">{getEventLabel(event)}</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{getEventLabel(event)}</p>
         </DialogHeader>
 
         <div className="space-y-2 mt-6">

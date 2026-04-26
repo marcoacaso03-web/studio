@@ -34,6 +34,10 @@ const SquadUsageChart = dynamic(() => import("@/components/statistiche/squad-usa
   loading: () => <Skeleton className="h-[420px] w-full" />,
   ssr: false
 });
+const SquadFormationView = dynamic(() => import("@/components/statistiche/squad-formation-view").then(mod => mod.SquadFormationView), {
+  loading: () => <Skeleton className="h-[600px] w-full" />,
+  ssr: false
+});
 
 export default function StatistichePage() {
   const { loading, error: statsError, loadDetailedStats } = useStatsStore();
@@ -105,7 +109,20 @@ export default function StatistichePage() {
           {loading ? (
             <Skeleton className="h-[420px] w-full" />
           ) : (
-            <SquadUsageChart />
+            <Tabs defaultValue="rosa" className="w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                <TabsList className="bg-muted dark:bg-black/40 border border-border dark:border-brand-green/20 p-1 rounded-xl h-10 transition-colors">
+                  <TabsTrigger value="rosa" className="text-[9px] font-black uppercase rounded-lg px-6 data-[state=active]:bg-background dark:data-[state=active]:bg-black data-[state=active]:text-primary dark:data-[state=active]:text-brand-green transition-all">ROSA</TabsTrigger>
+                  <TabsTrigger value="formazione" className="text-[9px] font-black uppercase rounded-lg px-6 data-[state=active]:bg-background dark:data-[state=active]:bg-black data-[state=active]:text-primary dark:data-[state=active]:text-brand-green transition-all">FORMAZIONE</TabsTrigger>
+                </TabsList>
+              </div>
+              <TabsContent value="rosa" className="mt-0">
+                <SquadUsageChart />
+              </TabsContent>
+              <TabsContent value="formazione" className="mt-0">
+                <SquadFormationView />
+              </TabsContent>
+            </Tabs>
           )}
         </TabsContent>
         <TabsContent value="grafici">
