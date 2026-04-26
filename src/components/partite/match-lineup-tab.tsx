@@ -45,6 +45,7 @@ export function MatchLineupTab() {
   const [modulo, setModulo] = useState("4-4-2");
   const [isSmartOpen, setIsSmartOpen] = useState(false);
   const [editingSlot, setEditingSlot] = useState<number | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
   // Inizializza lo stato locale dal lineup dello store
@@ -74,6 +75,7 @@ export function MatchLineupTab() {
         formation: modulo,
       });
       setIsDirty(false);
+      setIsEditing(false);
       toast({
         title: "Formazione Salvata",
         description: "La formazione è stata aggiornata con successo.",
@@ -106,6 +108,7 @@ export function MatchLineupTab() {
       setModulo("4-4-2");
     }
     setIsDirty(false);
+    setIsEditing(false);
   };
 
   const allSelectedIds = useMemo(() => {
@@ -152,62 +155,63 @@ export function MatchLineupTab() {
       {/* Header / Toolbar */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary/10 dark:bg-brand-green/10 border border-primary/20 dark:border-brand-green/20 rounded-2xl flex items-center justify-center">
-            <LayoutGrid className="h-5 w-5 text-primary dark:text-brand-green" />
-          </div>
-          <div>
-            <h3 className="text-lg font-black uppercase tracking-tight text-foreground">Lineup Editor</h3>
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Gestisci titolari e panchina</p>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-2 bg-muted/50 dark:bg-black/40 p-1.5 rounded-2xl border border-border dark:border-white/5">
-            <span className="text-[9px] font-black uppercase text-muted-foreground ml-2 hidden sm:inline">MODULO</span>
-            <Select 
-              value={modulo} 
-              onValueChange={(val) => { setModulo(val); setIsDirty(true); }}
+          {!isEditing ? (
+            <Button 
+              onClick={() => setIsEditing(true)}
+              className="h-10 px-6 bg-primary dark:bg-brand-green text-white dark:text-black rounded-2xl font-black uppercase text-xs shadow-lg dark:shadow-[0_0_15px_rgba(172,229,4,0.2)] hover:scale-105 active:scale-95 transition-all"
             >
-              <SelectTrigger className="bg-background dark:bg-black text-primary dark:text-brand-green h-9 text-xs w-28 font-black border-none shadow-none uppercase focus:ring-0 rounded-xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-card dark:bg-black border-border dark:border-brand-green/50 text-foreground dark:text-white rounded-xl">
-                {["4-4-2", "4-3-3", "3-5-2", "4-2-3-1", "3-4-2-1", "3-4-1-2", "4-3-1-2"].map(f => (
-                  <SelectItem key={f} value={f} className="text-xs font-black uppercase">{f}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Button 
-            variant="outline" 
-            onClick={() => setIsSmartOpen(true)}
-            className="h-10 px-4 rounded-2xl border-primary/30 dark:border-brand-green/30 text-primary dark:text-brand-green font-black uppercase text-[10px] hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all"
-          >
-            <Sparkles className="mr-2 h-4 w-4" />
-            AI Smart Mode
-          </Button>
-
-          {isDirty && (
-            <>
+              <Settings2 className="mr-2 h-4 w-4" />
+              Modifica Formazione
+            </Button>
+          ) : (
+            <div className="flex items-center gap-2">
               <Button 
-                variant="ghost" 
-                size="icon"
+                variant="ghost"
                 onClick={handleReset}
-                className="h-10 w-10 rounded-2xl text-muted-foreground"
+                className="h-10 px-4 rounded-2xl text-muted-foreground font-black uppercase text-[10px] hover:bg-muted dark:hover:bg-white/5 transition-all"
               >
-                <RotateCcw className="h-4 w-4" />
+                Annulla
               </Button>
               <Button 
                 onClick={handleSave}
-                className="h-10 px-6 bg-primary dark:bg-brand-green text-white dark:text-black rounded-2xl font-black uppercase text-[10px] shadow-lg dark:shadow-[0_0_15px_rgba(172,229,4,0.2)] animate-in fade-in slide-in-from-right-4"
+                className="h-10 px-6 bg-primary dark:bg-brand-green text-white dark:text-black rounded-2xl font-black uppercase text-[10px] shadow-lg dark:shadow-[0_0_15px_rgba(172,229,4,0.2)] animate-in fade-in slide-in-from-left-4"
               >
                 <Save className="mr-2 h-4 w-4" />
                 Salva
               </Button>
-            </>
+            </div>
           )}
         </div>
+
+        {isEditing && (
+          <div className="flex flex-wrap items-center gap-2 animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center gap-2 bg-muted/50 dark:bg-black/40 p-1.5 rounded-2xl border border-border dark:border-white/5">
+              <span className="text-[9px] font-black uppercase text-muted-foreground ml-2 hidden sm:inline">MODULO</span>
+              <Select 
+                value={modulo} 
+                onValueChange={(val) => { setModulo(val); setIsDirty(true); }}
+              >
+                <SelectTrigger className="bg-background dark:bg-black text-primary dark:text-brand-green h-9 text-xs w-28 font-black border-none shadow-none uppercase focus:ring-0 rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-card dark:bg-black border-border dark:border-brand-green/50 text-foreground dark:text-white rounded-xl">
+                  {["4-4-2", "4-3-3", "3-5-2", "4-2-3-1", "3-4-2-1", "3-4-1-2", "4-3-1-2"].map(f => (
+                    <SelectItem key={f} value={f} className="text-xs font-black uppercase">{f}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button 
+              variant="outline" 
+              onClick={() => setIsSmartOpen(true)}
+              className="h-10 px-4 rounded-2xl border-primary/30 dark:border-brand-green/30 text-primary dark:text-brand-green font-black uppercase text-[10px] hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all"
+            >
+              <Sparkles className="mr-2 h-4 w-4" />
+              AI Smart Mode
+            </Button>
+          </div>
+        )}
       </div>
       <div className="max-w-5xl mx-auto space-y-10">
         {/* Campo Area */}
@@ -222,7 +226,7 @@ export function MatchLineupTab() {
               starters={starters}
               allPlayers={allPlayers}
               matchDate={match?.date}
-              onSlotClick={(idx) => setEditingSlot(idx)}
+              onSlotClick={(idx) => isEditing && setEditingSlot(idx)}
             />
           </div>
         </div>
@@ -248,8 +252,12 @@ export function MatchLineupTab() {
                       <Select 
                         value={s || "none"} 
                         onValueChange={(val) => handlePlayerChange(i, false, val)}
+                        disabled={!isEditing}
                       >
-                        <SelectTrigger className="border-none shadow-none h-7 p-0 bg-transparent focus:ring-0 text-[11px] font-black uppercase text-foreground dark:text-white flex items-center gap-2">
+                        <SelectTrigger className={cn(
+                          "border-none shadow-none h-7 p-0 bg-transparent focus:ring-0 text-[11px] font-black uppercase flex items-center gap-2",
+                          isEditing ? "text-foreground dark:text-white" : "text-muted-foreground cursor-default"
+                        )}>
                           {player && isPlayerInjured(player, match?.date || "") && (
                             <Activity className="w-3 h-3 text-red-500 shrink-0" />
                           )}
