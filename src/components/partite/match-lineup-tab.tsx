@@ -3,13 +3,13 @@
 import { useState, useMemo, useEffect } from "react";
 import { useMatchDetailStore } from "@/store/useMatchDetailStore";
 import { Button } from "@/components/ui/button";
-import { 
-  PlusCircle, 
-  ClipboardList, 
-  Sparkles, 
-  LayoutGrid, 
-  Users, 
-  Save, 
+import {
+  PlusCircle,
+  ClipboardList,
+  Sparkles,
+  LayoutGrid,
+  Users,
+  Save,
   RotateCcw,
   Settings2,
   ChevronRight,
@@ -22,12 +22,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TacticalPitchEditor } from "./tactical-pitch-editor";
 import { SmartPlayerSelectDialog } from "./smart-player-select-dialog";
 import { SmartLineupDialog } from "./smart-lineup-dialog";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { displayPlayerName, cn } from "@/lib/utils";
@@ -39,7 +39,7 @@ export function MatchLineupTab() {
   const teamName = useSettingsStore((state) => state.teamName);
   const { match } = useMatchDetailStore();
   const { toast } = useToast();
-  
+
   const [starters, setStarters] = useState<string[]>(Array(11).fill(""));
   const [substitutes, setSubstitutes] = useState<string[]>(Array(9).fill(""));
   const [modulo, setModulo] = useState("4-4-2");
@@ -156,7 +156,7 @@ export function MatchLineupTab() {
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           {!isEditing ? (
-            <Button 
+            <Button
               onClick={() => setIsEditing(true)}
               className="h-10 px-6 bg-primary dark:bg-brand-green text-white dark:text-black rounded-2xl font-black uppercase text-xs shadow-lg dark:shadow-[0_0_15px_rgba(172,229,4,0.2)] hover:scale-105 active:scale-95 transition-all"
             >
@@ -165,14 +165,14 @@ export function MatchLineupTab() {
             </Button>
           ) : (
             <div className="flex items-center gap-2">
-              <Button 
+              <Button
                 variant="ghost"
                 onClick={handleReset}
                 className="h-10 px-4 rounded-2xl text-muted-foreground font-black uppercase text-[10px] hover:bg-muted dark:hover:bg-white/5 transition-all"
               >
                 Annulla
               </Button>
-              <Button 
+              <Button
                 onClick={handleSave}
                 className="h-10 px-6 bg-primary dark:bg-brand-green text-white dark:text-black rounded-2xl font-black uppercase text-[10px] shadow-lg dark:shadow-[0_0_15px_rgba(172,229,4,0.2)] animate-in fade-in slide-in-from-left-4"
               >
@@ -187,8 +187,8 @@ export function MatchLineupTab() {
           <div className="flex flex-wrap items-center gap-2 animate-in fade-in slide-in-from-top-2">
             <div className="flex items-center gap-2 bg-muted/50 dark:bg-black/40 p-1.5 rounded-2xl border border-border dark:border-white/5">
               <span className="text-[9px] font-black uppercase text-muted-foreground ml-2 hidden sm:inline">MODULO</span>
-              <Select 
-                value={modulo} 
+              <Select
+                value={modulo}
                 onValueChange={(val) => { setModulo(val); setIsDirty(true); }}
               >
                 <SelectTrigger className="bg-background dark:bg-black text-primary dark:text-brand-green h-9 text-xs w-28 font-black border-none shadow-none uppercase focus:ring-0 rounded-xl">
@@ -202,8 +202,8 @@ export function MatchLineupTab() {
               </Select>
             </div>
 
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setIsSmartOpen(true)}
               className="h-10 px-4 rounded-2xl border-primary/30 dark:border-brand-green/30 text-primary dark:text-brand-green font-black uppercase text-[10px] hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all"
             >
@@ -256,8 +256,8 @@ export function MatchLineupTab() {
                         R{i + 1}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <Select 
-                          value={s || "none"} 
+                        <Select
+                          value={s || "none"}
                           onValueChange={(val) => handlePlayerChange(i, false, val)}
                           disabled={!isEditing}
                         >
@@ -333,9 +333,9 @@ export function MatchLineupTab() {
         />
       )}
 
-      <SmartLineupDialog 
-        open={isSmartOpen} 
-        onOpenChange={setIsSmartOpen} 
+      <SmartLineupDialog
+        open={isSmartOpen}
+        onOpenChange={setIsSmartOpen}
       />
     </div>
   );

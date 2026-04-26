@@ -12,7 +12,7 @@ const navItems = [
   { href: "/", label: "Dashboard" },
   { href: "/calendario", label: "Calendario" },
   { href: "/allenamento", label: "Allenamento" },
-  { href: "/scout", label: "Scout" },
+  { href: "/membri", label: "Rosa" },
   { href: "/altro", label: "Impostazioni" },
 ];
 
