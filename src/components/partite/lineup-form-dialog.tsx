@@ -16,10 +16,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Users, LayoutGrid } from "lucide-react";
 import { getJerseyNumber, getSubstituteNumber, FORMATION_POSITIONS, getPositionAcronym } from "@/lib/lineup-mapping";
 import { displayPlayerName } from "@/lib/utils";
 import { useSettingsStore } from "@/store/useSettingsStore";
+import { TacticalPitchEditor } from "./tactical-pitch-editor";
+import { SmartPlayerSelectDialog } from "./smart-player-select-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
 interface LineupFormDialogProps {
@@ -28,12 +31,14 @@ interface LineupFormDialogProps {
 }
 
 export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) {
-  const { allPlayers, lineup, saveLineup, match } = useMatchDetailStore();
+  const { allPlayers, lineup, saveLineup } = useMatchDetailStore();
   const teamName = useSettingsStore((state) => state.teamName);
   const [starters, setStarters] = React.useState<string[]>(Array(11).fill(""));
   const [substitutes, setSubstitutes] = React.useState<string[]>(Array(9).fill(""));
   const [modulo, setModulo] = React.useState("4-4-2");
   const [openSelect, setOpenSelect] = React.useState<string | null>(null);
+  const [editingSlot, setEditingSlot] = React.useState<number | null>(null);
+  const [activeTab, setActiveTab] = React.useState("starters");
 
   React.useEffect(() => {
     if (open) {
@@ -89,8 +94,8 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
     );
 
     return (
-      <div className="flex items-center gap-2 border-b border-border dark:border-white/10 py-1.5 last:border-0 hover:bg-muted dark:hover:bg-white/10 transition-all px-2">
-        <div className="bg-muted dark:bg-black/50 text-foreground dark:text-white w-14 h-8 flex items-center justify-center font-black text-[10px] uppercase rounded border border-border dark:border-white/20 shadow-none dark:shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+      <div className="flex items-center gap-3 border-b border-border dark:border-white/5 py-3 last:border-0 hover:bg-muted/50 dark:hover:bg-white/5 transition-all px-4 rounded-xl group">
+        <div className="bg-muted dark:bg-neutral-900 text-foreground dark:text-white w-10 h-10 flex items-center justify-center font-black text-[10px] uppercase rounded-full border border-border dark:border-white/10 shadow-none transition-transform group-hover:scale-110">
           {label}
         </div>
         <div className="flex-1">
@@ -100,8 +105,8 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
             open={open}
             onOpenChange={onOpenChange}
           >
-            <SelectTrigger className="border-none shadow-none h-8 text-foreground/70 dark:text-white/70 focus:ring-0 text-xs font-bold uppercase hover:text-foreground dark:hover:text-white transition-colors">
-              <SelectValue placeholder="-- GIOCATORE --" />
+            <SelectTrigger className="border-none shadow-none h-10 text-foreground dark:text-white focus:ring-0 text-xs font-black uppercase hover:opacity-80 transition-opacity p-0 bg-transparent">
+              <SelectValue placeholder="-- SELEZIONA --" />
             </SelectTrigger>
             <SelectContent className="bg-card dark:bg-black border-border dark:border-white/20 text-foreground dark:text-white">
               <SelectItem value="none" className="text-xs uppercase font-bold text-muted-foreground dark:text-white/50">-- nessuno --</SelectItem>
@@ -118,68 +123,75 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-full h-full sm:max-w-md p-0 overflow-hidden flex flex-col gap-0 border-none bg-background dark:bg-black text-foreground dark:text-white transition-colors duration-300">
-        <DialogHeader className="bg-muted dark:bg-black text-foreground dark:text-white p-4 flex-row items-center gap-4 space-y-0 border-b border-border dark:border-brand-green/30 shrink-0">
-          <Button variant="ghost" size="icon" className="text-primary dark:text-brand-green hover:bg-primary/10 dark:hover:bg-white/10" onClick={() => onOpenChange(false)}>
+      <DialogContent className="max-w-2xl h-[90vh] sm:h-[85vh] p-0 overflow-hidden flex flex-col gap-0 border-none bg-background dark:bg-black text-foreground dark:text-white shadow-2xl rounded-3xl">
+        <DialogHeader className="bg-muted dark:bg-black text-foreground dark:text-white p-6 flex-row items-center gap-4 space-y-0 border-b border-border dark:border-white/10 shrink-0">
+          <Button variant="ghost" size="icon" className="text-primary dark:text-brand-green hover:bg-primary/10 dark:hover:bg-white/10 rounded-full" onClick={() => onOpenChange(false)}>
             <ChevronLeft className="h-6 w-6" />
           </Button>
-          <DialogTitle className="text-xl font-black uppercase tracking-tighter">Inserisci formazioni</DialogTitle>
+          <div className="flex-1">
+            <DialogTitle className="text-2xl font-black uppercase tracking-tight leading-none">Lineup Editor</DialogTitle>
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-1">Configura la formazione iniziale</p>
+          </div>
         </DialogHeader>
 
-        <div className="bg-card dark:bg-card/50 border-b border-border dark:border-white/10 px-4 py-3 flex items-center justify-between text-[10px] uppercase font-black tracking-widest shadow-inner shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 bg-primary dark:bg-brand-green rounded-full shadow-sm dark:shadow-[0_0_8px_rgba(172,229,4,0.4)]" />
-            <span className="text-foreground dark:text-white font-black uppercase">{teamName || 'PITCHMAN'}</span>
+        <div className="bg-card dark:bg-card/50 border-b border-border dark:border-white/10 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary/10 dark:bg-brand-green/10 border border-primary/20 dark:border-brand-green/20 rounded-2xl flex items-center justify-center">
+              <div className="w-4 h-4 bg-primary dark:bg-brand-green rounded-full animate-pulse" />
+            </div>
+            <div>
+              <span className="text-[10px] font-black text-muted-foreground uppercase block">Squadra</span>
+              <span className="text-sm font-black uppercase text-foreground dark:text-white">{teamName || 'PITCHMAN'}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground dark:text-white/60">MODULO</span>
+          
+          <div className="flex items-center gap-4 bg-background dark:bg-black p-2 rounded-2xl border border-border dark:border-white/10">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">MODULO</span>
             <Select 
               value={modulo} 
               onValueChange={setModulo}
               open={openSelect === 'modulo'}
               onOpenChange={(open) => setOpenSelect(open ? 'modulo' : null)}
             >
-              <SelectTrigger className="bg-background dark:bg-black text-foreground dark:text-white h-8 text-[11px] w-28 py-0 font-black border border-primary/50 dark:border-brand-green/50 shadow-sm uppercase focus:ring-1 focus:ring-primary dark:focus:ring-brand-green">
+              <SelectTrigger className="bg-primary/10 dark:bg-brand-green/10 text-primary dark:text-brand-green h-10 text-sm w-32 font-black border-none shadow-none uppercase focus:ring-0 rounded-xl">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-card dark:bg-black border-border dark:border-brand-green/50 text-foreground dark:text-white">
-                <SelectItem value="4-4-2" className="text-[11px] font-black">4-4-2</SelectItem>
-                <SelectItem value="4-3-3" className="text-[11px] font-black">4-3-3</SelectItem>
-                <SelectItem value="3-5-2" className="text-[11px] font-black">3-5-2</SelectItem>
-                <SelectItem value="4-2-3-1" className="text-[11px] font-black">4-2-3-1</SelectItem>
-                <SelectItem value="3-4-2-1" className="text-[11px] font-black">3-4-2-1</SelectItem>
-                <SelectItem value="3-4-1-2" className="text-[11px] font-black">3-4-1-2</SelectItem>
-                <SelectItem value="4-3-1-2" className="text-[11px] font-black">4-3-1-2</SelectItem>
+              <SelectContent className="bg-card dark:bg-black border-border dark:border-brand-green/50 text-foreground dark:text-white rounded-xl">
+                {["4-4-2", "4-3-3", "3-5-2", "4-2-3-1", "3-4-2-1", "3-4-1-2", "4-3-1-2"].map(f => (
+                  <SelectItem key={f} value={f} className="text-sm font-black uppercase">{f}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-background dark:bg-black p-3 space-y-4">
-          <div className="bg-card dark:bg-card/50 rounded-xl shadow-sm dark:shadow-lg border border-border dark:border-white/10 py-1">
-            {starters.map((s, i) => (
-              <PlayerRow
-                key={i}
-                label={getPositionAcronym(modulo, i)}
-                value={s}
-                isStarter={true}
-                onValueChange={(val) => {
-                  const newStarters = [...starters];
-                  newStarters[i] = val === "none" ? "" : val;
-                  setStarters(newStarters);
-                }}
-                open={openSelect === `starter-${i}`}
-                onOpenChange={(open) => setOpenSelect(open ? `starter-${i}` : null)}
-              />
-            ))}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+          <div className="px-6 py-2 border-b border-border dark:border-white/10">
+            <TabsList className="grid grid-cols-2 bg-muted dark:bg-neutral-900 h-12 p-1 rounded-xl">
+              <TabsTrigger value="starters" className="rounded-lg font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-background dark:data-[state=active]:bg-black data-[state=active]:text-primary dark:data-[state=active]:text-brand-green">
+                <LayoutGrid className="w-4 h-4 mr-2" />
+                Titolari
+              </TabsTrigger>
+              <TabsTrigger value="substitutes" className="rounded-lg font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-background dark:data-[state=active]:bg-black data-[state=active]:text-primary dark:data-[state=active]:text-brand-green">
+                <Users className="w-4 h-4 mr-2" />
+                Panchina
+              </TabsTrigger>
+            </TabsList>
           </div>
 
-          <div className="space-y-0">
-            <div className="bg-muted dark:bg-card/50 text-muted-foreground dark:text-white/50 px-4 py-3 flex items-center gap-2 text-[10px] uppercase font-black tracking-widest rounded-t-xl border-t border-x border-border dark:border-white/10">
-              <div className="w-4 h-4 bg-background dark:bg-black border border-border dark:border-white/20 rounded-full" />
-              <span className="text-foreground dark:text-white text-xs font-black">Panchina</span>
+          <TabsContent value="starters" className="flex-1 overflow-y-auto m-0 p-4 sm:p-6 bg-muted/30 dark:bg-black/20">
+            <div className="animate-in fade-in zoom-in-95 duration-500">
+              <TacticalPitchEditor
+                formation={modulo}
+                starters={starters}
+                allPlayers={allPlayers}
+                onSlotClick={(idx) => setEditingSlot(idx)}
+              />
             </div>
-            <div className="bg-card dark:bg-card/50 rounded-b-xl shadow-sm dark:shadow-lg border border-border dark:border-white/10 py-1 border-t-0">
+          </TabsContent>
+
+          <TabsContent value="substitutes" className="flex-1 overflow-y-auto m-0 p-6">
+            <div className="bg-card dark:bg-neutral-900/30 rounded-3xl border border-border dark:border-white/5 p-2 animate-in slide-in-from-bottom-4 duration-500">
               {substitutes.map((s, i) => (
                 <PlayerRow
                   key={i}
@@ -196,18 +208,34 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
                 />
               ))}
             </div>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
 
-        <div className="p-4 bg-muted dark:bg-card/50 border-t border-border dark:border-brand-green/30 shrink-0">
+        <div className="p-6 bg-background dark:bg-black border-t border-border dark:border-white/10 shrink-0">
           <Button
-            className="w-full bg-primary dark:bg-black border-2 border-primary dark:border-brand-green text-white hover:opacity-90 dark:hover:bg-brand-green dark:hover:text-black font-black uppercase text-sm h-14 rounded-2xl shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.2)] transition-all"
+            className="w-full bg-primary dark:bg-brand-green text-white dark:text-black hover:opacity-90 font-black uppercase text-sm h-14 rounded-2xl shadow-lg dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] transition-all"
             onClick={handleSave}
           >
-            Invia le formazioni
+            Conferma Formazioni
           </Button>
         </div>
       </DialogContent>
+
+      {editingSlot !== null && (
+        <SmartPlayerSelectDialog
+          open={editingSlot !== null}
+          onOpenChange={(open) => !open && setEditingSlot(null)}
+          slotIndex={editingSlot}
+          formation={modulo}
+          allPlayers={allPlayers}
+          selectedPlayerIds={[...starters, ...substitutes]}
+          onSelect={(playerId) => {
+            const newStarters = [...starters];
+            newStarters[editingSlot] = playerId;
+            setStarters(newStarters);
+          }}
+        />
+      )}
     </Dialog>
   );
 }
