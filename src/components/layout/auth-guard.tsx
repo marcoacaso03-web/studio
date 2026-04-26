@@ -3,12 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { SplashScreen } from '@/components/layout/splash-screen';
 
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
+  const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isInitialized = useAuthStore((state) => state.isInitialized);
+  const { fetchSettings } = useSettingsStore();
   const router = useRouter();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
@@ -16,6 +19,12 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (mounted && isInitialized && isAuthenticated && user) {
+      fetchSettings(user.id);
+    }
+  }, [mounted, isInitialized, isAuthenticated, user, fetchSettings]);
 
   useEffect(() => {
     if (mounted && isInitialized && !isAuthenticated && pathname !== '/login' && pathname !== '/') {
