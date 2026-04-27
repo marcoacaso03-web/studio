@@ -23,7 +23,7 @@ Dalla struttura del modello dati (`types.ts`), sono disponibili i seguenti dati 
 
 ## 🏆 Statistiche Squadra (Ispirate a FM)
 
-### 1. Andamento Stagionale ✅ *parzialmente implementato*
+### 1. Andamento Stagionale ✅ *implementato*
 | Metrica | Formula | Fonte |
 |---|---|---|
 | Partite giocate | `COUNT(matches WHERE status=completed)` | Match |
@@ -33,7 +33,7 @@ Dalla struttura del modello dati (`types.ts`), sono disponibili i seguenti dati 
 | Punti totali | `W×3 + D×1` | Match |
 | Media gol fatti/subiti per partita | `total / matchesPlayed` | Match |
 
-### 2. Rendimento Casa vs Trasferta ⬜ *da implementare*
+### 2. Rendimento Casa vs Trasferta ✅ *implementato*
 | Metrica | Formula | Fonte |
 |---|---|---|
 | W/D/L in casa | Filtra `isHome = true` | Match |
@@ -51,7 +51,7 @@ Dalla struttura del modello dati (`types.ts`), sono disponibili i seguenti dati 
 | Striscia negativa | Max partite consecutive senza vittoria |
 | Forma recente | Ultimi 5 risultati (es. W-D-W-L-W) |
 
-### 5. Performance per Minuto ⬜ *da implementare*
+### 5. Performance per Minuto ✅ *implementato*
 - Gol segnati nel 1° tempo vs 2° tempo
 - Gol subiti per fascia oraria (0-15', 16-30', 31-45', ecc.)
 - "Rimonte effettuate" (partite vinte da posizione di svantaggio)
@@ -70,17 +70,17 @@ Dalla struttura del modello dati (`types.ts`), sono disponibili i seguenti dati 
 | Cartellini rossi | `SUM(redCards)` |
 | Minuti medi | `AVG(minutesPlayed)` |
 
-### 7. Statistiche Avanzate Giocatore ✅ *parzialmente implementato*
+### 7. Statistiche Avanzate Giocatore ✅ *implementato*
 | Metrica | Formula | Note |
 |---|---|---|
-| G/A per partita da titolare | `(goals+assists) / starterApps` | Implementato |
-| Gol decisivi | Algoritmo timeline | Implementato |
-| Tasso sconfitta da titolare | `losses / starterApps` | Implementato |
+| G/A per partita da titolare | `(goals+assists) / starterApps` | Efficiency Index |
+| Gol decisivi | Algoritmo timeline | Risolutore |
+| Tasso sconfitta da titolare | `losses / starterApps` | Amuleto Squadra |
 | Gol per 90 minuti | `goals / (minutesPlayed / 90)` | ⬜ *da aggiungere* |
 | Assist per 90 minuti | `assists / (minutesPlayed / 90)` | ⬜ *da aggiungere* |
 | Contributo offensivo (G+A) per 90' | `(goals+assists) / (minutesPlayed / 90)` | ⬜ *da aggiungere* |
 
-### 8. Affidabilità e Continuità ⬜ *da implementare*
+### 8. Affidabilità e Continuità ✅ *implementato*
 | Metrica | Formula | Ispirazione FM |
 |---|---|---|
 | % partite da titolare | `starterApps / appearances` | "Starter Rate" |
@@ -90,7 +90,7 @@ Dalla struttura del modello dati (`types.ts`), sono disponibili i seguenti dati 
 | Contributo totale (G+A) | `goals + assists` | - |
 | Disciplina | `yellowCards + (redCards × 2)` | Indice disciplinare |
 
-### 9. Impatto in Esito delle Partite ⬜ *da implementare*
+### 9. Impatto in Esito delle Partite ✅ *implementato*
 | Metrica | Descrizione | Ispirazione FM |
 |---|---|---|
 | Win Rate da titolare | `W / starterApps` | FM: "Win % when starting" |
@@ -109,7 +109,7 @@ Dalla struttura del modello dati (`types.ts`), sono disponibili i seguenti dati 
 | Media gol subiti per partita | `goalsConceded / matchesTogether` |
 | Trio difensivo | Stesso calcolo per 3 difensori |
 
-### 11. Solidità Difensiva ⬜ *da implementare*
+### 11. Solidità Difensiva ✅ *parzialmente implementato*
 | Metrica | Formula | Ispirazione FM |
 |---|---|---|
 | Clean sheet portiere/difensori | `COUNT(matches WHERE opponentGoals=0 AND player started)` | FM: "Clean Sheets" |
@@ -155,21 +155,19 @@ Dalla struttura del modello dati (`types.ts`), sono disponibili i seguenti dati 
 ```
 Priorità ALTA (calcoli con dati già disponibili)
 ├── Gol/Assist per 90 minuti
-├── Win Rate da titolare/subentrato  
-├── Clean Sheet per difensore/portiere
-├── Rendimento casa vs trasferta
-└── Striscia di forma recente (ultimi 5)
+├── Clean Sheet per difensore/portiere (backend update)
+├── Striscia di forma recente (ultimi 5)
+└── Dashboard Punti per competizione
 
 Priorità MEDIA
-├── Statistiche per tipo competizione
-├── Gol per fascia temporale (1T/2T)
 ├── Presenze allenamento %
-└── Disciplina (indice)
+├── Disciplina (indice)
+└── Trend presenza allenamento (grafico)
 
 Priorità BASSA (più complesse)
-├── Rimonte effettuate
+├── Rimonte effettuate (logica evento)
 ├── Coppia offensiva più prolifica
-└── Modulo più efficace
+└── Modulo più efficace (ranking win rate)
 ```
 
 ---

@@ -53,7 +53,6 @@ Modalità spogliatoio con sondaggi e questionari privati
 
 ### ⚽ Gestione Partite
 - [ ] **Condivisione formazione** — Generare un'immagine PNG del layout tattico (campo con nomi) da condividere su WhatsApp/Telegram.
-- [ ] **Storico formazioni** — Mostrare le formazioni delle ultime N partite per confronto tattico.
 
 ### 📊 Statistiche Avanzate
 - [ ] **Export statistiche in PDF** — Report di fine stagione stampabile.

@@ -10,7 +10,10 @@ Il sistema di colori si basa su variabili CSS (HSL) definite nei file di configu
   Contiene le definizioni delle variabili CSS (es: `--primary`, `--background`, `--accent`) per i temi **Light** e **Dark**. Include anche classi personalizzate per gradienti neon e ombreggiature (glow).
 
 - **[tailwind.config.ts](file:///d:/Download/studio-main/studio-main/tailwind.config.ts)**
-  Configura Tailwind CSS per mappare le variabili CSS ai nomi delle utility (es: `bg-primary`). Qui sono definiti anche i colori del brand (`brand-yellow`, `brand-green`, `brand-cyan`).
+  Configura Tailwind CSS per mappare le variabili CSS ai nomi delle utility (es: `bg-primary`). Qui sono definiti anche i colori del brand:
+  - `brand-yellow`, `brand-green`, `brand-lime`, `brand-cyan`, `brand-pink`.
+  - Colori funzionali: `brand-win`, `brand-loss`, `brand-draw`.
+  - Icone cartellini: `brand-card-yellow`, `brand-card-red`.
 
 - **[components.json](file:///d:/Download/studio-main/studio-main/components.json)**
   Configurazione di **shadcn/ui**, che collega Tailwind al file CSS globale e definisce i parametri di base per i componenti UI.
@@ -19,13 +22,6 @@ Il sistema di colori si basa su variabili CSS (HSL) definite nei file di configu
 
 - **[src/app/layout.tsx](file:///d:/Download/studio-main/studio-main/src/app/layout.tsx)**
   Configura i font di Google (PT Sans) e inizializza il `ThemeProvider`.
-
-## 🛠️ Script di Utilità per i Colori
-
-Sono presenti alcuni script nella root del progetto per la gestione programmatica dei colori:
-
-- **[extract_colors.js](file:///d:/Download/studio-main/studio-main/extract_colors.js)**: Estrae i colori predominanti dal favicon.
-- **[replaceColors.js](file:///d:/Download/studio-main/studio-main/replaceColors.js)**: Script per la sostituzione massiva dei colori nel CSS o nel codice.
 
 ## 💡 Note sui Gradienti
 

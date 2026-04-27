@@ -1,54 +1,62 @@
-# PitchMan - Struttura del Progetto
+# ⚽ PitchMan — Studio
+### Il sistema operativo intelligente per la gestione tecnica calcistica
 
-Questo documento descrive sinteticamente tutti i file del progetto per facilitarne la navigazione.
+PitchMan è una piattaforma avanzata progettata per allenatori e staff tecnico, focalizzata sull'ottimizzazione della gestione della squadra, dell'analisi tattica e del monitoraggio delle performance tramite Intelligenza Artificiale.
 
-## File di Configurazione Principali
-- `.firebaserc` / `apphosting.yaml` / `firestore.rules`: Configurazioni per il deploy e le regole di sicurezza del database Firebase.
-- `package.json` / `package-lock.json` / `components.json`: Gestione delle dipendenze npm e dei componenti UI (Shadcn).
-- `next.config.ts` / `tailwind.config.ts` / `tsconfig.json` / `postcss.config.mjs`: File di configurazione di Next.js, Tailwind CSS e TypeScript.
-- `jest.config.js` / `jest.setup.js`: Configurazione e setup automatico per i test (Jest).
-- `next-env.d.ts`: Dichiarazioni TypeScript auto-generate da Next.js.
-- `.vercel/` / `.env.local`: Configurazioni e variabili d'ambiente gestite via Vercel CLI.
-- `temp_files_list_utf8.txt`: File generato temporaneamente per elencare la struttura.
+---
 
-## Root & Assets (public, docs)
-- `docs/`: Documentazione dettagliata (PROJECTS.md, Pages.md, Stili.md, backend.json, vercel.md).
-- `public/`: Manifest per PWA, favicon, icone e asset statici.
+## 🚀 Caratteristiche Principali
 
-## Pagine dell'Applicazione (src/app)
-- `layout.tsx` / `page.tsx` / `globals.css`: Layout base con provider, Splash screen (Dashboard) e stili globali.
-- `error.tsx`: Pagina di fallback universale per la gestione degli errori.
-- `allenamento/`: Root per sessioni, report di allenamento e `libreria/` degli esercizi.
-- `altro/`: Impostazioni app, gestione squadra, profilo coach e debug/reset dati.
-- `calendario/`: Dashboard principale con vista cronologica delle partite (`[id]` per il dettaglio).
-- `login/`: Schermata di autenticazione Firebase.
-- `membri/`: Gestione della rosa giocatori, `confronto/` tra giocatori e `[id]` per la scheda tecnica singola.
-- `scout/`: Scouting di talenti e gestione categorie di osservazione.
-- `statistiche/`: Dashboard analitica con grafici Recharts su performance, gol e record. Monitoraggio performance reale via Vercel Speed Insights e Analytics.
+- **🧠 AI Tactical Assistant**: Integrazione con **Google Gemini 2.5 Flash** via **Genkit** per analisi partite, suggerimento formazioni e chatbot statistico.
+- **🏃‍♂️ Gestione Rosa (Rosa)**: Strumenti avanzati per il monitoraggio dei giocatori, confronto tecnico e gestione degli infortuni.
+- **📡 Scouting**: Modulo dedicato alla ricerca di talenti e gestione delle categorie di osservazione.
+- **📊 Analytics**: Dashboard interattive con **Recharts** per il monitoraggio di gol, performance e record della stagione.
+- **🏋️‍♂️ Training Lab**: Libreria esercizi con supporto **Multimodal AI Vision** per l'importazione automatica da immagini/video tramite **Vercel Blob**.
+- **📱 PWA & Offline-First**: Ottimizzata per l'uso sul campo, con persistenza locale via **IndexedDB (Dexie)**.
+- **🔄 Team Sync**: Sincronizzazione automatica delle impostazioni e dei dati tra diversi dispositivi.
 
-## Intelligenza Artificiale (src/ai)
-- `dev.ts` / `genkit.ts`: Inizializzazione Google Genkit per modelli Gemini.
-- `flows/`: Prompt e workflow AI per importazione formazioni (Tuttocampo), generazione formazioni e analisi.
+---
 
-## Componenti UI - (src/components)
-- `layout/`: Componenti strutturali (`app-header`, `bottom-nav`, `auth-guard`, `theme-provider`).
-- `allenamento/`, `giocatori/`, `partite/`, `scout/`, `squadra/`: Dialog specifici (es. `match-form-dialog`, `player-form-dialog`), card e form di inserimento dati.
-- `statistiche/`: Componenti Recharts per i grafici della dashboard.
-- `ui/`: Componenti atomici di base installati via Shadcn UI (Button, Card, Dialog, Input, ecc.).
-- `FirebaseErrorListener.tsx`: Listener globale per la visualizzazione di errori dal database via Toast.
+## 🛠️ Tech Stack
 
-## Database & Servizi (src/firebase, src/lib, src/hooks, src/types)
-- `src/firebase/`: Inizializzazione SDK, provider di contesto, gestione errori e login non-blocking.
-- `src/firebase/firestore/`: Hook custom (`use-collection`, `use-doc`) per dati real-time.
-- `src/lib/repositories/`: Logica CRUD e query Firestore organizzate per dominio (Repository Pattern). Implementa anche la logica di condivisione stagioni via codici.
-- `src/lib/db.ts`: Gestione database locale IndexedDB via Dexie per cache e persistenza.
-- `src/lib/utils.ts`: Utility per classi CSS dinamiche (clsx, tailwind-merge).
-- `src/hooks/`: Hook React riutilizzabili (es. `use-toast`).
-- `src/types/`: Definizioni di tipi TypeScript globali o di terze parti.
+- **Core**: [Next.js 15](https://nextjs.org/) (App Router), TypeScript, React 19.
+- **Backend/DB**: [Firebase](https://firebase.google.com/) (Firestore, Auth), [Vercel Blob](https://vercel.com/docs/storage/vercel-blob).
+- **AI**: [Google Genkit](https://js.genkit.dev/), Gemini 2.5 Flash.
+- **UI/UX**: [Tailwind CSS](https://tailwindcss.com/), [Shadcn UI](https://ui.shadcn.com/), Lucide Icons, Framer Motion.
+- **State Management**: [Zustand](https://docs.pmnd.rs/zustand).
+- **Charts**: [Recharts](https://recharts.org/).
+- **Database Locale**: [Dexie.js](https://dexie.org/).
 
-## Gestione Stato App (src/store)
-- Usa **Zustand** per lo stato globale reattivo:
-  - `useAuthStore`: Stato sessione utente e stagione attiva.
-  - `usePlayersStore`, `useMatchesStore`, `useTrainingStore`: Cache dei dati scaricati per minimizzare le letture Firestore.
-  - `useThemeStore`: Gestione tema Dark/Light.
-  - `useAppStore`, `useSettingsStore`: Stato UI e preferenze utente.
+---
+
+## 📁 Struttura del Progetto
+
+### 📂 `src/app` (Pagine)
+- `allenamento/`: Sessioni, report e libreria esercizi.
+- `altro/`: Gestione squadra, impostazioni e profilo coach.
+- `calendario/`: Dettaglio partite e gestione cronaca live.
+- `membri/`: Gestione della rosa (Rosa) e confronto giocatori.
+- `scout/`: Modulo scouting.
+- `statistiche/`: Insight analitici e performance.
+
+### 📂 `src/components` (UI)
+- `layout/`: Componenti strutturali (`app-header`, `bottom-nav`).
+- `ui/`: Componenti atomici base (Shadcn).
+- `allenamento/`, `giocatori/`, `partite/`, `squadra/`: Componenti di dominio specifici.
+
+### 📂 `src/services` & `src/ai` (Logica & AI)
+- `ai/flows/`: Workflow AI (importazioni, suggerimenti, chatbot).
+- `services/ai.service.ts`: Service layer astratto per l'interazione con i flussi Genkit.
+- `lib/repositories/`: Logica CRUD e Query Firestore (Repository Pattern).
+
+---
+
+## 📖 Documentazione Aggiuntiva
+
+Per approfondimenti, consulta i documenti nella cartella `docs/`:
+- [Roadmap & Progetti](PROJECTS.md)
+- [Guida alle Pagine](Pages.md)
+- [Design System & Stili](Stili.md)
+
+---
+*PitchMan — Sviluppato con ❤️ per il calcio moderno.*
