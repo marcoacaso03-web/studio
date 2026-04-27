@@ -156,7 +156,8 @@ export function ImportTuttocampoDialog({ open, onOpenChange }: ImportTuttocampoD
                 <div className="space-y-2 text-[11px] font-bold leading-relaxed text-muted-foreground dark:text-white/40 uppercase">
                   <p>Incolla i dati testuali o carica un file con il calendario. L'AI utilizzerà il nome della tua squadra per filtrare automaticamente solo le partite in cui è coinvolta.</p>
                 </div>
-                
+              </div>
+
               <div className="space-y-3">
                 <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as 'text' | 'file')} className="w-full">
                   <div className="flex items-center justify-between mb-3">
