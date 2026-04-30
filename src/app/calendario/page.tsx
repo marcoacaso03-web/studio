@@ -370,15 +370,17 @@ export default function CalendarioPage() {
           {!isEditMode ? (
             <div className="flex items-center gap-2">
               <p className="text-[10px] font-black uppercase text-muted-foreground">{sortedMatches.length} Gare</p>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 rounded-xl transition-all text-muted-foreground/40 hover:bg-muted dark:hover:bg-white/5"
-                onClick={() => setIsEditMode(true)}
-                title="Modifica Lista"
-              >
-                <Pencil className="h-3.5 w-3.5 text-foreground dark:text-white" />
-              </Button>
+              {sortedMatches.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-xl transition-all text-muted-foreground/40 hover:bg-muted dark:hover:bg-white/5"
+                  onClick={() => setIsEditMode(true)}
+                  title="Modifica Lista"
+                >
+                  <Pencil className="h-3.5 w-3.5 text-foreground dark:text-white" />
+                </Button>
+              )}
             </div>
           ) : (
             <div className="flex items-center gap-2">
@@ -498,7 +500,14 @@ export default function CalendarioPage() {
           ) : sortedMatches.length === 0 && (
             <div className="py-12 text-center bg-card dark:bg-black/20 border border-dashed border-border dark:border-white/10 rounded-3xl">
               <PiTrafficCone className="h-12 w-12 text-muted-foreground/20 mx-auto mb-4" />
-              <p className="text-sm font-black uppercase tracking-widest text-muted-foreground/40">Zaino in spalla, Mister. Inizia a popolare il calendario!</p>
+              <p className="text-sm font-black uppercase tracking-widest text-muted-foreground/40 mb-4">Mister inizia a popolare il calendario!</p>
+              <Button
+                variant="outline"
+                className="rounded-full font-bold uppercase tracking-wider text-xs px-6 border-border dark:border-white/10 hover:bg-muted dark:hover:bg-white/5"
+                onClick={() => setIsMatchFormOpen(true)}
+              >
+                Aggiungi +
+              </Button>
             </div>
           )}
         </div>

@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{email?: string, password?: string}>({});
   const { login, signUp, loginWithGoogle, isAuthenticated } = useAuthStore();
   const router = useRouter();
   const { toast } = useToast();
@@ -49,23 +50,16 @@ export default function LoginPage() {
         setIsLoading(false);
       }
     } else {
+      setFieldErrors({});
       if (password !== confirmPassword) {
-        toast({
-          variant: "destructive",
-          title: "Errore",
-          description: "Le password non coincidono.",
-        });
+        setFieldErrors({ password: "Le password non coincidono." });
         setIsLoading(false);
         return;
       }
       
       const pwdError = validatePassword(password);
       if (pwdError) {
-        toast({
-          variant: "destructive",
-          title: "Password debole",
-          description: pwdError,
-        });
+        setFieldErrors({ password: pwdError });
         setIsLoading(false);
         return;
       }
@@ -74,15 +68,15 @@ export default function LoginPage() {
       if (result.success) {
         toast({
           title: "Registrazione completata",
-          description: "Account creato con successo.",
+          description: "Ti abbiamo inviato un'email di conferma. Clicca sul link per attivare il tuo account.",
         });
-        router.push('/');
+        setIsLoginMode(true);
+        setPassword('');
+        setConfirmPassword('');
+        setUsername('');
+        setIsLoading(false);
       } else {
-        toast({
-          variant: "destructive",
-          title: "Errore di registrazione",
-          description: result.error || "Errore durante la creazione dell'account.",
-        });
+        setFieldErrors({ email: result.error || "Errore durante la creazione dell'account." });
         setIsLoading(false);
       }
     }
@@ -139,36 +133,54 @@ export default function LoginPage() {
               />
             )}
             
-            <Input 
-              id="usernameOrEmail"
-              type={isLoginMode ? "text" : "email"}
-              placeholder={isLoginMode ? "Username o Email" : "Email"}
-              className="h-12 bg-transparent border-primary/30 dark:border-neon-gradient rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-0 placeholder:text-muted-foreground/50 transition-all font-sans"
-              value={usernameOrEmail}
-              onChange={(e) => setUsernameOrEmail(e.target.value)}
-              required
-            />
+            <div>
+              <Input 
+                id="usernameOrEmail"
+                type={isLoginMode ? "text" : "email"}
+                placeholder={isLoginMode ? "Username o Email" : "Email"}
+                className={`h-12 bg-transparent border-primary/30 dark:border-neon-gradient rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-0 placeholder:text-muted-foreground/50 transition-all font-sans ${fieldErrors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                value={usernameOrEmail}
+                onChange={(e) => {
+                  setUsernameOrEmail(e.target.value);
+                  if (fieldErrors.email) setFieldErrors(prev => ({...prev, email: undefined}));
+                }}
+                required
+              />
+              {fieldErrors.email && <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.email}</p>}
+            </div>
             
-            <Input 
-              id="password"
-              type="password"
-              placeholder="Password"
-              className="h-12 bg-transparent border-primary/30 dark:border-neon-gradient rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-0 placeholder:text-muted-foreground/50 transition-all"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div>
+              <Input 
+                id="password"
+                type="password"
+                placeholder="Password"
+                className={`h-12 bg-transparent border-primary/30 dark:border-neon-gradient rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-0 placeholder:text-muted-foreground/50 transition-all ${fieldErrors.password && !isLoginMode ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (fieldErrors.password) setFieldErrors(prev => ({...prev, password: undefined}));
+                }}
+                required
+              />
+              {/* Only show password error below confirmPassword if both are present, or here if no confirmPassword. We'll show it below confirmPassword later, but let's do it right here if it's the main password error */}
+            </div>
             
             {!isLoginMode && (
-              <Input 
-                id="confirmPassword"
-                type="password"
-                placeholder="Conferma Password"
-                className="h-12 bg-transparent border-primary/30 dark:border-neon-gradient rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-0 placeholder:text-muted-foreground/50 transition-all"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required={!isLoginMode}
-              />
+              <div>
+                <Input 
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Conferma Password"
+                  className={`h-12 bg-transparent border-primary/30 dark:border-neon-gradient rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-0 placeholder:text-muted-foreground/50 transition-all ${fieldErrors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (fieldErrors.password) setFieldErrors(prev => ({...prev, password: undefined}));
+                  }}
+                  required={!isLoginMode}
+                />
+                {fieldErrors.password && <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.password}</p>}
+              </div>
             )}
           </div>
 
@@ -216,6 +228,7 @@ export default function LoginPage() {
               setPassword('');
               setConfirmPassword('');
               setUsername('');
+              setFieldErrors({});
             }}
           >
             {isLoginMode ? "Registrati" : "Accedi"}

@@ -9,6 +9,7 @@ import {
   signOut, 
   onAuthStateChanged,
   updateProfile,
+  sendEmailVerification,
   GoogleAuthProvider,
   signInWithPopup,
   type User as FirebaseUser 
@@ -46,7 +47,13 @@ export const useAuthStore = create<AuthState>()(
         try {
           const email = usernameOrEmail.includes('@') ? usernameOrEmail : `${usernameOrEmail.toLowerCase()}@pitchman.app`;
           const auth = getAuth();
-          await signInWithEmailAndPassword(auth, email, password);
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          
+          if (!userCredential.user.emailVerified && !email.endsWith('@pitchman.app')) {
+            await signOut(auth);
+            return { success: false, error: "Per favore, conferma la tua email prima di effettuare l'accesso." };
+          }
+          
           return { success: true };
         } catch (error: any) {
           console.error("Login error:", error);
@@ -65,11 +72,13 @@ export const useAuthStore = create<AuthState>()(
           if (username) {
             await updateProfile(userCredential.user, { displayName: username });
           }
+          await sendEmailVerification(userCredential.user);
+          await signOut(auth);
           return { success: true };
         } catch (error: any) {
           console.error("SignUp error:", error);
           let message = "Errore durante la registrazione.";
-          if (error.code === 'auth/email-already-in-use') message = "L'account esiste già. Usa il login.";
+          if (error.code === 'auth/email-already-in-use') message = "Email o nome utente già registrato. Ti consigliamo di usare il Login.";
           if (error.code === 'auth/weak-password') message = "La password è troppo debole.";
           return { success: false, error: message };
         }
