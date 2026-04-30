@@ -12,6 +12,7 @@ import { MatchEventDialog } from "./match-event-dialog";
 import { LiveMatchTracker } from "./live-match-tracker";
 import { Button } from "@/components/ui/button";
 import { MatchEventType, MatchEvent } from "@/lib/types";
+import { useLiveTimerStore } from "@/store/useLiveTimerStore";
 import { GiGloves, GiTargetPoster, GiLightBulb } from "react-icons/gi";
 import { useRouter } from "next/navigation";
 import { getEventIcon, getEventLabel, formatDisplayMinute, PERIOD_ORDER } from "@/lib/match-events";
@@ -19,8 +20,8 @@ import { cn } from "@/lib/utils";
 
 export function MatchEventsTab() {
   const { events, deleteEvent, match } = useMatchDetailStore();
+  const { isTrackerOpen, setIsTrackerOpen } = useLiveTimerStore();
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
-  const [isLiveTrackerOpen, setIsLiveTrackerOpen] = useState(false);
   const [eventToEdit, setEventToEdit] = useState<MatchEvent | undefined>(undefined);
 
   const [selectedEventOptions, setSelectedEventOptions] = useState<MatchEvent | null>(null);
@@ -55,7 +56,7 @@ export function MatchEventsTab() {
             Aggiungi eventi <Plus className="h-4 w-4 ml-1" />
           </Button>
           <Button
-            onClick={() => setIsLiveTrackerOpen(true)}
+            onClick={() => setIsTrackerOpen(true)}
             className="h-10 px-5 rounded-full bg-primary dark:bg-brand-green text-white dark:text-black font-black uppercase tracking-widest shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.2)] hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5"
           >
             <Zap className="h-4 w-4" /> LIVE
@@ -68,7 +69,7 @@ export function MatchEventsTab() {
               <p className="text-xs font-black uppercase text-foreground/40 dark:text-muted-foreground">Nessun evento registrato</p>
               <p className="text-[10px] font-bold text-foreground/30 dark:text-muted-foreground mt-2 uppercase mb-6">Usa il + per aggiungere eventi alla partita.</p>
               <Button
-                onClick={() => setIsLiveTrackerOpen(true)}
+                onClick={() => setIsTrackerOpen(true)}
                 className="h-12 px-8 rounded-full bg-primary dark:bg-brand-green text-white dark:text-black font-black uppercase tracking-widest shadow-lg dark:shadow-[0_0_20px_rgba(172,229,4,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
               >
                 <Zap className="h-5 w-5" /> LIVE
@@ -177,8 +178,8 @@ export function MatchEventsTab() {
       />
 
       <LiveMatchTracker 
-        open={isLiveTrackerOpen}
-        onOpenChange={setIsLiveTrackerOpen}
+        open={isTrackerOpen}
+        onOpenChange={setIsTrackerOpen}
       />
     </div>
   );

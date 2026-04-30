@@ -17,6 +17,7 @@ interface LiveTimerState {
   setPeriod: (period: '1T' | '2T' | '1TS' | '2TS') => void;
   setMatchId: (matchId: string | null) => void;
   setIsTrackerOpen: (isOpen: boolean) => void;
+  clearSession: () => void;
   
   // Helper to get current elapsed time in milliseconds
   getElapsedTime: () => number;
@@ -78,6 +79,15 @@ export const useLiveTimerStore = create<LiveTimerState>()(
       setMatchId: (matchId) => set({ matchId }),
 
       setIsTrackerOpen: (isOpen) => set({ isTrackerOpen: isOpen }),
+      
+      clearSession: () => set({
+        matchId: null,
+        isRunning: false,
+        baseTime: 0,
+        startTime: null,
+        period: '1T',
+        isTrackerOpen: false
+      }),
 
       getElapsedTime: () => {
         const state = get();

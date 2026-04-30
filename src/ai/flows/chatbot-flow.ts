@@ -2,7 +2,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { FAQ_DATA } from '@/components/layout/guide-dialog';
+import { FAQ_DATA } from '@/lib/faq-data';
 
 // ── Schema dei dati che il client può fornire ──
 
