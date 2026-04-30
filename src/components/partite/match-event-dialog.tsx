@@ -21,6 +21,8 @@ import {
 import { MatchEventType, MatchEvent, GoalType } from "@/lib/types";
 import { displayPlayerName } from "@/lib/utils";
 
+import { Loader2 } from "lucide-react";
+
 import { PERIOD_ORDER } from "@/lib/match-events";
 
 type UIEventType = 'goal' | 'own_goal' | 'yellow_card' | 'red_card' | 'substitution' | 'penalty_saved' | 'penalty_missed' | 'chance' | 'woodwork' | 'note';
@@ -54,6 +56,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
   const [notes, setNotes] = React.useState<string>("");
 
   const [openSelect, setOpenSelect] = React.useState<string | null>(null);
+  const [isSaving, setIsSaving] = React.useState(false);
 
   // Pre-fill if editing
   React.useEffect(() => {
@@ -156,99 +159,104 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
   };
 
   const handleSave = async () => {
-    const eventsToSave: Omit<MatchEvent, 'id'>[] = [];
-    const baseEvent = { matchId: match?.id || "", minute, period, team };
+    setIsSaving(true);
+    try {
+      const eventsToSave: Omit<MatchEvent, 'id'>[] = [];
+      const baseEvent = { matchId: match?.id || "", minute, period, team };
 
-    if (uiType === 'goal') {
-      const selectedScorer = allPlayers.find(p => p.id === playerId);
-      const selectedAssist = allPlayers.find(p => p.id === assistPlayerId);
+      if (uiType === 'goal') {
+        const selectedScorer = allPlayers.find(p => p.id === playerId);
+        const selectedAssist = allPlayers.find(p => p.id === assistPlayerId);
 
-      const goalEvent: any = {
-        ...baseEvent,
-        type: 'goal',
-        goalType,
-      };
+        const goalEvent: any = {
+          ...baseEvent,
+          type: 'goal',
+          goalType,
+        };
 
-      if (isPitchManSide) {
-        if (playerId) goalEvent.playerId = playerId;
-        goalEvent.playerName = selectedScorer?.name || "GIOCATORE";
-        if (assistPlayerId && assistPlayerId !== "none") {
-          goalEvent.assistPlayerId = assistPlayerId;
-          if (selectedAssist) goalEvent.assistPlayerName = selectedAssist.name;
+        if (isPitchManSide) {
+          if (playerId) goalEvent.playerId = playerId;
+          goalEvent.playerName = selectedScorer?.name || "GIOCATORE";
+          if (assistPlayerId && assistPlayerId !== "none") {
+            goalEvent.assistPlayerId = assistPlayerId;
+            if (selectedAssist) goalEvent.assistPlayerName = selectedAssist.name;
+          }
+        } else {
+          goalEvent.playerName = playerName || match?.opponent || "Avversario";
+          if (assistPlayerName) goalEvent.assistPlayerName = assistPlayerName;
         }
-      } else {
-        goalEvent.playerName = playerName || match?.opponent || "Avversario";
-        if (assistPlayerName) goalEvent.assistPlayerName = assistPlayerName;
-      }
-      eventsToSave.push(goalEvent);
-    } else if (uiType === 'own_goal') {
-      // Autogol: team = la squadra del giocatore che ha commesso l'autogol
-      // Il gol verrà accreditato alla squadra avversaria nel conteggio risultato
-      const selectedPlayer = allPlayers.find(p => p.id === playerId);
-      const ownGoalEvent: any = {
-        ...baseEvent,
-        type: 'own_goal',
-      };
+        eventsToSave.push(goalEvent);
+      } else if (uiType === 'own_goal') {
+        const selectedPlayer = allPlayers.find(p => p.id === playerId);
+        const ownGoalEvent: any = {
+          ...baseEvent,
+          type: 'own_goal',
+        };
 
-      if (isPitchManSide) {
-        if (playerId) ownGoalEvent.playerId = playerId;
-        ownGoalEvent.playerName = selectedPlayer?.name || "GIOCATORE";
-      } else {
-        ownGoalEvent.playerName = playerName || match?.opponent || "Avversario";
-      }
-      eventsToSave.push(ownGoalEvent);
-    } else if (uiType === 'substitution') {
-      const selectedIn = allPlayers.find(p => p.id === subInPlayerId);
-      const selectedOut = allPlayers.find(p => p.id === subOutPlayerId);
+        if (isPitchManSide) {
+          if (playerId) ownGoalEvent.playerId = playerId;
+          ownGoalEvent.playerName = selectedPlayer?.name || "GIOCATORE";
+        } else {
+          ownGoalEvent.playerName = playerName || match?.opponent || "Avversario";
+        }
+        eventsToSave.push(ownGoalEvent);
+      } else if (uiType === 'substitution') {
+        const selectedIn = allPlayers.find(p => p.id === subInPlayerId);
+        const selectedOut = allPlayers.find(p => p.id === subOutPlayerId);
 
-      const subEvent: any = {
-        ...baseEvent,
-        type: 'substitution',
-      };
+        const subEvent: any = {
+          ...baseEvent,
+          type: 'substitution',
+        };
 
-      if (isPitchManSide) {
-        if (subInPlayerId) subEvent.playerId = subInPlayerId;
-        subEvent.playerName = selectedIn?.name || "Subentrante";
-        if (subOutPlayerId) subEvent.subOutPlayerId = subOutPlayerId;
-        subEvent.subOutPlayerName = selectedOut?.name || "Uscente";
+        if (isPitchManSide) {
+          if (subInPlayerId) subEvent.playerId = subInPlayerId;
+          subEvent.playerName = selectedIn?.name || "Subentrante";
+          if (subOutPlayerId) subEvent.subOutPlayerId = subOutPlayerId;
+          subEvent.subOutPlayerName = selectedOut?.name || "Uscente";
+        } else {
+          subEvent.playerName = subInPlayerName || "Subentrante";
+          subEvent.subOutPlayerName = subOutPlayerName || "Uscente";
+        }
+        eventsToSave.push(subEvent);
+      } else if (uiType === 'note') {
+        eventsToSave.push({
+          ...baseEvent,
+          type: 'note',
+          notes: notes || "Nota",
+          playerName: ""
+        });
       } else {
-        subEvent.playerName = subInPlayerName || "Subentrante";
-        subEvent.subOutPlayerName = subOutPlayerName || "Uscente";
-      }
-      eventsToSave.push(subEvent);
-    } else if (uiType === 'note') {
-      eventsToSave.push({
-        ...baseEvent,
-        type: 'note',
-        notes: notes || "Nota",
-        playerName: ""
-      });
-    } else {
-      const selectedPlayer = allPlayers.find(p => p.id === playerId);
-      const simpleEvent: any = {
-        ...baseEvent,
-        type: uiType as MatchEventType,
-        notes: notes || undefined
-      };
+        const selectedPlayer = allPlayers.find(p => p.id === playerId);
+        const simpleEvent: any = {
+          ...baseEvent,
+          type: uiType as MatchEventType,
+          notes: notes || undefined
+        };
 
-      if (isPitchManSide) {
-        if (playerId) simpleEvent.playerId = playerId;
-        simpleEvent.playerName = selectedPlayer?.name || "Giocatore";
-      } else {
-        simpleEvent.playerName = playerName || match?.opponent || "Avversario";
+        if (isPitchManSide) {
+          if (playerId) simpleEvent.playerId = playerId;
+          simpleEvent.playerName = selectedPlayer?.name || "Giocatore";
+        } else {
+          simpleEvent.playerName = playerName || match?.opponent || "Avversario";
+        }
+        eventsToSave.push(simpleEvent);
       }
-      eventsToSave.push(simpleEvent);
+
+      if (eventToEdit) {
+        const { ...dataToUpdate } = eventsToSave[0];
+        await updateEvent(eventToEdit.id, dataToUpdate);
+      } else {
+        await addEvents(eventsToSave);
+      }
+
+      onOpenChange(false);
+      resetForm();
+    } catch (error) {
+      console.error("Errore durante il salvataggio dell'evento:", error);
+    } finally {
+      setIsSaving(false);
     }
-
-    if (eventToEdit) {
-      const { ...dataToUpdate } = eventsToSave[0];
-      await updateEvent(eventToEdit.id, dataToUpdate);
-    } else {
-      addEvents(eventsToSave);
-    }
-
-    onOpenChange(false);
-    resetForm();
   };
 
   return (
@@ -270,6 +278,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
               onValueChange={(v) => { setTeam(v as any); setPlayerId(""); setSubInPlayerId(""); setSubOutPlayerId(""); }}
               open={openSelect === 'team'}
               onOpenChange={(open) => setOpenSelect(open ? 'team' : null)}
+              disabled={isSaving}
             >
               <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
                 <SelectValue placeholder="Seleziona" />
@@ -289,6 +298,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
               onValueChange={(v) => setUiType(v as UIEventType)}
               open={openSelect === 'type'}
               onOpenChange={(open) => setOpenSelect(open ? 'type' : null)}
+              disabled={isSaving}
             >
               <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
                 <SelectValue placeholder="Seleziona" />
@@ -323,6 +333,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                 }}
                 open={openSelect === 'goalDetail'}
                 onOpenChange={(open) => setOpenSelect(open ? 'goalDetail' : null)}
+                disabled={isSaving}
               >
                 <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
                   <SelectValue />
@@ -348,6 +359,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                     onValueChange={setPlayerId}
                     open={openSelect === 'scorer'}
                     onOpenChange={(open) => setOpenSelect(open ? 'scorer' : null)}
+                    disabled={isSaving}
                   >
                     <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
                       <SelectValue placeholder="Giocatore" />
@@ -359,7 +371,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                     </SelectContent>
                   </Select>
                 ) : (
-                  <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} />
+                  <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8 disabled:opacity-50" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} disabled={isSaving} />
                 )}
               </div>
               {goalType !== 'rigore' && (
@@ -371,6 +383,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                       onValueChange={setAssistPlayerId}
                       open={openSelect === 'assist'}
                       onOpenChange={(open) => setOpenSelect(open ? 'assist' : null)}
+                      disabled={isSaving}
                     >
                       <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
                         <SelectValue placeholder="OPZIONALE" />
@@ -383,7 +396,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                       </SelectContent>
                     </Select>
                   ) : (
-                    <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8" placeholder="Nome" value={assistPlayerName} onChange={e => setAssistPlayerName(e.target.value)} />
+                    <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8 disabled:opacity-50" placeholder="Nome" value={assistPlayerName} onChange={e => setAssistPlayerName(e.target.value)} disabled={isSaving} />
                   )}
                 </div>
               )}
@@ -401,6 +414,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                     onValueChange={setPlayerId}
                     open={openSelect === 'ownGoalPlayer'}
                     onOpenChange={(open) => setOpenSelect(open ? 'ownGoalPlayer' : null)}
+                    disabled={isSaving}
                   >
                     <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
                       <SelectValue placeholder="Giocatore" />
@@ -412,7 +426,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                     </SelectContent>
                   </Select>
                 ) : (
-                  <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} />
+                  <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8 disabled:opacity-50" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} disabled={isSaving} />
                 )}
               </div>
             </div>
@@ -429,6 +443,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                     onValueChange={setSubOutPlayerId}
                     open={openSelect === 'subOut'}
                     onOpenChange={(open) => setOpenSelect(open ? 'subOut' : null)}
+                    disabled={isSaving}
                   >
                     <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0 text-rose-500">
                       <SelectValue placeholder="Esce" />
@@ -440,7 +455,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                     </SelectContent>
                   </Select>
                 ) : (
-                  <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-rose-500 pr-8" placeholder="Esce" value={subOutPlayerName} onChange={e => setSubOutPlayerName(e.target.value)} />
+                  <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-rose-500 pr-8 disabled:opacity-50" placeholder="Esce" value={subOutPlayerName} onChange={e => setSubOutPlayerName(e.target.value)} disabled={isSaving} />
                 )}
               </div>
               <div className="flex items-center justify-between bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
@@ -451,6 +466,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                     onValueChange={setSubInPlayerId}
                     open={openSelect === 'subIn'}
                     onOpenChange={(open) => setOpenSelect(open ? 'subIn' : null)}
+                    disabled={isSaving}
                   >
                     <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0 text-brand-green">
                       <SelectValue placeholder="Entra" />
@@ -462,7 +478,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                     </SelectContent>
                   </Select>
                 ) : (
-                  <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-brand-green pr-8" placeholder="Entra" value={subInPlayerName} onChange={e => setSubInPlayerName(e.target.value)} />
+                  <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-brand-green pr-8 disabled:opacity-50" placeholder="Entra" value={subInPlayerName} onChange={e => setSubInPlayerName(e.target.value)} disabled={isSaving} />
                 )}
               </div>
             </div>
@@ -478,6 +494,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                   onValueChange={setPlayerId}
                   open={openSelect === 'pitchPlayer'}
                   onOpenChange={(open) => setOpenSelect(open ? 'pitchPlayer' : null)}
+                  disabled={isSaving}
                 >
                   <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
                     <SelectValue placeholder="NOME" />
@@ -489,7 +506,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                   </SelectContent>
                 </Select>
               ) : (
-                <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} />
+                <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8 disabled:opacity-50" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} disabled={isSaving} />
               )}
             </div>
           )}
@@ -504,6 +521,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                   onValueChange={setPlayerId}
                   open={openSelect === 'cardPlayer'}
                   onOpenChange={(open) => setOpenSelect(open ? 'cardPlayer' : null)}
+                  disabled={isSaving}
                 >
                   <SelectTrigger className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
                     <SelectValue placeholder="Seleziona" />
@@ -515,7 +533,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                   </SelectContent>
                 </Select>
               ) : (
-                <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} />
+                <input className="w-[220px] h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:outline-none text-foreground dark:text-brand-green pr-8 disabled:opacity-50" placeholder="Nome" value={playerName} onChange={e => setPlayerName(e.target.value)} disabled={isSaving} />
               )}
             </div>
           )}
@@ -525,10 +543,11 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
             <div className="bg-muted/20 dark:bg-black/40 border border-transparent hover:border-brand-green/20 p-3 rounded-xl transition-all">
               <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 ml-1 block mb-2">Testo Nota</span>
               <textarea
-                className="w-full bg-transparent border-none text-[12px] font-medium focus:outline-none text-foreground min-h-[80px] resize-none"
+                className="w-full bg-transparent border-none text-[12px] font-medium focus:outline-none text-foreground min-h-[80px] resize-none disabled:opacity-50"
                 placeholder="Inserisci i dettagli dell'evento..."
                 value={notes}
                 onChange={e => setNotes(e.target.value)}
+                disabled={isSaving}
               />
             </div>
           )}
@@ -542,6 +561,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                 onValueChange={(v) => setPeriod(v as any)}
                 open={openSelect === 'period'}
                 onOpenChange={(open) => setOpenSelect(open ? 'period' : null)}
+                disabled={isSaving}
               >
                 <SelectTrigger className="w-16 h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
                   <SelectValue />
@@ -558,6 +578,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
                 onValueChange={(v) => setMinute(v === "none" ? null : parseInt(v))}
                 open={openSelect === 'minute'}
                 onOpenChange={(open) => setOpenSelect(open ? 'minute' : null)}
+                disabled={isSaving}
               >
                 <SelectTrigger className="w-24 h-10 bg-transparent border-none text-right font-black uppercase text-xs focus:ring-0">
                   <SelectValue />
@@ -577,14 +598,23 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
               variant="ghost"
               className="flex-1 rounded-xl font-black uppercase text-[10px] tracking-widest h-12 text-muted-foreground hover:bg-muted dark:hover:bg-white/5 transition-all"
               onClick={() => onOpenChange(false)}
+              disabled={isSaving}
             >
               Annulla
             </Button>
             <Button
               className="flex-1 bg-primary dark:bg-black border-2 border-primary dark:border-brand-green text-white dark:text-brand-green font-black uppercase text-[10px] tracking-widest h-12 shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.1)] hover:scale-[1.02] active:scale-95 transition-all"
               onClick={handleSave}
+              disabled={isSaving}
             >
-              Salva
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                  Salvataggio...
+                </>
+              ) : (
+                "Salva"
+              )}
             </Button>
           </div>
         </div>

@@ -35,6 +35,8 @@ import {
 } from "@/components/ui/dialog";
 import { useSettingsStore } from "@/store/useSettingsStore";
 
+import { Loader2 } from "lucide-react";
+
 const safeParseDate = (dateSource?: any): Date => {
   if (!dateSource) return new Date();
   if (typeof dateSource === 'string') return new Date(dateSource);
@@ -64,12 +66,13 @@ type MatchFormValues = z.infer<typeof formSchema>;
 interface MatchFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (data: any, matchId?: string) => void;
+  onSave: (data: any, matchId?: string) => Promise<void> | void;
   match?: Match | null;
 }
 
 export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchFormDialogProps) {
   const { defaultDuration } = useSettingsStore();
+  const [isSaving, setIsSaving] = React.useState(false);
   
   const form = useForm<MatchFormValues>({
     resolver: zodResolver(formSchema),
@@ -100,12 +103,19 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
   }, [open, match, form, defaultDuration]);
 
 
-  function onSubmit(data: MatchFormValues) {
-    onSave({
-        ...data,
-        date: new Date(data.date).toISOString(), // Salviamo come stringa ISO a mezzanotte
-    }, match?.id);
-    onOpenChange(false);
+  async function onSubmit(data: MatchFormValues) {
+    setIsSaving(true);
+    try {
+      await onSave({
+          ...data,
+          date: new Date(data.date).toISOString(), // Salviamo come stringa ISO a mezzanotte
+      }, match?.id);
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Errore durante il salvataggio:", error);
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   const { min, max } = React.useMemo(() => {
@@ -261,9 +271,33 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
             </div>
 
             <DialogFooter className="pt-4 flex-row gap-2">
-              <Button type="button" className="flex-1 h-12 rounded-xl font-black uppercase text-xs bg-muted dark:bg-black/40 border border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black/60 transition-all" onClick={() => onOpenChange(false)}>Annulla</Button>
-              <Button type="submit" className="flex-1 h-12 rounded-xl bg-primary dark:bg-black border border-primary dark:border-brand-green text-white font-black uppercase text-xs shadow-[0_0_10px_rgba(172,229,4,0.2)] hover:opacity-90 dark:hover:bg-black/80 hover:scale-[1.02] transition-all">Salva Gara</Button>
+              <Button 
+                type="button" 
+                disabled={isSaving}
+                className="flex-1 h-12 rounded-xl font-black uppercase text-xs bg-muted dark:bg-black/40 border border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black/60 transition-all" 
+                onClick={() => onOpenChange(false)}
+              >
+                Annulla
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isSaving}
+                className="flex-1 h-12 rounded-xl bg-primary dark:bg-black border border-primary dark:border-brand-green text-white font-black uppercase text-xs shadow-[0_0_10px_rgba(172,229,4,0.2)] hover:opacity-90 dark:hover:bg-black/80 hover:scale-[1.02] transition-all"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Salvataggio...
+                  </>
+                ) : (
+                  "Salva Gara"
+                )}
+              </Button>
             </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
           </form>
         </Form>
       </DialogContent>

@@ -8,7 +8,7 @@ import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Sparkles, Globe } from "lucide-react";
+import { Sparkles, Globe, Loader2 } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -56,13 +56,14 @@ type PlayerSaveData = {
 interface PlayerFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (data: PlayerSaveData, playerId?: string) => void;
+  onSave: (data: PlayerSaveData, playerId?: string) => Promise<void> | void;
   player?: Player | null;
   onAIImport?: () => void;
   onTuttocampoImport?: () => void;
 }
 
 export function PlayerFormDialog({ open, onOpenChange, onSave, player, onAIImport, onTuttocampoImport }: PlayerFormDialogProps) {
+  const [isSaving, setIsSaving] = React.useState(false);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -96,16 +97,23 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player, onAIImpor
     }
   }, [player, open, form]);
 
-  function onSubmit(data: FormValues) {
-    const saveData: PlayerSaveData = {
-      name: `${data.firstName} ${data.lastName}`.trim(),
-      firstName: data.firstName,
-      lastName: data.lastName,
-      role: data.role,
-      secondaryRoles: data.secondaryRoles as Role[]
-    };
-    onSave(saveData, player?.id);
-    onOpenChange(false);
+  async function onSubmit(data: FormValues) {
+    setIsSaving(true);
+    try {
+      const saveData: PlayerSaveData = {
+        name: `${data.firstName} ${data.lastName}`.trim(),
+        firstName: data.firstName,
+        lastName: data.lastName,
+        role: data.role,
+        secondaryRoles: data.secondaryRoles as Role[]
+      };
+      await onSave(saveData, player?.id);
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Errore durante il salvataggio:", error);
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -126,6 +134,7 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player, onAIImpor
                 onClick={onAIImport}
                 variant="ghost"
                 size="icon"
+                disabled={isSaving}
                 className="h-10 w-10 rounded-full bg-primary/10 dark:bg-brand-green/10 text-primary dark:text-brand-green hover:bg-primary/20 dark:hover:bg-brand-green/20"
                 title="Importazione AI"
               >
@@ -135,6 +144,7 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player, onAIImpor
                 onClick={onTuttocampoImport}
                 variant="ghost"
                 size="icon"
+                disabled={isSaving}
                 className="h-10 w-10 rounded-full bg-primary/10 dark:bg-brand-green/10 text-primary dark:text-brand-green hover:bg-primary/20 dark:hover:bg-brand-green/20"
                 title="Importa da Tuttocampo"
               >
@@ -156,6 +166,7 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player, onAIImpor
                       <Input 
                         placeholder="Mario" 
                         {...field} 
+                        disabled={isSaving}
                         className="h-11 text-xs font-black uppercase rounded-xl bg-background dark:bg-black border border-border dark:border-brand-green/20 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green focus-visible:border-primary dark:focus-visible:border-brand-green transition-all" 
                       />
                     </FormControl>
@@ -173,6 +184,7 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player, onAIImpor
                       <Input 
                         placeholder="Rossi" 
                         {...field} 
+                        disabled={isSaving}
                         className="h-11 text-xs font-black uppercase rounded-xl bg-background dark:bg-black border border-border dark:border-brand-green/20 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green focus-visible:border-primary dark:focus-visible:border-brand-green transition-all" 
                       />
                     </FormControl>
@@ -188,7 +200,7 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player, onAIImpor
               render={({ field }) => (
                   <FormItem className="space-y-1.5">
                     <FormLabel className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/80 ml-1">Ruolo Tecnico</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value} disabled={isSaving}>
                         <FormControl>
                             <SelectTrigger className="h-11 text-xs font-black uppercase rounded-xl bg-background dark:bg-black border border-border dark:border-brand-green/20 focus:ring-1 focus:ring-primary dark:focus:ring-brand-green focus:border-primary dark:focus:border-brand-green transition-all">
                                 <SelectValue placeholder="Seleziona ruolo" />
@@ -237,6 +249,7 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player, onAIImpor
                                 <FormControl>
                                   <Checkbox
                                     checked={field.value?.includes(role)}
+                                    disabled={isSaving}
                                     onCheckedChange={(checked) => {
                                       return checked
                                         ? field.onChange([...field.value, role])
@@ -268,6 +281,7 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player, onAIImpor
               <Button 
                 type="button" 
                 variant="ghost" 
+                disabled={isSaving}
                 className="flex-1 rounded-xl font-black uppercase text-[10px] tracking-widest h-12 text-muted-foreground hover:bg-muted dark:hover:bg-white/5 transition-all" 
                 onClick={() => onOpenChange(false)}
               >
@@ -275,11 +289,23 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player, onAIImpor
               </Button>
               <Button 
                 type="submit" 
+                disabled={isSaving}
                 className="flex-1 bg-primary dark:bg-black border-2 border-primary dark:border-brand-green text-white dark:text-brand-green font-black uppercase text-[10px] tracking-widest h-12 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.2)] hover:scale-[1.02] active:scale-95 transition-all"
               >
-                Salva
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Salvataggio...
+                  </>
+                ) : (
+                  "Salva"
+                )}
               </Button>
             </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
           </form>
         </Form>
       </DialogContent>

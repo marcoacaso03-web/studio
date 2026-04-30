@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { PlusCircle, Trash2, Calendar, Home, Plane, Globe, ChevronLeft, ClipboardCopy } from "lucide-react";
+import { PlusCircle, Trash2, Calendar, Home, Plane, Globe, ChevronLeft, ClipboardCopy, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Match, MatchStatus } from "@/lib/types";
 import { useMatchesStore } from "@/store/useMatchesStore";
@@ -62,6 +62,7 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
   const [isScraperImportOpen, setIsScraperImportOpen] = useState(false);
   const [matchToDelete, setMatchToDelete] = useState<Match | null>(null);
   const [isDeleteAllOpen, setIsDeleteAllOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSaveMatch = async (data: any) => {
     const newMatch = await addMatch(data);
@@ -75,6 +76,7 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
     const matchId = matchToDelete.id;
     const seasonId = activeSeason?.id;
 
+    setIsProcessing(true);
     // Pattern: chiudiamo il dialog PRIMA per evitare lock della UI di Radix
     setMatchToDelete(null);
 
@@ -82,11 +84,13 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
     setTimeout(async () => {
       try {
         await removeMatch(matchId);
-        loadSummaryStats(seasonId);
+        await loadSummaryStats(seasonId);
         // Forza pulizia pointer-events per bug Radix
         document.body.style.pointerEvents = "";
       } catch (error) {
         console.error("Errore durante l'eliminazione della partita:", error);
+      } finally {
+        setIsProcessing(false);
       }
     }, 200);
   };
@@ -94,17 +98,20 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
   const handleDeleteAllMatches = async () => {
     const seasonId = activeSeason?.id;
 
+    setIsProcessing(true);
     // Chiudiamo il dialog PRIMA
     setIsDeleteAllOpen(false);
 
     setTimeout(async () => {
       try {
         await removeAllMatches();
-        loadSummaryStats(seasonId);
+        await loadSummaryStats(seasonId);
         // Forza pulizia pointer-events per bug Radix
         document.body.style.pointerEvents = "";
       } catch (error) {
         console.error("Errore durante l'eliminazione di tutte le partite:", error);
+      } finally {
+        setIsProcessing(false);
       }
     }, 200);
   };
@@ -141,12 +148,15 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
             <DialogTitle className="sr-only">Calendario</DialogTitle>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="text-foreground hover:bg-primary/10 dark:hover:bg-white/10 h-8 w-8 transition-colors" onClick={() => onOpenChange(false)}>
+                <Button variant="ghost" size="icon" className="text-foreground hover:bg-primary/10 dark:hover:bg-white/10 h-8 w-8 transition-colors" onClick={() => onOpenChange(false)} disabled={isProcessing}>
                   <ChevronLeft className="h-5 w-5 text-foreground" />
                 </Button>
               </div>
-              <div>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Stagione {activeSeason?.name}</p>
+              <div className="flex items-center gap-2">
+                <div>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Stagione {activeSeason?.name}</p>
+                </div>
+                {isProcessing && <Loader2 className="h-3 w-3 animate-spin text-primary dark:text-brand-green" />}
               </div>
             </div>
             <div className="flex gap-1 md:gap-1.5 shrink-0 items-center">
@@ -155,6 +165,7 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
                 className="bg-muted dark:bg-black/80 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 w-8 rounded-xl shadow-sm p-0"
                 size="icon"
                 onClick={() => setIsScraperImportOpen(true)}
+                disabled={isProcessing}
                 title="Sincronizza da URL (Scraping)"
               >
                 <Globe className="h-4 w-4 text-primary dark:text-brand-green" />
@@ -164,6 +175,7 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
                 className="bg-muted dark:bg-black/80 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 w-8 rounded-xl shadow-sm p-0"
                 size="icon"
                 onClick={() => setIsImportOpen(true)}
+                disabled={isProcessing}
                 title="Importazione Smart (Copia e Incolla)"
               >
                 <ClipboardCopy className="h-4 w-4 text-primary dark:text-brand-green" />
@@ -173,6 +185,7 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
                 className="bg-muted dark:bg-black/80 border-border dark:border-brand-green text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 w-8 rounded-xl shadow-sm p-0"
                 size="icon"
                 onClick={() => setIsFormOpen(true)}
+                disabled={isProcessing}
                 title="Nuova Partita"
               >
                 <PlusCircle className="h-4 w-4 text-primary dark:text-brand-green" />
@@ -183,6 +196,7 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
                   size="icon"
                   className="text-red-600 dark:text-red-500 hover:text-white hover:bg-red-600 bg-red-50 dark:bg-black border border-red-200 dark:border-red-500/40 h-8 w-8 transition-all rounded-lg"
                   onClick={() => setIsDeleteAllOpen(true)}
+                  disabled={isProcessing}
                   title="Elimina tutto"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -214,10 +228,10 @@ export function FullCalendarDialog({ open, onOpenChange }: FullCalendarDialogPro
                     const autoRound = sameTypeMatches.findIndex(m => m.id === match.id) + 1;
 
                     return (
-                      <TableRow key={match.id} className="h-14 border-b border-border dark:border-white/5 hover:bg-muted/50 dark:hover:bg-primary/5 transition-all group">
+                      <TableRow key={match.id} className={cn("h-14 border-b border-border dark:border-white/5 hover:bg-muted/50 dark:hover:bg-primary/5 transition-all group", isProcessing && "opacity-50 pointer-events-none")}>
                         <TableCell
                           className="p-0 px-4 cursor-pointer"
-                          onClick={() => navigateToMatch(match)}
+                          onClick={() => !isProcessing && navigateToMatch(match)}
                         >
                           <div className="flex items-center gap-4">
                             <RoundBadge round={autoRound} />

@@ -401,7 +401,7 @@ export function ExerciseDialog({ open, onOpenChange, exercise }: ExerciseDialogP
         </div>
 
         <DialogFooter className="mt-4 pt-4 border-t border-border dark:border-white/5 mx-1 flex-row gap-3">
-          <Button variant="ghost" className="flex-1 h-12 rounded-xl text-[10px] font-black uppercase tracking-widest text-muted-foreground" onClick={() => onOpenChange(false)}>
+          <Button variant="ghost" className="flex-1 h-12 rounded-xl text-[10px] font-black uppercase tracking-widest text-muted-foreground" onClick={() => onOpenChange(false)} disabled={loading || uploadLoading}>
             <X className="h-3.5 w-3.5 mr-2" /> Esci
           </Button>
           <Button 

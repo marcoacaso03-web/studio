@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft, Users, LayoutGrid } from "lucide-react";
+import { ChevronLeft, Users, LayoutGrid, Loader2 } from "lucide-react";
 import { getJerseyNumber, getSubstituteNumber, FORMATION_POSITIONS, getPositionAcronym } from "@/lib/lineup-mapping";
 import { displayPlayerName } from "@/lib/utils";
 import { useSettingsStore } from "@/store/useSettingsStore";
@@ -39,6 +39,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
   const [openSelect, setOpenSelect] = React.useState<string | null>(null);
   const [editingSlot, setEditingSlot] = React.useState<number | null>(null);
   const [activeTab, setActiveTab] = React.useState("starters");
+  const [isSaving, setIsSaving] = React.useState(false);
 
   React.useEffect(() => {
     if (open) {
@@ -61,14 +62,21 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
     }
   }, [open, lineup]);
 
-  const handleSave = () => {
-    saveLineup({
-      matchId: "", // Gestito dallo store
-      starters,
-      substitutes,
-      formation: modulo,
-    });
-    onOpenChange(false);
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await saveLineup({
+        matchId: "", // Gestito dallo store
+        starters,
+        substitutes,
+        formation: modulo,
+      });
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Errore durante il salvataggio della formazione:", error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const allSelectedIds = React.useMemo(() => {
@@ -104,6 +112,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
             onValueChange={onValueChange}
             open={open}
             onOpenChange={onOpenChange}
+            disabled={isSaving}
           >
             <SelectTrigger className="border-none shadow-none h-10 text-foreground dark:text-white focus:ring-0 text-xs font-black uppercase hover:opacity-80 transition-opacity p-0 bg-transparent">
               <SelectValue placeholder="-- SELEZIONA --" />
@@ -125,7 +134,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl h-[90vh] sm:h-[85vh] p-0 overflow-hidden flex flex-col gap-0 border-none bg-background dark:bg-black text-foreground dark:text-white shadow-2xl rounded-3xl">
         <DialogHeader className="bg-muted dark:bg-black text-foreground dark:text-white p-6 flex-row items-center gap-4 space-y-0 border-b border-border dark:border-white/10 shrink-0">
-          <Button variant="ghost" size="icon" className="text-primary dark:text-brand-green hover:bg-primary/10 dark:hover:bg-white/10 rounded-full" onClick={() => onOpenChange(false)}>
+          <Button variant="ghost" size="icon" disabled={isSaving} className="text-primary dark:text-brand-green hover:bg-primary/10 dark:hover:bg-white/10 rounded-full" onClick={() => onOpenChange(false)}>
             <ChevronLeft className="h-6 w-6" />
           </Button>
           <div className="flex-1">
@@ -150,6 +159,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
             <Select 
               value={modulo} 
               onValueChange={setModulo}
+              disabled={isSaving}
               open={openSelect === 'modulo'}
               onOpenChange={(open) => setOpenSelect(open ? 'modulo' : null)}
             >
@@ -185,7 +195,7 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
                 formation={modulo}
                 starters={starters}
                 allPlayers={allPlayers}
-                onSlotClick={(idx) => setEditingSlot(idx)}
+                onSlotClick={(idx) => !isSaving && setEditingSlot(idx)}
               />
             </div>
           </TabsContent>
@@ -215,8 +225,16 @@ export function LineupFormDialog({ open, onOpenChange }: LineupFormDialogProps) 
           <Button
             className="w-full bg-primary dark:bg-brand-green text-white dark:text-black hover:opacity-90 font-black uppercase text-sm h-14 rounded-2xl shadow-lg dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] transition-all"
             onClick={handleSave}
+            disabled={isSaving}
           >
-            Conferma Formazioni
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Salvataggio...
+              </>
+            ) : (
+              "Conferma Formazioni"
+            )}
           </Button>
         </div>
       </DialogContent>
