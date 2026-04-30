@@ -98,9 +98,7 @@ export function FloatingMatchTimer() {
             variant="ghost" 
             className="h-9 w-9 rounded-full hover:bg-rose-500/20 text-rose-500 transition-all active:scale-90"
             onClick={() => {
-              if (confirm("Vuoi davvero chiudere il tracking live?")) {
-                clearSession();
-              }
+              clearSession();
             }}
           >
             <X className="h-5 w-5" />

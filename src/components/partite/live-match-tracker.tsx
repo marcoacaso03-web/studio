@@ -11,6 +11,8 @@ import { Play, Pause, Square, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { useLiveTimerStore } from "@/store/useLiveTimerStore";
+import { LiveMatchEventWorkflow } from "./live-match-event-workflow";
+import { MatchEventType } from "@/lib/types";
 
 const EVENT_BUTTONS = [
   { type: "goal", label: "GOL", color: "bg-brand-green text-black hover:bg-brand-green/80 border-transparent" },
@@ -22,7 +24,7 @@ const EVENT_BUTTONS = [
 ];
 
 export function LiveMatchTracker({ open, onOpenChange }: { open: boolean, onOpenChange: (o: boolean) => void }) {
-  const { match, addEvent } = useMatchDetailStore();
+  const { match, addEvent, lineup, allPlayers } = useMatchDetailStore();
   const teamName = useSettingsStore(state => state.teamName) || "PITCHMAN";
   
   const { 
@@ -38,6 +40,11 @@ export function LiveMatchTracker({ open, onOpenChange }: { open: boolean, onOpen
 
   const [seconds, setSeconds] = useState(0);
   const [simpleMode, setSimpleMode] = useState(true);
+  
+  // Workflow state
+  const [workflowOpen, setWorkflowOpen] = useState(false);
+  const [activeEventType, setActiveEventType] = useState<MatchEventType>("goal");
+  const [activeTeam, setActiveTeam] = useState<'home' | 'away'>('home');
 
   useEffect(() => {
     setIsTrackerOpen(open);
@@ -81,11 +88,16 @@ export function LiveMatchTracker({ open, onOpenChange }: { open: boolean, onOpen
 
   const handleEvent = async (type: string, team: 'home' | 'away') => {
     if (!match) return;
+    
+    if (!simpleMode) {
+      setActiveEventType(type as MatchEventType);
+      setActiveTeam(team);
+      setWorkflowOpen(true);
+      return;
+    }
+
     const minute = Math.floor(seconds / 60);
     
-    // In simple mode, just add the event. 
-    // If we wanted detailed mode, we would maybe open the normal dialog, 
-    // but the request asks to record them instantly in simple mode.
     await addEvent({
       matchId: match.id,
       type: type as any,
@@ -93,6 +105,20 @@ export function LiveMatchTracker({ open, onOpenChange }: { open: boolean, onOpen
       minute,
       period,
       playerName: type === 'own_goal' ? "Autogol" : "",
+    });
+  };
+
+  const onWorkflowComplete = async (data: any) => {
+    if (!match) return;
+    const minute = Math.floor(seconds / 60);
+    
+    await addEvent({
+      matchId: match.id,
+      type: activeEventType,
+      team: activeTeam,
+      minute,
+      period,
+      ...data
     });
   };
 
@@ -138,12 +164,15 @@ export function LiveMatchTracker({ open, onOpenChange }: { open: boolean, onOpen
         </div>
 
         {/* Simple Mode Toggle */}
-        <div className="flex items-center justify-between mb-6 px-4 py-3 bg-muted/10 dark:bg-white/5 rounded-xl border border-border dark:border-white/10">
-          <span className="text-[10px] font-black uppercase tracking-widest text-foreground/70 dark:text-white/70">Registra SOLO gli eventi senza dettagli</span>
+        <div className="flex items-center justify-between mb-6 px-4 py-3 bg-muted/10 dark:bg-white/5 rounded-xl border border-border dark:border-white/10 transition-all">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black uppercase tracking-widest text-foreground dark:text-brand-green">Cronaca Dettagliata</span>
+            <span className="text-[8px] font-bold text-muted-foreground uppercase">Seleziona autore, assist e tipo gol</span>
+          </div>
           <Switch 
-            checked={simpleMode} 
-            onCheckedChange={setSimpleMode} 
-            className="scale-90"
+            checked={!simpleMode} 
+            onCheckedChange={(val) => setSimpleMode(!val)} 
+            className="data-[state=checked]:bg-primary dark:data-[state=checked]:bg-brand-green scale-90"
           />
         </div>
 
@@ -175,6 +204,17 @@ export function LiveMatchTracker({ open, onOpenChange }: { open: boolean, onOpen
           </TabsContent>
         </Tabs>
       </DialogContent>
+
+      <LiveMatchEventWorkflow 
+        open={workflowOpen}
+        onOpenChange={setWorkflowOpen}
+        eventType={activeEventType}
+        team={activeTeam}
+        isOurTeam={activeTeam === (match.isHome ? 'home' : 'away')}
+        lineup={lineup}
+        allPlayers={allPlayers}
+        onComplete={onWorkflowComplete}
+      />
     </Dialog>
   );
 }
