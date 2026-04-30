@@ -242,15 +242,21 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
               &quot;{event.notes}&quot;
             </p>
           ) : (
-            <div className={cn("flex flex-col", alignLeft ? "items-end" : "items-start")}>
+            <div className={cn("flex flex-col", alignLeft ? "items-end text-right" : "items-start text-left")}>
               <p className="font-black leading-tight uppercase text-xs sm:text-sm truncate max-w-[120px] sm:max-w-none">
                 {mainName.toUpperCase()}
               </p>
-              <div className="flex items-center gap-2 mt-1">
+              <div className={cn("flex items-center gap-2 mt-1", alignLeft ? "flex-row-reverse" : "flex-row")}>
                 <p className="text-[9px] text-muted-foreground font-black tracking-widest leading-none">
                   {getEventLabel(event)}
                 </p>
               </div>
+              {event.type === 'goal' && event.assistPlayerName && (
+                <div className={cn("flex items-center gap-1 mt-1 opacity-70", alignLeft ? "flex-row-reverse" : "flex-row")}>
+                  <Handshake className="h-2.5 w-2.5 text-brand-green" />
+                  <p className="text-[9px] font-bold uppercase tracking-wider">Assist: {event.assistPlayerName}</p>
+                </div>
+              )}
             </div>
           )}
         </div>

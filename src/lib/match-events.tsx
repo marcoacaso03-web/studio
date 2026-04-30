@@ -63,10 +63,8 @@ export const getEventIcon = (event: Partial<MatchEvent>, size: string = "h-4 w-4
  */
 export const getEventLabel = (event: Partial<MatchEvent>) => {
   if (event.type === 'goal') {
-    const typeLabel = event.goalType && event.goalType !== 'azione' ? ` (${event.goalType.replace('_', ' ').toUpperCase()})` : '';
-    return event.playerName
-      ? `${event.playerName.toUpperCase()}${typeLabel}`
-      : typeLabel;
+    if (!event.goalType || event.goalType === 'azione') return 'GOL';
+    return event.goalType.replace('_', ' ').toUpperCase();
   }
   if (event.type === 'own_goal') return 'AUTOGOL';
   if (event.type === 'substitution') return 'SOSTITUZIONE';

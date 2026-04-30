@@ -179,11 +179,11 @@ export function LiveMatchTracker({ open, onOpenChange }: { open: boolean, onOpen
         {/* Teams Tabs */}
         <Tabs defaultValue="home" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4 h-14 bg-muted/50 dark:bg-black/40 border border-border dark:border-brand-green/20 p-1.5 rounded-2xl">
-            <TabsTrigger value="home" className="text-xs font-black uppercase tracking-widest rounded-xl data-[state=active]:bg-card dark:data-[state=active]:bg-black data-[state=active]:text-primary dark:data-[state=active]:text-brand-green data-[state=active]:shadow-sm transition-all truncate">
-              {homeName}
+            <TabsTrigger value="home" className="text-xs font-black uppercase tracking-widest rounded-xl data-[state=active]:bg-card dark:data-[state=active]:bg-black data-[state=active]:text-primary dark:data-[state=active]:text-brand-green data-[state=active]:shadow-sm transition-all overflow-hidden">
+              <span className="truncate w-full block px-2">{homeName}</span>
             </TabsTrigger>
-            <TabsTrigger value="away" className="text-xs font-black uppercase tracking-widest rounded-xl data-[state=active]:bg-card dark:data-[state=active]:bg-black data-[state=active]:text-primary dark:data-[state=active]:text-brand-green data-[state=active]:shadow-sm transition-all truncate">
-              {awayName}
+            <TabsTrigger value="away" className="text-xs font-black uppercase tracking-widest rounded-xl data-[state=active]:bg-card dark:data-[state=active]:bg-black data-[state=active]:text-primary dark:data-[state=active]:text-brand-green data-[state=active]:shadow-sm transition-all overflow-hidden">
+              <span className="truncate w-full block px-2">{awayName}</span>
             </TabsTrigger>
           </TabsList>
           

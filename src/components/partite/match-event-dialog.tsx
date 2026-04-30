@@ -306,14 +306,14 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
               <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
                 <SelectItem value="goal" className="text-[10px] font-black uppercase text-foreground">Goal</SelectItem>
                 <SelectItem value="own_goal" className="text-[10px] font-black uppercase text-foreground">Autogol</SelectItem>
-                <SelectItem value="yellow_card" className="text-[10px] font-black uppercase text-brand-card-yellow">Ammonizione</SelectItem>
-                <SelectItem value="red_card" className="text-[10px] font-black uppercase text-brand-card-red">Espulsione</SelectItem>
+                <SelectItem value="yellow_card" className="text-[10px] font-black uppercase text-foreground">Ammonizione</SelectItem>
+                <SelectItem value="red_card" className="text-[10px] font-black uppercase text-foreground">Espulsione</SelectItem>
                 <SelectItem value="substitution" className="text-[10px] font-black uppercase text-foreground">Sostituzione</SelectItem>
                 <SelectItem value="penalty_saved" className="text-[10px] font-black uppercase text-foreground">Rigore Parato</SelectItem>
                 <SelectItem value="penalty_missed" className="text-[10px] font-black uppercase text-foreground">Rigore Sbagliato</SelectItem>
                 <SelectItem value="chance" className="text-[10px] font-black uppercase text-foreground">Occasione</SelectItem>
                 <SelectItem value="woodwork" className="text-[10px] font-black uppercase text-foreground">Palo/Traversa</SelectItem>
-                <SelectItem value="note" className="text-[10px] font-black uppercase text-muted-foreground">Nota / Altro</SelectItem>
+                <SelectItem value="note" className="text-[10px] font-black uppercase text-foreground">Nota / Altro</SelectItem>
               </SelectContent>
             </Select>
           </div>
