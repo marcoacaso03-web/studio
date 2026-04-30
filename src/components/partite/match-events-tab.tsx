@@ -16,7 +16,7 @@ import { useLiveTimerStore } from "@/store/useLiveTimerStore";
 import { GiGloves, GiTargetPoster, GiLightBulb } from "react-icons/gi";
 import { useRouter } from "next/navigation";
 import { getEventIcon, getEventLabel, formatDisplayMinute, PERIOD_ORDER } from "@/lib/match-events";
-import { cn } from "@/lib/utils";
+import { cn, formatPlayerInitial } from "@/lib/utils";
 
 export function MatchEventsTab() {
   const { events, deleteEvent, match } = useMatchDetailStore();
@@ -231,10 +231,14 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
           {event.type === 'substitution' ? (
             <div className={cn("flex flex-col", alignLeft ? "items-end text-right" : "items-start text-left")}>
               <div className="flex items-center gap-2">
-                <p className="font-black leading-tight uppercase text-xs sm:text-sm">{event.playerName}</p>
+                <p className="font-black leading-tight uppercase text-xs sm:text-sm truncate max-w-[120px] sm:max-w-none">
+                  {formatPlayerInitial(event.playerName)}
+                </p>
               </div>
               <div className="flex items-center gap-2 mt-0.5 opacity-60">
-                <p className="text-[10px] sm:text-[11px] font-bold leading-tight uppercase">{event.subOutPlayerName}</p>
+                <p className="text-[10px] sm:text-[11px] font-bold leading-tight uppercase">
+                  {formatPlayerInitial(event.subOutPlayerName)}
+                </p>
               </div>
             </div>
           ) : event.type === 'note' ? (
@@ -244,7 +248,7 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
           ) : (
             <div className={cn("flex flex-col", alignLeft ? "items-end text-right" : "items-start text-left")}>
               <p className="font-black leading-tight uppercase text-xs sm:text-sm truncate max-w-[120px] sm:max-w-none">
-                {mainName.toUpperCase()}
+                {formatPlayerInitial(mainName)}
               </p>
               <div className={cn("flex items-center gap-2 mt-1", alignLeft ? "flex-row-reverse" : "flex-row")}>
                 <p className="text-[9px] text-muted-foreground font-black tracking-widest leading-none">
@@ -253,8 +257,7 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
               </div>
               {event.type === 'goal' && event.assistPlayerName && (
                 <div className={cn("flex items-center gap-1 mt-1 opacity-70", alignLeft ? "flex-row-reverse" : "flex-row")}>
-                  <Handshake className="h-2.5 w-2.5 text-brand-green" />
-                  <p className="text-[9px] font-bold uppercase tracking-wider">Assist: {event.assistPlayerName}</p>
+                  <p className="text-[9px] font-bold uppercase tracking-wider">Assist: {formatPlayerInitial(event.assistPlayerName)}</p>
                 </div>
               )}
             </div>

@@ -21,3 +21,19 @@ export function displayPlayerName(player: { firstName?: string; lastName?: strin
   const lastName = parts.slice(1).join(' ');
   return `${lastName} ${firstName}`.trim().toUpperCase();
 }
+
+/**
+ * Formatta il nome come 'N. Cognome' (Iniziale. Cognome)
+ */
+export function formatPlayerInitial(fullName: string): string {
+  if (!fullName || fullName === 'GIOCATORE' || fullName === 'AVVERSARIO' || fullName === 'Autogol') return fullName || "";
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length <= 1) return fullName.toUpperCase();
+  
+  // Se abbiamo "Mario Rossi" -> "M. ROSSI"
+  // Se abbiamo "Rossi Mario" -> assumiamo il primo sia il nome se non sappiamo altro, 
+  // ma solitamente l'input utente è Nome Cognome.
+  const firstName = parts[0];
+  const lastName = parts.slice(1).join(' ');
+  return `${firstName.charAt(0).toUpperCase()}. ${lastName.toUpperCase()}`;
+}
