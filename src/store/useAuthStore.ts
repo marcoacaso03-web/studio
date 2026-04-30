@@ -87,12 +87,21 @@ export const useAuthStore = create<AuthState>()(
         try {
           const auth = getAuth();
           const provider = new GoogleAuthProvider();
-          await signInWithPopup(auth, provider);
+          // Adding custom parameters can help with some popup issues
+          provider.setCustomParameters({ prompt: 'select_account' });
+          
+          const result = await signInWithPopup(auth, provider);
+          
+          // Force immediate state update to prevent race conditions during navigation
+          useAuthStore.getState().setAuth(result.user);
+          
           return { success: true };
         } catch (error: any) {
           console.error("Google Login error:", error);
           let message = "Errore durante l'accesso con Google.";
           if (error.code === 'auth/popup-closed-by-user') message = "Finestra di accesso chiusa prima del completamento.";
+          if (error.code === 'auth/popup-blocked') message = "Popup bloccato dal browser. Abilita i popup per questo sito.";
+          if (error.code === 'auth/unauthorized-domain') message = "Dominio non autorizzato. Verifica la configurazione Firebase.";
           return { success: false, error: message };
         }
       },

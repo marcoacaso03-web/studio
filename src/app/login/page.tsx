@@ -27,9 +27,14 @@ export default function LoginPage() {
   }, [isAuthenticated, router]);
 
   const validatePassword = (pwd: string) => {
-    if (pwd.length < 8) return "La password deve contenere almeno 8 caratteri.";
-    if (!/\d/.test(pwd)) return "La password deve contenere almeno un numero.";
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) return "La password deve contenere almeno un carattere speciale.";
+    const requirements = [];
+    if (pwd.length < 8) requirements.push("almeno 8 caratteri");
+    if (!/\d/.test(pwd)) requirements.push("un numero");
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) requirements.push("un carattere speciale");
+    
+    if (requirements.length > 0) {
+      return `La password deve contenere: ${requirements.join(", ")}.`;
+    }
     return null;
   };
 
@@ -51,15 +56,16 @@ export default function LoginPage() {
       }
     } else {
       setFieldErrors({});
-      if (password !== confirmPassword) {
-        setFieldErrors({ password: "Le password non coincidono." });
-        setIsLoading(false);
-        return;
-      }
       
       const pwdError = validatePassword(password);
       if (pwdError) {
         setFieldErrors({ password: pwdError });
+        setIsLoading(false);
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setFieldErrors({ password: "Le password non coincidono." });
         setIsLoading(false);
         return;
       }
@@ -76,7 +82,16 @@ export default function LoginPage() {
         setUsername('');
         setIsLoading(false);
       } else {
-        setFieldErrors({ email: result.error || "Errore durante la creazione dell'account." });
+        // If error is related to existing account, show it under the email field
+        if (result.error?.toLowerCase().includes("registrato") || result.error?.toLowerCase().includes("login")) {
+          setFieldErrors({ email: result.error });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Errore Registrazione",
+            description: result.error || "Errore durante la creazione dell'account.",
+          });
+        }
         setIsLoading(false);
       }
     }
@@ -162,7 +177,7 @@ export default function LoginPage() {
                 }}
                 required
               />
-              {/* Only show password error below confirmPassword if both are present, or here if no confirmPassword. We'll show it below confirmPassword later, but let's do it right here if it's the main password error */}
+              {fieldErrors.password && !isLoginMode && <p className="text-red-500 text-[10px] mt-1 ml-1 leading-tight">{fieldErrors.password}</p>}
             </div>
             
             {!isLoginMode && (
@@ -171,15 +186,14 @@ export default function LoginPage() {
                   id="confirmPassword"
                   type="password"
                   placeholder="Conferma Password"
-                  className={`h-12 bg-transparent border-primary/30 dark:border-neon-gradient rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-0 placeholder:text-muted-foreground/50 transition-all ${fieldErrors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                  className={`h-12 bg-transparent border-primary/30 dark:border-neon-gradient rounded-xl px-4 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-0 placeholder:text-muted-foreground/50 transition-all ${fieldErrors.password === "Le password non coincidono." ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                   value={confirmPassword}
                   onChange={(e) => {
                     setConfirmPassword(e.target.value);
-                    if (fieldErrors.password) setFieldErrors(prev => ({...prev, password: undefined}));
+                    if (fieldErrors.password === "Le password non coincidono.") setFieldErrors(prev => ({...prev, password: undefined}));
                   }}
                   required={!isLoginMode}
                 />
-                {fieldErrors.password && <p className="text-red-500 text-xs mt-1 ml-1">{fieldErrors.password}</p>}
               </div>
             )}
           </div>
