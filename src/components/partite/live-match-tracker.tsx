@@ -25,26 +25,47 @@ export function LiveMatchTracker({ open, onOpenChange }: { open: boolean, onOpen
   
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [accumulatedSeconds, setAccumulatedSeconds] = useState(0);
   const [period, setPeriod] = useState<'1T' | '2T'>('1T');
   const [simpleMode, setSimpleMode] = useState(true);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (isRunning) {
+    if (isRunning && startTime !== null) {
       interval = setInterval(() => {
-        setSeconds(s => s + 1);
-      }, 1000);
+        setSeconds(accumulatedSeconds + Math.floor((Date.now() - startTime) / 1000));
+      }, 500);
     }
     return () => clearInterval(interval);
-  }, [isRunning]);
+  }, [isRunning, startTime, accumulatedSeconds]);
 
-  const handleStartPause = () => setIsRunning(!isRunning);
-  const handleStop = () => { setIsRunning(false); setSeconds(0); };
+  const handleStartPause = () => {
+    if (isRunning) {
+      if (startTime !== null) {
+        setAccumulatedSeconds(prev => prev + Math.floor((Date.now() - startTime) / 1000));
+      }
+      setIsRunning(false);
+      setStartTime(null);
+    } else {
+      setStartTime(Date.now());
+      setIsRunning(true);
+    }
+  };
+
+  const handleStop = () => { 
+    setIsRunning(false); 
+    setStartTime(null);
+    setAccumulatedSeconds(0);
+    setSeconds(0); 
+  };
 
   const handlePeriodToggle = (checked: boolean) => {
     setPeriod(checked ? '2T' : '1T');
-    setSeconds(0);
     setIsRunning(false);
+    setStartTime(null);
+    setAccumulatedSeconds(0);
+    setSeconds(0);
   };
 
   const handleEvent = async (type: string, team: 'home' | 'away') => {

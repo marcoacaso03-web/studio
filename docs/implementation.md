@@ -11,7 +11,7 @@
 | Segmento | Profilo | Dove trovarlo |
 |----------|---------|---------------|
 | **Primary** | Allenatori di settore giovanile (Pulcini → Juniores), serie dilettanti | Gruppi Facebook, campi sportivi, tornei |
-| **Secondary** | Direttori sportivi di società dilettantistiche | LinkedIn, federazioni locali (FIGC/LND) |
+| **Secondary** | Direttori sportivi di società dilettantistiche | Federazioni locali (FIGC/LND) |
 | **Tertiary** | Preparatori atletici freelance | Instagram, community fitness |
 
 ### 📋 Google Form — Validazione Mercato
@@ -24,21 +24,17 @@
 
 1. **Qual è il tuo ruolo?** *(Allenatore / Direttore Sportivo / Preparatore / Altro)*
 2. **In che categoria alleni?** *(Pulcini / Esordienti / Giovanissimi / Allievi / Juniores / Prima squadra dilettanti)*
-3. **Quanti giocatori gestisci?** *(< 15 / 15-25 / 25-40 / > 40)*
-4. **Come gestisci OGGI il calendario delle partite?** *(Carta / WhatsApp / Excel / App dedicata / Altro)*
-5. **Come gestisci la formazione prima della partita?** *(A mente / Foglio / Lavagna / App)*
-6. **Quanto tempo dedichi settimanalmente alla parte "burocratica" (convocazioni, formazioni, statistiche)?** *(< 30 min / 30-60 min / 1-2 ore / > 2 ore)*
-7. **Pagheresti per uno strumento che automatizza tutto questo con l'AI?** *(Sì subito / Sì se economico / Solo se gratis / No)*
-8. **Quanto saresti disposto a spendere al mese?** *(€0 / €3-5 / €5-10 / €10-20 / > €20)*
-9. **Qual è la funzione che vorresti di più?** *(Formazione AI / Import calendario automatico / Statistiche avanzate / Condivisione con lo staff / Altro)*
-10. **Lascia la tua email per accesso anticipato gratuito** *(opzionale)*
+3. **Come gestisci OGGI il calendario delle partite?** *(Carta / WhatsApp / Excel / App dedicata / Altro)*
+4. **Come gestisci la formazione prima della partita?** *(A mente / Foglio / Lavagna / App)*
+5. **Quanto tempo dedichi settimanalmente alla parte "burocratica" (convocazioni, formazioni, statistiche)?** *(< 30 min / 30-60 min / 1-2 ore / > 2 ore)*
+6. **Pagheresti per uno strumento che faciliterebbe tutto questo?** *(Sì subito / Sì se economico / Solo se gratis / No)*
+7. **Qual è la funzione che vorresti di più?** *(Statistiche avanzate / Condivisione con lo staff / Altro)*
+8. **Lascia la tua email per accesso anticipato gratuito** *(opzionale)*
 
 **Distribuzione del Form**:
 - Posta nei gruppi Facebook: *"Allenatori Calcio Giovanile"*, *"Mister Calcio"*, *"Allenatori Dilettanti Italia"*
 - Condividi su r/calcio, r/soccer (Reddit)
 - Chiedi ai tuoi contatti nel mondo calcio di inoltrarlo
-- Pubblica su LinkedIn con un post narrativo
-
 ---
 
 ## 📌 Fase 1 — Landing Page (Settimana 2-3)
@@ -47,18 +43,15 @@
 
 | Tool | Uso | Costo |
 |------|-----|-------|
-| **[Carrd.co](https://carrd.co)** | Landing page one-page, velocissima | €9/anno (Pro) |
 | **[Framer](https://framer.com)** | Landing page più elaborata, animazioni | Free → €5/mese |
 | **Vercel** (già in uso) | Deploy diretto di una `/landing` route in Next.js | Gratuito |
-| **[Tally.so](https://tally.so)** | Form waitlist alternativo a Google Forms, più bello | Gratuito |
-
 ### ✍️ Copy per la Landing Page
 
 **Headline (H1)**:
-> **Gestisci la tua squadra come un professionista. Con l'intelligenza artificiale.**
+> **Gestisci la tua squadra come un professionista.**
 
 **Sottotitolo**:
-> PitchMan è il primo assistente AI per allenatori di calcio: importa il calendario in un click, genera la formazione migliore, analizza le statistiche — tutto dal tuo telefono.
+> PitchMan è il primo assistente AI per allenatori di calcio: Tieni traccia degli allenamenti, analizza le statistiche dei tuoi giocatori, tutto dal tuo telefono.
 
 **Sezione "Il problema"**:
 > Fogli Excel, gruppi WhatsApp infiniti, appunti su carta che si perdono. Ogni settimana sprechi ore a gestire convocazioni, formazioni e statistiche. E se potessi fare tutto in 30 secondi?
@@ -67,20 +60,16 @@
 
 | Icona | Titolo | Descrizione |
 |-------|--------|-------------|
-| 📋 | **Importa il calendario** | Copia-incolla da Tuttocampo o carica un PDF. L'AI estrae tutte le partite in automatico. |
-| 🧠 | **Formazione AI** | L'assistente analizza presenze, infortuni e performance per suggerirti il miglior 11. |
-| 📊 | **Statistiche intelligenti** | Gol, assist, minuti giocati, rendimento casa/trasferta — tutto calcolato in tempo reale. |
+**Libreria esercizi comune**
+**Condivisione allenamenti con assistenti**
+**Sezione scout per direttore sportivo**
+| 📊 | **Statistiche smart** | Gol, assist, minuti giocati, rendimento casa/trasferta — tutto calcolato in tempo reale. |
 
 **CTA principale**:
 > 🚀 **Provalo gratis per 14 giorni** — Nessuna carta di credito richiesta.
 
 **CTA secondaria** (se non ancora pronto al lancio):
 > 📩 **Unisciti alla lista d'attesa** — Sarai tra i primi 100 a provarlo.
-
-**Social proof** (da costruire):
-> *"Finalmente non devo più portarmi il foglio A4 in panchina."* — Marco, allenatore Juniores
-
----
 
 ## 📌 Fase 2 — Pricing & Monetizzazione (Settimana 3-4)
 
@@ -121,9 +110,9 @@ src/
 
 | Canale | Azione | Frequenza |
 |--------|--------|-----------|
-| **Instagram** | Reel 15-30s: "Come creo la formazione in 10 secondi con l'AI" | 3x/settimana |
+| **Instagram** | Reel 15-30s: "Come gestisco gli allenamenti in 10 secondi" | 3x/settimana |
 | **TikTok** | Stessi reel, cross-posting | 3x/settimana |
-| **YouTube Shorts** | Tutorial brevi: "Import calendario da foto" | 1x/settimana |
+| **YouTube Shorts** | Tutorial brevi: "Gestione allenamenti" | 1x/settimana |
 | **Gruppi Facebook** | Post di valore (non spam): consigli + link app | 2x/settimana |
 | **Reddit** | r/calcio, r/SideProject, r/webdev — post narrativo | 1x/settimana |
 | **ProductHunt** | Launch day con preparazione | 1 volta |
@@ -132,10 +121,7 @@ src/
 ### ✍️ Copy per i social
 
 **Instagram/TikTok — Hook**:
-> "Ogni settimana perdi 2 ore per fare la formazione. Io la faccio in 10 secondi."
-
-**YouTube — Titolo**:
-> "Ho creato un'app AI che fa la formazione al posto tuo (e funziona davvero)"
+> "Tutte le informazioni necessarie per la formazione migliore in 10 secondi."
 
 **LinkedIn — Post completo**:
 ```
@@ -144,16 +130,14 @@ Ho allenato per anni nel settore giovanile.
 Ogni settimana la stessa storia:
 → Foglio Excel per le presenze
 → WhatsApp per le convocazioni  
-→ Appunti persi sulla formazione
+→ Appunti persi sulla squadra avversaria
 
 Così ho costruito PitchMan.
 
-È un'app che usa l'intelligenza artificiale per:
-✅ Importare il calendario (basta una foto)
-✅ Suggerire la formazione migliore
+È un'app per:
 ✅ Calcolare le statistiche in automatico
-
-Funziona anche offline, dal telefono.
+✅ Gestire agilmente le presenze agli allenamenti
+✅ Prendere nota di avversari e eventi durante la partita
 
 Se alleni una squadra dilettantistica, provala gratis →
 [link]
@@ -245,10 +229,41 @@ I'd love your feedback!
 
 | Tool | Costo | Uso |
 |------|-------|-----|
-| **[Plausible](https://plausible.io)** | €9/mese | Analytics privacy-friendly per la landing |
-| **[PostHog](https://posthog.com)** | Gratuito fino a 1M eventi | Event tracking in-app, funnel, retention |
-| **[Hotjar](https://hotjar.com)** | Gratuito (base) | Heatmap e registrazioni sessione |
 | **Vercel Analytics** | Già incluso | Web vitals e pageviews |
+
+---
+
+## 💰 Strategia di Monetizzazione & Funzioni Premium
+
+Il modello di business di PitchMan è **Freemium**. La gestione operativa è gratuita per attirare utenti, mentre l'intelligenza e l'analisi sono a pagamento.
+
+### 🕒 Il Modello "Trial 24 Ore"
+Per massimizzare la conversione, ogni nuovo account riceve un **Full Access Pass di 24 ore**:
+- **Obiettivo**: Permettere all'utente di importare la rosa/calendario (AI), generare la prima formazione e vedere le statistiche prodotte.
+- **Effetto**: Una volta scadute le 24 ore, l'utente avrà già i suoi dati nell'app e sentirà la "perdita" delle funzioni avanzate.
+
+---
+
+### 📊 Suddivisione Funzionalità
+
+| Funzionalità | 🟢 FREE (Base) | 💎 PRO (Analisi & AI) |
+|--------------|:--------------:|:-------------------:|
+| **Rosa & Giocatori** | Gestione base (CRUD) | - |
+| **Calendario & Partite** | Inserimento manuale | **Import AI** (Foto/Testo) |
+| **Allenamenti** | Presenze e note | - |
+| **Libreria Esercizi** | Privata | **Sociale/Società** |
+| **Statistiche** | Risultato ultima partita | **Dashboard Avanzata** (Trend, Grafici, Medie) |
+| **AI Assistant** | ❌ | **Chatbot Illimitato** (Tattica & Dati) |
+| **Export** | ❌ | PDF/CSV (Report stagione) |
+| **Director Mode** | ❌ | **Multi-squadra** (Piano Society) |
+
+---
+
+### 💳 Piani e Pricing (Suggerito)
+
+1. **Free (€0)**: Ideale per l'allenatore che vuole solo smettere di usare carta e penna.
+2. **Pro (~€4.99/mese)**: Per l'allenatore che vuole un vantaggio competitivo e risparmiare tempo con l'AI.
+3. **Society/Team (~€19.99/mese)**: Per il Direttore Sportivo che gestisce fino a 5 squadre con visione aggregata.
 
 ---
 

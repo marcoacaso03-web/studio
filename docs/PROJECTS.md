@@ -1,5 +1,6 @@
 # 🗺️ PitchMan — Roadmap & Miglioramenti
 ---
+Customer assistance in ? Research su documentazione FAQ e in ultima battuta cliccando su Non ho trovato la risposta apre chat con AI con accesso a documentazione e può rispondere solo a domande inerenti a come usare l'app e a che cosa fa l'app.
 
 ## 🔴 Bug & Fix Immediati
 - [ ] **Hydration Errors nei Modali**: Con React 18 / Next.js e componenti headless (Radix UI), verificare e prevenire avvisi di mismatch HTML tra il server rendering e la visualizzazione locale.
