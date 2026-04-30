@@ -13,6 +13,7 @@ const PlayerFormDialog = dynamic(() => import("@/components/squadra/player-form-
 const SmartPlayerDialog = dynamic(() => import("@/components/giocatori/smart-player-dialog").then(mod => mod.SmartPlayerDialog), { ssr: false });
 const ImportTuttocampoDialog = dynamic(() => import("@/components/squadra/import-tuttocampo-dialog").then(mod => mod.ImportTuttocampoDialog), { ssr: false });
 const InjuryFormDialog = dynamic(() => import("@/components/squadra/injury-form-dialog").then(mod => mod.InjuryFormDialog), { ssr: false });
+import { FaUserSecret } from "react-icons/fa";
 
 import {
   AlertDialog,
@@ -189,7 +190,7 @@ export default function RosaPage() {
                       className="h-12 w-12 rounded-full p-0 flex-shrink-0 bg-background dark:bg-black border border-primary/20 dark:border-brand-green/20 text-primary dark:text-brand-green shadow-sm hover:bg-primary/5 dark:hover:bg-brand-green/5 transition-all hover:scale-105 active:scale-95"
                       title="Scout"
                     >
-                      <Search className="h-6 w-6" />
+                      <FaUserSecret className="h-6 w-6" />
                     </Button>
                     <Button
                       onClick={() => setIsInjuryFormOpen(true)}

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useMatchesStore } from '@/store/useMatchesStore';
 import { useSeasonsStore } from '@/store/useSeasonsStore';
-import { SplashScreen } from '@/components/layout/splash-screen';
+import { Skeleton } from '@/components/ui/skeleton';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -187,7 +187,7 @@ export default function CalendarioPage() {
     }, 200);
   };
 
-  if (!mounted || (loading && matches.length === 0)) return <SplashScreen />;
+  if (!mounted) return null;
 
   return (
     <div className="space-y-6 pb-24">
@@ -489,7 +489,13 @@ export default function CalendarioPage() {
             </Card>
           ))}
 
-          {sortedMatches.length === 0 && (
+          {loading && sortedMatches.length === 0 ? (
+            <div className="space-y-4 px-2">
+              <Skeleton className="h-24 w-full rounded-2xl bg-card/20" />
+              <Skeleton className="h-24 w-full rounded-2xl bg-card/20" />
+              <Skeleton className="h-24 w-full rounded-2xl bg-card/20" />
+            </div>
+          ) : sortedMatches.length === 0 && (
             <div className="py-12 text-center bg-card dark:bg-black/20 border border-dashed border-border dark:border-white/10 rounded-3xl">
               <PiTrafficCone className="h-12 w-12 text-muted-foreground/20 mx-auto mb-4" />
               <p className="text-sm font-black uppercase tracking-widest text-muted-foreground/40">Zaino in spalla, Mister. Inizia a popolare il calendario!</p>
