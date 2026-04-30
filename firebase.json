@@ -5,6 +5,11 @@
   "auth": {
     "providers": {
       "googleSignIn": {
+        "authorizedRedirectUris": [
+          "http://localhost:3000",
+          "http://localhost",
+          "https://pitchman.vercel.app"
+        ],
         "oAuthBrandDisplayName": "Pitchman",
         "supportEmail": "marcoloiacono034@gmail.com"
       }
