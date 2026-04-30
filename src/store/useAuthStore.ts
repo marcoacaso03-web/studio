@@ -15,6 +15,7 @@ import {
   type User as FirebaseUser 
 } from 'firebase/auth';
 import { initializeFirebase } from '@/firebase';
+import { useSettingsStore } from './useSettingsStore';
 
 interface User {
   id: string;
@@ -110,6 +111,8 @@ export const useAuthStore = create<AuthState>()(
           const auth = getAuth();
           await signOut(auth);
           set({ isAuthenticated: false, user: null });
+          // Clear settings to prevent data leaking to the next user
+          useSettingsStore.getState().resetSettings();
         } catch (error) {
           console.error("Logout error:", error);
         }

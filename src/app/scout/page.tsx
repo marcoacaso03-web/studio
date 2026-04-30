@@ -122,7 +122,7 @@ function ScoutContent() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <PageHeader title="Scouting">
+      <PageHeader title="Osservazioni">
         <div className="flex gap-2">
           <Button
             size="sm"
@@ -291,7 +291,7 @@ function ScoutContent() {
         onOpenChange={setIsCategoryDialogOpen}
         categories={categories || []}
       />
-      
+
       {/* Alert Dialog per Delete */}
       <AlertDialog open={!!playerToDelete} onOpenChange={(open) => !open && setPlayerToDelete(null)}>
         <AlertDialogContent className="max-w-md rounded-3xl bg-card dark:bg-black border border-border dark:border-brand-green/30">
@@ -303,7 +303,7 @@ function ScoutContent() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-xl font-bold uppercase text-xs h-10 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted dark:hover:bg-black/40">Annulla</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={confirmDeletePlayer}
               className="rounded-xl font-bold uppercase text-xs h-10 bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
