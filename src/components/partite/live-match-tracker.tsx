@@ -10,6 +10,8 @@ import { Switch } from "@/components/ui/switch";
 import { Play, Pause, Square, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { useLiveTimerStore } from "@/store/useLiveTimerStore";
+
 const EVENT_BUTTONS = [
   { type: "goal", label: "GOL", color: "bg-brand-green text-black hover:bg-brand-green/80 border-transparent" },
   { type: "chance", label: "OCCASIONE", color: "bg-muted/50 text-foreground hover:bg-muted border-border" },
@@ -23,49 +25,58 @@ export function LiveMatchTracker({ open, onOpenChange }: { open: boolean, onOpen
   const { match, addEvent } = useMatchDetailStore();
   const teamName = useSettingsStore(state => state.teamName) || "PITCHMAN";
   
+  const { 
+    isRunning, 
+    period, 
+    startTimer, 
+    pauseTimer, 
+    resetTimer, 
+    setPeriod, 
+    getElapsedTime,
+    setIsTrackerOpen
+  } = useLiveTimerStore();
+
   const [seconds, setSeconds] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-  const [startTime, setStartTime] = useState<number | null>(null);
-  const [accumulatedSeconds, setAccumulatedSeconds] = useState(0);
-  const [period, setPeriod] = useState<'1T' | '2T'>('1T');
   const [simpleMode, setSimpleMode] = useState(true);
 
   useEffect(() => {
+    setIsTrackerOpen(open);
+    // When unmounting or closing, ensure it's marked as closed
+    return () => setIsTrackerOpen(false);
+  }, [open, setIsTrackerOpen]);
+
+  useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (isRunning && startTime !== null) {
-      interval = setInterval(() => {
-        setSeconds(accumulatedSeconds + Math.floor((Date.now() - startTime) / 1000));
-      }, 500);
+    
+    const update = () => {
+      setSeconds(Math.floor(getElapsedTime() / 1000));
+    };
+
+    update();
+    if (isRunning) {
+      interval = setInterval(update, 500);
     }
+    
     return () => clearInterval(interval);
-  }, [isRunning, startTime, accumulatedSeconds]);
+  }, [isRunning, getElapsedTime]);
 
   const handleStartPause = () => {
+    if (!match) return;
     if (isRunning) {
-      if (startTime !== null) {
-        setAccumulatedSeconds(prev => prev + Math.floor((Date.now() - startTime) / 1000));
-      }
-      setIsRunning(false);
-      setStartTime(null);
+      pauseTimer();
     } else {
-      setStartTime(Date.now());
-      setIsRunning(true);
+      startTimer(match.id);
     }
   };
 
   const handleStop = () => { 
-    setIsRunning(false); 
-    setStartTime(null);
-    setAccumulatedSeconds(0);
-    setSeconds(0); 
+    if (!match) return;
+    resetTimer(match.id);
   };
 
   const handlePeriodToggle = (checked: boolean) => {
     setPeriod(checked ? '2T' : '1T');
-    setIsRunning(false);
-    setStartTime(null);
-    setAccumulatedSeconds(0);
-    setSeconds(0);
+    if (match) resetTimer(match.id);
   };
 
   const handleEvent = async (type: string, team: 'home' | 'away') => {

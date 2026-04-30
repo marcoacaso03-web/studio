@@ -43,6 +43,7 @@ export const metadata: Metadata = {
 
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
+import { FloatingMatchTimer } from '@/components/partite/floating-match-timer';
 
 export default function RootLayout({
   children,
@@ -62,6 +63,7 @@ export default function RootLayout({
                     {children}
                 </main>
                 <BottomNavWrapper />
+                <FloatingMatchTimer />
               </div>
             </AuthGuard>
             <Toaster />
