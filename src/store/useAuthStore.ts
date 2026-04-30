@@ -9,6 +9,8 @@ import {
   signOut, 
   onAuthStateChanged,
   updateProfile,
+  GoogleAuthProvider,
+  signInWithPopup,
   type User as FirebaseUser 
 } from 'firebase/auth';
 import { initializeFirebase } from '@/firebase';
@@ -23,8 +25,9 @@ interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
   isInitialized: boolean;
-  login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signUp: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (usernameOrEmail: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signUp: (email: string, password: string, username?: string) => Promise<{ success: boolean; error?: string }>;
+  loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   setAuth: (user: FirebaseUser | null) => void;
 }
@@ -39,30 +42,48 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       user: null,
       isInitialized: false,
-      login: async (username, password) => {
+      login: async (usernameOrEmail, password) => {
         try {
-          const email = username.includes('@') ? username : `${username.toLowerCase()}@pitchman.app`;
+          const email = usernameOrEmail.includes('@') ? usernameOrEmail : `${usernameOrEmail.toLowerCase()}@pitchman.app`;
           const auth = getAuth();
           await signInWithEmailAndPassword(auth, email, password);
           return { success: true };
         } catch (error: any) {
           console.error("Login error:", error);
           let message = "Credenziali non valide.";
-          if (error.code === 'auth/user-not-found') message = "Utente non trovato. Prova a inizializzare l'account.";
+          if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+             message = "Utente non trovato o password errata.";
+          }
           return { success: false, error: message };
         }
       },
-      signUp: async (username, password) => {
+      signUp: async (email, password, username) => {
         try {
-          const email = `${username.toLowerCase()}@pitchman.app`;
+          const finalEmail = email.includes('@') ? email : `${email.toLowerCase()}@pitchman.app`;
           const auth = getAuth();
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          await updateProfile(userCredential.user, { displayName: username });
+          const userCredential = await createUserWithEmailAndPassword(auth, finalEmail, password);
+          if (username) {
+            await updateProfile(userCredential.user, { displayName: username });
+          }
           return { success: true };
         } catch (error: any) {
           console.error("SignUp error:", error);
-          let message = "Errore durante l'inizializzazione.";
+          let message = "Errore durante la registrazione.";
           if (error.code === 'auth/email-already-in-use') message = "L'account esiste già. Usa il login.";
+          if (error.code === 'auth/weak-password') message = "La password è troppo debole.";
+          return { success: false, error: message };
+        }
+      },
+      loginWithGoogle: async () => {
+        try {
+          const auth = getAuth();
+          const provider = new GoogleAuthProvider();
+          await signInWithPopup(auth, provider);
+          return { success: true };
+        } catch (error: any) {
+          console.error("Google Login error:", error);
+          let message = "Errore durante l'accesso con Google.";
+          if (error.code === 'auth/popup-closed-by-user') message = "Finestra di accesso chiusa prima del completamento.";
           return { success: false, error: message };
         }
       },
