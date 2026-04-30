@@ -306,9 +306,5 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player, onAIImpor
         </Form>
       </DialogContent>
     </Dialog>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
   );
 }

@@ -298,9 +298,5 @@ export function MatchFormDialog({ open, onOpenChange, onSave, match }: MatchForm
         </Form>
       </DialogContent>
     </Dialog>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
   );
 }

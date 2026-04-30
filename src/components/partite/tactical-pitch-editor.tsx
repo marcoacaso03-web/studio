@@ -34,7 +34,7 @@ export function TacticalPitchEditor({
     });
   };
   return (
-    <div className="relative aspect-[3/4] w-full max-w-lg mx-auto rounded-3xl bg-neutral-900 dark:bg-black overflow-hidden border-4 border-white/5 shadow-2xl flex flex-col p-4 touch-none select-none">
+    <div className="relative aspect-[3/4] w-full max-w-lg mx-auto rounded-3xl bg-neutral-900 dark:bg-black overflow-hidden border-4 border-white/5 shadow-2xl flex flex-col p-4 select-none">
       {/* Linee del campo */}
       <div className="absolute inset-4 border-2 border-white/10 pointer-events-none rounded-sm">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-16 border-b-2 border-x-2 border-white/10" />
