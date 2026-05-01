@@ -50,7 +50,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
   const [subOutPlayerId, setSubOutPlayerId] = React.useState<string>("");
   const [subOutPlayerName, setSubOutPlayerName] = React.useState<string>("");
 
-  const [minute, setMinute] = React.useState<number | null>(0);
+  const [minute, setMinute] = React.useState<number | null>(null);
   const [period, setPeriod] = React.useState<'1T' | '2T' | '1TS' | '2TS'>('1T');
   const [goalType, setGoalType] = React.useState<GoalType>('azione');
   const [notes, setNotes] = React.useState<string>("");
@@ -152,7 +152,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
     setSubInPlayerName("");
     setSubOutPlayerId("");
     setSubOutPlayerName("");
-    setMinute(0);
+    setMinute(null);
     setPeriod('1T');
     setGoalType('azione');
     setNotes("");

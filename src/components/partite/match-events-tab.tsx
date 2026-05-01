@@ -55,12 +55,14 @@ export function MatchEventsTab() {
           >
             Aggiungi eventi <Plus className="h-4 w-4 ml-1" />
           </Button>
-          <Button
-            onClick={() => setIsTrackerOpen(true)}
-            className="h-10 px-5 rounded-full bg-primary dark:bg-brand-green text-white dark:text-black font-black uppercase tracking-widest shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.2)] hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5"
-          >
-            <Zap className="h-4 w-4" /> LIVE
-          </Button>
+          {events.length > 0 && (
+            <Button
+              onClick={() => setIsTrackerOpen(true)}
+              className="h-10 px-5 rounded-full bg-primary dark:bg-brand-green text-white dark:text-black font-black uppercase tracking-widest shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.2)] hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5"
+            >
+              <Zap className="h-4 w-4" /> LIVE
+            </Button>
+          )}
         </CardHeader>
         <CardContent className="relative px-2 sm:px-6 pb-8">
           {events.length === 0 ? (

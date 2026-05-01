@@ -70,7 +70,6 @@ export const useLiveTimerStore = create<LiveTimerState>()(
           isRunning: false,
           baseTime: 0,
           startTime: null,
-          period: '1T'
         });
       },
 

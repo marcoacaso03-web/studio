@@ -213,6 +213,7 @@ export function LiveMatchTracker({ open, onOpenChange }: { open: boolean, onOpen
         isOurTeam={activeTeam === (match.isHome ? 'home' : 'away')}
         lineup={lineup}
         allPlayers={allPlayers}
+        opponentName={match.opponent}
         onComplete={onWorkflowComplete}
       />
     </Dialog>
