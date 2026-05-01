@@ -433,7 +433,7 @@ export default function AltroPage() {
 
       {/* Gestione Squadra Dialog */}
       <Dialog open={isSquadraOpen} onOpenChange={setIsSquadraOpen}>
-        <DialogContent className="max-w-[95vw] sm:max-w-lg rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground max-h-[90vh] overflow-y-auto">
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-[95vw] sm:max-w-lg rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-black text-foreground">Gestione Squadra</DialogTitle>
             <DialogDescription className="text-muted-foreground">Configura archivio stagioni e frequenza allenamento.</DialogDescription>

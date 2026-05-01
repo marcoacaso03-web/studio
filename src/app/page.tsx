@@ -8,7 +8,6 @@ import { useMatchesStore } from '@/store/useMatchesStore';
 import { useTrainingStore } from '@/store/useTrainingStore';
 import { useStatsStore } from '@/store/useStatsStore';
 import { useSeasonsStore } from '@/store/useSeasonsStore';
-import { useSettingsStore } from '@/store/useSettingsStore';
 import { useAppStore } from '@/store/useAppStore';
 import { ErrorState } from '@/components/ui/error-state';
 import { parseError } from '@/lib/error-utils';
@@ -24,7 +23,7 @@ import {
 } from "lucide-react";
 import { GiWhistle, GiSoccerBall, GiSoccerKick } from "react-icons/gi";
 import { PiTrafficCone } from "react-icons/pi";
-import { format, isAfter, parseISO, startOfDay } from "date-fns";
+import { format, parseISO, startOfDay } from "date-fns";
 import { it } from "date-fns/locale";
 import dynamic from "next/dynamic";
 
@@ -34,62 +33,22 @@ const MatchFormDialog = dynamic(() => import("@/components/partite/match-form-di
 import { FloatingAssistant } from '@/components/ai/floating-assistant';
 
 export default function HomePage() {
-  const { user, isAuthenticated } = useAuthStore();
+  const { user } = useAuthStore();
   const router = useRouter();
 
   const [mounted, setMounted] = useState(false);
-  const { hasInitialized, setHasInitialized } = useAppStore();
-  const [isInitializing, setIsInitializing] = useState(!hasInitialized);
+  const { hasInitialized } = useAppStore();
   const [isMatchFormOpen, setIsMatchFormOpen] = useState(false);
 
-  const { fetchSettings } = useSettingsStore();
-  const { activeSeason, error: seasonsError, fetchAll: fetchSeasons } = useSeasonsStore();
-  const { players, fetchAll: fetchPlayers } = usePlayersStore();
-  const { matches, fetchAll: fetchMatches, add: addMatch } = useMatchesStore();
-  const { sessions, fetchAll: fetchTrainings } = useTrainingStore();
-  const { playerLeaderboard, loadDetailedStats } = useStatsStore();
+  const { activeSeason, error: seasonsError } = useSeasonsStore();
+  const { players } = usePlayersStore();
+  const { matches, add: addMatch } = useMatchesStore();
+  const { sessions } = useTrainingStore();
+  const { playerLeaderboard } = useStatsStore();
 
   useEffect(() => {
-    setMounted(true);
-
     setMounted(true);
   }, []);
-
-  useEffect(() => {
-    const initializeDashboard = async () => {
-      if (!isAuthenticated || !user) {
-        // Leave the splash screen visible for a fraction of a second before routing
-        setTimeout(() => router.push('/login'), 500);
-        return;
-      }
-
-      try {
-        await Promise.all([
-          fetchSettings(user.id),
-          fetchSeasons()
-        ]);
-        const season = useSeasonsStore.getState().activeSeason;
-        if (season) {
-          await Promise.all([
-            fetchPlayers(),
-            fetchMatches(season.id),
-            fetchTrainings(),
-            loadDetailedStats(season.id),
-          ]);
-        }
-      } catch (e) {
-        console.error("Dashboard initialization error", e);
-      } finally {
-        // Extra little delay to prevent flashing
-        setHasInitialized(true);
-        setTimeout(() => setIsInitializing(false), 300);
-      }
-    };
-
-    if (mounted) {
-      initializeDashboard();
-    }
-  }, [mounted, isAuthenticated, user, fetchSettings, fetchSeasons, fetchPlayers, fetchMatches, fetchTrainings, loadDetailedStats, router]);
 
   const userName = user?.username || user?.email?.split('@')[0] || "Mister";
 
@@ -142,7 +101,6 @@ export default function HomePage() {
     await addMatch(data);
   };
 
-  if (isInitializing) return <SplashScreen />;
   if (!mounted) return null;
 
   if (seasonsError) {

@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { X, ChevronLeft, User, Goal, Star, AlertTriangle, Trash2 } from "lucide-react";
+import { X, ChevronLeft, User, Goal, Star, AlertTriangle, Trash2, Handshake, ArrowRightLeft } from "lucide-react";
 import { cn, displayPlayerName } from "@/lib/utils";
 import { getPositionCoordinates, getPositionAcronym } from "@/lib/lineup-mapping";
 import { Player, MatchLineup, MatchEventType, GoalType, GOAL_TYPES, ROLES } from "@/lib/types";
@@ -25,11 +25,13 @@ interface LiveMatchEventWorkflowProps {
     goalType?: GoalType;
     assistPlayerId?: string;
     assistPlayerName?: string;
+    subOutPlayerId?: string;
+    subOutPlayerName?: string;
   }) => void;
   opponentName?: string;
 }
 
-type Step = 'player' | 'goal_type' | 'assist';
+type Step = 'player' | 'goal_type' | 'assist' | 'sub_in';
 
 export function LiveMatchEventWorkflow({
   open,
@@ -46,7 +48,10 @@ export function LiveMatchEventWorkflow({
   const [selectedPlayerId, setSelectedPlayerId] = React.useState<string | undefined>();
   const [selectedGoalType, setSelectedGoalType] = React.useState<GoalType>('azione');
   const [selectedAssistId, setSelectedAssistId] = React.useState<string | undefined>();
+  const [selectedSubOutId, setSelectedSubOutId] = React.useState<string | undefined>();
   const [customPlayerName, setCustomPlayerName] = React.useState("");
+  const [customAssistName, setCustomAssistName] = React.useState("");
+  const [customSubOutName, setCustomSubOutName] = React.useState("");
 
   // Reset state when opening
   React.useEffect(() => {
@@ -55,20 +60,37 @@ export function LiveMatchEventWorkflow({
       setSelectedPlayerId(undefined);
       setSelectedGoalType('azione');
       setSelectedAssistId(undefined);
+      setSelectedSubOutId(undefined);
       setCustomPlayerName("");
+      setCustomAssistName("");
+      setCustomSubOutName("");
     }
   }, [open]);
 
   const handlePlayerSelect = (playerId: string) => {
     const player = allPlayers.find(p => p.id === playerId);
     if (step === 'player') {
-      setSelectedPlayerId(playerId);
-      if (eventType === 'goal' && isOurTeam) {
-        setStep('goal_type');
+      if (eventType === 'substitution') {
+        setSelectedSubOutId(playerId);
+        if (isOurTeam) setStep('sub_in');
       } else {
-        onComplete({ playerId, playerName: player ? displayPlayerName(player) : "" });
-        onOpenChange(false);
+        setSelectedPlayerId(playerId);
+        if (eventType === 'goal' && isOurTeam) {
+          setStep('goal_type');
+        } else {
+          onComplete({ playerId, playerName: player ? displayPlayerName(player) : "" });
+          onOpenChange(false);
+        }
       }
+    } else if (step === 'sub_in') {
+      const subOutPlayer = allPlayers.find(p => p.id === selectedSubOutId);
+      onComplete({ 
+        playerId, 
+        playerName: player ? displayPlayerName(player) : "",
+        subOutPlayerId: selectedSubOutId,
+        subOutPlayerName: subOutPlayer ? displayPlayerName(subOutPlayer) : ""
+      });
+      onOpenChange(false);
     } else if (step === 'assist') {
       setSelectedAssistId(playerId);
       const mainPlayer = allPlayers.find(p => p.id === selectedPlayerId);
@@ -87,19 +109,18 @@ export function LiveMatchEventWorkflow({
     setStep('assist');
   };
 
-  const renderPitch = (isAssist: boolean = false) => {
-    if (!lineup || !lineup.formation) return renderPlayerList(isAssist);
+  const renderPitch = (isAssist: boolean = false, isSubIn: boolean = false) => {
+    if (!lineup || !lineup.formation) return renderPlayerList(isAssist, isSubIn);
 
     const starters = lineup.starters.map(s => typeof s === 'string' ? s : s.playerId);
     const substitutes = lineup.substitutes.map(s => typeof s === 'string' ? s : s.playerId);
-    const allInMatch = [...starters, ...substitutes];
 
     return (
       <div className="space-y-4">
         {isAssist && (
           <Button 
             variant="outline" 
-            className="w-full h-12 rounded-xl border-dashed border-2 font-black uppercase tracking-widest hover:bg-rose-500/10 hover:text-rose-500 transition-all"
+            className="w-full h-12 rounded-xl border-dashed border-2 font-black uppercase tracking-widest hover:bg-rose-500/10 hover:text-rose-500 transition-all border-white/10"
             onClick={() => handlePlayerSelect('none')}
           >
             Nessun Assist
@@ -120,8 +141,7 @@ export function LiveMatchEventWorkflow({
                const coords = getPositionCoordinates(lineup.formation!, idx);
                const acronym = getPositionAcronym(lineup.formation!, idx);
                const player = allPlayers.find(p => p.id === pid);
-               const isSelected = isAssist ? selectedAssistId === pid : selectedPlayerId === pid;
-               const isAlreadyScorer = !isAssist && selectedPlayerId === pid;
+               const isSelected = isAssist ? selectedAssistId === pid : (isSubIn ? selectedPlayerId === pid : selectedSubOutId === pid);
 
                return (
                  <div 
@@ -155,6 +175,7 @@ export function LiveMatchEventWorkflow({
             {substitutes.map(pid => {
               const player = allPlayers.find(p => p.id === pid);
               if (!player) return null;
+              const isSelected = isAssist ? selectedAssistId === pid : (isSubIn ? selectedPlayerId === pid : selectedSubOutId === pid);
               return (
                 <Button 
                   key={pid} 
@@ -162,7 +183,7 @@ export function LiveMatchEventWorkflow({
                   size="sm" 
                   className={cn(
                     "h-8 text-[9px] font-bold uppercase justify-start px-2 rounded-lg border-white/10",
-                    (isAssist ? selectedAssistId === pid : selectedPlayerId === pid) && "bg-brand-green border-brand-green text-black"
+                    isSelected && "bg-brand-green border-brand-green text-black"
                   )}
                   onClick={() => handlePlayerSelect(pid)}
                 >
@@ -177,13 +198,13 @@ export function LiveMatchEventWorkflow({
     );
   };
 
-  const renderPlayerList = (isAssist: boolean = false) => {
+  const renderPlayerList = (isAssist: boolean = false, isSubIn: boolean = false) => {
     return (
       <div className="space-y-4">
         {isAssist && (
           <Button 
             variant="outline" 
-            className="w-full h-12 rounded-xl border-dashed border-2 font-black uppercase tracking-widest hover:bg-rose-500/10 hover:text-rose-500 transition-all"
+            className="w-full h-12 rounded-xl border-dashed border-2 font-black uppercase tracking-widest hover:bg-rose-500/10 hover:text-rose-500 transition-all border-white/10"
             onClick={() => handlePlayerSelect('none')}
           >
             Nessun Assist
@@ -198,22 +219,25 @@ export function LiveMatchEventWorkflow({
                 <div key={role} className="space-y-2">
                   <h4 className="text-[10px] font-black uppercase text-brand-green tracking-widest pl-1">{role}</h4>
                   <div className="grid grid-cols-1 gap-2">
-                    {playersInRole.map(player => (
-                      <Button
-                        key={player.id}
-                        variant="outline"
-                        className={cn(
-                          "h-12 justify-start px-4 rounded-xl border-white/5 bg-white/5 hover:bg-white/10 text-white font-bold transition-all",
-                          (isAssist ? selectedAssistId === player.id : selectedPlayerId === player.id) && "bg-brand-green/20 border-brand-green text-brand-green"
-                        )}
-                        onClick={() => handlePlayerSelect(player.id)}
-                      >
-                        <div className="flex items-center justify-between w-full">
-                          <span className="uppercase text-xs">{displayPlayerName(player)}</span>
-                          {(isAssist ? selectedAssistId === player.id : selectedPlayerId === player.id) && <Star className="h-4 w-4 fill-current" />}
-                        </div>
-                      </Button>
-                    ))}
+                    {playersInRole.map(player => {
+                      const isSelected = isAssist ? selectedAssistId === player.id : (isSubIn ? selectedPlayerId === player.id : selectedSubOutId === player.id);
+                      return (
+                        <Button
+                          key={player.id}
+                          variant="outline"
+                          className={cn(
+                            "h-12 justify-start px-4 rounded-xl border-white/5 bg-white/5 hover:bg-white/10 text-white font-bold transition-all",
+                            isSelected && "bg-brand-green/20 border-brand-green text-brand-green"
+                          )}
+                          onClick={() => handlePlayerSelect(player.id)}
+                        >
+                          <div className="flex items-center justify-between w-full">
+                            <span className="uppercase text-xs">{displayPlayerName(player)}</span>
+                            {isSelected && <Star className="h-4 w-4 fill-current" />}
+                          </div>
+                        </Button>
+                      );
+                    })}
                   </div>
                 </div>
               );
@@ -226,7 +250,10 @@ export function LiveMatchEventWorkflow({
 
   const getTitle = () => {
     switch (step) {
-      case 'player': return `Chi ha fatto ${eventType === 'goal' ? 'GOL' : eventType.replace('_', ' ')}?`;
+      case 'player': 
+        if (eventType === 'substitution') return "Chi esce?";
+        return `Chi ha fatto ${eventType === 'goal' ? 'GOL' : eventType.replace('_', ' ')}?`;
+      case 'sub_in': return "Chi entra?";
       case 'goal_type': return "Tipo di Gol";
       case 'assist': return "Chi ha fatto l'ASSIST?";
       default: return "Dettagli Evento";
@@ -239,31 +266,37 @@ export function LiveMatchEventWorkflow({
         <DialogHeader className="mb-4">
           <div className="flex items-center justify-between">
             {step !== 'player' && (
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-white/50 hover:text-white" onClick={() => setStep(step === 'assist' ? 'goal_type' : 'player')}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-white/50 hover:text-white" onClick={() => {
+                if (step === 'sub_in') setStep('player');
+                else if (step === 'assist') setStep('goal_type');
+                else if (step === 'goal_type') setStep('player');
+              }}>
                 <ChevronLeft className="h-5 w-5" />
               </Button>
             )}
             <DialogTitle className="text-xl font-black uppercase tracking-widest text-center flex-1">
               {getTitle()}
             </DialogTitle>
-            <div className="w-8" /> {/* Spacer */}
+            <div className="w-8" />
           </div>
         </DialogHeader>
 
         {step === 'player' && (
           isOurTeam 
-            ? (lineup?.starters?.length ? renderPitch() : renderPlayerList())
+            ? (lineup?.starters?.length ? renderPitch() : renderPlayerList()) 
             : (
               <div className="space-y-6 py-4">
                 <div className="space-y-3">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-white/40 text-center">Inserisci il nome del marcatore/protagonista</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-white/40 text-center">
+                    {eventType === 'substitution' ? "Nome giocatore che esce" : "Inserisci il nome del protagonista"}
+                  </p>
                   <div className="relative">
                     <input 
                       autoFocus
                       className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-5 text-lg font-black uppercase tracking-widest text-white placeholder:text-white/20 focus:outline-none focus:border-brand-green/50 transition-all"
                       placeholder={opponentName || "AVVERSARIO"}
-                      value={customPlayerName}
-                      onChange={(e) => setCustomPlayerName(e.target.value)}
+                      value={eventType === 'substitution' ? customSubOutName : customPlayerName}
+                      onChange={(e) => eventType === 'substitution' ? setCustomSubOutName(e.target.value) : setCustomPlayerName(e.target.value)}
                     />
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">
                       <User className="h-5 w-5 text-white/20" />
@@ -276,31 +309,22 @@ export function LiveMatchEventWorkflow({
                   <Button 
                     className="w-full h-14 bg-brand-green text-black font-black uppercase tracking-widest rounded-2xl hover:bg-brand-green/80 shadow-[0_0_20px_rgba(172,229,4,0.3)] transition-all"
                     onClick={() => {
-                      const finalName = customPlayerName.trim() || opponentName || "Avversario";
-                      if (eventType === 'goal') {
-                        setSelectedPlayerId(undefined); // No specific ID from our team
-                        setStep('goal_type');
-                      } else {
-                        onComplete({ playerName: finalName });
-                        onOpenChange(false);
-                      }
+                        if (eventType === 'substitution') {
+                            setStep('sub_in');
+                        } else {
+                            const finalName = customPlayerName.trim() || opponentName || "Avversario";
+                            if (eventType === 'goal') {
+                                setSelectedPlayerId(undefined);
+                                setStep('goal_type');
+                            } else {
+                                onComplete({ playerName: finalName });
+                                onOpenChange(false);
+                            }
+                        }
                     }}
                   >
-                    {eventType === 'goal' ? 'Continua al tipo goal' : 'Salva Evento'}
+                    {eventType === 'goal' ? 'Continua al tipo goal' : (eventType === 'substitution' ? 'Continua al sub-in' : 'Salva Evento')}
                   </Button>
-                  
-                  {eventType !== 'goal' && (
-                     <Button 
-                        variant="ghost"
-                        className="w-full h-12 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 rounded-xl transition-all"
-                        onClick={() => {
-                          onComplete({ playerName: opponentName || "Avversario" });
-                          onOpenChange(false);
-                        }}
-                     >
-                       Salta e usa nome squadra
-                     </Button>
-                  )}
                 </div>
               </div>
             )
@@ -331,9 +355,99 @@ export function LiveMatchEventWorkflow({
           </div>
         )}
 
-        {step === 'assist' && (lineup?.starters?.length ? renderPitch(true) : renderPlayerList(true))}
+        {step === 'assist' && (
+          isOurTeam 
+            ? (lineup?.starters?.length ? renderPitch(true) : renderPlayerList(true))
+            : (
+              <div className="space-y-6 py-4">
+                <Button 
+                  variant="outline" 
+                  className="w-full h-12 rounded-xl border-dashed border-2 font-black uppercase tracking-widest hover:bg-rose-500/10 hover:text-rose-500 transition-all border-white/10"
+                  onClick={() => handlePlayerSelect('none')}
+                >
+                  Nessun Assist
+                </Button>
 
-        {/* Rimosso vecchio pulsante statico poiché integrato sopra */}
+                <div className="space-y-3">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-white/40 text-center">Inserisci il nome dell'assistman</p>
+                  <div className="relative">
+                    <input 
+                      autoFocus
+                      className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-5 text-lg font-black uppercase tracking-widest text-white placeholder:text-white/20 focus:outline-none focus:border-brand-green/50 transition-all"
+                      placeholder={opponentName || "AVVERSARIO"}
+                      value={customAssistName}
+                      onChange={(e) => setCustomAssistName(e.target.value)}
+                    />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <Handshake className="h-5 w-5 text-white/20" />
+                    </div>
+                  </div>
+                  <p className="text-[9px] font-bold text-white/30 uppercase text-center">Lascia vuoto per usare il nome della squadra</p>
+                </div>
+
+                <div className="space-y-3">
+                  <Button 
+                    className="w-full h-14 bg-brand-green text-black font-black uppercase tracking-widest rounded-2xl hover:bg-brand-green/80 shadow-[0_0_20px_rgba(172,229,4,0.3)] transition-all"
+                    onClick={() => {
+                      const finalAssistName = customAssistName.trim() || opponentName || "Avversario";
+                      const mainPlayer = allPlayers.find(p => p.id === selectedPlayerId);
+                      onComplete({
+                        playerId: selectedPlayerId,
+                        playerName: mainPlayer ? displayPlayerName(mainPlayer) : (customPlayerName.trim() || opponentName || "Avversario"),
+                        goalType: selectedGoalType,
+                        assistPlayerName: finalAssistName
+                      });
+                      onOpenChange(false);
+                    }}
+                  >
+                    Salva Evento
+                  </Button>
+                </div>
+              </div>
+            )
+        )}
+
+        {step === 'sub_in' && (
+          isOurTeam 
+            ? (lineup?.starters?.length ? renderPitch(false, true) : renderPlayerList(false, true))
+            : (
+              <div className="space-y-6 py-4">
+                <div className="space-y-3">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-white/40 text-center">Nome giocatore che entra</p>
+                  <div className="relative">
+                    <input 
+                      autoFocus
+                      className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-5 text-lg font-black uppercase tracking-widest text-white placeholder:text-white/20 focus:outline-none focus:border-brand-green/50 transition-all"
+                      placeholder={opponentName || "AVVERSARIO"}
+                      value={customPlayerName}
+                      onChange={(e) => setCustomPlayerName(e.target.value)}
+                    />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <ArrowRightLeft className="h-5 w-5 text-white/20" />
+                    </div>
+                  </div>
+                  <p className="text-[9px] font-bold text-white/30 uppercase text-center">Lascia vuoto per usare il nome della squadra</p>
+                </div>
+
+                <div className="space-y-3">
+                  <Button 
+                    className="w-full h-14 bg-brand-green text-black font-black uppercase tracking-widest rounded-2xl hover:bg-brand-green/80 shadow-[0_0_20px_rgba(172,229,4,0.3)] transition-all"
+                    onClick={() => {
+                      const finalSubInName = customPlayerName.trim() || opponentName || "Avversario";
+                      const finalSubOutName = customSubOutName.trim() || opponentName || "Avversario";
+                      onComplete({
+                        playerName: finalSubInName,
+                        subOutPlayerName: finalSubOutName
+                      });
+                      onOpenChange(false);
+                    }}
+                  >
+                    Salva Sostituzione
+                  </Button>
+                </div>
+              </div>
+            )
+        )}
       </DialogContent>
     </Dialog>
   );
