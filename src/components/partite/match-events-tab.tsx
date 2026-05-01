@@ -232,12 +232,14 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
         )}>
           {event.type === 'substitution' ? (
             <div className={cn("flex flex-col", alignLeft ? "items-end text-right" : "items-start text-left")}>
-              <div className="flex items-center gap-2">
+              <div className={cn("flex items-center gap-2", alignLeft && "flex-row-reverse")}>
+                <ArrowUp className="h-3 w-3 text-emerald-500" />
                 <p className="font-black leading-tight uppercase text-xs sm:text-sm truncate max-w-[120px] sm:max-w-none">
                   {formatPlayerInitial(event.playerName)}
                 </p>
               </div>
-              <div className="flex items-center gap-2 mt-0.5 opacity-60">
+              <div className={cn("flex items-center gap-2 mt-0.5 opacity-60", alignLeft && "flex-row-reverse")}>
+                <ArrowDown className="h-3 w-3 text-rose-500" />
                 <p className="text-[10px] sm:text-[11px] font-bold leading-tight uppercase">
                   {formatPlayerInitial(event.subOutPlayerName)}
                 </p>

@@ -106,7 +106,17 @@ export function LiveMatchEventWorkflow({
   };
 
   const handleGoalTypeConfirm = () => {
-    setStep('assist');
+    if (selectedGoalType === 'rigore') {
+      const mainPlayer = allPlayers.find(p => p.id === selectedPlayerId);
+      onComplete({
+        playerId: selectedPlayerId,
+        playerName: mainPlayer ? displayPlayerName(mainPlayer) : (customPlayerName.trim() || opponentName || "Avversario"),
+        goalType: selectedGoalType,
+      });
+      onOpenChange(false);
+    } else {
+      setStep('assist');
+    }
   };
 
   const renderPitch = (isAssist: boolean = false, isSubIn: boolean = false) => {

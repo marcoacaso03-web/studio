@@ -45,8 +45,8 @@ export const getEventIcon = (event: Partial<MatchEvent>, size: string = "h-4 w-4
     case 'sub_out': 
       return (
         <div className="flex items-center -space-x-1.5 h-full">
-          <ArrowUp className={cn(size, "text-black dark:text-white -translate-y-0.5")} />
-          <ArrowDown className={cn(size, "text-black dark:text-white/40 translate-y-0.5")} />
+          <ArrowUp className={cn(size, "text-emerald-500 -translate-y-0.5")} />
+          <ArrowDown className={cn(size, "text-rose-500 translate-y-0.5")} />
         </div>
       );
     case 'penalty_saved': return <GiGloves className={getFinalClass("text-black dark:text-white")} />;
