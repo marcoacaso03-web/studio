@@ -33,6 +33,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { displayPlayerName, cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useSettingsStore } from "@/store/useSettingsStore";
+import { DraggablePlayer } from "./draggable-player";
 
 export function MatchLineupTab() {
   const { lineup, allPlayers, saveLineup, loading } = useMatchDetailStore();
@@ -65,6 +66,38 @@ export function MatchLineupTab() {
       setIsDirty(false);
     }
   }, [lineup]);
+
+  const handleSwap = (source: { type: 'starter' | 'sub'; index: number }, target: { type: 'starter' | 'sub'; index: number }) => {
+    if (!isEditing) return;
+
+    const newStarters = [...starters];
+    const newSubs = [...substitutes];
+
+    const sourceId = source.type === 'starter' ? starters[source.index] : substitutes[source.index];
+    const targetId = target.type === 'starter' ? starters[target.index] : substitutes[target.index];
+
+    if (source.type === 'starter') {
+      newStarters[source.index] = targetId;
+    } else {
+      newSubs[source.index] = targetId;
+    }
+
+    if (target.type === 'starter') {
+      newStarters[target.index] = sourceId;
+    } else {
+      newSubs[target.index] = sourceId;
+    }
+
+    setStarters(newStarters);
+    setSubstitutes(newSubs);
+    setIsDirty(true);
+    
+    toast({
+      title: "Posizione Scambiata",
+      description: "La formazione è stata aggiornata.",
+      duration: 2000,
+    });
+  };
 
   const handleSave = async () => {
     try {
@@ -226,7 +259,9 @@ export function MatchLineupTab() {
               starters={starters}
               allPlayers={allPlayers}
               matchDate={match?.date}
+              isEditing={isEditing}
               onSlotClick={(idx) => isEditing && setEditingSlot(idx)}
+              onSwap={handleSwap}
             />
           </div>
         </div>
@@ -243,7 +278,7 @@ export function MatchLineupTab() {
                 Nessun giocatore in panchina
               </div>
             ) : (
-              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {substitutes.map((s, i) => {
                   if (!isEditing && !s) return null;
 
@@ -251,10 +286,17 @@ export function MatchLineupTab() {
                   const availablePlayers = allPlayers.filter(p => !allSelectedIds.includes(p.id) || p.id === s);
 
                   return (
-                    <div key={i} className="flex items-center gap-3 p-2 bg-muted/30 dark:bg-white/5 rounded-xl border border-transparent hover:border-primary/20 dark:hover:border-brand-green/20 transition-all">
-                      <div className="w-7 h-7 rounded-full bg-background dark:bg-black flex items-center justify-center text-[9px] font-black text-muted-foreground border border-border dark:border-white/10 shrink-0">
-                        R{i + 1}
-                      </div>
+                    <div key={`${i}-${s || 'empty'}`} className="flex items-center gap-3 p-3 bg-muted/30 dark:bg-white/5 rounded-2xl border border-border/50 dark:border-white/5 hover:border-primary/20 dark:hover:border-brand-green/20 transition-all relative">
+                      <DraggablePlayer
+                        player={player}
+                        acronym={`R${i + 1}`}
+                        index={i}
+                        type="sub"
+                        isEditing={isEditing}
+                        onSwap={handleSwap}
+                        isInjured={player ? isPlayerInjured(player, match?.date || "") : false}
+                        onClick={() => {}} // Non necessario qui perché c'è la Select
+                      />
                       <div className="flex-1 min-w-0">
                         <Select
                           value={s || "none"}
@@ -265,9 +307,6 @@ export function MatchLineupTab() {
                             "border-none shadow-none h-7 p-0 bg-transparent focus:ring-0 text-[11px] font-black uppercase flex items-center gap-2",
                             isEditing ? "text-foreground dark:text-white" : "text-muted-foreground cursor-default"
                           )}>
-                            {player && isPlayerInjured(player, match?.date || "") && (
-                              <Activity className="w-3 h-3 text-red-500 shrink-0" />
-                            )}
                             <SelectValue placeholder="-- SELEZIONA --" />
                           </SelectTrigger>
                           <SelectContent className="bg-card dark:bg-black border-border dark:border-brand-green/50">

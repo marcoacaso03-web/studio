@@ -7,6 +7,7 @@ import { useSettingsStore } from '@/store/useSettingsStore';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { GuideDialog } from './guide-dialog';
+import { InstallPWA } from './install-pwa';
 
 const navItems = [
   { href: "/", label: "Dashboard" },
@@ -59,6 +60,9 @@ export function AppHeader() {
 
       {user && (
         <div className="flex items-center gap-3">
+          {/* PWA Install Button */}
+          <InstallPWA />
+          
           {/* Help Button */}
           <GuideDialog />
 
