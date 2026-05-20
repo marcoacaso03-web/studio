@@ -18,6 +18,7 @@ import {
   FormMessage,
   FormDescription,
 } from "@/components/ui/form";
+import { RoleGuard } from "@/components/auth/RoleGuard";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -140,16 +141,18 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player, onAIImpor
               >
                 <Sparkles className="h-5 w-5" />
               </Button>
-              <Button 
-                onClick={onTuttocampoImport}
-                variant="ghost"
-                size="icon"
-                disabled={isSaving}
-                className="h-10 w-10 rounded-full bg-primary/10 dark:bg-brand-green/10 text-primary dark:text-brand-green hover:bg-primary/20 dark:hover:bg-brand-green/20"
-                title="Importa da Tuttocampo"
-              >
-                <Globe className="h-5 w-5" />
-              </Button>
+              <RoleGuard allowedRoles={['developer']}>
+                <Button 
+                  onClick={onTuttocampoImport}
+                  variant="ghost"
+                  size="icon"
+                  disabled={isSaving}
+                  className="h-10 w-10 rounded-full bg-primary/10 dark:bg-brand-green/10 text-primary dark:text-brand-green hover:bg-primary/20 dark:hover:bg-brand-green/20"
+                  title="Importa da Tuttocampo"
+                >
+                  <Globe className="h-5 w-5" />
+                </Button>
+              </RoleGuard>
             </div>
           )}
         </DialogHeader>

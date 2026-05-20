@@ -87,7 +87,7 @@ export function ExerciseViewDialog({ open, onOpenChange, exercise }: ExerciseVie
                         <h3 className="text-xs font-black uppercase tracking-widest text-foreground">Obiettivi Strategici</h3>
                       </div>
                       <div className="bg-muted/30 dark:bg-zinc-900/40 p-5 rounded-3xl border border-border/50 dark:border-brand-green/5">
-                        <p className="text-sm md:text-base text-foreground/80 leading-relaxed whitespace-pre-wrap font-medium">
+                        <p className="text-sm md:text-base text-foreground/80 leading-relaxed whitespace-pre-wrap font-medium select-text">
                           {exercise.objectives}
                         </p>
                       </div>
@@ -102,7 +102,7 @@ export function ExerciseViewDialog({ open, onOpenChange, exercise }: ExerciseVie
                       <h3 className="text-xs font-black uppercase tracking-widest text-foreground">Svolgimento dell'Esercizio</h3>
                     </div>
                     <div className="bg-muted/30 dark:bg-zinc-900/40 p-5 rounded-3xl border border-border/50 dark:border-brand-green/5">
-                      <p className="text-sm md:text-base text-foreground/80 leading-relaxed whitespace-pre-wrap font-medium">
+                      <p className="text-sm md:text-base text-foreground/80 leading-relaxed whitespace-pre-wrap font-medium select-text">
                         {exercise.description}
                       </p>
                     </div>

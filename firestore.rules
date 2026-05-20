@@ -13,6 +13,22 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    function getRole() {
+      return request.auth.token.role;
+    }
+
+    function isDeveloper() {
+      return getRole() == 'developer';
+    }
+
+    function isDirectorOrAbove() {
+      return getRole() in ['director', 'developer'];
+    }
+
+    function isCoachOrAbove() {
+      return getRole() in ['coach', 'director', 'developer'];
+    }
+
     function isExistingOwner(userId) {
       return isOwner(userId) && resource != null;
     }
@@ -44,11 +60,12 @@ service cloud.firestore {
     // ─── /users/{userId} ─────────────────────────────────────────────────────
     
     match /users/{userId} {
-      allow get:    if isOwner(userId);
-      allow list:   if false;
+      allow get:    if isOwner(userId) || isDeveloper();
+      allow list:   if isDeveloper();
       allow create: if isOwner(userId);
-      allow update: if isExistingOwner(userId);
-      allow delete: if isExistingOwner(userId);
+      // Evita che gli utenti si auto-promuovano modificando il ruolo (solo API/admin possono)
+      allow update: if isExistingOwner(userId) && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']) || isDeveloper());
+      allow delete: if isExistingOwner(userId) || isDeveloper();
 
       match /scoutPlayers/{scoutPlayerId} {
         allow get, list: if isOwner(userId);

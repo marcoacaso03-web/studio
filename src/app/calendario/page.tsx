@@ -35,6 +35,7 @@ import { cn } from '@/lib/utils';
 import { MatchFormDialog } from '@/components/partite/match-form-dialog';
 import { ImportTuttocampoDialog } from "@/components/partite/import-tuttocampo-dialog";
 import { ImportCalendarioScraperDialog } from "@/components/partite/import-calendario-scraper-dialog";
+import { RoleGuard } from "@/components/auth/RoleGuard";
 import { useStatsStore } from "@/store/useStatsStore";
 import {
   AlertDialog,
@@ -202,15 +203,17 @@ export default function CalendarioPage() {
           }
         >
           <div className="flex gap-1 md:gap-1.5 shrink-0 items-center">
-            <Button
-              variant="outline"
-              className="bg-muted dark:bg-black/80 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 w-8 sm:h-9 sm:w-9 rounded-xl shadow-sm p-0"
-              size="icon"
-              onClick={() => setIsScraperImportOpen(true)}
-              title="Sincronizza da URL (Scraping)"
-            >
-              <Globe className="h-4 w-4 text-primary dark:text-brand-green" />
-            </Button>
+            <RoleGuard allowedRoles={['developer']}>
+              <Button
+                variant="outline"
+                className="bg-muted dark:bg-black/80 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 w-8 sm:h-9 sm:w-9 rounded-xl shadow-sm p-0"
+                size="icon"
+                onClick={() => setIsScraperImportOpen(true)}
+                title="Sincronizza da URL (Scraping)"
+              >
+                <Globe className="h-4 w-4 text-primary dark:text-brand-green" />
+              </Button>
+            </RoleGuard>
             <Button
               variant="outline"
               className="bg-muted dark:bg-black/80 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 w-8 sm:h-9 sm:w-9 rounded-xl shadow-sm p-0"

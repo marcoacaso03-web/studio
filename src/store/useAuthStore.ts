@@ -16,11 +16,13 @@ import {
 } from 'firebase/auth';
 import { initializeFirebase } from '@/firebase';
 import { useSettingsStore } from './useSettingsStore';
+import { AccountRole } from '@/lib/types';
 
 interface User {
   id: string;
   username: string;
   email: string;
+  role: AccountRole | null;
 }
 
 interface AuthState {
@@ -31,7 +33,7 @@ interface AuthState {
   signUp: (email: string, password: string, username?: string) => Promise<{ success: boolean; error?: string }>;
   loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
-  setAuth: (user: FirebaseUser | null) => void;
+  setAuth: (user: FirebaseUser | null) => Promise<void>;
 }
 
 if (typeof window !== 'undefined') {
@@ -74,6 +76,14 @@ export const useAuthStore = create<AuthState>()(
             await updateProfile(userCredential.user, { displayName: username });
           }
           await sendEmailVerification(userCredential.user);
+
+          // Inizializza ruolo e documento Firestore
+          const idToken = await userCredential.user.getIdToken(true);
+          await fetch('/api/auth/init-user', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${idToken}` }
+          });
+
           await signOut(auth);
           return { success: true };
         } catch (error: any) {
@@ -88,13 +98,19 @@ export const useAuthStore = create<AuthState>()(
         try {
           const auth = getAuth();
           const provider = new GoogleAuthProvider();
-          // Adding custom parameters can help with some popup issues
           provider.setCustomParameters({ prompt: 'select_account' });
           
           const result = await signInWithPopup(auth, provider);
           
+          // Inizializza ruolo e documento se nuovo utente
+          const idToken = await result.user.getIdToken(true);
+          await fetch('/api/auth/init-user', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${idToken}` }
+          });
+
           // Force immediate state update to prevent race conditions during navigation
-          useAuthStore.getState().setAuth(result.user);
+          await useAuthStore.getState().setAuth(result.user);
           
           return { success: true };
         } catch (error: any) {
@@ -117,18 +133,26 @@ export const useAuthStore = create<AuthState>()(
           console.error("Logout error:", error);
         }
       },
-      setAuth: (firebaseUser) => {
+      setAuth: async (firebaseUser) => {
         if (firebaseUser) {
           const username = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Utente';
-          set({ 
-            isAuthenticated: true, 
-             isInitialized: true,
-            user: { 
-              id: firebaseUser.uid, 
-              username,
-              email: firebaseUser.email || ''
-            } 
-          });
+          try {
+            const tokenResult = await firebaseUser.getIdTokenResult(true);
+            const role = (tokenResult.claims.role as AccountRole) || 'coach';
+            set({ 
+              isAuthenticated: true, 
+              isInitialized: true,
+              user: { 
+                id: firebaseUser.uid, 
+                username,
+                email: firebaseUser.email || '',
+                role
+              } 
+            });
+          } catch (error) {
+            console.error('Error fetching token result:', error);
+            set({ isAuthenticated: false, isInitialized: true, user: null });
+          }
         } else {
           set({ isAuthenticated: false, isInitialized: true, user: null });
         }

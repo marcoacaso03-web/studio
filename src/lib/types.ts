@@ -1,3 +1,15 @@
+export type AccountRole = 'developer' | 'director' | 'coach' | 'player';
+
+export interface UserProfile {
+  uid: string;
+  email: string;
+  displayName?: string;
+  role: AccountRole;
+  teamIds?: string[];
+  linkedPlayerId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export const ROLES = ['Portiere', 'Difensore', 'Centrocampista', 'Attaccante'] as const;
 export type Role = typeof ROLES[number];

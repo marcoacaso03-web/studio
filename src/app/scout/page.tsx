@@ -246,7 +246,7 @@ function ScoutContent() {
                   </div>
 
                   {player.notes && (
-                    <p className="text-[10px] text-foreground/70 dark:text-white/70 leading-relaxed mb-3 line-clamp-2 italic">
+                    <p className="text-[10px] text-foreground/70 dark:text-white/70 leading-relaxed mb-3 line-clamp-2 italic select-text">
                       "{player.notes}"
                     </p>
                   )}

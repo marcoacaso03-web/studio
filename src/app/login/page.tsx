@@ -248,6 +248,12 @@ export default function LoginPage() {
             {isLoginMode ? "Registrati" : "Accedi"}
           </button>
         </div>
+
+        <div className="text-xs text-center text-muted-foreground mt-4 space-x-2">
+          <a href="/privacy" className="hover:underline hover:text-primary transition-colors">Privacy Policy</a>
+          <span>&bull;</span>
+          <a href="/termini" className="hover:underline hover:text-primary transition-colors">Termini di servizio</a>
+        </div>
       </div>
     </div>
   );

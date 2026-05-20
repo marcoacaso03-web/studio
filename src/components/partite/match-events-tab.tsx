@@ -246,7 +246,7 @@ function TimelineEvent({ event, match, getEventIcon, getEventLabel, isHome, onOp
               </div>
             </div>
           ) : event.type === 'note' ? (
-            <p className="text-[11px] sm:text-xs font-medium tracking-tight text-foreground/80 break-words italic max-w-[140px] sm:max-w-[200px]">
+            <p className="text-[11px] sm:text-xs font-medium tracking-tight text-foreground/80 break-words italic max-w-[140px] sm:max-w-[200px] select-text">
               &quot;{event.notes}&quot;
             </p>
           ) : (
