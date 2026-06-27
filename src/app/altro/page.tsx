@@ -45,6 +45,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 
 export default function AltroPage() {
   const [isAddingSeason, setIsAddingSeason] = useState(false);
+  const [isDeletingSeason, setIsDeletingSeason] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [newSeasonName, setNewSeasonName] = useState('');
@@ -213,14 +214,19 @@ export default function AltroPage() {
 
   const handleDeleteSeason = async () => {
     if (!seasonToDelete) return;
-    await removeSeason(seasonToDelete.id);
-    setSeasonToDelete(null);
-    setIsSquadraOpen(false);
-    // Radix UI nested dialogs bug: body gets stuck with pointer-events:none
-    // Force cleanup after both dialogs close
-    setTimeout(() => {
-      document.body.style.pointerEvents = '';
-    }, 300);
+    setIsDeletingSeason(true);
+    try {
+      await removeSeason(seasonToDelete.id);
+      setSeasonToDelete(null);
+      setIsSquadraOpen(false);
+      // Radix UI nested dialogs bug: body gets stuck with pointer-events:none
+      // Force cleanup after both dialogs close
+      setTimeout(() => {
+        document.body.style.pointerEvents = '';
+      }, 300);
+    } finally {
+      setIsDeletingSeason(false);
+    }
   };
 
   const handleLogout = () => {
@@ -325,8 +331,23 @@ export default function AltroPage() {
 
   if (!mounted) return null;
 
+  // Global loading overlay for async season operations
+  const isSeasonProcessing = isAddingSeason || isDeletingSeason;
+
   return (
     <div className="pb-24 pt-4 space-y-6 bg-background">
+
+      {/* Loading overlay — blocks all interaction during season create/delete */}
+      {isSeasonProcessing && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4 p-8 rounded-3xl bg-card border border-border dark:border-brand-green/30 shadow-2xl dark:shadow-[0_0_30px_rgba(172,229,4,0.15)]">
+            <Loader2 className="h-10 w-10 animate-spin text-primary dark:text-brand-green" />
+            <span className="text-sm font-black uppercase tracking-widest text-foreground">
+              {isAddingSeason ? 'Creazione stagione...' : 'Eliminazione stagione...'}
+            </span>
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-2 px-6 mb-2">
         <h1 className="text-2xl font-black text-foreground uppercase tracking-tight">Impostazioni</h1>
       </div>
