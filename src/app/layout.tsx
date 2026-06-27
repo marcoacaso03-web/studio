@@ -7,6 +7,7 @@ import { BottomNavWrapper } from '@/components/layout/bottom-nav-wrapper';
 import { ThemeProvider } from '@/components/layout/theme-provider';
 import { AuthGuard } from '@/components/layout/auth-guard';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { PrefetchProvider } from '@/hooks/PrefetchProvider';
 import { PT_Sans } from 'next/font/google';
 
 const ptSans = PT_Sans({ 
@@ -57,14 +58,16 @@ export default function RootLayout({
         <FirebaseClientProvider>
           <ThemeProvider>
             <AuthGuard>
-              <div className="relative flex min-h-screen w-full flex-col">
-                <AppHeaderWrapper />
-                <main className="flex-1 p-3 pb-24 md:p-10 lg:p-16">
+              <PrefetchProvider>
+                <div className="relative flex min-h-screen w-full flex-col">
+                  <AppHeaderWrapper />
+                  <main className="flex-1 p-3 pb-24 md:p-10 lg:p-16">
                     {children}
-                </main>
-                <BottomNavWrapper />
-                <FloatingMatchTimer />
-              </div>
+                  </main>
+                  <BottomNavWrapper />
+                  <FloatingMatchTimer />
+                </div>
+              </PrefetchProvider>
             </AuthGuard>
             <Toaster />
           </ThemeProvider>

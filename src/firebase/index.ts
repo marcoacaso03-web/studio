@@ -3,7 +3,7 @@
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore'
+import { initializeFirestore, enableIndexedDbPersistence, enableNetwork, persistentLocalCache } from 'firebase/firestore';
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
@@ -19,8 +19,10 @@ export function initializeFirebase() {
 let isPersistenceEnabled = false;
 
 export function getSdks(firebaseApp: FirebaseApp) {
-  const db = getFirestore(firebaseApp);
-  
+  const db = initializeFirestore(firebaseApp, {
+    localCache: persistentLocalCache({})
+  });
+
   if (typeof window !== 'undefined' && !isPersistenceEnabled) {
     isPersistenceEnabled = true;
     enableIndexedDbPersistence(db).catch((err) => {
@@ -30,6 +32,8 @@ export function getSdks(firebaseApp: FirebaseApp) {
         console.warn('The current browser does not support all of the features required to enable persistence');
       }
     });
+    // Force WebSocket connection immediately — no waiting for first getDoc
+    enableNetwork(db).catch(() => {});
   }
 
   return {

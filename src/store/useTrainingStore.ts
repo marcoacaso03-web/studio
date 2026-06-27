@@ -10,6 +10,8 @@ import { useSeasonsStore } from './useSeasonsStore';
 import { useSettingsStore } from './useSettingsStore';
 import { startOfWeek, addDays, format, startOfDay } from 'date-fns';
 import { getErrorMessage } from '@/lib/error-utils';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 
 interface TrainingState {
   sessions: TrainingSession[];
@@ -21,6 +23,7 @@ interface TrainingState {
   deleteSessions: (ids: string[]) => Promise<void>;
   clearAllSessions: () => Promise<void>;
   updateSessionLocally: (id: string, updates: Partial<TrainingSession>) => void;
+  subscribe: (userId: string, seasonId: string) => () => void;
 }
 
 export const useTrainingStore = create<TrainingState>()(
@@ -190,7 +193,27 @@ export const useTrainingStore = create<TrainingState>()(
         set(state => ({
           sessions: state.sessions.map(s => s.id === id ? { ...s, ...updates } : s)
         }));
-      }
+      },
+      subscribe: (userId: string, seasonId: string) => {
+        const db = getFirestore();
+        const sessionsRef = collection(db, 'teams', seasonId, 'sessions');
+        const q = query(sessionsRef, where('seasonId', '==', seasonId));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          const sessions = snapshot.docs.map(doc => {
+            const data = { ...doc.data(), id: doc.id } as TrainingSession;
+            return data;
+          });
+          set({
+            sessions: sessions.sort((a, b) => a.date.localeCompare(b.date)),
+            loading: false,
+            error: null,
+          });
+        }, (err) => {
+          console.error("Training onSnapshot error:", err);
+          set({ loading: false, error: getErrorMessage(err) });
+        });
+        return unsubscribe;
+      },
     }),
     {
       name: 'pitchman-training',

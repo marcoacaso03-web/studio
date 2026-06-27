@@ -7,6 +7,9 @@ import type { MatchCreateData } from '@/lib/repositories/match-repository';
 import { useSeasonsStore } from './useSeasonsStore';
 import { useAuthStore } from './useAuthStore';
 import { getErrorMessage } from '@/lib/error-utils';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
+import { MatchSchema } from '@/lib/schemas';
 
 interface MatchState {
     matches: Match[];
@@ -18,6 +21,7 @@ interface MatchState {
     update: (id: string, updates: Partial<Omit<Match, 'id' | 'userId'>>) => Promise<void>;
     remove: (id: string) => Promise<void>;
     removeAll: () => Promise<void>;
+    subscribe: (userId: string, seasonId: string) => () => void;
 }
 
 export const useMatchesStore = create<MatchState>((set, get) => ({
@@ -91,5 +95,26 @@ export const useMatchesStore = create<MatchState>((set, get) => ({
 
         await matchRepository.deleteAll(user.id, activeSeason.id);
         await get().fetchAll(activeSeason.id);
+    },
+    subscribe: (userId: string, seasonId: string) => {
+        const db = getFirestore();
+        const matchesRef = collection(db, 'teams', seasonId, 'matches');
+        const q = query(matchesRef, where('teamOwnerId', '==', userId));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const matches = snapshot.docs.map(doc => {
+                const data = { ...doc.data(), id: doc.id };
+                const parsed = MatchSchema.safeParse(data);
+                if (!parsed.success) {
+                    console.error("Schema validation failed for Match:", parsed.error);
+                    return data as Match;
+                }
+                return parsed.data;
+            });
+            set({ matches, loading: false, error: null });
+        }, (err) => {
+            console.error("Matches onSnapshot error:", err);
+            set({ loading: false, error: getErrorMessage(err) });
+        });
+        return unsubscribe;
     },
 }));

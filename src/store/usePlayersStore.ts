@@ -6,11 +6,14 @@ import { persist } from 'zustand/middleware';
 import { playerRepository } from '@/lib/repositories/player-repository';
 import type { Player, Role } from '@/lib/types';
 import type { PlayerCreateData } from '@/lib/repositories/player-repository';
+import { PlayerSchema } from '@/lib/schemas';
 import { useStatsStore } from './useStatsStore';
 import { useSeasonsStore } from './useSeasonsStore';
 import { useAuthStore } from './useAuthStore';
 import { mutate } from 'swr';
 import { getErrorMessage } from '@/lib/error-utils';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 
 interface PlayerState {
     players: Player[];
@@ -22,6 +25,7 @@ interface PlayerState {
     update: (id: string, updates: Partial<Omit<Player, 'id' | 'userId' | 'seasonId' | 'teamId' | 'teamOwnerId'>>) => Promise<void>;
     remove: (id: string) => Promise<void>;
     removeAll: () => Promise<void>;
+    subscribe: (userId: string, seasonId: string) => () => void;
 }
 
 export const getPlayersSWRKey = (userId?: string, seasonId?: string) => 
@@ -114,6 +118,33 @@ export const usePlayersStore = create<PlayerState>()(
           await mutate(getPlayersSWRKey(user.id, activeSeason.id));
           await get().fetchAll(activeSeason.id);
           useStatsStore.getState().loadSummaryStats();
+      },
+      subscribe: (userId: string, seasonId: string) => {
+        const db = getFirestore();
+        const playersRef = collection(db, 'teams', seasonId, 'players');
+        const q = query(playersRef, where('teamOwnerId', '==', userId));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          const players = snapshot.docs.map(doc => {
+            const pData = doc.data();
+            if (!pData.firstName || !pData.lastName) {
+              const parts = (pData.name || "").split(" ");
+              pData.firstName = parts.shift() || "";
+              pData.lastName = parts.join(" ") || pData.firstName;
+            }
+            const data = { ...pData, id: doc.id };
+            const parsed = PlayerSchema.safeParse(data);
+            if (!parsed.success) {
+              console.error("Schema validation failed for Player:", parsed.error);
+              return data as Player;
+            }
+            return parsed.data;
+          });
+          set({ players: players.sort((a, b) => a.lastName.localeCompare(b.lastName)), loading: false, error: null });
+        }, (err) => {
+          console.error("Players onSnapshot error:", err);
+          set({ loading: false, error: getErrorMessage(err) });
+        });
+        return unsubscribe;
       },
     }),
     {
