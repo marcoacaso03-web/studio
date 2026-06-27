@@ -141,17 +141,6 @@ export default function AltroPage() {
     }
   }, [fetchSeasons, user, fetchSettings]);
 
-  // Cleanup Radix pointer-events lock when processing ends
-  useEffect(() => {
-    if (!isDeletingSeason && !isAddingSeason) {
-      const timer = setTimeout(() => {
-        document.body.style.pointerEvents = '';
-        document.body.style.overflow = '';
-      }, 150);
-      return () => clearTimeout(timer);
-    }
-  }, [isDeletingSeason, isAddingSeason]);
-
   const handleAddSeason = async () => {
     if (!newSeasonName.trim() || isAddingSeason) return;
     setIsAddingSeason(true);
@@ -226,12 +215,17 @@ export default function AltroPage() {
   const handleDeleteSeason = async () => {
     if (!seasonToDelete) return;
     const id = seasonToDelete.id;
+    const name = seasonToDelete.name;
     setIsDeletingSeason(true);
     try {
       await removeSeason(id);
     } finally {
       setSeasonToDelete(null);
       setIsDeletingSeason(false);
+      // Show success toast after dialog closes
+      setTimeout(() => {
+        toast({ title: "Stagione Eliminata", description: `La stagione "${name}" è stata eliminata.` });
+      }, 100);
     }
   };
 
@@ -337,23 +331,8 @@ export default function AltroPage() {
 
   if (!mounted) return null;
 
-  // Global loading overlay for async season operations
-  const isSeasonProcessing = isAddingSeason || isDeletingSeason;
-
   return (
     <div className="pb-24 pt-4 space-y-6 bg-background">
-
-      {/* Loading overlay — blocks all interaction during season create/delete */}
-      {isSeasonProcessing && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-4 p-8 rounded-3xl bg-card border border-border dark:border-brand-green/30 shadow-2xl dark:shadow-[0_0_30px_rgba(172,229,4,0.15)]">
-            <Loader2 className="h-10 w-10 animate-spin text-primary dark:text-brand-green" />
-            <span className="text-sm font-black uppercase tracking-widest text-foreground">
-              {isAddingSeason ? 'Creazione stagione...' : 'Eliminazione stagione...'}
-            </span>
-          </div>
-        </div>
-      )}
       <div className="flex items-center gap-2 px-6 mb-2">
         <h1 className="text-2xl font-black text-foreground uppercase tracking-tight">Impostazioni</h1>
       </div>
@@ -480,7 +459,7 @@ export default function AltroPage() {
       </Dialog>
 
       {/* Gestione Squadra Dialog */}
-      <Dialog open={isSquadraOpen} onOpenChange={(open) => { if (!open) { setIsSquadraOpen(false); document.body.style.pointerEvents = ''; document.body.style.overflow = ''; } else { setIsSquadraOpen(true); } }}>
+      <Dialog open={isSquadraOpen} onOpenChange={setIsSquadraOpen}>
         <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-[95vw] sm:max-w-lg rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-black text-foreground">Gestione Squadra</DialogTitle>
@@ -854,7 +833,7 @@ export default function AltroPage() {
       </Dialog>
 
       {/* Season Deletion Confirmation */}
-      <AlertDialog open={!!seasonToDelete} onOpenChange={(open) => { if (!open) { setSeasonToDelete(null); setIsSquadraOpen(false); } }}>
+      <AlertDialog open={!!seasonToDelete} onOpenChange={(open) => { if (!open) setSeasonToDelete(null); }}>
         <AlertDialogContent className="rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-2xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground max-w-[90vw]">
           <AlertDialogHeader>
             <AlertDialogTitle className="uppercase font-black text-destructive">Elimina Stagione?</AlertDialogTitle>
@@ -863,9 +842,9 @@ export default function AltroPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4">
-            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs bg-card/40 hover:bg-card/50 text-foreground border-none">Annulla</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteSeason} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase border-none">
-              Elimina
+            <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs bg-card/40 hover:bg-card/50 text-foreground border-none" disabled={isDeletingSeason}>Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteSeason} disabled={isDeletingSeason} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase border-none">
+              {isDeletingSeason ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Elimina"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
