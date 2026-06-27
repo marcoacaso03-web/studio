@@ -155,10 +155,10 @@ export default function AltroPage() {
       }
       const newSeason = await addSeason(normalizedName);
       setNewSeasonName('');
-      // Attiva la nuova stagione e redirect alla dashboard
+      // Attiva la nuova stagione e redirect alla home
       if (newSeason?.id) {
         await setActiveSeason(newSeason.id);
-        router.push('/dashboard');
+        router.push('/');
       }
     } catch (error) {
       toast({ variant: "destructive", title: "Errore", description: "Impossibile creare la stagione." });
@@ -217,15 +217,17 @@ export default function AltroPage() {
     setIsDeletingSeason(true);
     try {
       await removeSeason(seasonToDelete.id);
+    } finally {
+      // Close dialogs first, then clean up Radix pointer-events lock
       setSeasonToDelete(null);
       setIsSquadraOpen(false);
-      // Radix UI nested dialogs bug: body gets stuck with pointer-events:none
-      // Force cleanup after both dialogs close
-      setTimeout(() => {
-        document.body.style.pointerEvents = '';
-      }, 300);
-    } finally {
       setIsDeletingSeason(false);
+      // Radix UI nested dialogs bug: body gets stuck with pointer-events:none
+      // Force cleanup with a small delay to let Radix finish its close animation
+      requestAnimationFrame(() => {
+        document.body.style.pointerEvents = '';
+        document.body.style.overflow = '';
+      });
     }
   };
 

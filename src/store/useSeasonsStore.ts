@@ -81,16 +81,34 @@ export const useSeasonsStore = create<SeasonsState>((set, get) => ({
         if (!user) return;
         const wasActive = get().activeSeason?.id === id;
         await seasonRepository.delete(id);
-        await get().fetchAll();
-        // If the deleted season was active, set a new active season
-        if (wasActive) {
-            const remaining = get().seasons;
-            if (remaining.length > 0) {
-                await get().setActiveSeason(remaining[0].id);
-            } else {
-                await seasonRepository.ensureDefaultSeason(user.id);
-                await get().fetchAll();
-            }
+        // Re-fetch once and handle active season inline (avoid double fetchAll)
+        const all = await seasonRepository.getAll(user.id);
+        const sortedSeasons = all.sort((a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        let newActive = sortedSeasons.find(s => s.isActive) || null;
+        if (wasActive && sortedSeasons.length > 0) {
+            // Activate the first (most recent) remaining season via repo batch
+            await seasonRepository.setActive(sortedSeasons[0].id, user.id);
+            // Re-read to get the updated active flag
+            const refreshed = await seasonRepository.getAll(user.id);
+            const sortedRefreshed = refreshed.sort((a, b) =>
+                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+            newActive = sortedRefreshed.find(s => s.isActive) || sortedRefreshed[0];
+            set({
+                seasons: sortedRefreshed,
+                activeSeason: newActive,
+                loading: false,
+                error: null,
+            });
+        } else {
+            set({
+                seasons: sortedSeasons,
+                activeSeason: newActive || (sortedSeasons.length > 0 ? sortedSeasons[0] : null),
+                loading: false,
+                error: null,
+            });
         }
     },
 
