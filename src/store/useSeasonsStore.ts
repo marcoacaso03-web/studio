@@ -13,7 +13,7 @@ interface SeasonsState {
     loading: boolean;
     error: string | null;
     fetchAll: () => Promise<void>;
-    addSeason: (name: string) => Promise<void>;
+    addSeason: (name: string) => Promise<Season>;
     setActiveSeason: (id: string) => Promise<void>;
     removeSeason: (id: string) => Promise<void>;
     renameSeason: (id: string, name: string) => Promise<void>;
@@ -57,9 +57,16 @@ export const useSeasonsStore = create<SeasonsState>((set, get) => ({
 
     addSeason: async (name) => {
         const user = useAuthStore.getState().user;
-        if (!user) return;
-        await seasonRepository.add(name, user.id);
+        if (!user) return undefined as unknown as Season;
+        // Prevent duplicates: check if a season with this name already exists
+        const existing = get().seasons.find(s => s.name.toLowerCase() === name.toLowerCase());
+        if (existing) {
+            await get().setActiveSeason(existing.id);
+            return existing;
+        }
+        const newSeason = await seasonRepository.add(name, user.id);
         await get().fetchAll();
+        return newSeason;
     },
 
     setActiveSeason: async (id) => {
@@ -72,8 +79,19 @@ export const useSeasonsStore = create<SeasonsState>((set, get) => ({
     removeSeason: async (id) => {
         const user = useAuthStore.getState().user;
         if (!user) return;
+        const wasActive = get().activeSeason?.id === id;
         await seasonRepository.delete(id);
         await get().fetchAll();
+        // If the deleted season was active, set a new active season
+        if (wasActive) {
+            const remaining = get().seasons;
+            if (remaining.length > 0) {
+                await get().setActiveSeason(remaining[0].id);
+            } else {
+                await seasonRepository.ensureDefaultSeason(user.id);
+                await get().fetchAll();
+            }
+        }
     },
 
     renameSeason: async (id, name) => {

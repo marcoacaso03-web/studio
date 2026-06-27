@@ -124,8 +124,31 @@ export const seasonRepository = {
 
     async delete(id: string) {
         const db = getFirestore();
-        const docRef = doc(db, 'teams', id);
-        return await writeBatch(db).delete(docRef).commit();
+        let batch = writeBatch(db);
+        let operationCount = 0;
+        
+        // Delete subcollections: players, matches, stats, sessions, events, trainings
+        const subcollections = ['players', 'matches', 'sessions', 'events', 'trainings'];
+        
+        for (const sub of subcollections) {
+            const subRef = collection(db, 'teams', id, sub);
+            const subSnap = await getDocs(subRef);
+            for (const d of subSnap.docs) {
+                batch.delete(d.ref);
+                operationCount++;
+                // Firebase batch limit is 500 operations; commit in chunks
+                if (operationCount >= 499) {
+                    await batch.commit();
+                    batch = writeBatch(db);
+                    operationCount = 0;
+                }
+            }
+        }
+        
+        // Delete the season document itself
+        batch.delete(doc(db, 'teams', id));
+        
+        await batch.commit();
     },
 
     async rename(id: string, newName: string) {
@@ -146,7 +169,7 @@ export const seasonRepository = {
         if (activeSeasons.length === 1) {
             return activeSeasons[0];
         }
-
+        
         if (all.length > 0) {
             const targetId = activeSeasons.length > 1 ? activeSeasons[0].id : all[0].id;
             await this.setActive(targetId, userId);

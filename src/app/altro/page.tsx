@@ -44,6 +44,7 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export default function AltroPage() {
+  const [isAddingSeason, setIsAddingSeason] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [newSeasonName, setNewSeasonName] = useState('');
@@ -140,9 +141,29 @@ export default function AltroPage() {
   }, [fetchSeasons, user, fetchSettings]);
 
   const handleAddSeason = async () => {
-    if (!newSeasonName.trim()) return;
-    await addSeason(newSeasonName);
-    setNewSeasonName('');
+    if (!newSeasonName.trim() || isAddingSeason) return;
+    setIsAddingSeason(true);
+    try {
+      // Normalize: trim and check for duplicates client-side too
+      const normalizedName = newSeasonName.trim();
+      const duplicate = seasons.find(s => s.name.toLowerCase() === normalizedName.toLowerCase());
+      if (duplicate) {
+        toast({ title: "Stagione esistente", description: `La stagione "${normalizedName}" esiste già. Selezionala dall'elenco.` });
+        setIsAddingSeason(false);
+        return;
+      }
+      const newSeason = await addSeason(normalizedName);
+      setNewSeasonName('');
+      // Attiva la nuova stagione e redirect alla dashboard
+      if (newSeason?.id) {
+        await setActiveSeason(newSeason.id);
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      toast({ variant: "destructive", title: "Errore", description: "Impossibile creare la stagione." });
+    } finally {
+      setIsAddingSeason(false);
+    }
   };
 
   const handleRenameSeason = async () => {
@@ -551,8 +572,8 @@ export default function AltroPage() {
                   onChange={(e) => setNewSeasonName(e.target.value)}
                   className="font-bold uppercase text-xs bg-background dark:bg-black border border-border dark:border-brand-green/30 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green h-10 rounded-xl text-foreground"
                 />
-                <Button onClick={handleAddSeason} className="bg-primary dark:bg-black border border-primary dark:border-brand-green text-white hover:opacity-90 dark:hover:bg-black/80 shadow-md dark:shadow-[0_0_10px_rgba(172,229,4,0.15)] transition-all h-10 rounded-xl font-black uppercase">
-                  <Plus className="h-4 w-4 mr-1 text-white dark:text-brand-green" /> Crea
+                <Button onClick={handleAddSeason} disabled={isAddingSeason} className="bg-primary dark:bg-black border border-primary dark:border-brand-green text-white hover:opacity-90 dark:hover:bg-black/80 shadow-md dark:shadow-[0_0_10px_rgba(172,229,4,0.15)] transition-all h-10 rounded-xl font-black uppercase">
+                  {isAddingSeason ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Plus className="h-4 w-4 mr-1 text-white dark:text-brand-green" />} Crea
                 </Button>
               </div>
 
