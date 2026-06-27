@@ -80,35 +80,23 @@ export const useSeasonsStore = create<SeasonsState>((set, get) => ({
         const user = useAuthStore.getState().user;
         if (!user) return;
         const wasActive = get().activeSeason?.id === id;
-        await seasonRepository.delete(id);
-        // Re-fetch once and handle active season inline (avoid double fetchAll)
-        const all = await seasonRepository.getAll(user.id);
-        const sortedSeasons = all.sort((a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-        let newActive = sortedSeasons.find(s => s.isActive) || null;
-        if (wasActive && sortedSeasons.length > 0) {
-            // Activate the first (most recent) remaining season via repo batch
-            await seasonRepository.setActive(sortedSeasons[0].id, user.id);
-            // Re-read to get the updated active flag
-            const refreshed = await seasonRepository.getAll(user.id);
-            const sortedRefreshed = refreshed.sort((a, b) =>
-                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-            );
-            newActive = sortedRefreshed.find(s => s.isActive) || sortedRefreshed[0];
-            set({
-                seasons: sortedRefreshed,
-                activeSeason: newActive,
-                loading: false,
-                error: null,
-            });
-        } else {
-            set({
-                seasons: sortedSeasons,
-                activeSeason: newActive || (sortedSeasons.length > 0 ? sortedSeasons[0] : null),
-                loading: false,
-                error: null,
-            });
+        // Optimistic update: remove from local state immediately
+        const remaining = get().seasons.filter(s => s.id !== id);
+        set({
+            seasons: remaining,
+            activeSeason: wasActive
+                ? (remaining.length > 0 ? remaining[0] : null)
+                : get().activeSeason,
+        });
+        // Fire-and-forget the backend delete (subcollections can take time)
+        seasonRepository.delete(id).catch(err => {
+            console.error("Failed to delete season:", err);
+            // Re-fetch on failure to restore correct state
+            get().fetchAll();
+        });
+        // If deleted season was active, persist the switch in background
+        if (wasActive && remaining.length > 0) {
+            seasonRepository.setActive(remaining[0].id, user.id).catch(() => {});
         }
     },
 

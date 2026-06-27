@@ -141,6 +141,17 @@ export default function AltroPage() {
     }
   }, [fetchSeasons, user, fetchSettings]);
 
+  // Cleanup Radix pointer-events lock when processing ends
+  useEffect(() => {
+    if (!isDeletingSeason && !isAddingSeason) {
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = '';
+        document.body.style.overflow = '';
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isDeletingSeason, isAddingSeason]);
+
   const handleAddSeason = async () => {
     if (!newSeasonName.trim() || isAddingSeason) return;
     setIsAddingSeason(true);
@@ -214,20 +225,13 @@ export default function AltroPage() {
 
   const handleDeleteSeason = async () => {
     if (!seasonToDelete) return;
+    const id = seasonToDelete.id;
     setIsDeletingSeason(true);
     try {
-      await removeSeason(seasonToDelete.id);
+      await removeSeason(id);
     } finally {
-      // Close dialogs first, then clean up Radix pointer-events lock
       setSeasonToDelete(null);
-      setIsSquadraOpen(false);
       setIsDeletingSeason(false);
-      // Radix UI nested dialogs bug: body gets stuck with pointer-events:none
-      // Force cleanup with a small delay to let Radix finish its close animation
-      requestAnimationFrame(() => {
-        document.body.style.pointerEvents = '';
-        document.body.style.overflow = '';
-      });
     }
   };
 
@@ -476,7 +480,7 @@ export default function AltroPage() {
       </Dialog>
 
       {/* Gestione Squadra Dialog */}
-      <Dialog open={isSquadraOpen} onOpenChange={setIsSquadraOpen}>
+      <Dialog open={isSquadraOpen} onOpenChange={(open) => { if (!open) { setIsSquadraOpen(false); document.body.style.pointerEvents = ''; document.body.style.overflow = ''; } else { setIsSquadraOpen(true); } }}>
         <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-[95vw] sm:max-w-lg rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-black text-foreground">Gestione Squadra</DialogTitle>
@@ -850,7 +854,7 @@ export default function AltroPage() {
       </Dialog>
 
       {/* Season Deletion Confirmation */}
-      <AlertDialog open={!!seasonToDelete} onOpenChange={(open) => !open && setSeasonToDelete(null)}>
+      <AlertDialog open={!!seasonToDelete} onOpenChange={(open) => { if (!open) { setSeasonToDelete(null); setIsSquadraOpen(false); } }}>
         <AlertDialogContent className="rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-2xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground max-w-[90vw]">
           <AlertDialogHeader>
             <AlertDialogTitle className="uppercase font-black text-destructive">Elimina Stagione?</AlertDialogTitle>
