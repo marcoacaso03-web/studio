@@ -231,8 +231,8 @@ export default function AltroPage() {
     try {
       await removeSeason(id);
       toast({ title: "Stagione Eliminata", description: `La stagione "${name}" è stata eliminata.` });
-    } catch (err) {
-      toast({ variant: "destructive", title: "Errore", description: "Impossibile eliminare la stagione. Riprova." });
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Errore", description: err?.message || "Impossibile eliminare la stagione." });
     } finally {
       setIsDeletingSeason(false);
     }

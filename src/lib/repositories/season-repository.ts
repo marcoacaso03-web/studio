@@ -125,36 +125,46 @@ export const seasonRepository = {
 
     async delete(id: string) {
         const db = getFirestore();
+        console.log("[seasonRepository.delete] Starting delete for season:", id);
         
         // Delete all subcollections in parallel
         const subcollections = ['players', 'matches', 'sessions', 'events', 'trainings'];
         
         await Promise.all(subcollections.map(async (sub) => {
-            const subRef = collection(db, 'teams', id, sub);
-            const subSnap = await getDocs(subRef);
-            if (subSnap.empty) return;
-            
-            // Chunked batch delete (500 ops per batch)
-            let batch = writeBatch(db);
-            let count = 0;
-            
-            for (const d of subSnap.docs) {
-                batch.delete(d.ref);
-                count++;
-                if (count >= 499) {
-                    await batch.commit();
-                    batch = writeBatch(db);
-                    count = 0;
+            try {
+                const subRef = collection(db, 'teams', id, sub);
+                const subSnap = await getDocs(subRef);
+                console.log(`[seasonRepository.delete] ${sub}: ${subSnap.size} docs to delete`);
+                if (subSnap.empty) return;
+                
+                // Chunked batch delete (500 ops per batch)
+                let batch = writeBatch(db);
+                let count = 0;
+                
+                for (const d of subSnap.docs) {
+                    batch.delete(d.ref);
+                    count++;
+                    if (count >= 499) {
+                        await batch.commit();
+                        batch = writeBatch(db);
+                        count = 0;
+                    }
                 }
-            }
-            
-            if (count > 0) {
-                await batch.commit();
+                
+                if (count > 0) {
+                    await batch.commit();
+                }
+                console.log(`[seasonRepository.delete] ${sub}: deleted successfully`);
+            } catch (err: any) {
+                console.error(`[seasonRepository.delete] ${sub}: FAILED -`, err?.code, err?.message);
+                throw err;
             }
         }));
         
         // Delete the season document itself
+        console.log("[seasonRepository.delete] Deleting season document...");
         await deleteDoc(doc(db, 'teams', id));
+        console.log("[seasonRepository.delete] Season document deleted successfully");
     },
 
     async rename(id: string, newName: string) {

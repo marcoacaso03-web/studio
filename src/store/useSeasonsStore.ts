@@ -104,11 +104,13 @@ export const useSeasonsStore = create<SeasonsState>((set, get) => ({
             }
             // Delete all subcollections + season document
             await seasonRepository.delete(id);
-        } catch (err) {
+        } catch (err: any) {
             console.error("Failed to delete season from Firestore:", err);
+            console.error("Error code:", err?.code, "message:", err?.message);
             // Rollback: restore previous UI state
             set({ seasons: previousSeasons, activeSeason: previousActive });
-            throw err; // Re-throw so caller can show error toast
+            // Re-throw with detailed message for the UI
+            throw new Error(`Delete failed: ${err?.code || 'unknown'} — ${err?.message || 'no message'}`);
         }
     },
 
