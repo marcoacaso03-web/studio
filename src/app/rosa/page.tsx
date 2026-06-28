@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { usePlayersStore } from '@/store/usePlayersStore';
 import { useSeasonsStore } from '@/store/useSeasonsStore';
 import {
@@ -8,7 +8,6 @@ import {
   FORMATIONS,
   DEFAULT_FORMATION,
   PlayerRole,
-  ROLE_LABELS,
   Player,
 } from '@/lib/types';
 import { calculateCoverage, getFirstCriticalSlot, FormationCoverage } from '@/lib/rosa-coverage';
@@ -16,10 +15,21 @@ import { RosaPitch } from '@/components/squadra/rosa-pitch';
 import { RolePlayerList, ObservedPlayersList } from '@/components/squadra/rosa-player-list';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Users, AlertTriangle, AlertCircle } from 'lucide-react';
+import { AlertTriangle, AlertCircle, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type SeasonMode = 'current' | 'next';
+
+// Per-formation state: orders + exclusions are tracked per formation module
+interface FormationState {
+  orderedPlayerIds: Record<PlayerRole, string[]>;
+  excludedFromNextSeason: string[];
+}
+
+const createEmptyFormationState = (): FormationState => ({
+  orderedPlayerIds: {} as Record<PlayerRole, string[]>,
+  excludedFromNextSeason: [],
+});
 
 export default function RosaOverviewPage() {
   const { players } = usePlayersStore();
@@ -29,13 +39,29 @@ export default function RosaOverviewPage() {
   const [selectedRole, setSelectedRole] = useState<PlayerRole | null>(null);
   const [seasonMode, setSeasonMode] = useState<SeasonMode>('current');
 
-  // Ordered players per role (for sorting within each role slot)
-  const [orderedPlayerIds, setOrderedPlayerIds] = useState<Record<PlayerRole, string[]>>({} as Record<PlayerRole, string[]>);
+  // Per-formation state map — persists across formation switches
+  const [formationStates, setFormationStates] = useState<Record<FormationModule, FormationState>>(() => {
+    const init: Partial<Record<FormationModule, FormationState>> = {};
+    FORMATIONS.forEach(f => { init[f] = createEmptyFormationState(); });
+    return init as Record<FormationModule, FormationState>;
+  });
 
-  // Players excluded from next season
-  const [excludedFromNextSeason, setExcludedFromNextSeason] = useState<string[]>([]);
+  // Save a ref to track the previous formation to auto-select on change
+  const prevFormationRef = useRef<FormationModule>(formation);
 
-  // Calculate coverage for current formation
+  // Current formation's state
+  const currentState = formationStates[formation];
+  const { orderedPlayerIds, excludedFromNextSeason } = currentState;
+
+  // Setter helpers that update the per-formation state
+  const updateFormationState = useCallback((updater: (prev: FormationState) => FormationState) => {
+    setFormationStates(prev => ({
+      ...prev,
+      [formation]: updater(prev[formation]),
+    }));
+  }, [formation]);
+
+  // Calculate coverage
   const coverage: FormationCoverage = useMemo(
     () => calculateCoverage(players, formation),
     [players, formation]
@@ -55,16 +81,19 @@ export default function RosaOverviewPage() {
     [activePlayers, formation]
   );
 
-  // Auto-select first critical role or first slot on formation change
+  // Auto-select first critical role on formation change
   useEffect(() => {
-    const autoRole = getFirstCriticalSlot(formation, activeCoverage);
-    if (autoRole) setSelectedRole(autoRole);
+    if (prevFormationRef.current !== formation) {
+      prevFormationRef.current = formation;
+      const autoRole = getFirstCriticalSlot(formation, activeCoverage);
+      if (autoRole) setSelectedRole(autoRole);
+    }
   }, [formation, activeCoverage]);
 
   // Reorder handler
   const handleReorder = useCallback((role: PlayerRole, playerId: string, direction: 'up' | 'down') => {
-    setOrderedPlayerIds(prev => {
-      const current = prev[role] ? [...prev[role]] : [];
+    updateFormationState(prev => {
+      const current = prev.orderedPlayerIds[role] ? [...prev.orderedPlayerIds[role]] : [];
       const idx = current.indexOf(playerId);
       if (idx === -1) return prev;
 
@@ -74,42 +103,58 @@ export default function RosaOverviewPage() {
         [current[idx], current[idx + 1]] = [current[idx + 1], current[idx]];
       }
 
-      return { ...prev, [role]: current };
+      return {
+        ...prev,
+        orderedPlayerIds: { ...prev.orderedPlayerIds, [role]: current },
+      };
     });
-  }, []);
+  }, [updateFormationState]);
 
   // Remove handler
   const handleRemove = useCallback((playerId: string) => {
     if (seasonMode === 'next') {
-      // Exclude from next season
-      setExcludedFromNextSeason(prev =>
-        prev.includes(playerId) ? prev : [...prev, playerId]
-      );
+      updateFormationState(prev => ({
+        ...prev,
+        excludedFromNextSeason: prev.excludedFromNextSeason.includes(playerId)
+          ? prev.excludedFromNextSeason
+          : [...prev.excludedFromNextSeason, playerId],
+      }));
     } else {
-      // Remove from current season (use store)
       usePlayersStore.getState().remove(playerId);
     }
-  }, [seasonMode]);
+  }, [seasonMode, updateFormationState]);
 
-  // Add player handler (re-add to next season or add to role order)
+  // Add player handler
   const handleAddPlayer = useCallback((player: Player) => {
     if (seasonMode === 'next') {
-      // Re-include in next season
-      setExcludedFromNextSeason(prev => prev.filter(id => id !== player.id));
+      updateFormationState(prev => ({
+        ...prev,
+        excludedFromNextSeason: prev.excludedFromNextSeason.filter(id => id !== player.id),
+      }));
     }
-    // Also add to ordered list for the selected role
     if (selectedRole) {
-      setOrderedPlayerIds(prev => {
-        const current = prev[selectedRole] ? [...prev[selectedRole]] : [];
+      updateFormationState(prev => {
+        const current = prev.orderedPlayerIds[selectedRole] ? [...prev.orderedPlayerIds[selectedRole]] : [];
         if (!current.includes(player.id)) {
           current.push(player.id);
         }
-        return { ...prev, [selectedRole]: current };
+        return {
+          ...prev,
+          orderedPlayerIds: { ...prev.orderedPlayerIds, [selectedRole]: current },
+        };
       });
     }
-  }, [seasonMode, selectedRole]);
+  }, [seasonMode, selectedRole, updateFormationState]);
 
-  // Mock observed players (would come from a scout store in a real app)
+  // Reset handler — resets current formation to initial state
+  const handleReset = useCallback(() => {
+    setFormationStates(prev => ({
+      ...prev,
+      [formation]: createEmptyFormationState(),
+    }));
+  }, [formation]);
+
+  // Mock observed players
   const observedPlayers: { name: string; role: PlayerRole; note: string }[] = [];
 
   if (!activeSeason) {
@@ -123,46 +168,12 @@ export default function RosaOverviewPage() {
   }
 
   return (
-    <div className="space-y-4 pb-24">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Users className="h-6 w-6 text-primary dark:text-brand-green" />
-        <h1 className="text-2xl font-black text-foreground uppercase tracking-tight">
-          Panoramica Rosa
-        </h1>
-      </div>
-
-      {/* Coverage Summary Bar */}
-      <div className="flex items-center gap-3 p-3 rounded-2xl bg-muted/30 dark:bg-card/20 border border-border dark:border-transparent">
-        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-          Copertura:
-        </span>
-        <span className="text-xs font-black">
-          {activeCoverage.coveredSlots + activeCoverage.warningSlots}/{activeCoverage.totalSlots}
-        </span>
-        {activeCoverage.criticalSlots > 0 && (
-          <span className="flex items-center gap-1 text-[10px] font-black uppercase text-red-500 ml-auto">
-            <AlertCircle className="h-3 w-3" />
-            {activeCoverage.criticalSlots} emergenze
-          </span>
-        )}
-        {activeCoverage.warningSlots > 0 && (
-          <span className="flex items-center gap-1 text-[10px] font-black uppercase text-yellow-500">
-            <AlertTriangle className="h-3 w-3" />
-            {activeCoverage.warningSlots} scoperti
-          </span>
-        )}
-        {seasonMode === 'next' && excludedFromNextSeason.length > 0 && (
-          <span className="text-[10px] font-bold uppercase text-muted-foreground/60">
-            ({excludedFromNextSeason.length} esclusi)
-          </span>
-        )}
-      </div>
-
-      {/* Controls Row */}
-      <div className="flex items-center gap-2">
+    <div className="space-y-3 pb-24">
+      {/* Controls Row — everything compact at top */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* Formation selector */}
         <Select value={formation} onValueChange={(v) => setFormation(v as FormationModule)}>
-          <SelectTrigger className="w-32 h-9 text-xs font-bold uppercase bg-background dark:bg-black border border-border dark:border-brand-green/30">
+          <SelectTrigger className="w-28 h-8 text-xs font-bold uppercase bg-background dark:bg-black border border-border dark:border-brand-green/30">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -171,6 +182,17 @@ export default function RosaOverviewPage() {
             ))}
           </SelectContent>
         </Select>
+
+        {/* Reset button */}
+        <button
+          type="button"
+          onClick={handleReset}
+          className="flex items-center gap-1.5 px-2.5 h-8 rounded-lg text-[9px] font-black uppercase tracking-widest border border-border dark:border-brand-green/30 text-muted-foreground hover:text-foreground hover:border-primary dark:hover:border-brand-green transition-all"
+          title="Reset ordinamento ed esclusioni per questa formazione"
+        >
+          <RotateCcw className="h-3 w-3" />
+          Reset
+        </button>
 
         {/* Season toggle */}
         <div className="flex bg-muted/50 rounded-full p-0.5 ml-auto">
@@ -199,11 +221,37 @@ export default function RosaOverviewPage() {
         </div>
       </div>
 
+      {/* Coverage Summary Bar */}
+      <div className="flex items-center gap-3 px-3 py-2 rounded-2xl bg-muted/30 dark:bg-card/20 border border-border dark:border-transparent">
+        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+          Copertura:
+        </span>
+        <span className="text-xs font-black">
+          {activeCoverage.coveredSlots + activeCoverage.warningSlots}/{activeCoverage.totalSlots}
+        </span>
+        {activeCoverage.criticalSlots > 0 && (
+          <span className="flex items-center gap-1 text-[10px] font-black uppercase text-red-500 ml-auto">
+            <AlertCircle className="h-3 w-3" />
+            {activeCoverage.criticalSlots} emergenze
+          </span>
+        )}
+        {activeCoverage.warningSlots > 0 && (
+          <span className="flex items-center gap-1 text-[10px] font-black uppercase text-yellow-500">
+            <AlertTriangle className="h-3 w-3" />
+            {activeCoverage.warningSlots} scoperti
+          </span>
+        )}
+        {seasonMode === 'next' && excludedFromNextSeason.length > 0 && (
+          <span className="text-[10px] font-bold uppercase text-muted-foreground/60">
+            ({excludedFromNextSeason.length} esclusi)
+          </span>
+        )}
+      </div>
+
       {/* Next season banner */}
       {seasonMode === 'next' && (
-        <div className="p-3 rounded-2xl bg-primary/5 dark:bg-brand-green/5 border border-primary/20 dark:border-brand-green/20">
+        <div className="px-3 py-2 rounded-2xl bg-primary/5 dark:bg-brand-green/5 border border-primary/20 dark:border-brand-green/20">
           <p className="text-[10px] font-bold uppercase text-muted-foreground leading-relaxed">
-            La proiezione include tutti i giocatori attualmente in rosa.
             Premi <span className="text-red-400 font-black">−</span> per escludere un giocatore dalla stagione prossima,
             <span className="text-[#00e5a0] font-black"> +</span> per reincluderlo.
           </p>
@@ -229,7 +277,6 @@ export default function RosaOverviewPage() {
           <ScrollArea className="h-[500px] pr-2">
             {selectedRole ? (
               <div className="space-y-4">
-                {/* Season projection header */}
                 {seasonMode === 'next' && (
                   <p className="text-[10px] font-black uppercase text-primary dark:text-brand-green tracking-widest">
                     Proiezione {new Date().getFullYear() + 1}/{String(new Date().getFullYear() + 2).slice(2)}
@@ -240,7 +287,7 @@ export default function RosaOverviewPage() {
                   players={activePlayers}
                   selectedRole={selectedRole}
                   isNextSeason={seasonMode === 'next'}
-                  orderedPlayerIds={orderedPlayerIds[selectedRole] ? { [selectedRole]: orderedPlayerIds[selectedRole] } : {}}
+                  orderedPlayerIds={{ [selectedRole]: orderedPlayerIds[selectedRole] ?? [] }}
                   excludedIds={excludedFromNextSeason}
                   onReorder={handleReorder}
                   onRemove={handleRemove}
