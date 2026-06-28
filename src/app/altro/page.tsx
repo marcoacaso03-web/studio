@@ -222,10 +222,15 @@ export default function AltroPage() {
     } finally {
       setSeasonToDelete(null);
       setIsDeletingSeason(false);
-      // Show success toast after dialog closes
+      // Ensure body is not locked by Radix
+      setTimeout(() => {
+        document.body.style.pointerEvents = '';
+        document.body.style.overflow = '';
+        document.body.removeAttribute('data-scroll-locked');
+      }, 50);
       setTimeout(() => {
         toast({ title: "Stagione Eliminata", description: `La stagione "${name}" è stata eliminata.` });
-      }, 100);
+      }, 150);
     }
   };
 
@@ -642,6 +647,7 @@ export default function AltroPage() {
                           className="h-8 w-8 text-foreground/40 hover:text-destructive hover:bg-destructive/10"
                           onClick={(e) => {
                             e.stopPropagation();
+                            setIsSquadraOpen(false);
                             setSeasonToDelete({ id: s.id, name: s.name });
                           }}
                         >
@@ -832,7 +838,7 @@ export default function AltroPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Season Deletion Confirmation */}
+      {/* Season Deletion Confirmation — OUTSIDE the Dialog */}
       <AlertDialog open={!!seasonToDelete} onOpenChange={(open) => { if (!open) setSeasonToDelete(null); }}>
         <AlertDialogContent className="rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-2xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground max-w-[90vw]">
           <AlertDialogHeader>
