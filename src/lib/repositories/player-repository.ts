@@ -103,23 +103,30 @@ export const playerRepository = {
     const newPlayers: Player[] = playersData.map((p) => {
       const shortRandom = Math.random().toString(36).substring(2, 7).toUpperCase();
       const id = `P-${shortRandom}`;
+
+      // Sanitize: ensure no undefined values reach Firestore
+      const roles = ensureRoles({ roles: p.roles, role: p.role, secondaryRoles: p.secondaryRoles as Role[] | undefined });
+
       const newPlayer: Player = {
         id,
         userId,
         teamOwnerId: userId,
         teamId: seasonId,
         seasonId,
-        name: p.name.toUpperCase(),
-        firstName: p.firstName.toUpperCase(),
-        lastName: p.lastName.toUpperCase(),
-        roles: ensureRoles({ roles: p.roles, role: p.role, secondaryRoles: p.secondaryRoles as Role[] | undefined }),
+        name: (p.name || ' ').toUpperCase().trim() || 'GIOCATORE',
+        firstName: (p.firstName || p.name?.split(' ')[0] || ' ').toUpperCase().trim(),
+        lastName: (p.lastName || p.name?.split(' ').slice(1).join(' ') || ' ').toUpperCase().trim(),
+        roles,
         stats: { appearances: 0, goals: 0, assists: 0, avgMinutes: 0 },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
 
+      // Remove any undefined or null values recursively before writing
+      const cleanObj = JSON.parse(JSON.stringify(newPlayer));
+
       const docRef = doc(db, 'teams', seasonId, 'players', id);
-      batch.set(docRef, newPlayer);
+      batch.set(docRef, cleanObj);
       return newPlayer;
     });
 

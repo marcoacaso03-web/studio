@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, Sparkles, Search, Plus, ChevronRight, Globe, Hospital, Save } from "lucide-react";
+import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, Sparkles, Search, Plus, ChevronRight, Globe, Hospital, Save, Users } from "lucide-react";
 import type { Player, Role, PlayerRole } from "@/lib/types";
 import type { PlayerCreateData } from "@/lib/repositories/player-repository";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -140,7 +140,7 @@ export default function RosaPage() {
   const reverseRoleMap: Record<PlayerRole, string> = {
     POR: 'Portiere', DC: 'Difensore', TD: 'Difensore', TS: 'Difensore', ADA: 'Difensore', ASA: 'Difensore',
     CDC: 'Centrocampista', TRQ: 'Centrocampista', CD: 'Centrocampista', CS: 'Centrocampista',
-    AD: 'Attaccante', AS: 'Attaccante', ATT: 'Attaccante',
+    AD: 'Attaccante', AS: 'Attaccante', ATT: 'Attaccante', CC: 'Centrocampista',
   };
 
   const groupedPlayers = useMemo(() => {
@@ -262,6 +262,25 @@ export default function RosaPage() {
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Link to Rosa Overview */}
+          <div className="px-3">
+            <button
+              onClick={() => router.push('/rosa')}
+              className="flex items-center gap-3 w-full p-3 rounded-2xl bg-muted/30 dark:bg-card/20 border border-border dark:border-brand-green/20 hover:bg-muted/50 dark:hover:bg-card/30 transition-all"
+            >
+              <div className="w-10 h-10 rounded-xl bg-primary/10 dark:bg-brand-green/10 flex items-center justify-center shrink-0">
+                <Users className="h-5 w-5 text-primary dark:text-brand-green" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="text-sm font-black uppercase tracking-tight">Panoramica Rosa</span>
+                <p className="text-[9px] font-bold uppercase text-muted-foreground/60 tracking-widest">
+                  Visualizza posizione per posizione con indicatori di copertura
+                </p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
           </div>
 
           <div className="space-y-4 px-3">

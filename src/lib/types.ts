@@ -18,7 +18,7 @@ export type Role = typeof ROLES[number];
 export type PlayerRole =
   | 'POR'
   | 'DC' | 'TD' | 'TS' | 'ADA' | 'ASA'
-  | 'CDC' | 'TRQ' | 'CD' | 'CS'
+  | 'CDC' | 'CC' | 'TRQ' | 'CD' | 'CS'
   | 'AD' | 'AS' | 'ATT';
 
 export type RoleCategory = 'POR' | 'DIF' | 'CEN' | 'ATT';
@@ -26,14 +26,14 @@ export type RoleCategory = 'POR' | 'DIF' | 'CEN' | 'ATT';
 export const ALL_ROLES: PlayerRole[] = [
   'POR',
   'DC', 'TD', 'TS', 'ADA', 'ASA',
-  'CDC', 'TRQ', 'CD', 'CS',
+  'CDC', 'CC', 'TRQ', 'CD', 'CS',
   'AD', 'AS', 'ATT',
 ];
 
 export const ROLE_CATEGORIES: Record<RoleCategory, PlayerRole[]> = {
   POR: ['POR'],
   DIF: ['DC', 'TD', 'TS', 'ADA', 'ASA'],
-  CEN: ['CDC', 'TRQ', 'CD', 'CS'],
+  CEN: ['CDC', 'CC', 'TRQ', 'CD', 'CS'],
   ATT: ['AD', 'AS', 'ATT'],
 };
 
@@ -44,7 +44,8 @@ export const ROLE_LABELS: Record<PlayerRole, string> = {
   TS:  'Terzino Sinistro',
   ADA: 'Ala Destra Arretrata',
   ASA: 'Ala Sinistra Arretrata',
-  CDC: 'Centrocampista Difensivo Centrale',
+  CDC: 'Centrocampista Centrale',
+  CC:  'Centrocampista Centrale',
   TRQ: 'Trequartista',
   CD:  'Centrocampista Destro',
   CS:  'Centrocampista Sinistro',
@@ -65,6 +66,110 @@ export const ROLE_CATEGORY_COLORS: Record<RoleCategory, string> = {
   DIF: '#00e5a0',
   CEN: '#3b82f6',
   ATT: '#ef4444',
+};
+
+// ── Formation Modules ──────────────────────────────────────
+
+export type FormationModule = '4-3-3' | '4-2-3-1' | '4-4-2' | '3-5-2' | '3-4-2-1' | '3-4-3';
+
+export const FORMATIONS: FormationModule[] = ['4-3-3', '4-2-3-1', '4-4-2', '3-5-2', '3-4-2-1', '3-4-3'];
+
+export const DEFAULT_FORMATION: FormationModule = '4-3-3';
+
+// Mapping of formation -> roles on the pitch (order matters for layout)
+// This is used by the Rosa Overview screen
+export const FORMATION_ROLES: Record<FormationModule, PlayerRole[]> = {
+  '4-3-3':   ['POR', 'TD', 'DC', 'DC', 'TS', 'CD', 'CDC', 'CS', 'AD', 'ATT', 'AS'],
+  '4-2-3-1': ['POR', 'TD', 'DC', 'DC', 'TS', 'CDC', 'CDC', 'CD', 'TRQ', 'CS', 'ATT'],
+  '4-4-2':   ['POR', 'TD', 'DC', 'DC', 'TS', 'CD', 'CDC', 'CDC', 'CS', 'ATT', 'ATT'],
+  '3-5-2':   ['POR', 'DC', 'DC', 'DC', 'ADA', 'CDC', 'CDC', 'CS', 'ASA', 'ATT', 'ATT'],
+  '3-4-2-1': ['POR', 'DC', 'DC', 'DC', 'ADA', 'CD', 'CS', 'ASA', 'TRQ', 'TRQ', 'ATT'],
+  '3-4-3':   ['POR', 'DC', 'DC', 'DC', 'ADA', 'CD', 'CS', 'ASA', 'AD', 'ATT', 'AS'],
+};
+
+// Map a role slot position to pitch coordinates (top %, left %)
+// Each formation has its own layout for realistic positioning
+export interface SlotPosition { top: string; left: string }
+
+export const FORMATION_POSITIONS: Record<FormationModule, SlotPosition[]> = {
+  '4-3-3': [
+    { top: '90%', left: '50%' },  // POR
+    { top: '72%', left: '15%' },  // TD
+    { top: '75%', left: '38%' },  // DC
+    { top: '75%', left: '62%' },  // DC
+    { top: '72%', left: '85%' },  // TS
+    { top: '50%', left: '30%' },  // CD
+    { top: '48%', left: '50%' },  // CC
+    { top: '50%', left: '70%' },  // CS
+    { top: '25%', left: '75%' },  // AD
+    { top: '12%', left: '50%' },  // ATT
+    { top: '25%', left: '25%' },  // AS
+  ],
+  '4-2-3-1': [
+    { top: '90%', left: '50%' },  // POR
+    { top: '72%', left: '15%' },  // TD
+    { top: '75%', left: '38%' },  // DC
+    { top: '75%', left: '62%' },  // DC
+    { top: '72%', left: '85%' },  // TS
+    { top: '55%', left: '35%' },  // CDC
+    { top: '55%', left: '65%' },  // CDC
+    { top: '38%', left: '25%' },  // CD
+    { top: '40%', left: '50%' },  // TRQ
+    { top: '38%', left: '75%' },  // CS
+    { top: '15%', left: '50%' },  // ATT
+  ],
+  '4-4-2': [
+    { top: '90%', left: '50%' },  // POR
+    { top: '72%', left: '15%' },  // TD
+    { top: '75%', left: '38%' },  // DC
+    { top: '75%', left: '62%' },  // DC
+    { top: '72%', left: '85%' },  // TS
+    { top: '50%', left: '25%' },  // CD
+    { top: '48%', left: '42%' },  // CC
+    { top: '48%', left: '58%' },  // CC
+    { top: '50%', left: '75%' },  // CS
+    { top: '18%', left: '35%' },  // ATT
+    { top: '18%', left: '65%' },  // ATT
+  ],
+  '3-5-2': [
+    { top: '90%', left: '50%' },  // POR
+    { top: '75%', left: '28%' },  // DC
+    { top: '78%', left: '50%' },  // DC
+    { top: '75%', left: '72%' },  // DC
+    { top: '55%', left: '10%' },  // ADA
+    { top: '52%', left: '35%' },  // CDC
+    { top: '48%', left: '50%' },  // CC
+    { top: '52%', left: '65%' },  // CS
+    { top: '55%', left: '90%' },  // ASA
+    { top: '18%', left: '35%' },  // ATT
+    { top: '18%', left: '65%' },  // ATT
+  ],
+  '3-4-2-1': [
+    { top: '90%', left: '50%' },  // POR
+    { top: '75%', left: '28%' },  // DC
+    { top: '78%', left: '50%' },  // DC
+    { top: '75%', left: '72%' },  // DC
+    { top: '55%', left: '10%' },  // ADA
+    { top: '50%', left: '30%' },  // CD
+    { top: '50%', left: '70%' },  // CS
+    { top: '55%', left: '90%' },  // ASA
+    { top: '32%', left: '38%' },  // TRQ
+    { top: '32%', left: '62%' },  // TRQ
+    { top: '12%', left: '50%' },  // ATT
+  ],
+  '3-4-3': [
+    { top: '90%', left: '50%' },  // POR
+    { top: '75%', left: '28%' },  // DC
+    { top: '78%', left: '50%' },  // DC
+    { top: '75%', left: '72%' },  // DC
+    { top: '55%', left: '10%' },  // ADA
+    { top: '50%', left: '30%' },  // CD
+    { top: '50%', left: '70%' },  // CS
+    { top: '55%', left: '90%' },  // ASA
+    { top: '25%', left: '75%' },  // AD
+    { top: '12%', left: '50%' },  // ATT
+    { top: '25%', left: '25%' },  // AS
+  ],
 };
 
 export function getRoleCategory(role: PlayerRole): RoleCategory {

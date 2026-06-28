@@ -82,11 +82,10 @@ export const usePlayersStore = create<PlayerState>()(
           if (!activeSeason || !user) return;
 
           const repoData: PlayerCreateData[] = playersData.map(p => ({
-            name: p.name,
-            firstName: p.name.split(' ')[0] || p.name,
-            lastName: p.name.split(' ').slice(1).join(' ') || '',
-            roles: p.roles,
-            role: p.role,
+            name: p.name || '',
+            firstName: p.firstName || p.name?.split(' ')[0] || p.name || '',
+            lastName: p.lastName || p.name?.split(' ').slice(1).join(' ') || '',
+            roles: p.roles && p.roles.length > 0 ? p.roles : undefined,
             seasonId: activeSeason.id,
             userId: user.id,
           }));
