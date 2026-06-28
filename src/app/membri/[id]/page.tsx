@@ -14,7 +14,8 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useThemeStore } from "@/store/useThemeStore";
 import { aggregationRepository } from "@/lib/repositories/aggregation-repository";
 import { trainingRepository } from "@/lib/repositories/training-repository";
-import type { Player, TrainingSession, TrainingAttendance, TrainingStatus, Match } from "@/lib/types";
+import type { Player, TrainingSession, TrainingAttendance, TrainingStatus, Match, PlayerRole } from "@/lib/types";
+import { getPrimaryRole } from "@/lib/types";
 import { parseISO, isAfter, startOfDay } from "date-fns";
 
 import { PageHeader } from "@/components/layout/page-header";
@@ -608,9 +609,9 @@ export default function PlayerDetailPage() {
                   {player && (
                     <>
                       <span
-                        className={`text-[8px] font-black px-2 py-0.5 rounded-full border shadow-sm ${roleBg[player.role] ?? "bg-muted dark:bg-white/5 text-muted-foreground dark:text-white/40 border-border dark:border-white/10"}`}
+                        className={`text-[8px] font-black px-2 py-0.5 rounded-full border shadow-sm ${roleBg[getPrimaryRole(player)] ?? "bg-muted dark:bg-white/5 text-muted-foreground dark:text-white/40 border-border dark:border-white/10"}`}
                       >
-                        {roleLabel[player.role] ?? player.role}
+                        {roleLabel[getPrimaryRole(player)] ?? getPrimaryRole(player)}
                       </span>
                       {player.secondaryRoles && player.secondaryRoles.map(r => (
                         <span

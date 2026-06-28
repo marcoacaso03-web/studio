@@ -14,40 +14,40 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
-import { Role, ROLES } from '@/lib/types';
+import { Role, ROLES, PlayerRole, ALL_ROLES, migrateRole } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface BulkPlayerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (players: { name: string, role: Role }[]) => Promise<void>;
+  onSave: (players: { name: string, role: PlayerRole }[]) => Promise<void>;
 }
 
 interface PlayerRow {
   id: string;
   firstName: string;
   lastName: string;
-  role: Role;
+  role: PlayerRole;
 }
 
 export function BulkPlayerDialog({ open, onOpenChange, onSave }: BulkPlayerDialogProps) {
   const [rows, setRows] = useState<PlayerRow[]>([
-    { id: '1', firstName: '', lastName: '', role: 'Centrocampista' },
-    { id: '2', firstName: '', lastName: '', role: 'Centrocampista' }
+    { id: '1', firstName: '', lastName: '', role: migrateRole('Centrocampista') },
+    { id: '2', firstName: '', lastName: '', role: migrateRole('Centrocampista') }
   ]);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (open) {
       setRows([
-        { id: '1', firstName: '', lastName: '', role: 'Centrocampista' },
-        { id: '2', firstName: '', lastName: '', role: 'Centrocampista' }
+        { id: '1', firstName: '', lastName: '', role: migrateRole('Centrocampista') },
+        { id: '2', firstName: '', lastName: '', role: migrateRole('Centrocampista') }
       ]);
     }
   }, [open]);
 
   const addRow = () => {
-    setRows([...rows, { id: Math.random().toString(36).substr(2, 9), firstName: '', lastName: '', role: 'Centrocampista' }]);
+    setRows([...rows, { id: Math.random().toString(36).substr(2, 9), firstName: '', lastName: '', role: migrateRole('Centrocampista') }]);
   };
 
   const removeRow = (id: string) => {
@@ -114,12 +114,12 @@ export function BulkPlayerDialog({ open, onOpenChange, onSave }: BulkPlayerDialo
                   />
                 </div>
                 <div className="col-span-9 sm:col-span-4 ml-6 sm:ml-0">
-                  <Select value={row.role} onValueChange={(v) => updateRow(row.id, 'role', v as Role)}>
+                  <Select value={row.role} onValueChange={(v) => updateRow(row.id, 'role', v as PlayerRole)}>
                     <SelectTrigger className="h-9 text-[10px] font-bold uppercase">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {ROLES.map(r => <SelectItem key={r} value={r} className="text-xs font-bold uppercase">{r}</SelectItem>)}
+                      {ALL_ROLES.map(r => <SelectItem key={r} value={r} className="text-xs font-bold uppercase">{r}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>

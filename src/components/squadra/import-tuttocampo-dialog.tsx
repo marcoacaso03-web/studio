@@ -13,14 +13,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Loader2, Globe, AlertCircle, CheckCircle2, Link2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Role } from '@/lib/types';
+import { Role, PlayerRole } from "@/lib/types";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface ImportTuttocampoDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (players: { name: string, role: Role }[]) => Promise<void>;
+  onSave: (players: { name: string, role: PlayerRole }[]) => Promise<void>;
 }
 
 export function ImportTuttocampoDialog({ open, onOpenChange, onSave }: ImportTuttocampoDialogProps) {
@@ -53,7 +53,7 @@ export function ImportTuttocampoDialog({ open, onOpenChange, onSave }: ImportTut
 
       const playersToSave = data.giocatori.map((g: any) => ({
         name: g.name,
-        role: g.role as Role,
+        role: g.role as PlayerRole,
       }));
 
       await onSave(playersToSave);

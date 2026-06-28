@@ -27,7 +27,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Player, Role, ROLES } from "@/lib/types";
+import { Player, Role, ROLES, PlayerRole, migrateRole } from "@/lib/types";
+import { PitchRoleSelector } from "./PitchRoleSelector";
 import {
   Dialog,
   DialogContent,
@@ -40,8 +41,10 @@ import {
 const formSchema = z.object({
   firstName: z.string().min(2, { message: "Il nome è richiesto." }),
   lastName: z.string().min(2, { message: "Il cognome è richiesto." }),
-  role: z.enum(ROLES, { required_error: "Il ruolo è richiesto."}),
-  secondaryRoles: z.array(z.enum(ROLES)).default([]),
+  roles: z.array(z.string().refine((val): val is PlayerRole =>
+    ['POR','DC','TD','TS','ADA','ASA','CDC','TRQ','CD','CS','AD','AS','ATT'].includes(val),
+    { message: "Ruolo non valido" }
+  )).min(1, { message: "Seleziona almeno un ruolo." }).default([]),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -50,8 +53,7 @@ type PlayerSaveData = {
   name: string;
   firstName: string;
   lastName: string;
-  role: Role;
-  secondaryRoles: Role[];
+  roles: PlayerRole[];
 };
 
 interface PlayerFormDialogProps {
@@ -70,30 +72,38 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player, onAIImpor
     defaultValues: {
       firstName: "",
       lastName: "",
-      role: "Centrocampista",
-      secondaryRoles: [],
+      roles: [],
     },
-});
+  });
 
   React.useEffect(() => {
     if (open) {
       if (player) {
-          const nameParts = player.name.split(' ');
-          const firstName = nameParts.shift() || '';
-          const lastName = nameParts.join(' ');
-          form.reset({
-              firstName,
-              lastName,
-              role: player.role,
-              secondaryRoles: player.secondaryRoles || [],
-          });
+        const nameParts = player.name.split(' ');
+        const firstName = nameParts.shift() || '';
+        const lastName = nameParts.join(' ');
+
+        // Migrate legacy role/secondaryRoles to roles array
+        let roles: PlayerRole[];
+        if (player.roles && player.roles.length > 0) {
+          roles = player.roles;
+        } else if (player.role) {
+          roles = [migrateRole(player.role), ...(player.secondaryRoles?.map(migrateRole) || [])];
+        } else {
+          roles = [];
+        }
+
+        form.reset({
+          firstName,
+          lastName,
+          roles,
+        });
       } else {
-          form.reset({
-              firstName: "",
-              lastName: "",
-              role: "Centrocampista",
-              secondaryRoles: [],
-          });
+        form.reset({
+          firstName: "",
+          lastName: "",
+          roles: [],
+        });
       }
     }
   }, [player, open, form]);
@@ -105,8 +115,7 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player, onAIImpor
         name: `${data.firstName} ${data.lastName}`.trim(),
         firstName: data.firstName,
         lastName: data.lastName,
-        role: data.role,
-        secondaryRoles: data.secondaryRoles as Role[]
+        roles: data.roles,
       };
       await onSave(saveData, player?.id);
       onOpenChange(false);
@@ -197,84 +206,22 @@ export function PlayerFormDialog({ open, onOpenChange, onSave, player, onAIImpor
               />
             </div>
             
+            {/* Role Selector */}
             <FormField
               control={form.control}
-              name="role"
+              name="roles"
               render={({ field }) => (
-                  <FormItem className="space-y-1.5">
-                    <FormLabel className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/80 ml-1">Ruolo Tecnico</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value} disabled={isSaving}>
-                        <FormControl>
-                            <SelectTrigger className="h-11 text-xs font-black uppercase rounded-xl bg-background dark:bg-black border border-border dark:border-brand-green/20 focus:ring-1 focus:ring-primary dark:focus:ring-brand-green focus:border-primary dark:focus:border-brand-green transition-all">
-                                <SelectValue placeholder="Seleziona ruolo" />
-                            </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="rounded-xl border-border dark:border-brand-green/30 bg-card dark:bg-background">
-                            {ROLES.map(role => (
-                                <SelectItem key={role} value={role} className="text-xs font-black uppercase focus:bg-primary/10 dark:focus:bg-brand-green/10 focus:text-primary dark:focus:text-brand-green transition-colors">
-                                  {role}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <FormMessage className="text-[9px] font-bold uppercase" />
-                  </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="secondaryRoles"
-              render={() => (
-                <FormItem className="space-y-3 p-4 bg-muted/30 dark:bg-white/5 rounded-2xl border border-divider dark:border-white/5">
+                <FormItem className="space-y-3">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/80 ml-1">Ruoli Secondari</FormLabel>
+                    <FormLabel className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/80 ml-1">Ruoli del giocatore</FormLabel>
                     <FormDescription className="text-[8px] font-bold uppercase text-muted-foreground/40 ml-1">
-                      Seleziona altri ruoli in cui il giocatore può adattarsi.
+                      Seleziona tutti i ruoli che il giocatore può svolgere. Il primo selezionato sarà il ruolo principale.
                     </FormDescription>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 pt-1">
-                    {ROLES.map((role) => {
-                      // Non mostrare il ruolo primario selezionato
-                      if (role === form.watch('role')) return null;
-                      
-                      return (
-                        <FormField
-                          key={role}
-                          control={form.control}
-                          name="secondaryRoles"
-                          render={({ field }) => {
-                            return (
-                              <FormItem
-                                key={role}
-                                className="flex flex-row items-center space-x-2 space-y-0"
-                              >
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value?.includes(role)}
-                                    disabled={isSaving}
-                                    onCheckedChange={(checked) => {
-                                      return checked
-                                        ? field.onChange([...field.value, role])
-                                        : field.onChange(
-                                            field.value?.filter(
-                                              (value) => value !== role
-                                            )
-                                          )
-                                    }}
-                                    className="border-primary/30 dark:border-brand-green/30 data-[state=checked]:bg-primary dark:data-[state=checked]:bg-brand-green data-[state=checked]:text-white dark:data-[state=checked]:text-black"
-                                  />
-                                </FormControl>
-                                <FormLabel className="text-[10px] font-black uppercase tracking-tight text-foreground dark:text-white/80 cursor-pointer">
-                                  {role}
-                                </FormLabel>
-                              </FormItem>
-                            )
-                          }}
-                        />
-                      )
-                    })}
-                  </div>
+                  <PitchRoleSelector
+                    selectedRoles={field.value}
+                    onChange={field.onChange}
+                  />
                   <FormMessage className="text-[9px] font-bold uppercase" />
                 </FormItem>
               )}

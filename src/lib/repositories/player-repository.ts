@@ -12,15 +12,25 @@ import {
   where,
   writeBatch
 } from 'firebase/firestore';
-import type { Player, Role } from '@/lib/types';
+import type { Player, Role, PlayerRole } from '@/lib/types';
 import { PlayerSchema } from '@/lib/schemas';
+import { migrateRole } from '@/lib/types';
+
+function ensureRoles(player: { roles?: PlayerRole[]; role?: Role; secondaryRoles?: Role[] }): PlayerRole[] {
+  if (player.roles && player.roles.length > 0) return player.roles;
+  if (player.role) {
+    return [migrateRole(player.role), ...(player.secondaryRoles?.map(r => migrateRole(r)) || [])];
+  }
+  return ['CDC'];
+}
 
 export type PlayerCreateData = {
     name: string;
     firstName: string;
     lastName: string;
-    role: Role;
+    role?: Role;
     secondaryRoles?: Role[];
+    roles?: PlayerRole[];
     seasonId: string;
     userId: string;
 }
@@ -76,8 +86,7 @@ export const playerRepository = {
       name: data.name.toUpperCase(),
       firstName: data.firstName.toUpperCase(),
       lastName: data.lastName.toUpperCase(),
-      role: data.role,
-      secondaryRoles: data.secondaryRoles || [],
+      roles: ensureRoles({ roles: data.roles, role: data.role, secondaryRoles: data.secondaryRoles }),
       stats: { appearances: 0, goals: 0, assists: 0, avgMinutes: 0 },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -87,10 +96,10 @@ export const playerRepository = {
     return newPlayer;
   },
 
-  async bulkAdd(playersData: { name: string, role: Role }[], userId: string, seasonId: string) {
+  async bulkAdd(playersData: PlayerCreateData[], userId: string, seasonId: string) {
     const db = getFirestore();
     const batch = writeBatch(db);
-    
+
     const newPlayers: Player[] = playersData.map((p) => {
       const shortRandom = Math.random().toString(36).substring(2, 7).toUpperCase();
       const id = `P-${shortRandom}`;
@@ -101,15 +110,14 @@ export const playerRepository = {
         teamId: seasonId,
         seasonId,
         name: p.name.toUpperCase(),
-        firstName: (p as any).firstName?.toUpperCase() || p.name.split(" ")[0].toUpperCase(),
-        lastName: (p as any).lastName?.toUpperCase() || p.name.split(" ").slice(1).join(" ").toUpperCase() || p.name.toUpperCase(),
-        role: p.role,
-        secondaryRoles: [],
+        firstName: p.firstName.toUpperCase(),
+        lastName: p.lastName.toUpperCase(),
+        roles: ensureRoles({ roles: p.roles, role: p.role, secondaryRoles: p.secondaryRoles as Role[] | undefined }),
         stats: { appearances: 0, goals: 0, assists: 0, avgMinutes: 0 },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
-      
+
       const docRef = doc(db, 'teams', seasonId, 'players', id);
       batch.set(docRef, newPlayer);
       return newPlayer;

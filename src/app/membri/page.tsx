@@ -6,7 +6,10 @@ import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Edit, Trash2, ChevronUp, ChevronDown, Sparkles, Search, Plus, ChevronRight, Globe, Hospital, Save } from "lucide-react";
-import type { Player, Role } from "@/lib/types";
+import type { Player, Role, PlayerRole } from "@/lib/types";
+import type { PlayerCreateData } from "@/lib/repositories/player-repository";
+import { useAuthStore } from "@/store/useAuthStore";
+import { migrateRole } from "@/lib/types";
 import dynamic from "next/dynamic";
 
 const PlayerFormDialog = dynamic(() => import("@/components/squadra/player-form-dialog").then(mod => mod.PlayerFormDialog), { ssr: false });
@@ -80,7 +83,7 @@ export default function RosaPage() {
     setIsFormOpen(true);
   };
 
-  const handleSavePlayer = async (data: { name: string, firstName: string, lastName: string, role: Role, secondaryRoles: Role[] }, playerId?: string) => {
+  const handleSavePlayer = async (data: { name: string, firstName: string, lastName: string, roles: PlayerRole[] }, playerId?: string) => {
     if (playerId) {
       await update(playerId, data);
     } else {
@@ -88,8 +91,19 @@ export default function RosaPage() {
     }
   };
 
-  const handleSmartSavePlayers = async (playersData: { name: string, role: Role }[]) => {
-    await bulkAdd(playersData);
+  const handleSmartSavePlayers = async (playersData: { name: string, role: PlayerRole }[]) => {
+    const user = useAuthStore.getState().user;
+    const activeSeason = useSeasonsStore.getState().activeSeason;
+    if (!user || !activeSeason) return;
+    const mapped: PlayerCreateData[] = playersData.map(p => ({
+      name: p.name,
+      firstName: p.name.split(' ')[0] || p.name,
+      lastName: p.name.split(' ').slice(1).join(' ') || '',
+      roles: [p.role],
+      seasonId: activeSeason.id,
+      userId: user.id,
+    }));
+    await bulkAdd(mapped);
   };
 
   const handleDeletePlayer = async () => {
@@ -122,6 +136,13 @@ export default function RosaPage() {
     }, 200);
   };
 
+  // Map new PlayerRole codes back to legacy Role labels for grouping
+  const reverseRoleMap: Record<PlayerRole, string> = {
+    POR: 'Portiere', DC: 'Difensore', TD: 'Difensore', TS: 'Difensore', ADA: 'Difensore', ASA: 'Difensore',
+    CDC: 'Centrocampista', TRQ: 'Centrocampista', CD: 'Centrocampista', CS: 'Centrocampista',
+    AD: 'Attaccante', AS: 'Attaccante', ATT: 'Attaccante',
+  };
+
   const groupedPlayers = useMemo(() => {
     const filtered = players.filter(p =>
       p.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -135,8 +156,10 @@ export default function RosaPage() {
     };
 
     filtered.forEach(p => {
-      if (groups[p.role]) {
-        groups[p.role].push(p);
+      const primaryRole = p.roles?.[0] || migrateRole(p.role || 'Centrocampista');
+      const mappedRole = reverseRoleMap[primaryRole] || 'Centrocampista';
+      if (groups[mappedRole]) {
+        groups[mappedRole].push(p);
       }
     });
 

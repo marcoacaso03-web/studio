@@ -4,7 +4,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { playerRepository } from '@/lib/repositories/player-repository';
-import type { Player, Role } from '@/lib/types';
+import type { Player, Role, PlayerRole } from '@/lib/types';
 import type { PlayerCreateData } from '@/lib/repositories/player-repository';
 import { PlayerSchema } from '@/lib/schemas';
 import { useStatsStore } from './useStatsStore';
@@ -21,7 +21,7 @@ interface PlayerState {
     error: string | null;
     fetchAll: (seasonId?: string) => Promise<void>;
     add: (data: Omit<PlayerCreateData, 'seasonId' | 'userId'>) => Promise<Player | undefined>;
-    bulkAdd: (data: { name: string, role: Role }[]) => Promise<void>;
+    bulkAdd: (data: PlayerCreateData[]) => Promise<void>;
     update: (id: string, updates: Partial<Omit<Player, 'id' | 'userId' | 'seasonId' | 'teamId' | 'teamOwnerId'>>) => Promise<void>;
     remove: (id: string) => Promise<void>;
     removeAll: () => Promise<void>;
@@ -81,7 +81,16 @@ export const usePlayersStore = create<PlayerState>()(
           const activeSeason = useSeasonsStore.getState().activeSeason;
           if (!activeSeason || !user) return;
 
-          await playerRepository.bulkAdd(playersData, user.id, activeSeason.id);
+          const repoData: PlayerCreateData[] = playersData.map(p => ({
+            name: p.name,
+            firstName: p.name.split(' ')[0] || p.name,
+            lastName: p.name.split(' ').slice(1).join(' ') || '',
+            roles: p.roles,
+            role: p.role,
+            seasonId: activeSeason.id,
+            userId: user.id,
+          }));
+          await playerRepository.bulkAdd(repoData, user.id, activeSeason.id);
           
           await mutate(getPlayersSWRKey(user.id, activeSeason.id));
           await get().fetchAll(activeSeason.id);

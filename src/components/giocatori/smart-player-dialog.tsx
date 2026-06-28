@@ -14,14 +14,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Sparkles, Loader2, AlertCircle, Info } from 'lucide-react';
 import * as AIService from '@/services/ai.service';
 import { useToast } from '@/hooks/use-toast';
-import { Role } from '@/lib/types';
+import { PlayerRole, Role } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface SmartPlayerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (players: { name: string, role: Role }[]) => Promise<void>;
+  onSave: (players: { name: string, role: PlayerRole }[]) => Promise<void>;
 }
 
 export function SmartPlayerDialog({ open, onOpenChange, onSave }: SmartPlayerDialogProps) {
@@ -40,7 +40,7 @@ export function SmartPlayerDialog({ open, onOpenChange, onSave }: SmartPlayerDia
         throw new Error("Nessun giocatore individuato. Controlla il formato del testo.");
       }
 
-      await onSave(result.players as { name: string, role: Role }[]);
+      await onSave(result.players as unknown as { name: string, role: PlayerRole }[]);
 
       toast({
         title: "Rosa Aggiornata",
