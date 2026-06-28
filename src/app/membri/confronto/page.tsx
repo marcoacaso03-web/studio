@@ -11,7 +11,7 @@ import { useSeasonsStore } from "@/store/useSeasonsStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { aggregationRepository } from "@/lib/repositories/aggregation-repository";
 import { cn, displayPlayerName } from "@/lib/utils";
-import type { Player } from "@/lib/types";
+import { Player, getPrimaryRole } from '@/lib/types';
 import { useThemeStore } from "@/store/useThemeStore";
 
 import { PageHeader } from "@/components/layout/page-header";
@@ -103,7 +103,7 @@ function calculatePlayerStats(playerId: string, context: any, player: Player, pS
         }
       });
 
-      if (player.role === "Portiere" && matchGoalsConcededCount === 0) cleanSheets++;
+      if (getPrimaryRole(player) === 'POR' && matchGoalsConcededCount === 0) cleanSheets++;
 
       if (!match.result) continue;
       const scored = match.isHome ? match.result.home : match.result.away;
@@ -184,15 +184,15 @@ function ConfrontoContent() {
   }, [user, activeSeason, p1Id, p2Id, players]);
 
   // Restrict p2 selection based on p1's role
-  const isP1Goalkeeper = p1?.role === "Portiere";
+  const isP1Goalkeeper = p1 ? getPrimaryRole(p1) === 'POR' : false;
   const eligibleP2s = useMemo(() => {
     if (!p1) return [];
     return players.filter(p => {
       if (p.id === p1.id) return false;
-      if (isP1Goalkeeper) return p.role === "Portiere";
-      return p.role !== "Portiere"; // Outfield players compared with outfield
+      if (isP1Goalkeeper) return getPrimaryRole(p) === 'POR';
+      return getPrimaryRole(p) !== 'POR'; // Outfield players compared with outfield
     });
-  }, [players, p1, isP1Goalkeeper]);
+  }, [players, p1]);
 
   const handleChangeP2 = (v: string) => {
     router.replace(`/membri/confronto?p1=${p1Id}&p2=${v}`);

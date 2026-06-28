@@ -1,10 +1,11 @@
 import { 
-    Match, 
-    MatchEvent, 
-    MatchLineup, 
-    Player, 
+    Match,
+    MatchEvent,
+    MatchLineup,
+    Player,
     AdvancedStatsLeaderboard,
-    StarterPlayer
+    StarterPlayer,
+    getPrimaryRole
 } from '../types';
 
 export interface AdvancedStatsOptions {
@@ -50,7 +51,7 @@ export function normalizeLineup(lineup: MatchLineup | undefined, players: Player
             const player = players.find(pl => pl.id === p);
             return {
                 playerId: p,
-                role: player?.role ?? 'Difensore',
+                role: player ? getPrimaryRole(player) : 'DC',
                 positionCode: undefined
             };
         }

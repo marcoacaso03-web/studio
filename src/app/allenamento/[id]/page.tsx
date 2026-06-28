@@ -17,7 +17,8 @@ import { ArrowLeft, Save, ClipboardList, Users, CheckCircle2, Clock, XCircle, Lo
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import type { TrainingSession, TrainingAttendance, TrainingStatus } from "@/lib/types";
+import type { TrainingSession, TrainingAttendance, TrainingStatus, Player } from "@/lib/types";
+import { getPrimaryRole } from "@/lib/types";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { parseISO } from "date-fns";
@@ -389,7 +390,7 @@ export default function TrainingDetailPage() {
                   <CardContent className="p-4 flex flex-row items-center justify-between gap-4">
                     <div className="flex flex-col justify-center sm:pl-2 flex-1">
                       <span className="text-[15px] font-black uppercase tracking-tight text-foreground">{displayPlayerName(player)}</span>
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">{player.role}</span>
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">{getPrimaryRole(player)}</span>
                     </div>
 
                     <div className="grid grid-cols-3 gap-1.5 w-auto">

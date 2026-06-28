@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Search, User, Check, Star, Activity } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Player, Role } from "@/lib/types";
+import { Player, Role, PlayerRole, getPrimaryRole, migrateRole } from '@/lib/types';
 import { displayPlayerName, cn } from "@/lib/utils";
 import { getPositionAcronym } from "@/lib/lineup-mapping";
 
@@ -73,15 +73,17 @@ export function SmartPlayerSelectDialog({
     );
 
     return searched.sort((a, b) => {
-      const getScore = (p: Player) => {
-        if (p.role === targetRole) return 100;
-        if (p.secondaryRoles?.includes(targetRole)) return 80;
-        if (p.role === 'Portiere') return 0; // Goalkeepers last unless target
-        return 50; // Others
+      const aPrimary = getPrimaryRole(a);
+      const bPrimary = getPrimaryRole(b);
+      const getScore = (p: Player, primary: string) => {
+        if (primary === targetRole) return 100;
+        if (p.secondaryRoles?.includes(targetRole as any)) return 80;
+        if (primary === 'POR') return 0;
+        return 50;
       };
 
-      const scoreA = getScore(a);
-      const scoreB = getScore(b);
+      const scoreA = getScore(a, aPrimary);
+      const scoreB = getScore(b, bPrimary);
 
       if (scoreA !== scoreB) return scoreB - scoreA;
       return a.name.localeCompare(b.name);
@@ -122,8 +124,10 @@ export function SmartPlayerSelectDialog({
           </Button>
           
           {sortedPlayers.map((player) => {
-            const isMatch = player.role === targetRole;
-            const isSecondary = player.secondaryRoles?.includes(targetRole);
+            const primary = getPrimaryRole(player);
+            const targetRoleCode = migrateRole(targetRole) as PlayerRole;
+            const isMatch = primary === targetRoleCode;
+            const isSecondary = player.roles?.some(r => migrateRole(r) === targetRoleCode);
             const isSelected = selectedPlayerIds[slotIndex] === player.id;
             const injured = isInjured(player);
 
@@ -165,7 +169,7 @@ export function SmartPlayerSelectDialog({
                       {displayPlayerName(player)}
                     </p>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase">
-                      {injured ? "Infortunato" : `${player.role} ${isSecondary ? `• ${targetRole}` : ""}`}
+                      {injured ? "Infortunato" : `${primary} ${isSecondary ? `• ${targetRole}` : ""}`}
                     </p>
                   </div>
                 </div>

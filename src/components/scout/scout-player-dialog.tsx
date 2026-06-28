@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUser, useFirestore } from "@/firebase";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
-import { ROLES } from "@/lib/types";
+import { ALL_ROLES, Role, getPrimaryRole } from '@/lib/types';
 import type { ScoutPlayer, ScoutCategory } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Check, Loader2 } from "lucide-react";
@@ -45,7 +45,7 @@ export function ScoutPlayerDialog({ open, onOpenChange, player, categories }: Sc
     if (player) {
       setFormData({
         name: player.name || "",
-        role: player.role || "Attaccante",
+        role: player.role ? getPrimaryRole({...player, role: player.role} as any) : 'ATT',
         currentTeam: player.currentTeam || "",
         notes: player.notes || "",
         categoryIds: player.categoryIds || []
@@ -130,7 +130,7 @@ export function ScoutPlayerDialog({ open, onOpenChange, player, categories }: Sc
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-card dark:bg-background border border-primary/30 dark:border-brand-green/30">
-                    {ROLES.map(r => (
+                    {ALL_ROLES.map(r => (
                       <SelectItem key={r} value={r} className="text-xs font-bold uppercase">{r}</SelectItem>
                     ))}
                   </SelectContent>

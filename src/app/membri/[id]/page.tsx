@@ -441,7 +441,7 @@ export default function PlayerDetailPage() {
             });
 
             // Applica clean sheet logic
-            if (player?.role === "Portiere" && matchGoalsConcededCount === 0) cleanSheets++;
+            if (player && getPrimaryRole(player) === 'POR' && matchGoalsConcededCount === 0) cleanSheets++;
 
             if (!match.result) continue;
             const scored = match.isHome ? match.result.home : match.result.away;

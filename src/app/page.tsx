@@ -11,6 +11,7 @@ import { useSeasonsStore } from '@/store/useSeasonsStore';
 import { useAppStore } from '@/store/useAppStore';
 import { ErrorState } from '@/components/ui/error-state';
 import { parseError } from '@/lib/error-utils';
+import { getPrimaryRole } from '@/lib/types';
 
 import { SplashScreen } from '@/components/layout/splash-screen';
 import { PageHeader } from '@/components/layout/page-header';
@@ -57,10 +58,10 @@ export default function HomePage() {
   // 1. Rosa
   const { totPOR, totDIF, totCEN, totATT } = useMemo(() => {
     return {
-      totPOR: players.filter(p => p.role === 'Portiere').length,
-      totDIF: players.filter(p => p.role === 'Difensore').length,
-      totCEN: players.filter(p => p.role === 'Centrocampista').length,
-      totATT: players.filter(p => p.role === 'Attaccante').length,
+      totPOR: players.filter(p => getPrimaryRole(p) === 'POR').length,
+      totDIF: players.filter(p => ['DC','TD','TS','ADA','ASA'].includes(getPrimaryRole(p))).length,
+      totCEN: players.filter(p => ['CDC','TRQ','CD','CS'].includes(getPrimaryRole(p))).length,
+      totATT: players.filter(p => ['AD','AS','ATT'].includes(getPrimaryRole(p))).length,
     };
   }, [players]);
 

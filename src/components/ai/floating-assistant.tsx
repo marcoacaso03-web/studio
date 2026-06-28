@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { getPrimaryRole } from "@/lib/types";
 import * as AIService from '@/services/ai.service';
 import { useMatchesStore } from "@/store/useMatchesStore";
 import { usePlayersStore } from "@/store/usePlayersStore";
@@ -60,7 +61,7 @@ export function FloatingAssistant() {
         })),
         players: players.map(p => ({
           name: p.name,
-          role: p.role || undefined,
+          role: getPrimaryRole(p),
           stats: p.stats ? {
             appearances: p.stats.appearances || 0,
             goals: p.stats.goals || 0,

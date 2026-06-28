@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { X, ChevronLeft, User, Goal, Star, AlertTriangle, Trash2, Handshake, ArrowRightLeft } from "lucide-react";
 import { cn, displayPlayerName } from "@/lib/utils";
 import { getPositionCoordinates, getPositionAcronym } from "@/lib/lineup-mapping";
-import { Player, MatchLineup, MatchEventType, GoalType, GOAL_TYPES, ROLES } from "@/lib/types";
+import { Player, MatchLineup, MatchEventType, GoalType, GOAL_TYPES, ROLES, getPrimaryRole } from "@/lib/types";
 
 interface LiveMatchEventWorkflowProps {
   open: boolean;
@@ -223,7 +223,7 @@ export function LiveMatchEventWorkflow({
         <ScrollArea className="h-[400px] pr-4">
           <div className="space-y-6">
             {ROLES.map(role => {
-              const playersInRole = allPlayers.filter(p => p.role === role);
+              const playersInRole = allPlayers.filter(p => getPrimaryRole(p) === role.toUpperCase());
               if (playersInRole.length === 0) return null;
               return (
                 <div key={role} className="space-y-2">
