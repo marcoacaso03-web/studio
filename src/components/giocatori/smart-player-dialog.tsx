@@ -89,11 +89,11 @@ export function SmartPlayerDialog({ open, onOpenChange, onSave }: SmartPlayerDia
                   Guida Rapida
                 </AlertTitle>
                 <AlertDescription className="text-[11px] font-bold text-muted-foreground dark:text-white/40 uppercase leading-relaxed tracking-wide">
-                  Copia e incolla la lista dei giocatori. Puoi specificare i ruoli come intestazioni. 
+                  Copia e incolla la lista dei giocatori. Puoi specificare i ruoli come intestazioni.
                   <span className="text-foreground dark:text-white block mt-2 p-3 bg-background/50 dark:bg-black rounded-xl border border-border dark:border-brand-green/10">
-                    Esempio: "Difensori: Rossi, Bianchi. Centrocampisti: Verdi..."
+                    Esempio: "POR: Buffon. Difensori: Chiellini, Bonucci. Centrocampisti: Verratti, Barella. Attaccanti: Immobile, Chiesa."
                   </span>
-                  <span className="text-foreground dark:text-brand-green/80 block mt-3 font-black">L'AI riconoscerà automaticamente nomi e ruoli tecnici.</span>
+                  <span className="text-foreground dark:text-brand-green/80 block mt-3 font-black">L'AI riconoscerà automaticamente nomi e ruoli (POR, DC, TD, TS, CDC, CD, CS, TRQ, AD, AS, ATT, ADA, ASA).</span>
                 </AlertDescription>
               </div>
             </Alert>
@@ -104,7 +104,7 @@ export function SmartPlayerDialog({ open, onOpenChange, onSave }: SmartPlayerDia
                 {rawText.length > 0 && <span className="text-[9px] font-black text-primary dark:text-brand-green uppercase">{rawText.length} Caratteri</span>}
               </div>
               <Textarea
-                placeholder="Incolla qui la lista...&#10;Es: Portieri: Buffon; Difensori: Chiellini..."
+                placeholder={"Incolla qui la lista...\nEs: POR: Buffon; DC: Chiellini, Bonucci; CDC: Verratti; ATT: Immobile"}
                 value={rawText}
                 onChange={(e) => setRawText(e.target.value)}
                 disabled={isAnalyzing}
