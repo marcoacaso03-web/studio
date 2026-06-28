@@ -222,15 +222,17 @@ export default function AltroPage() {
 
   const handleDeleteSeason = async () => {
     if (!seasonToDelete) return;
-    // Capture values IMMEDIATELY before Radix closes the dialog on pointerdown
     const id = seasonToDelete.id;
     const name = seasonToDelete.name;
-    // Close dialog immediately to prevent Radix nested-dialog freeze
+    // Close both dialogs immediately
     setSeasonToDelete(null);
+    setIsSquadraOpen(false);
     setIsDeletingSeason(true);
     try {
       await removeSeason(id);
       toast({ title: "Stagione Eliminata", description: `La stagione "${name}" è stata eliminata.` });
+      // Redirect to home to "restart" the app with fresh state
+      router.push('/');
     } catch (err: any) {
       toast({ variant: "destructive", title: "Errore", description: err?.message || "Impossibile eliminare la stagione." });
     } finally {
