@@ -70,21 +70,23 @@ export const ROLE_CATEGORY_COLORS: Record<RoleCategory, string> = {
 
 // ── Formation Modules ──────────────────────────────────────
 
-export type FormationModule = '4-3-3' | '4-2-3-1' | '4-4-2' | '3-5-2' | '3-4-2-1' | '3-4-3';
+export type FormationModule = '4-3-3' | '4-2-3-1' | '4-4-2' | '3-5-2' | '3-4-2-1' | '3-4-3' | '3-4-1-2';
 
-export const FORMATIONS: FormationModule[] = ['4-3-3', '4-2-3-1', '4-4-2', '3-5-2', '3-4-2-1', '3-4-3'];
+export const FORMATIONS: FormationModule[] = ['4-3-3', '4-2-3-1', '4-4-2', '3-5-2', '3-4-2-1', '3-4-3', '3-4-1-2'];
 
 export const DEFAULT_FORMATION: FormationModule = '4-3-3';
 
 // Mapping of formation -> roles on the pitch (order matters for layout)
 // This is used by the Rosa Overview screen
+// CD = Centrocampista Centrale/Sinistra, CS = Centrocampista Destra
 export const FORMATION_ROLES: Record<FormationModule, PlayerRole[]> = {
   '4-3-3':   ['POR', 'TS', 'DC', 'DC', 'TD', 'CD', 'CDC', 'CS', 'AS', 'ATT', 'AD'],
   '4-2-3-1': ['POR', 'TS', 'DC', 'DC', 'TD', 'CDC', 'CDC', 'CD', 'TRQ', 'CS', 'ATT'],
   '4-4-2':   ['POR', 'TS', 'DC', 'DC', 'TD', 'AS', 'CD', 'CS', 'AD', 'ATT', 'ATT'],
-  '3-5-2':   ['POR', 'DC', 'DC', 'DC', 'ASA', 'CDC', 'CDC', 'CS', 'ADA', 'ATT', 'ATT'],
+  '3-5-2':   ['POR', 'DC', 'DC', 'DC', 'ASA', 'CS', 'CDC', 'CD', 'ADA', 'ATT', 'ATT'],
   '3-4-2-1': ['POR', 'DC', 'DC', 'DC', 'ASA', 'CD', 'CS', 'ADA', 'TRQ', 'TRQ', 'ATT'],
   '3-4-3':   ['POR', 'DC', 'DC', 'DC', 'ASA', 'CD', 'CS', 'ADA', 'AS', 'ATT', 'AD'],
+  '3-4-1-2': ['POR', 'DC', 'DC', 'DC', 'ASA', 'CD', 'CS', 'ADA', 'TRQ', 'ATT', 'ATT'],
 };
 
 // Map a role slot position to pitch coordinates (top %, left %)
@@ -137,9 +139,9 @@ export const FORMATION_POSITIONS: Record<FormationModule, SlotPosition[]> = {
     { top: '78%', left: '50%' },  // DC centro
     { top: '75%', left: '72%' },  // DC dx
     { top: '55%', left: '12%' },  // ASA (sinistra)
-    { top: '52%', left: '32%' },  // CDC sx
-    { top: '48%', left: '50%' },  // CDC centro
-    { top: '52%', left: '68%' },  // CS dx
+    { top: '52%', left: '30%' },  // CS (sx)
+    { top: '48%', left: '50%' },  // CDC (centro)
+    { top: '52%', left: '70%' },  // CD (dx)
     { top: '55%', left: '88%' },  // ADA (destra)
     { top: '18%', left: '38%' },  // ATT sx
     { top: '18%', left: '62%' },  // ATT dx
@@ -169,6 +171,19 @@ export const FORMATION_POSITIONS: Record<FormationModule, SlotPosition[]> = {
     { top: '25%', left: '20%' },  // AS (sinistra)
     { top: '12%', left: '50%' },  // ATT (centro)
     { top: '25%', left: '80%' },  // AD (destra)
+  ],
+  '3-4-1-2': [
+    { top: '90%', left: '50%' },  // POR
+    { top: '75%', left: '28%' },  // DC sx
+    { top: '78%', left: '50%' },  // DC centro
+    { top: '75%', left: '72%' },  // DC dx
+    { top: '55%', left: '12%' },  // ASA (sinistra)
+    { top: '52%', left: '32%' },  // CD sx
+    { top: '52%', left: '68%' },  // CS dx
+    { top: '55%', left: '88%' },  // ADA (destra)
+    { top: '35%', left: '50%' },  // TRQ (centro)
+    { top: '15%', left: '35%' },  // ATT sx
+    { top: '15%', left: '65%' },  // ATT dx
   ],
 };
 

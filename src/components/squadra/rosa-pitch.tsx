@@ -81,7 +81,7 @@ export function RosaPitch({ formation, coverage, selectedRole, onSelectRole, ord
               <span className="text-white drop-shadow-md leading-none">{role}</span>
               <span className="text-[7px] text-white/80 leading-none mt-0.5">{count}</span>
               {topName && (
-                <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[7px] font-bold text-white/70 whitespace-nowrap drop-shadow-md max-w-[70px] truncate">
+                <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] sm:text-[10px] font-black text-white/80 whitespace-nowrap drop-shadow-md max-w-[80px] truncate">
                   {topName}
                 </span>
               )}

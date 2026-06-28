@@ -179,28 +179,36 @@ export function RolePlayerList({
                   <button
                     type="button"
                     disabled={!canMoveUp(idx)}
-                    onClick={() => onReorder(selectedRole, playerId, 'up')}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onReorder(selectedRole, playerId, 'up');
+                    }}
                     className={cn(
-                      "p-0.5 rounded transition-colors",
+                      "p-1 rounded-md transition-colors",
                       canMoveUp(idx)
-                        ? "hover:bg-muted text-muted-foreground hover:text-foreground"
+                        ? "hover:bg-background/80 dark:hover:bg-black/50 text-muted-foreground hover:text-foreground active:scale-90"
                         : "opacity-20 cursor-not-allowed"
                     )}
                   >
-                    <ChevronUp className="h-3 w-3" />
+                    <ChevronUp className="h-4 w-4" />
                   </button>
                   <button
                     type="button"
                     disabled={!canMoveDown(idx)}
-                    onClick={() => onReorder(selectedRole, playerId, 'down')}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onReorder(selectedRole, playerId, 'down');
+                    }}
                     className={cn(
-                      "p-0.5 rounded transition-colors",
+                      "p-1 rounded-md transition-colors",
                       canMoveDown(idx)
-                        ? "hover:bg-muted text-muted-foreground hover:text-foreground"
+                        ? "hover:bg-background/80 dark:hover:bg-black/50 text-muted-foreground hover:text-foreground active:scale-90"
                         : "opacity-20 cursor-not-allowed"
                     )}
                   >
-                    <ChevronDown className="h-3 w-3" />
+                    <ChevronDown className="h-4 w-4" />
                   </button>
                 </div>
 
