@@ -21,7 +21,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 interface SmartPlayerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (players: { name: string, role: PlayerRole }[]) => Promise<void>;
+  onSave: (players: { name: string, roles: PlayerRole[] }[]) => Promise<void>;
 }
 
 export function SmartPlayerDialog({ open, onOpenChange, onSave }: SmartPlayerDialogProps) {
@@ -40,7 +40,11 @@ export function SmartPlayerDialog({ open, onOpenChange, onSave }: SmartPlayerDia
         throw new Error("Nessun giocatore individuato. Controlla il formato del testo.");
       }
 
-      await onSave(result.players as unknown as { name: string, role: PlayerRole }[]);
+      const players = result.players.map(p => ({
+        name: p.name,
+        roles: p.roles as unknown as PlayerRole[],
+      }));
+      await onSave(players);
 
       toast({
         title: "Rosa Aggiornata",

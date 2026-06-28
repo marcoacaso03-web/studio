@@ -20,7 +20,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 interface ImportTuttocampoDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (players: { name: string, role: PlayerRole }[]) => Promise<void>;
+  onSave: (players: { name: string, roles: PlayerRole[] }[]) => Promise<void>;
 }
 
 export function ImportTuttocampoDialog({ open, onOpenChange, onSave }: ImportTuttocampoDialogProps) {
@@ -53,7 +53,7 @@ export function ImportTuttocampoDialog({ open, onOpenChange, onSave }: ImportTut
 
       const playersToSave = data.giocatori.map((g: any) => ({
         name: g.name,
-        role: g.role as PlayerRole,
+        roles: [g.role as PlayerRole],
       }));
 
       await onSave(playersToSave);

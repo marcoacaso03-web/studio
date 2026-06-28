@@ -91,7 +91,7 @@ export default function RosaPage() {
     }
   };
 
-  const handleSmartSavePlayers = async (playersData: { name: string, role: PlayerRole }[]) => {
+  const handleSmartSavePlayers = async (playersData: { name: string, roles: PlayerRole[] }[]) => {
     const user = useAuthStore.getState().user;
     const activeSeason = useSeasonsStore.getState().activeSeason;
     if (!user || !activeSeason) return;
@@ -99,7 +99,7 @@ export default function RosaPage() {
       name: p.name,
       firstName: p.name.split(' ')[0] || p.name,
       lastName: p.name.split(' ').slice(1).join(' ') || '',
-      roles: [p.role],
+      roles: p.roles,
       seasonId: activeSeason.id,
       userId: user.id,
     }));
