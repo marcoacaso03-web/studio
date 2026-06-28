@@ -3,7 +3,7 @@
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeFirestore, enableIndexedDbPersistence, enableNetwork, persistentLocalCache } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, persistentLocalCache } from 'firebase/firestore';
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
@@ -19,21 +19,29 @@ export function initializeFirebase() {
 let isPersistenceEnabled = false;
 
 export function getSdks(firebaseApp: FirebaseApp) {
-  const db = initializeFirestore(firebaseApp, {
-    localCache: persistentLocalCache({})
-  });
+  // Use regular getFirestore on server (SSR/prerendering) to avoid
+  // "initializeFirestore() has already been called with different options" error.
+  // On the client, initializeFirestore with persistentLocalCache is fine.
+  const isServer = typeof window === 'undefined';
 
-  if (typeof window !== 'undefined' && !isPersistenceEnabled) {
+  const db = isServer
+    ? getFirestore(firebaseApp)
+    : initializeFirestore(firebaseApp, {
+        localCache: persistentLocalCache({})
+      });
+
+  if (!isServer && !isPersistenceEnabled) {
     isPersistenceEnabled = true;
-    enableIndexedDbPersistence(db).catch((err) => {
-      if (err.code === 'failed-precondition') {
-        console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
-      } else if (err.code === 'unimplemented') {
-        console.warn('The current browser does not support all of the features required to enable persistence');
-      }
+    import('firebase/firestore').then(({ enableIndexedDbPersistence, enableNetwork }) => {
+      enableIndexedDbPersistence(db).catch((err) => {
+        if (err.code === 'failed-precondition') {
+          console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+        } else if (err.code === 'unimplemented') {
+          console.warn('The current browser does not support all of the features required to enable persistence');
+        }
+      });
+      enableNetwork(db).catch(() => {});
     });
-    // Force WebSocket connection immediately — no waiting for first getDoc
-    enableNetwork(db).catch(() => {});
   }
 
   return {
