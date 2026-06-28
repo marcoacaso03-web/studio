@@ -81,7 +81,7 @@ export const DEFAULT_FORMATION: FormationModule = '4-3-3';
 export const FORMATION_ROLES: Record<FormationModule, PlayerRole[]> = {
   '4-3-3':   ['POR', 'TS', 'DC', 'DC', 'TD', 'CD', 'CDC', 'CS', 'AS', 'ATT', 'AD'],
   '4-2-3-1': ['POR', 'TS', 'DC', 'DC', 'TD', 'CDC', 'CDC', 'CD', 'TRQ', 'CS', 'ATT'],
-  '4-4-2':   ['POR', 'TS', 'DC', 'DC', 'TD', 'AS', 'CDC', 'CDC', 'AD', 'ATT', 'ATT'],
+  '4-4-2':   ['POR', 'TS', 'DC', 'DC', 'TD', 'AS', 'CD', 'CS', 'AD', 'ATT', 'ATT'],
   '3-5-2':   ['POR', 'DC', 'DC', 'DC', 'ASA', 'CDC', 'CDC', 'CS', 'ADA', 'ATT', 'ATT'],
   '3-4-2-1': ['POR', 'DC', 'DC', 'DC', 'ASA', 'CD', 'CS', 'ADA', 'TRQ', 'TRQ', 'ATT'],
   '3-4-3':   ['POR', 'DC', 'DC', 'DC', 'ASA', 'CD', 'CS', 'ADA', 'AS', 'ATT', 'AD'],

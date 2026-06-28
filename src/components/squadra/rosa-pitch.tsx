@@ -1,7 +1,7 @@
 'use client';
 
-import { FormationModule, ROLE_LABELS, getRoleCategory, ROLE_CATEGORY_COLORS, PlayerRole, FORMATION_POSITIONS, FORMATION_ROLES } from '@/lib/types';
-import { FormationCoverage, CoverageLevel } from '@/lib/rosa-coverage';
+import { FormationModule, ROLE_LABELS, getRoleCategory, ROLE_CATEGORY_COLORS, PlayerRole, FORMATION_POSITIONS, FORMATION_ROLES, Player } from '@/lib/types';
+import { FormationCoverage, CoverageLevel, getPlayersForRole } from '@/lib/rosa-coverage';
 import { cn } from '@/lib/utils';
 
 interface RosaPitchProps {
@@ -9,6 +9,8 @@ interface RosaPitchProps {
   coverage: FormationCoverage;
   selectedRole: PlayerRole | null;
   onSelectRole: (role: PlayerRole) => void;
+  orderedPlayerIds: Record<PlayerRole, string[]>;
+  players: Player[];
 }
 
 const COVERAGE_COLORS: Record<CoverageLevel, { bg: string; border: string; glow: string }> = {
@@ -17,9 +19,22 @@ const COVERAGE_COLORS: Record<CoverageLevel, { bg: string; border: string; glow:
   critical: { bg: '#ef4444', border: '#ef4444', glow: 'rgba(239,68,68,0.4)' },
 };
 
-export function RosaPitch({ formation, coverage, selectedRole, onSelectRole }: RosaPitchProps) {
+export function RosaPitch({ formation, coverage, selectedRole, onSelectRole, orderedPlayerIds, players }: RosaPitchProps) {
   const positions = FORMATION_POSITIONS[formation];
   const rolesInFormation = FORMATION_ROLES[formation];
+
+  // Get the first player's last name for a role slot
+  const getTopPlayerName = (role: PlayerRole): string | null => {
+    const ordered = orderedPlayerIds[role];
+    if (ordered && ordered.length > 0) {
+      const topPlayer = players.find(p => p.id === ordered[0]);
+      if (topPlayer) return topPlayer.lastName;
+    }
+    // Fallback: any player with this role
+    const rolePlayers = getPlayersForRole(players, role);
+    if (rolePlayers.length > 0) return rolePlayers[0].lastName;
+    return null;
+  };
 
   return (
     <div className="relative w-full mx-auto" style={{ aspectRatio: '9/16', maxHeight: '500px' }}>
@@ -42,6 +57,7 @@ export function RosaPitch({ formation, coverage, selectedRole, onSelectRole }: R
           const count = cov?.count ?? 0;
           const colors = COVERAGE_COLORS[level];
           const isSelected = selectedRole === role;
+          const topName = getTopPlayerName(role);
 
           return (
             <button
@@ -49,7 +65,7 @@ export function RosaPitch({ formation, coverage, selectedRole, onSelectRole }: R
               type="button"
               onClick={() => onSelectRole(role)}
               className={cn(
-                'absolute -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex flex-col items-center justify-center transition-all duration-150',
+                'absolute -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all duration-150',
                 'border-2 text-[9px] font-black uppercase cursor-pointer',
                 'hover:scale-110 active:scale-95',
                 isSelected && 'ring-2 ring-[#00e5a0] ring-offset-2 ring-offset-emerald-900'
@@ -62,8 +78,13 @@ export function RosaPitch({ formation, coverage, selectedRole, onSelectRole }: R
                 boxShadow: `0 0 12px ${colors.glow}`,
               }}
             >
-              <span className="text-white drop-shadow-md">{role}</span>
-              <span className="text-[7px] text-white/80 mt-0.5">{count}</span>
+              <span className="text-white drop-shadow-md leading-none">{role}</span>
+              <span className="text-[7px] text-white/80 leading-none mt-0.5">{count}</span>
+              {topName && (
+                <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[7px] font-bold text-white/70 whitespace-nowrap drop-shadow-md max-w-[70px] truncate">
+                  {topName}
+                </span>
+              )}
             </button>
           );
         })}
