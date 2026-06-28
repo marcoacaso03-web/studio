@@ -126,15 +126,15 @@ export const seasonRepository = {
     async delete(id: string) {
         const db = getFirestore();
         
-        // Delete subcollections in parallel using Promise.all for speed
+        // Delete all subcollections in parallel
         const subcollections = ['players', 'matches', 'sessions', 'events', 'trainings'];
         
-        const deletePromises = subcollections.map(async (sub) => {
+        await Promise.all(subcollections.map(async (sub) => {
             const subRef = collection(db, 'teams', id, sub);
             const subSnap = await getDocs(subRef);
             if (subSnap.empty) return;
             
-            // Use chunked batch delete (500 ops per batch)
+            // Chunked batch delete (500 ops per batch)
             let batch = writeBatch(db);
             let count = 0;
             
@@ -151,9 +151,7 @@ export const seasonRepository = {
             if (count > 0) {
                 await batch.commit();
             }
-        });
-        
-        await Promise.all(deletePromises);
+        }));
         
         // Delete the season document itself
         await deleteDoc(doc(db, 'teams', id));

@@ -220,17 +220,22 @@ export default function AltroPage() {
   };
 
 
-  const handleDeleteSeason = () => {
+  const handleDeleteSeason = async () => {
     if (!seasonToDelete) return;
+    // Capture values IMMEDIATELY before Radix closes the dialog on pointerdown
     const id = seasonToDelete.id;
     const name = seasonToDelete.name;
-    // Close dialog immediately — no await, no blocking
+    // Close dialog immediately to prevent Radix nested-dialog freeze
     setSeasonToDelete(null);
     setIsDeletingSeason(true);
-    // Fire-and-forget: optimistic UI update already done in store
-    removeSeason(id);
-    setIsDeletingSeason(false);
-    toast({ title: "Stagione Eliminata", description: `La stagione "${name}" è stata eliminata.` });
+    try {
+      await removeSeason(id);
+      toast({ title: "Stagione Eliminata", description: `La stagione "${name}" è stata eliminata.` });
+    } catch (err) {
+      toast({ variant: "destructive", title: "Errore", description: "Impossibile eliminare la stagione. Riprova." });
+    } finally {
+      setIsDeletingSeason(false);
+    }
   };
 
   const handleLogout = () => {
@@ -838,7 +843,7 @@ export default function AltroPage() {
       </Dialog>
 
       {/* Season Deletion Confirmation — OUTSIDE the Dialog */}
-      <AlertDialog open={!!seasonToDelete} onOpenChange={(open) => { if (!open) setSeasonToDelete(null); }}>
+      <AlertDialog open={!!seasonToDelete} onOpenChange={(open) => { if (!open && !isDeletingSeason) setSeasonToDelete(null); }}>
         <AlertDialogContent className="rounded-3xl bg-background border border-border dark:bg-black dark:border-brand-green/30 shadow-2xl dark:shadow-[0_0_20px_rgba(172,229,4,0.15)] text-foreground max-w-[90vw]">
           <AlertDialogHeader>
             <AlertDialogTitle className="uppercase font-black text-destructive">Elimina Stagione?</AlertDialogTitle>
@@ -848,9 +853,9 @@ export default function AltroPage() {
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4">
             <AlertDialogCancel className="flex-1 mt-0 rounded-xl font-bold text-xs bg-card/40 hover:bg-card/50 text-foreground border-none" disabled={isDeletingSeason}>Annulla</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteSeason} disabled={isDeletingSeason} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase border-none">
+            <Button onClick={handleDeleteSeason} disabled={isDeletingSeason} className="flex-1 bg-destructive hover:bg-destructive/90 rounded-xl font-bold text-xs uppercase border-none text-white">
               {isDeletingSeason ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Elimina"}
-            </AlertDialogAction>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

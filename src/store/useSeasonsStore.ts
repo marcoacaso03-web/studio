@@ -84,26 +84,32 @@ export const useSeasonsStore = create<SeasonsState>((set, get) => ({
         const user = useAuthStore.getState().user;
         if (!user) return;
         const wasActive = get().activeSeason?.id === id;
-        const remaining = get().seasons.filter(s => s.id !== id);
+        const remainingBeforeDelete = get().seasons.filter(s => s.id !== id);
         const newActive = wasActive
-            ? (remaining.length > 0 ? remaining[0] : null)
+            ? (remainingBeforeDelete.length > 0 ? remainingBeforeDelete[0] : null)
             : get().activeSeason;
 
-        // 1. Update local state IMMEDIATELY — UI responds instantly
-        set({ seasons: remaining, activeSeason: newActive });
+        // 1. Snapshot for rollback
+        const previousSeasons = get().seasons;
+        const previousActive = get().activeSeason;
 
-        // 2. If deleted season was active, switch Firestore active flag in background
-        if (wasActive && remaining.length > 0) {
-            seasonRepository.setActive(remaining[0].id, user.id).catch(() => {});
+        // 2. Update local state IMMEDIATELY — UI responds instantly
+        set({ seasons: remainingBeforeDelete, activeSeason: newActive });
+
+        // 3. Try Firestore operations — if anything fails, rollback UI
+        try {
+            // If deleted season was active, switch Firestore active flag first
+            if (wasActive && remainingBeforeDelete.length > 0) {
+                await seasonRepository.setActive(remainingBeforeDelete[0].id, user.id);
+            }
+            // Delete all subcollections + season document
+            await seasonRepository.delete(id);
+        } catch (err) {
+            console.error("Failed to delete season from Firestore:", err);
+            // Rollback: restore previous UI state
+            set({ seasons: previousSeasons, activeSeason: previousActive });
+            throw err; // Re-throw so caller can show error toast
         }
-
-        // 3. Delete from Firestore in background — truly non-blocking
-        //    If it fails, we already removed from UI (optimistic delete)
-        seasonRepository.delete(id).catch(err => {
-            console.error("Failed to delete season:", err);
-            // Attempt to restore UI state on failure
-            get().fetchAll();
-        });
     },
 
     renameSeason: async (id, name) => {
