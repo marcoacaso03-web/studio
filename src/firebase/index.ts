@@ -3,7 +3,7 @@
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, initializeFirestore, persistentLocalCache } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, persistentLocalCache, type Firestore } from 'firebase/firestore';
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
@@ -21,14 +21,23 @@ let isPersistenceEnabled = false;
 export function getSdks(firebaseApp: FirebaseApp) {
   // Use regular getFirestore on server (SSR/prerendering) to avoid
   // "initializeFirestore() has already been called with different options" error.
-  // On the client, initializeFirestore with persistentLocalCache is fine.
+  // On the client, use initializeFirestore with persistentLocalCache once,
+  // then getFirestore for subsequent calls (after remount, navigation, etc.)
   const isServer = typeof window === 'undefined';
 
-  const db = isServer
-    ? getFirestore(firebaseApp)
-    : initializeFirestore(firebaseApp, {
+  let db: Firestore;
+  if (isServer) {
+    db = getFirestore(firebaseApp);
+  } else {
+    try {
+      db = initializeFirestore(firebaseApp, {
         localCache: persistentLocalCache({})
       });
+    } catch {
+      // Already initialized — reuse the existing instance
+      db = getFirestore(firebaseApp);
+    }
+  }
 
   if (!isServer && !isPersistenceEnabled) {
     isPersistenceEnabled = true;
