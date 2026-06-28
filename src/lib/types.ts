@@ -79,12 +79,12 @@ export const DEFAULT_FORMATION: FormationModule = '4-3-3';
 // Mapping of formation -> roles on the pitch (order matters for layout)
 // This is used by the Rosa Overview screen
 export const FORMATION_ROLES: Record<FormationModule, PlayerRole[]> = {
-  '4-3-3':   ['POR', 'TD', 'DC', 'DC', 'TS', 'CD', 'CDC', 'CS', 'AD', 'ATT', 'AS'],
-  '4-2-3-1': ['POR', 'TD', 'DC', 'DC', 'TS', 'CDC', 'CDC', 'CD', 'TRQ', 'CS', 'ATT'],
-  '4-4-2':   ['POR', 'TD', 'DC', 'DC', 'TS', 'CD', 'CDC', 'CDC', 'CS', 'ATT', 'ATT'],
-  '3-5-2':   ['POR', 'DC', 'DC', 'DC', 'ADA', 'CDC', 'CDC', 'CS', 'ASA', 'ATT', 'ATT'],
-  '3-4-2-1': ['POR', 'DC', 'DC', 'DC', 'ADA', 'CD', 'CS', 'ASA', 'TRQ', 'TRQ', 'ATT'],
-  '3-4-3':   ['POR', 'DC', 'DC', 'DC', 'ADA', 'CD', 'CS', 'ASA', 'AD', 'ATT', 'AS'],
+  '4-3-3':   ['POR', 'TS', 'DC', 'DC', 'TD', 'CD', 'CDC', 'CS', 'AS', 'ATT', 'AD'],
+  '4-2-3-1': ['POR', 'TS', 'DC', 'DC', 'TD', 'CDC', 'CDC', 'CD', 'TRQ', 'CS', 'ATT'],
+  '4-4-2':   ['POR', 'TS', 'DC', 'DC', 'TD', 'AS', 'CDC', 'CDC', 'AD', 'ATT', 'ATT'],
+  '3-5-2':   ['POR', 'DC', 'DC', 'DC', 'ASA', 'CDC', 'CDC', 'CS', 'ADA', 'ATT', 'ATT'],
+  '3-4-2-1': ['POR', 'DC', 'DC', 'DC', 'ASA', 'CD', 'CS', 'ADA', 'TRQ', 'TRQ', 'ATT'],
+  '3-4-3':   ['POR', 'DC', 'DC', 'DC', 'ASA', 'CD', 'CS', 'ADA', 'AS', 'ATT', 'AD'],
 };
 
 // Map a role slot position to pitch coordinates (top %, left %)
@@ -94,81 +94,81 @@ export interface SlotPosition { top: string; left: string }
 export const FORMATION_POSITIONS: Record<FormationModule, SlotPosition[]> = {
   '4-3-3': [
     { top: '90%', left: '50%' },  // POR
-    { top: '72%', left: '15%' },  // TD
-    { top: '75%', left: '38%' },  // DC
-    { top: '75%', left: '62%' },  // DC
-    { top: '72%', left: '85%' },  // TS
-    { top: '50%', left: '30%' },  // CD
-    { top: '48%', left: '50%' },  // CC
-    { top: '50%', left: '70%' },  // CS
-    { top: '25%', left: '75%' },  // AD
-    { top: '12%', left: '50%' },  // ATT
-    { top: '25%', left: '25%' },  // AS
+    { top: '72%', left: '15%' },  // TS (sinistra)
+    { top: '75%', left: '35%' },  // DC sx
+    { top: '75%', left: '65%' },  // DC dx
+    { top: '72%', left: '85%' },  // TD (destra)
+    { top: '52%', left: '28%' },  // CD (sx)
+    { top: '50%', left: '50%' },  // CDC (centro)
+    { top: '52%', left: '72%' },  // CS (dx)
+    { top: '25%', left: '20%' },  // AS (sinistra)
+    { top: '12%', left: '50%' },  // ATT (centro)
+    { top: '25%', left: '80%' },  // AD (destra)
   ],
   '4-2-3-1': [
     { top: '90%', left: '50%' },  // POR
-    { top: '72%', left: '15%' },  // TD
-    { top: '75%', left: '38%' },  // DC
-    { top: '75%', left: '62%' },  // DC
-    { top: '72%', left: '85%' },  // TS
-    { top: '55%', left: '35%' },  // CDC
-    { top: '55%', left: '65%' },  // CDC
-    { top: '38%', left: '25%' },  // CD
-    { top: '40%', left: '50%' },  // TRQ
-    { top: '38%', left: '75%' },  // CS
-    { top: '15%', left: '50%' },  // ATT
+    { top: '72%', left: '15%' },  // TS (sinistra)
+    { top: '75%', left: '35%' },  // DC sx
+    { top: '75%', left: '65%' },  // DC dx
+    { top: '72%', left: '85%' },  // TD (destra)
+    { top: '58%', left: '38%' },  // CDC sx
+    { top: '58%', left: '62%' },  // CDC dx
+    { top: '42%', left: '28%' },  // CD sx (trequartista basso)
+    { top: '42%', left: '50%' },  // TRQ centrale
+    { top: '42%', left: '72%' },  // CS dx
+    { top: '15%', left: '50%' },  // ATT punta
   ],
   '4-4-2': [
     { top: '90%', left: '50%' },  // POR
-    { top: '72%', left: '15%' },  // TD
-    { top: '75%', left: '38%' },  // DC
-    { top: '75%', left: '62%' },  // DC
-    { top: '72%', left: '85%' },  // TS
-    { top: '50%', left: '25%' },  // CD
-    { top: '48%', left: '42%' },  // CC
-    { top: '48%', left: '58%' },  // CC
-    { top: '50%', left: '75%' },  // CS
-    { top: '18%', left: '35%' },  // ATT
-    { top: '18%', left: '65%' },  // ATT
+    { top: '72%', left: '15%' },  // TS (sinistra)
+    { top: '75%', left: '35%' },  // DC sx
+    { top: '75%', left: '65%' },  // DC dx
+    { top: '72%', left: '85%' },  // TD (destra)
+    { top: '52%', left: '18%' },  // AS (sinistra)
+    { top: '52%', left: '38%' },  // CDC sx
+    { top: '52%', left: '62%' },  // CDC dx
+    { top: '52%', left: '82%' },  // AD (destra)
+    { top: '18%', left: '38%' },  // ATT sx
+    { top: '18%', left: '62%' },  // ATT dx
   ],
   '3-5-2': [
     { top: '90%', left: '50%' },  // POR
-    { top: '75%', left: '28%' },  // DC
-    { top: '78%', left: '50%' },  // DC
-    { top: '75%', left: '72%' },  // DC
-    { top: '55%', left: '10%' },  // ADA
-    { top: '52%', left: '35%' },  // CDC
-    { top: '48%', left: '50%' },  // CC
-    { top: '52%', left: '65%' },  // CS
-    { top: '55%', left: '90%' },  // ASA
-    { top: '18%', left: '35%' },  // ATT
-    { top: '18%', left: '65%' },  // ATT
+    { top: '75%', left: '28%' },  // DC sx
+    { top: '78%', left: '50%' },  // DC centro
+    { top: '75%', left: '72%' },  // DC dx
+    { top: '55%', left: '12%' },  // ASA (sinistra)
+    { top: '52%', left: '32%' },  // CDC sx
+    { top: '48%', left: '50%' },  // CDC centro
+    { top: '52%', left: '68%' },  // CS dx
+    { top: '55%', left: '88%' },  // ADA (destra)
+    { top: '18%', left: '38%' },  // ATT sx
+    { top: '18%', left: '62%' },  // ATT dx
   ],
   '3-4-2-1': [
     { top: '90%', left: '50%' },  // POR
-    { top: '75%', left: '28%' },  // DC
-    { top: '78%', left: '50%' },  // DC
-    { top: '75%', left: '72%' },  // DC
-    { top: '55%', left: '10%' },  // ADA
-    { top: '50%', left: '30%' },  // CD
-    { top: '50%', left: '70%' },  // CS
-    { top: '55%', left: '90%' },  // ASA
-    { top: '32%', left: '38%' },  // TRQ
-    { top: '32%', left: '62%' },  // TRQ
-    { top: '12%', left: '50%' },  // ATT
+    { top: '75%', left: '28%' },  // DC sx
+    { top: '78%', left: '50%' },  // DC centro
+    { top: '75%', left: '72%' },  // DC dx
+    { top: '55%', left: '12%' },  // ASA (sinistra)
+    { top: '52%', left: '32%' },  // CD sx
+    { top: '52%', left: '68%' },  // CS dx
+    { top: '55%', left: '88%' },  // ADA (destra)
+    { top: '35%', left: '38%' },  // TRQ sx
+    { top: '35%', left: '62%' },  // TRQ dx
+    { top: '15%', left: '50%' },  // ATT punta
   ],
   '3-4-3': [
     { top: '90%', left: '50%' },  // POR
-    { top: '75%', left: '28%' },  // DC
-    { top: '78%', left: '50%' },  // DC
-    { top: '75%', left: '72%' },  // DC
-    { top: '55%', left: '10%' },  // ADA
-    { top: '50%', left: '30%' },  // CD
-    { top: '50%', left: '70%' },  // CS
-    { top: '55%', left: '90%' },  // ASA
-    { top: '25%', left: '75%' },  // AD
-    { top: '12%', left: '50%' },  // ATT
-    { top: '25%', left: '25%' },  // AS
+    { top: '75%', left: '28%' },  // DC sx
+    { top: '78%', left: '50%' },  // DC centro
+    { top: '75%', left: '72%' },  // DC dx
+    { top: '55%', left: '12%' },  // ASA (sinistra)
+    { top: '52%', left: '32%' },  // CD sx
+    { top: '52%', left: '68%' },  // CS dx
+    { top: '55%', left: '88%' },  // ADA (destra)
+    { top: '25%', left: '20%' },  // AS (sinistra)
+    { top: '12%', left: '50%' },  // ATT (centro)
+    { top: '25%', left: '80%' },  // AD (destra)
   ],
 };
 
