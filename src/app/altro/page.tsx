@@ -183,12 +183,19 @@ export default function AltroPage() {
   };
 
   const handleSwitchSeason = async (id: string) => {
-    await setActiveSeason(id);
-    await Promise.all([
-      useMatchesStore.getState().fetchAll(id),
-      usePlayersStore.getState().fetchAll(id),
-      useStatsStore.getState().loadSummaryStats(id)
-    ]);
+    const previousActiveId = activeSeason?.id;
+    // Store-level optimistic update + Firestore write
+    try {
+      await setActiveSeason(id);
+    } catch (err) {
+      // Rollback on failure: re-activate previous season in store
+      if (previousActiveId) {
+        const sortedSeasons = seasons.map(s => ({ ...s, isActive: s.id === previousActiveId }));
+        const prevActive = sortedSeasons.find(s => s.id === previousActiveId) || null;
+        setActiveSeason(previousActiveId);
+      }
+      toast({ variant: "destructive", title: "Errore", description: "Impossibile cambiare stagione." });
+    }
   };
 
   const handleJoinSeason = async () => {

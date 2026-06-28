@@ -72,8 +72,12 @@ export const useSeasonsStore = create<SeasonsState>((set, get) => ({
     setActiveSeason: async (id) => {
         const user = useAuthStore.getState().user;
         if (!user) return;
+        // Persist to Firestore (single writeBatch — fast)
         await seasonRepository.setActive(id, user.id);
-        await get().fetchAll();
+        // Update local state immediately (no fetchAll — prefetch handles refresh)
+        const sortedSeasons = get().seasons.map(s => ({ ...s, isActive: s.id === id }));
+        const newActive = sortedSeasons.find(s => s.id === id) || null;
+        set({ seasons: sortedSeasons, activeSeason: newActive, loading: false });
     },
 
     removeSeason: async (id) => {
