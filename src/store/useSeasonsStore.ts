@@ -84,24 +84,26 @@ export const useSeasonsStore = create<SeasonsState>((set, get) => ({
         const user = useAuthStore.getState().user;
         if (!user) return;
         const wasActive = get().activeSeason?.id === id;
-        // Optimistic update: remove from local state immediately
         const remaining = get().seasons.filter(s => s.id !== id);
-        set({
-            seasons: remaining,
-            activeSeason: wasActive
-                ? (remaining.length > 0 ? remaining[0] : null)
-                : get().activeSeason,
-        });
-        // Fire-and-forget the backend delete (subcollections can take time)
-        seasonRepository.delete(id).catch(err => {
-            console.error("Failed to delete season:", err);
-            // Re-fetch on failure to restore correct state
-            get().fetchAll();
-        });
-        // If deleted season was active, persist the switch in background
+        const newActive = wasActive
+            ? (remaining.length > 0 ? remaining[0] : null)
+            : get().activeSeason;
+
+        // 1. Update local state IMMEDIATELY — UI responds instantly
+        set({ seasons: remaining, activeSeason: newActive });
+
+        // 2. If deleted season was active, switch Firestore active flag in background
         if (wasActive && remaining.length > 0) {
             seasonRepository.setActive(remaining[0].id, user.id).catch(() => {});
         }
+
+        // 3. Delete from Firestore in background — truly non-blocking
+        //    If it fails, we already removed from UI (optimistic delete)
+        seasonRepository.delete(id).catch(err => {
+            console.error("Failed to delete season:", err);
+            // Attempt to restore UI state on failure
+            get().fetchAll();
+        });
     },
 
     renameSeason: async (id, name) => {

@@ -7,10 +7,11 @@ import {
   doc, 
   setDoc, 
   updateDoc,
-  arrayUnion,
-  writeBatch,
-  getFirestore,
-  or
+  deleteDoc,
+  arrayUnion, 
+  writeBatch, 
+  getFirestore, 
+  or 
 } from 'firebase/firestore';
 import type { Season } from '@/lib/types';
 import { SeasonSchema } from '@/lib/schemas';
@@ -106,7 +107,7 @@ export const seasonRepository = {
         const db = getFirestore();
         const batch = writeBatch(db);
         
-        // Fetch all seasons the user has access to
+        // Fetch all seasons the user has access to (needed to deactivate others)
         const seasons = await this.getAll(userId);
         
         // Deactivate all that are currently active
@@ -124,31 +125,38 @@ export const seasonRepository = {
 
     async delete(id: string) {
         const db = getFirestore();
-        let batch = writeBatch(db);
-        let operationCount = 0;
         
-        // Delete subcollections: players, matches, stats, sessions, events, trainings
+        // Delete subcollections in parallel using Promise.all for speed
         const subcollections = ['players', 'matches', 'sessions', 'events', 'trainings'];
         
-        for (const sub of subcollections) {
+        const deletePromises = subcollections.map(async (sub) => {
             const subRef = collection(db, 'teams', id, sub);
             const subSnap = await getDocs(subRef);
+            if (subSnap.empty) return;
+            
+            // Use chunked batch delete (500 ops per batch)
+            let batch = writeBatch(db);
+            let count = 0;
+            
             for (const d of subSnap.docs) {
                 batch.delete(d.ref);
-                operationCount++;
-                // Firebase batch limit is 500 operations; commit in chunks
-                if (operationCount >= 499) {
+                count++;
+                if (count >= 499) {
                     await batch.commit();
                     batch = writeBatch(db);
-                    operationCount = 0;
+                    count = 0;
                 }
             }
-        }
+            
+            if (count > 0) {
+                await batch.commit();
+            }
+        });
+        
+        await Promise.all(deletePromises);
         
         // Delete the season document itself
-        batch.delete(doc(db, 'teams', id));
-        
-        await batch.commit();
+        await deleteDoc(doc(db, 'teams', id));
     },
 
     async rename(id: string, newName: string) {

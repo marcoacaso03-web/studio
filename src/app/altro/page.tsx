@@ -184,15 +184,16 @@ export default function AltroPage() {
 
   const handleSwitchSeason = async (id: string) => {
     const previousActiveId = activeSeason?.id;
-    // Store-level optimistic update + Firestore write
     try {
       await setActiveSeason(id);
+      // Redirect to home to "restart" the app with new active season
+      router.push('/');
     } catch (err) {
       // Rollback on failure: re-activate previous season in store
       if (previousActiveId) {
         const sortedSeasons = seasons.map(s => ({ ...s, isActive: s.id === previousActiveId }));
         const prevActive = sortedSeasons.find(s => s.id === previousActiveId) || null;
-        setActiveSeason(previousActiveId);
+        useSeasonsStore.setState({ seasons: sortedSeasons, activeSeason: prevActive });
       }
       toast({ variant: "destructive", title: "Errore", description: "Impossibile cambiare stagione." });
     }
@@ -219,26 +220,17 @@ export default function AltroPage() {
   };
 
 
-  const handleDeleteSeason = async () => {
+  const handleDeleteSeason = () => {
     if (!seasonToDelete) return;
     const id = seasonToDelete.id;
     const name = seasonToDelete.name;
+    // Close dialog immediately — no await, no blocking
+    setSeasonToDelete(null);
     setIsDeletingSeason(true);
-    try {
-      await removeSeason(id);
-    } finally {
-      setSeasonToDelete(null);
-      setIsDeletingSeason(false);
-      // Ensure body is not locked by Radix
-      setTimeout(() => {
-        document.body.style.pointerEvents = '';
-        document.body.style.overflow = '';
-        document.body.removeAttribute('data-scroll-locked');
-      }, 50);
-      setTimeout(() => {
-        toast({ title: "Stagione Eliminata", description: `La stagione "${name}" è stata eliminata.` });
-      }, 150);
-    }
+    // Fire-and-forget: optimistic UI update already done in store
+    removeSeason(id);
+    setIsDeletingSeason(false);
+    toast({ title: "Stagione Eliminata", description: `La stagione "${name}" è stata eliminata.` });
   };
 
   const handleLogout = () => {
