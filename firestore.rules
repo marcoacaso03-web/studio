@@ -147,6 +147,33 @@ service cloud.firestore {
         }
       }
 
+      // ── Sessions (subcollection of teams) ─────────────────────────────────
+      match /sessions/{sessionId} {
+        allow get:    if isSignedIn() && (resource == null || isSeasonAuthorized(seasonId));
+        allow list:   if isSignedIn() && isSeasonAuthorized(seasonId);
+        allow create: if isSignedIn() && isSeasonAuthorized(seasonId);
+        allow update: if isSignedIn() && isSeasonAuthorized(seasonId);
+        allow delete: if isSignedIn() && isSeasonAuthorized(seasonId);
+      }
+
+      // ── Events (subcollection of teams) ───────────────────────────────────
+      match /events/{eventId} {
+        allow get:    if isSignedIn() && (resource == null || isSeasonAuthorized(seasonId));
+        allow list:   if isSignedIn() && isSeasonAuthorized(seasonId);
+        allow create: if isSignedIn() && isSeasonAuthorized(seasonId);
+        allow update: if isSignedIn() && isSeasonAuthorized(seasonId);
+        allow delete: if isSignedIn() && isSeasonAuthorized(seasonId);
+      }
+
+      // ── Trainings (subcollection of teams) ────────────────────────────────
+      match /trainings/{trainingId} {
+        allow get:    if isSignedIn() && (resource == null || isSeasonAuthorized(seasonId));
+        allow list:   if isSignedIn() && isSeasonAuthorized(seasonId);
+        allow create: if isSignedIn() && isSeasonAuthorized(seasonId);
+        allow update: if isSignedIn() && isSeasonAuthorized(seasonId);
+        allow delete: if isSignedIn() && isSeasonAuthorized(seasonId);
+      }
+
       // ── Aggregates ────────────────────────────────────────────────────────
       match /aggregates/{aggregateId=**} {
         allow get, list: if isSignedIn() && isSeasonAuthorized(seasonId);
