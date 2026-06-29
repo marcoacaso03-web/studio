@@ -10,6 +10,7 @@ import { IoSquare } from "react-icons/io5";
 
 import { usePlayersStore } from "@/store/usePlayersStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
+import { PhysicalTab } from "@/components/allenamento/physical-tab";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useThemeStore } from "@/store/useThemeStore";
 import { aggregationRepository } from "@/lib/repositories/aggregation-repository";
@@ -723,7 +724,7 @@ export default function PlayerDetailPage() {
 
       {/* Heatmap presenze */}
       <div className="grid md:grid-cols-2 gap-4">
-        <Card className="rounded-3xl bg-card dark:bg-black/40 backdrop-blur-sm border-border dark:border-brand-green/20 shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.05)] overflow-hidden">
+        <Card className="rounded-3xl bg-card dark:bg-black/40 backdrop-blur-sm border border-border dark:border-brand-green/20 shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.05)] overflow-hidden">
           <CardHeader className="pb-0 px-6 pt-6">
             <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground dark:text-white/30 flex items-center gap-2">
               <Sword className="h-3.5 w-3.5 text-primary dark:text-brand-green" /> Storico Presenze Partite
@@ -741,7 +742,7 @@ export default function PlayerDetailPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-3xl bg-card dark:bg-black/40 backdrop-blur-sm border-border dark:border-brand-green/20 shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.05)] overflow-hidden">
+        <Card className="rounded-3xl bg-card dark:bg-black/40 backdrop-blur-sm border border-border dark:border-brand-green/20 shadow-sm dark:shadow-[0_0_20px_rgba(172,229,4,0.05)] overflow-hidden">
           <CardHeader className="pb-0 px-6 pt-6">
             <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground dark:text-white/30 flex items-center gap-2">
               <Calendar className="h-3.5 w-3.5 text-primary dark:text-brand-green" /> Storico Presenze Allenamenti
@@ -759,6 +760,9 @@ export default function PlayerDetailPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Physical Tests */}
+      <PhysicalTab />
     </div>
   );
 }

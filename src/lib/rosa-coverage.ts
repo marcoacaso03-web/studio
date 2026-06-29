@@ -55,26 +55,33 @@ export function calculateCoverage(
     }
   }
 
-  // Determine coverage levels
+  // Count how many formation slots are covered/warning/critical
+  // A role covers its slots if it has 2+ players (covered) or exactly 1 (warning)
+  const roleSlots = new Map<PlayerRole, number>();
+  for (const role of rolesInFormation) {
+    roleSlots.set(role, (roleSlots.get(role) ?? 0) + 1);
+  }
+
   let coveredSlots = 0;
   let warningSlots = 0;
   let criticalSlots = 0;
 
-  for (const [, coverage] of roleCoverage) {
+  for (const [role, coverage] of roleCoverage) {
+    const slots = roleSlots.get(role) ?? 1;
     if (coverage.count >= 2) {
       coverage.level = 'covered';
-      coveredSlots++;
+      coveredSlots += slots;
     } else if (coverage.count === 1) {
       coverage.level = 'warning';
-      warningSlots++;
+      warningSlots += slots;
     } else {
       coverage.level = 'critical';
-      criticalSlots++;
+      criticalSlots += slots;
     }
   }
 
   return {
-    totalSlots: seenRoles.size,
+    totalSlots: rolesInFormation.length,
     coveredSlots,
     warningSlots,
     criticalSlots,
