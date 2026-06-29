@@ -441,6 +441,27 @@ export interface ScoutPlayer {
   notes?: string;
 }
 
+// ── Physical Tests ──────────────────────────────────────
+
+export type TestType = 'velocita' | 'resistenza' | string;
+export type TestUnit = 'secondi' | 'metri' | string;
+
+export interface TestResult {
+  playerId: string;
+  value: number;
+}
+
+export interface PhysicalTest {
+  id: string;
+  name: string;
+  type: TestType;
+  unit: TestUnit;
+  date: string;  // ISO string
+  seasonId: string;
+  userId: string;
+  results: TestResult[];
+}
+
 export type ExerciseMediaType = 'image' | 'video' | 'link';
 
 export interface ExerciseMedia {

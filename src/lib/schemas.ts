@@ -182,3 +182,20 @@ export const ScoutPlayerSchema = z.object({
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });
+
+// ── Physical Tests ──────────────────────────────────────
+export const TestResultSchema = z.object({
+  playerId: z.string(),
+  value: z.number(),
+});
+
+export const PhysicalTestSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1),
+  type: z.string().default('velocita'),
+  unit: z.string().default('secondi'),
+  date: z.string(),
+  seasonId: z.string(),
+  userId: z.string(),
+  results: z.array(TestResultSchema).default([]),
+});

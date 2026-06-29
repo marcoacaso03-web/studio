@@ -6,11 +6,11 @@ import { useSeasonsStore } from '@/store/useSeasonsStore';
 import { usePlayersStore } from '@/store/usePlayersStore';
 import { useMatchesStore } from '@/store/useMatchesStore';
 import { useTrainingStore } from '@/store/useTrainingStore';
+import { useTestsStore } from '@/store/useTestsStore';
 
 /**
- * Prefetches critical data (players, matches, trainings) via Firestore
+ * Prefetches critical data (players, matches, trainings, tests) via Firestore
  * onSnapshot immediately after login and active season is available.
- * Subscribers are cleaned up and re-established when the active season changes.
  */
 export function usePrefetch() {
   const user = useAuthStore((s) => s.user);
@@ -18,6 +18,7 @@ export function usePrefetch() {
   const subscribePlayers = usePlayersStore((s) => s.subscribe);
   const subscribeMatches = useMatchesStore((s) => s.subscribe);
   const subscribeTraining = useTrainingStore((s) => s.subscribe);
+  const subscribeTests = useTestsStore((s) => s.subscribe);
 
   const unsubscribersRef = useRef<(() => void)[]>([]);
   const lastKeyRef = useRef<string | null>(null);
@@ -32,20 +33,19 @@ export function usePrefetch() {
     if (cacheKey === lastKeyRef.current) return;
     lastKeyRef.current = cacheKey;
 
-    // Cleanup previous subscribers (season changed)
     unsubscribersRef.current.forEach((unsub) => unsub());
     unsubscribersRef.current = [];
 
-    // Start all 3 subscriptions in parallel
     const unsubPlayers = subscribePlayers(userId, seasonId);
     const unsubMatches = subscribeMatches(userId, seasonId);
     const unsubTraining = subscribeTraining(userId, seasonId);
+    const unsubTests = subscribeTests(userId, seasonId);
 
-    unsubscribersRef.current = [unsubPlayers, unsubMatches, unsubTraining];
+    unsubscribersRef.current = [unsubPlayers, unsubMatches, unsubTraining, unsubTests];
 
     return () => {
       unsubscribersRef.current.forEach((unsub) => unsub());
       unsubscribersRef.current = [];
     };
-  }, [user?.id, activeSeason?.id, subscribePlayers, subscribeMatches, subscribeTraining]);
+  }, [user?.id, activeSeason?.id, subscribePlayers, subscribeMatches, subscribeTraining, subscribeTests]);
 }
