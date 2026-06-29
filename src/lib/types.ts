@@ -81,7 +81,7 @@ export const DEFAULT_FORMATION: FormationModule = '4-3-3';
 // CD = Centrocampista Centrale/Sinistra, CS = Centrocampista Destra
 export const FORMATION_ROLES: Record<FormationModule, PlayerRole[]> = {
   '4-3-3':   ['POR', 'TS', 'DC', 'DC', 'TD', 'CD', 'CDC', 'CS', 'AS', 'ATT', 'AD'],
-  '4-2-3-1': ['POR', 'TS', 'DC', 'DC', 'TD', 'CDC', 'CDC', 'CD', 'TRQ', 'CS', 'ATT'],
+  '4-2-3-1': ['POR', 'TS', 'DC', 'DC', 'TD', 'CD', 'CDC', 'AS', 'TRQ', 'AD', 'ATT'],
   '4-4-2':   ['POR', 'TS', 'DC', 'DC', 'TD', 'AS', 'CD', 'CS', 'AD', 'ATT', 'ATT'],
   '3-5-2':   ['POR', 'DC', 'DC', 'DC', 'ASA', 'CS', 'CDC', 'CD', 'ADA', 'ATT', 'ATT'],
   '3-4-2-1': ['POR', 'DC', 'DC', 'DC', 'ASA', 'CD', 'CS', 'ADA', 'TRQ', 'TRQ', 'ATT'],
@@ -113,11 +113,11 @@ export const FORMATION_POSITIONS: Record<FormationModule, SlotPosition[]> = {
     { top: '75%', left: '35%' },  // DC sx
     { top: '75%', left: '65%' },  // DC dx
     { top: '72%', left: '85%' },  // TD (destra)
-    { top: '58%', left: '38%' },  // CDC sx
+    { top: '58%', left: '38%' },  // CD sx
     { top: '58%', left: '62%' },  // CDC dx
-    { top: '42%', left: '28%' },  // CD sx (trequartista basso)
-    { top: '42%', left: '50%' },  // TRQ centrale
-    { top: '42%', left: '72%' },  // CS dx
+    { top: '35%', left: '20%' },  // AS (sinistra)
+    { top: '35%', left: '50%' },  // TRQ centrale
+    { top: '35%', left: '80%' },  // AD (destra)
     { top: '15%', left: '50%' },  // ATT punta
   ],
   '4-4-2': [

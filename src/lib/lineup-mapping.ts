@@ -16,7 +16,7 @@ export const FORMATION_POSITIONS: Record<string, string[]> = {
   "4-4-2": ["POR", "TS", "DC", "DC", "TD", "ES", "CC", "CC", "ED", "ATT", "ATT"],
   "4-3-3": ["POR", "TS", "DC", "DC", "TD", "CC", "MED", "CC", "AS", "ATT", "AD"],
   "3-5-2": ["POR", "DCS", "DC", "DCD", "ES", "CCS", "MED", "CCD", "ED", "ATT", "ATT"],
-  "4-2-3-1": ["POR", "TS", "DC", "DC", "TD", "MED", "MED", "ES", "TRQ", "ED", "ATT"],
+  "4-2-3-1": ["POR", "TS", "DC", "DC", "TD", "CD", "CDC", "AS", "TRQ", "AD", "ATT"],
   "3-4-2-1": ["POR", "DCS", "DC", "DCD", "ES", "CCS", "CCD", "ED", "TRQ", "TRQ", "ATT"],
   "3-4-1-2": ["POR", "DCS", "DC", "DCD", "ES", "CCS", "CCD", "ED", "TRQ", "ATT", "ATT"],
   "4-3-1-2": ["POR", "TS", "DC", "DC", "TD", "CC", "MED", "CC", "TRQ", "ATT", "ATT"]
@@ -44,8 +44,8 @@ export const FORMATION_COORDINATES: Record<string, { top: number, left: number }
   "4-2-3-1": [
     { top: 90, left: 50 },
     { top: 72, left: 15 }, { top: 72, left: 38 }, { top: 72, left: 62 }, { top: 72, left: 85 },
-    { top: 55, left: 35 }, { top: 55, left: 65 },
-    { top: 32, left: 20 }, { top: 32, left: 50 }, { top: 32, left: 80 },
+    { top: 55, left: 38 }, { top: 55, left: 62 },
+    { top: 35, left: 20 }, { top: 35, left: 50 }, { top: 35, left: 80 },
     { top: 12, left: 50 }
   ],
   "3-4-2-1": [
