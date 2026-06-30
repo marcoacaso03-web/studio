@@ -113,7 +113,7 @@ function ScoutContent() {
       await deleteDoc(doc(firestore, 'users', user.uid, 'scoutPlayers', playerToDelete.id));
       await mutate(`users/${user.uid}/scoutPlayers`);
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Errore", description: "Impossibile eliminare il talento." });
+      toast({ variant: "destructive", title: "Errore", description: "Impossibile eliminare l'osservato." });
       console.error("Delete Error:", err);
     } finally {
       setPlayerToDelete(null);
@@ -147,7 +147,7 @@ function ScoutContent() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary dark:text-brand-green" />
             <Input
-              placeholder="Cerca talento per nome..."
+              placeholder="Cerca osservato per nome..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9 h-10 w-full rounded-2xl border-border dark:border-brand-green/30 bg-card dark:bg-black/40 text-foreground dark:text-white font-bold text-sm focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)] placeholder:text-muted-foreground/30 dark:placeholder:text-white/20"
@@ -205,9 +205,9 @@ function ScoutContent() {
           <Card className="col-span-full border border-dashed border-border dark:border-brand-green/30 bg-muted/20 dark:bg-black/20 hover:bg-muted/30 dark:hover:bg-black/30 rounded-3xl">
             <CardContent className="flex flex-col items-center justify-center py-16 text-center">
               <Search className="h-12 w-12 text-primary dark:text-brand-green mb-4 opacity-40" />
-              <h3 className="text-sm font-black uppercase text-foreground dark:text-white">Nessun talento trovato</h3>
+              <h3 className="text-sm font-black uppercase text-foreground dark:text-white">Nessun osservato trovato</h3>
               <p className="text-[10px] font-bold text-muted-foreground/60 dark:text-white/30 uppercase tracking-widest mt-1">
-                {players?.length === 0 ? "Inizia aggiungendo il primo talento alla tua lista." : "Prova a cambiare i filtri selezionati."}
+                {players?.length === 0 ? "Inizia aggiungendo il primo osservato alla tua lista." : "Prova a cambiare i filtri selezionati."}
               </p>
             </CardContent>
           </Card>
@@ -298,7 +298,7 @@ function ScoutContent() {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-foreground dark:text-white font-black uppercase">Sei sicuro?</AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground">
-              Vuoi eliminare definitivamente il talento <strong className="text-foreground dark:text-brand-green uppercase">{playerToDelete?.name}</strong>? Questa azione non può essere annullata.
+              Vuoi eliminare definitivamente il osservato <strong className="text-foreground dark:text-brand-green uppercase">{playerToDelete?.name}</strong>? Questa azione non può essere annullata.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

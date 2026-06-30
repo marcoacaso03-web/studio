@@ -92,7 +92,7 @@ export function ScoutPlayerDialog({ open, onOpenChange, player, categories }: Sc
       onOpenChange(false);
     } catch (e: any) {
       console.error("Save Player Error:", e);
-      toast({ variant: "destructive", title: "Errore di salvataggio", description: e.message || "Non è stato possibile salvare le info del talento." });
+      toast({ variant: "destructive", title: "Errore di salvataggio", description: e.message || "Non è stato possibile salvare le info dell'osservato." });
     } finally {
       setLoading(false);
     }
