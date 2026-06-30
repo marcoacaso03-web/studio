@@ -173,9 +173,8 @@ export default function HomePage() {
         </>
       )}
 
-      {/* 3. Azioni Rapide */}
-      <h3 className="text-sm font-black uppercase tracking-widest text-foreground dark:text-white mt-5 mb-2">Azioni Rapide</h3>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+      {/* Azioni Rapide */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
         <Button
           onClick={() => nextMatch ? router.push(`/calendario/${nextMatch.id}?s=${nextMatch.seasonId}&tab=formazione`) : router.push('/calendario')}
           className="h-auto flex-col items-center justify-center p-3 bg-card dark:bg-white/5 border border-border dark:border-white/10 hover:bg-muted dark:hover:bg-white/10 hover:border-primary dark:hover:border-brand-green/50 text-foreground dark:text-white rounded-2xl transition-all shadow-sm gap-2"

@@ -193,58 +193,40 @@ export default function CalendarioPage() {
   return (
     <div className="space-y-6 pb-24">
       <div className="-mt-2 mb-2 md:mb-4">
-        <PageHeader
-          title={
-            <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
-              <span>Calendario</span>
-              <span className="hidden sm:inline text-muted-foreground/30 font-light">|</span>
-              <span className="text-sm sm:text-lg font-bold text-primary dark:text-brand-green uppercase tracking-widest">{activeSeason?.name}</span>
-            </div>
-          }
-        >
-          <div className="flex gap-1 md:gap-1.5 shrink-0 items-center">
+        <PageHeader title="">
+          <div className="flex gap-1.5 shrink-0 items-center w-full">
             <RoleGuard allowedRoles={['developer']}>
               <Button
                 variant="outline"
-                className="bg-muted dark:bg-black/80 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 w-8 sm:h-9 sm:w-9 rounded-xl shadow-sm p-0"
-                size="icon"
+                className="bg-muted dark:bg-black/80 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-9 px-3 rounded-xl shadow-sm flex items-center gap-1.5 flex-1"
                 onClick={() => setIsScraperImportOpen(true)}
                 title="Sincronizza da URL (Scraping)"
               >
                 <Globe className="h-4 w-4 text-primary dark:text-brand-green" />
+                <span className="font-black uppercase text-[10px]">IMPORTA</span>
               </Button>
             </RoleGuard>
             <Button
               variant="outline"
-              className="bg-muted dark:bg-black/80 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-8 w-8 sm:h-9 sm:w-9 rounded-xl shadow-sm p-0"
-              size="icon"
+              className="bg-muted dark:bg-black/80 border-border dark:border-brand-green/30 text-foreground dark:text-white hover:bg-muted/80 dark:hover:bg-black hover:scale-105 transition-all h-9 px-3 rounded-xl shadow-sm flex items-center gap-1.5 flex-1"
               onClick={() => setIsImportOpen(true)}
               title="Importazione Smart (Copia e Incolla)"
             >
               <ClipboardCopy className="h-4 w-4 text-primary dark:text-brand-green" />
+              <span className="font-black uppercase text-[10px]">IMPORTA</span>
             </Button>
             <Button
               variant="outline"
-              className="bg-primary dark:bg-black border border-primary dark:border-brand-green text-white dark:text-brand-green hover:opacity-90 dark:hover:bg-black/80 hover:scale-105 transition-all h-8 sm:h-9 px-2 sm:px-3 rounded-xl shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.15)] hidden sm:flex items-center"
-              onClick={() => setIsMatchFormOpen(true)}
-              title="Nuova Partita"
-            >
-              <PlusCircle className="sm:mr-1.5 h-4 w-4" />
-              <span className="hidden sm:inline font-black uppercase text-[10px]">Nuova</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="bg-primary dark:bg-black border border-primary dark:border-brand-green text-white dark:text-brand-green hover:opacity-90 dark:hover:bg-black/80 hover:scale-105 transition-all h-8 w-8 rounded-xl shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.15)] sm:hidden flex items-center justify-center p-0"
+              className="bg-primary dark:bg-black border border-primary dark:border-brand-green text-white dark:text-brand-green hover:opacity-90 dark:hover:bg-black/80 hover:scale-105 transition-all h-9 px-3 rounded-xl shadow-md dark:shadow-[0_0_15px_rgba(172,229,4,0.15)] flex items-center gap-1.5 flex-1"
               onClick={() => setIsMatchFormOpen(true)}
               title="Nuova Partita"
             >
               <PlusCircle className="h-4 w-4" />
+              <span className="font-black uppercase text-[10px]">PARTITE</span>
             </Button>
           </div>
         </PageHeader>
       </div>
-
-      {/* PROSSIMO INCONTRO */}
       {nextMatch && (
         <section className="space-y-3">
           <div className="flex items-center gap-2 px-1">

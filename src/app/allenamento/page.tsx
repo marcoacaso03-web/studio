@@ -144,7 +144,7 @@ export default function AllenamentoPage() {
     <div className="space-y-6 pb-20">
       <PageHeader title="" className="mb-2 md:mb-4">
         {!hasPageError && (
-          <div className="flex flex-col gap-1.5 ml-auto w-full max-w-md">
+          <div className="flex flex-col gap-1.5 ml-auto w-full">
             {/* Riga 1 — Azioni principali */}
             <div className="flex items-center gap-1.5 w-full">
               <Button
