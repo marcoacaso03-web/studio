@@ -28,10 +28,8 @@ const COVERAGE_COLORS: Record<CoverageLevel, { bg: string; border: string; glow:
 };
 
 function getPlayerById(id: string, players: Player[], observedPlayers: ObservedPlayer[]): { lastName: string; firstName: string } | null {
-  // Check Rosa players
   const p = players.find(pl => pl.id === id);
   if (p) return { lastName: p.lastName, firstName: p.firstName };
-  // Check observed players (prefixed with obs_)
   const obsId = id.replace(/^obs_/, '');
   const obs = observedPlayers.find(o => o.id === obsId);
   if (obs) {
@@ -45,13 +43,20 @@ export function RosaPitch({ formation, coverage, selectedSlot, onSelectSlot, slo
   const positions = FORMATION_POSITIONS[formation];
   const rolesInFormation = FORMATION_ROLES[formation];
 
-  const getTopPlayerName = (slotIdx: number): string | null => {
+  const getPlayerInfo = (slotIdx: number, playerIdx: number): string | null => {
     const key = `__slot${slotIdx}`;
     const slotIds = slotPlayers[key];
-    if (slotIds && slotIds.length > 0) {
-      const info = getPlayerById(slotIds[0], players, observedPlayers);
+    if (slotIds && slotIds.length > playerIdx) {
+      const info = getPlayerById(slotIds[playerIdx], players, observedPlayers);
       if (info) return info.lastName || info.firstName;
     }
+    return null;
+  };
+
+  const getFirstPlayerName = (slotIdx: number): string | null => {
+    // First priority: titolare from formation state
+    const name = getPlayerInfo(slotIdx, 0);
+    if (name) return name;
     // Fallback: any player with this role from Rosa
     const role = rolesInFormation[slotIdx];
     const rolePlayers = getPlayersForRole(players, role);
@@ -59,7 +64,10 @@ export function RosaPitch({ formation, coverage, selectedSlot, onSelectSlot, slo
     return null;
   };
 
-  // Get count of players in Rosa for this role (not slot)
+  const getSecondPlayerName = (slotIdx: number): string | null => {
+    return getPlayerInfo(slotIdx, 1);
+  };
+
   const getCountForRole = (role: PlayerRole): number => {
     const cov = coverage.roleCoverage.get(role);
     return cov?.count ?? 0;
@@ -67,15 +75,16 @@ export function RosaPitch({ formation, coverage, selectedSlot, onSelectSlot, slo
 
   return (
     <div className="relative w-full mx-auto" style={{ aspectRatio: '9/16', maxHeight: '500px' }}>
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-emerald-800 to-emerald-900 border-2 border-white/20 overflow-hidden">
+      {/* Darker field background */}
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-emerald-950 to-black border-2 border-white/10 overflow-hidden">
         {/* Field lines */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-[4%] border border-white/20 rounded-xl" />
-          <div className="absolute top-1/2 left-[4%] right-[4%] h-px bg-white/20" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[28%] aspect-square border border-white/20 rounded-full" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white/30 rounded-full" />
-          <div className="absolute top-0 left-[25%] right-[25%] h-[16%]" style={{ borderBottom: '1px solid rgba(255,255,255,0.15)', borderLeft: '1px solid rgba(255,255,255,0.15)', borderRight: '1px solid rgba(255,255,255,0.15)' }} />
-          <div className="absolute bottom-0 left-[25%] right-[25%] h-[16%]" style={{ borderTop: '1px solid rgba(255,255,255,0.15)', borderLeft: '1px solid rgba(255,255,255,0.15)', borderRight: '1px solid rgba(255,255,255,0.15)' }} />
+          <div className="absolute inset-[4%] border border-white/10 rounded-xl" />
+          <div className="absolute top-1/2 left-[4%] right-[4%] h-px bg-white/10" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[28%] aspect-square border border-white/10 rounded-full" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white/20 rounded-full" />
+          <div className="absolute top-0 left-[25%] right-[25%] h-[16%]" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', borderLeft: '1px solid rgba(255,255,255,0.08)', borderRight: '1px solid rgba(255,255,255,0.08)' }} />
+          <div className="absolute bottom-0 left-[25%] right-[25%] h-[16%]" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', borderLeft: '1px solid rgba(255,255,255,0.08)', borderRight: '1px solid rgba(255,255,255,0.08)' }} />
         </div>
 
         {/* Role slots — one circle per slot */}
@@ -85,7 +94,8 @@ export function RosaPitch({ formation, coverage, selectedSlot, onSelectSlot, slo
           const count = getCountForRole(role);
           const colors = COVERAGE_COLORS[level];
           const isSelected = selectedSlot === idx;
-          const topName = getTopPlayerName(idx);
+          const topName = getFirstPlayerName(idx);
+          const subName = getSecondPlayerName(idx);
 
           return (
             <button
@@ -96,24 +106,52 @@ export function RosaPitch({ formation, coverage, selectedSlot, onSelectSlot, slo
                 'absolute -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all duration-150',
                 'border-2 text-[9px] font-black uppercase cursor-pointer',
                 'hover:scale-110 active:scale-95',
-                isSelected && 'ring-2 ring-[#00e5a0] ring-offset-2 ring-offset-emerald-900'
+                isSelected && 'ring-2 ring-[#00e5a0] ring-offset-2 ring-offset-emerald-950'
               )}
               style={{
                 top: pos.top,
                 left: pos.left,
                 backgroundColor: colors.bg,
                 borderColor: isSelected ? '#00e5a0' : colors.border,
-                boxShadow: `0 0 12px ${colors.glow}`,
+                boxShadow: `0 0 14px ${colors.glow}`,
               }}
             >
               <span className="text-white drop-shadow-md leading-none">{role}</span>
-              <span className="text-[7px] text-white/80 leading-none mt-0.5">{count}</span>
+              <span className="text-[7px] text-white/70 leading-none mt-0.5">{count}</span>
+            </button>
+          );
+        })}
+
+        {/* Player names — positioned below each circle */}
+        {rolesInFormation.map((role, idx) => {
+          const pos = positions[idx];
+          const topName = getFirstPlayerName(idx);
+          const subName = getSecondPlayerName(idx);
+          if (!topName && !subName) return null;
+
+          const posTop = parseFloat(pos.top);
+          const posLeft = parseFloat(pos.left);
+
+          return (
+            <div
+              key={`name-${idx}`}
+              className="absolute flex flex-col items-center -translate-x-1/2 pointer-events-none"
+              style={{
+                top: `${posTop + 8}%`,
+                left: `${posLeft}%`,
+              }}
+            >
               {topName && (
-                <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] sm:text-[10px] font-black text-white/80 whitespace-nowrap drop-shadow-md max-w-[80px] truncate">
+                <span className="text-[9px] sm:text-[10px] font-black text-white whitespace-nowrap drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] max-w-[85px] truncate leading-tight">
                   {topName}
                 </span>
               )}
-            </button>
+              {subName && (
+                <span className="text-[8px] sm:text-[9px] font-bold text-white/50 whitespace-nowrap drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] max-w-[80px] truncate leading-tight">
+                  {subName}
+                </span>
+              )}
+            </div>
           );
         })}
       </div>

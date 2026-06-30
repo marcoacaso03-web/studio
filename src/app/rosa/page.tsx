@@ -17,17 +17,15 @@ import { RosaPitch } from '@/components/squadra/rosa-pitch';
 import { RolePlayerList, ObservedPlayersList } from '@/components/squadra/rosa-player-list';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { AlertTriangle, AlertCircle, RotateCcw } from 'lucide-react';
+import { AlertTriangle, AlertCircle, RotateCcw, Save } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { ScoutPlayerSchema } from '@/lib/schemas';
 
 // ── Formation state ──────────────────────────────────────
-// Each slot gets a unique key `__slotN` (N = index in FORMATION_ROLES[formation]).
-// Two slots with the same role (e.g. ATT+ATT in 4-4-2) are independent.
 interface FormationState {
-  slotPlayers: Record<string, string[]>;  // __slotN → playerId[]
+  slotPlayers: Record<string, string[]>;
 }
 
 const slotKey = (index: number) => `__slot${index}`;
@@ -35,6 +33,8 @@ const slotKey = (index: number) => `__slot${index}`;
 const createEmptyFormationState = (): FormationState => ({
   slotPlayers: {},
 });
+
+const STORAGE_KEY = 'rosa-overview-state';
 
 export default function RosaOverviewPage() {
   const { players } = usePlayersStore();
@@ -44,17 +44,45 @@ export default function RosaOverviewPage() {
 
   const [formation, setFormation] = useState<FormationModule>(DEFAULT_FORMATION);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
+  // sessionStorage-backed state: survives remount/reload
   const [formationStates, setFormationStates] = useState<Record<FormationModule, FormationState>>(() => {
     const init: Partial<Record<FormationModule, FormationState>> = {};
     FORMATIONS.forEach(f => { init[f] = createEmptyFormationState(); });
     return init as Record<FormationModule, FormationState>;
   });
 
+  // Track dirty state (true when user made changes vs saved snapshot)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
   const prevFormationRef = useRef<FormationModule>(formation);
 
   const currentState = formationStates[formation];
   const { slotPlayers } = currentState;
+
+  // ── Load from sessionStorage on mount ──────────────────
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as Record<FormationModule, FormationState>;
+        if (parsed && typeof parsed === 'object') {
+          setFormationStates(parsed);
+        }
+      }
+    } catch {
+      // ignore parse error
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // ── Save to sessionStorage whenever state changes ───────
+  useEffect(() => {
+    if (!isLoaded) return;
+    // Mark dirty on any change after initial load
+    setHasUnsavedChanges(true);
+  }, [formationStates, isLoaded]);
 
   const updateFormationState = useCallback((updater: (prev: FormationState) => FormationState) => {
     setFormationStates(prev => ({
@@ -93,7 +121,6 @@ export default function RosaOverviewPage() {
   useEffect(() => {
     if (prevFormationRef.current !== formation) {
       prevFormationRef.current = formation;
-      // Find critical slot from coverage, or just first slot
       const criticalRole = getFirstCriticalSlot(formation, activeCoverage);
       const rolesInFormation = FORMATION_ROLES[formation];
       if (criticalRole) {
@@ -105,9 +132,18 @@ export default function RosaOverviewPage() {
     }
   }, [formation, activeCoverage]);
 
+  // ── Save to sessionStorage (explicit save) ─────────────
+  const handleSaveFormation = useCallback(() => {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(formationStates));
+      setHasUnsavedChanges(false);
+    } catch {
+      // ignore quota error
+    }
+  }, [formationStates]);
+
   // ── Handlers ──────────────────────────────────────────
 
-  /** Reorder a player within a slot's player list */
   const handleReorder = useCallback((slotIdx: number, playerId: string, direction: 'up' | 'down') => {
     const key = slotKey(slotIdx);
     updateFormationState(prev => {
@@ -128,7 +164,6 @@ export default function RosaOverviewPage() {
     });
   }, [updateFormationState]);
 
-  /** Remove a player from the formation overview (all slots) */
   const handleRemove = useCallback((playerId: string) => {
     setFormationStates(prev => {
       const next: Record<FormationModule, FormationState> = { ...prev };
@@ -143,7 +178,6 @@ export default function RosaOverviewPage() {
     });
   }, []);
 
-  /** Add a Rosa player to the current selected slot */
   const handleAddPlayerToSlot = useCallback((playerId: string) => {
     if (selectedSlot === null) return;
     const key = slotKey(selectedSlot);
@@ -159,11 +193,9 @@ export default function RosaOverviewPage() {
     });
   }, [selectedSlot, updateFormationState]);
 
-  /** Add an observed player to the overview formation (does NOT add to Rosa) */
   const handleAddObservedPlayer = useCallback((observedId: string, name: string, role: PlayerRole) => {
     if (selectedSlot === null) return;
     const key = slotKey(selectedSlot);
-    // Use the scout player ID directly (prefixed to distinguish from Rosa players)
     const tempId = `obs_${observedId}`;
     updateFormationState(prev => {
       const current = prev.slotPlayers[key] ? [...prev.slotPlayers[key]] : [];
@@ -191,9 +223,6 @@ export default function RosaOverviewPage() {
   const selectedSlotKey = selectedSlot !== null ? slotKey(selectedSlot) : null;
   const selectedSlotOrderedIds = selectedSlotKey ? (slotPlayers[selectedSlotKey] ?? []) : [];
 
-  // Map slot-indexed → role-indexed for child components that expect role-based records
-  // RolePlayerList expects Partial<Record<PlayerRole, string[]>> — we synthesize it
-  // by using the role of the selected slot as key
   const roleOrderedForSidebar: Partial<Record<PlayerRole, string[]>> = selectedRole
     ? { [selectedRole]: selectedSlotOrderedIds }
     : {};
@@ -231,6 +260,22 @@ export default function RosaOverviewPage() {
           <RotateCcw className="h-3 w-3" />
           Reset
         </button>
+
+        {/* Spacer to push save button right */}
+        <div className="flex-1" />
+
+        {/* Save button — appears when there are unsaved changes */}
+        {hasUnsavedChanges && isLoaded && (
+          <button
+            type="button"
+            onClick={handleSaveFormation}
+            className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-[9px] font-black uppercase tracking-widest bg-[#00e5a0]/10 border border-[#00e5a0]/40 text-[#00e5a0] hover:bg-[#00e5a0]/20 transition-all animate-pulse"
+            title="Salva modifiche — le mantiene anche uscendo dalla schermata"
+          >
+            <Save className="h-3.5 w-3.5" />
+            <span>Salva modifica</span>
+          </button>
+        )}
       </div>
 
       <div className="flex items-center gap-3 px-3 py-2 rounded-2xl bg-muted/30 dark:bg-card/20 border border-border dark:border-transparent">
