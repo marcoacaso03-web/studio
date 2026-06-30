@@ -4,13 +4,21 @@ import { FormationModule, ROLE_LABELS, getRoleCategory, ROLE_CATEGORY_COLORS, Pl
 import { FormationCoverage, CoverageLevel, getPlayersForRole } from '@/lib/rosa-coverage';
 import { cn } from '@/lib/utils';
 
+interface ObservedPlayer {
+  id: string;
+  name: string;
+  role: PlayerRole;
+  note: string;
+}
+
 interface RosaPitchProps {
   formation: FormationModule;
   coverage: FormationCoverage;
-  selectedRole: PlayerRole | null;
-  onSelectRole: (role: PlayerRole) => void;
-  orderedPlayerIds: Record<PlayerRole, string[]>;
+  selectedSlot: number | null;
+  onSelectSlot: (slotIdx: number) => void;
+  slotPlayers: Record<string, string[]>;
   players: Player[];
+  observedPlayers: ObservedPlayer[];
 }
 
 const COVERAGE_COLORS: Record<CoverageLevel, { bg: string; border: string; glow: string }> = {
@@ -19,21 +27,42 @@ const COVERAGE_COLORS: Record<CoverageLevel, { bg: string; border: string; glow:
   critical: { bg: '#ef4444', border: '#ef4444', glow: 'rgba(239,68,68,0.4)' },
 };
 
-export function RosaPitch({ formation, coverage, selectedRole, onSelectRole, orderedPlayerIds, players }: RosaPitchProps) {
+function getPlayerById(id: string, players: Player[], observedPlayers: ObservedPlayer[]): { lastName: string; firstName: string } | null {
+  // Check Rosa players
+  const p = players.find(pl => pl.id === id);
+  if (p) return { lastName: p.lastName, firstName: p.firstName };
+  // Check observed players (prefixed with obs_)
+  const obsId = id.replace(/^obs_/, '');
+  const obs = observedPlayers.find(o => o.id === obsId);
+  if (obs) {
+    const parts = obs.name.split(/\s+/);
+    return { lastName: parts.slice(1).join(' ') || parts[0], firstName: parts[0] };
+  }
+  return null;
+}
+
+export function RosaPitch({ formation, coverage, selectedSlot, onSelectSlot, slotPlayers, players, observedPlayers }: RosaPitchProps) {
   const positions = FORMATION_POSITIONS[formation];
   const rolesInFormation = FORMATION_ROLES[formation];
 
-  // Get the first player's last name for a role slot
-  const getTopPlayerName = (role: PlayerRole): string | null => {
-    const ordered = orderedPlayerIds[role];
-    if (ordered && ordered.length > 0) {
-      const topPlayer = players.find(p => p.id === ordered[0]);
-      if (topPlayer) return topPlayer.lastName;
+  const getTopPlayerName = (slotIdx: number): string | null => {
+    const key = `__slot${slotIdx}`;
+    const slotIds = slotPlayers[key];
+    if (slotIds && slotIds.length > 0) {
+      const info = getPlayerById(slotIds[0], players, observedPlayers);
+      if (info) return info.lastName || info.firstName;
     }
-    // Fallback: any player with this role
+    // Fallback: any player with this role from Rosa
+    const role = rolesInFormation[slotIdx];
     const rolePlayers = getPlayersForRole(players, role);
     if (rolePlayers.length > 0) return rolePlayers[0].lastName;
     return null;
+  };
+
+  // Get count of players in Rosa for this role (not slot)
+  const getCountForRole = (role: PlayerRole): number => {
+    const cov = coverage.roleCoverage.get(role);
+    return cov?.count ?? 0;
   };
 
   return (
@@ -49,21 +78,20 @@ export function RosaPitch({ formation, coverage, selectedRole, onSelectRole, ord
           <div className="absolute bottom-0 left-[25%] right-[25%] h-[16%]" style={{ borderTop: '1px solid rgba(255,255,255,0.15)', borderLeft: '1px solid rgba(255,255,255,0.15)', borderRight: '1px solid rgba(255,255,255,0.15)' }} />
         </div>
 
-        {/* Role slots */}
+        {/* Role slots — one circle per slot */}
         {rolesInFormation.map((role, idx) => {
           const pos = positions[idx];
-          const cov = coverage.roleCoverage.get(role);
-          const level = cov?.level ?? 'critical';
-          const count = cov?.count ?? 0;
+          const level = coverage.roleCoverage.get(role)?.level ?? 'critical';
+          const count = getCountForRole(role);
           const colors = COVERAGE_COLORS[level];
-          const isSelected = selectedRole === role;
-          const topName = getTopPlayerName(role);
+          const isSelected = selectedSlot === idx;
+          const topName = getTopPlayerName(idx);
 
           return (
             <button
-              key={`${role}-${idx}`}
+              key={`slot-${idx}`}
               type="button"
-              onClick={() => onSelectRole(role)}
+              onClick={() => onSelectSlot(idx)}
               className={cn(
                 'absolute -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all duration-150',
                 'border-2 text-[9px] font-black uppercase cursor-pointer',

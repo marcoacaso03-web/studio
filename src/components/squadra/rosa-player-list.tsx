@@ -5,6 +5,13 @@ import { getPlayersForRole } from '@/lib/rosa-coverage';
 import { ChevronUp, ChevronDown, Plus, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+interface ObservedPlayer {
+  id: string;
+  name: string;
+  role: PlayerRole;
+  note: string;
+}
+
 /* ═══════════════════════════════════════════════════════
    RolePlayerList — shows players for the selected role,
    ordered (in formation) first, then compatibili.
@@ -20,6 +27,7 @@ interface RolePlayerListProps {
   onRemove: (playerId: string) => void;
   onAddPlayer: (player: Player) => void;
   allPlayers: Player[];
+  observedPlayers?: ObservedPlayer[];
 }
 
 export function RolePlayerList({
@@ -32,8 +40,14 @@ export function RolePlayerList({
   onRemove,
   onAddPlayer,
   allPlayers,
+  observedPlayers = [],
 }: RolePlayerListProps) {
   const ordered = orderedPlayerIds[selectedRole] ?? [];
+
+  // Separate Rosa players from observed (obs_ prefix)
+  const rosaPlayerIds = ordered.filter(id => !id.startsWith('obs_'));
+  const obsPlayerIds = ordered.filter(id => id.startsWith('obs_'));
+
   const compatiblePlayers = getPlayersForRole(players, selectedRole);
   const incompatiblePlayers = players.filter(
     (p) =>
@@ -41,8 +55,13 @@ export function RolePlayerList({
       (p.roles?.some((r) => getRoleCategory(r) === getRoleCategory(selectedRole)) ?? false),
   );
 
-  function getPlayerById(id: string): Player | undefined {
+  function getRosaPlayerById(id: string): Player | undefined {
     return allPlayers.find((p) => p.id === id);
+  }
+
+  function getObservedById(id: string): ObservedPlayer | undefined {
+    const realId = id.replace(/^obs_/, '');
+    return observedPlayers.find(o => o.id === realId);
   }
 
   return (
@@ -63,14 +82,14 @@ export function RolePlayerList({
         </span>
       </div>
 
-      {/* Ordered / Already in formation */}
-      {ordered.length > 0 && (
+      {/* Ordered / Already in formation — Rosa players */}
+      {rosaPlayerIds.length > 0 && (
         <div className="space-y-1">
           <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">
             In formazione
           </span>
-          {ordered.map((playerId, idx) => {
-            const player = getPlayerById(playerId);
+          {rosaPlayerIds.map((playerId, idx) => {
+            const player = getRosaPlayerById(playerId);
             if (!player) return null;
             const isExcluded = excludedIds.includes(playerId);
             return (
@@ -97,7 +116,7 @@ export function RolePlayerList({
                   <button
                     type="button"
                     onClick={() => onReorder(selectedRole, playerId, 'down')}
-                    disabled={idx === ordered.length - 1}
+                    disabled={idx === rosaPlayerIds.length - 1}
                     className="p-0.5 rounded hover:bg-muted disabled:opacity-20"
                     title="Sposta giù"
                   >
@@ -130,7 +149,69 @@ export function RolePlayerList({
         </div>
       )}
 
-      {/* Compatible players (not yet in formation this role) */}
+      {/* Observed players already in formation */}
+      {obsPlayerIds.length > 0 && (
+        <div className="space-y-1">
+          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-orange-500/60">
+            In formazione (osservati)
+          </span>
+          {obsPlayerIds.map((obsId, idx) => {
+            const obs = getObservedById(obsId);
+            if (!obs) return null;
+            return (
+              <div
+                key={obsId}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl border border-orange-500/30 bg-orange-500/5 dark:bg-orange-500/5"
+              >
+                {/* Reorder arrows */}
+                <div className="flex flex-col gap-0.5">
+                  <button
+                    type="button"
+                    onClick={() => onReorder(selectedRole, obsId, 'up')}
+                    disabled={idx === 0}
+                    className="p-0.5 rounded hover:bg-orange-500/10 disabled:opacity-20"
+                    title="Sposta su"
+                  >
+                    <ChevronUp className="h-3 w-3 text-orange-500" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onReorder(selectedRole, obsId, 'down')}
+                    disabled={idx === obsPlayerIds.length - 1}
+                    className="p-0.5 rounded hover:bg-orange-500/10 disabled:opacity-20"
+                    title="Sposta giù"
+                  >
+                    <ChevronDown className="h-3 w-3 text-orange-500" />
+                  </button>
+                </div>
+
+                {/* Player info — all orange */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold truncate text-orange-500">
+                    {obs.name}
+                  </p>
+                  <p className="text-[9px] font-medium uppercase text-orange-600">
+                    {ROLE_LABELS[obs.role] ?? obs.role}
+                    {obs.note && ` • ${obs.note}`}
+                  </p>
+                </div>
+
+                {/* Remove */}
+                <button
+                  type="button"
+                  onClick={() => onRemove(obsId)}
+                  className="p-1 rounded-lg hover:bg-red-500/10 text-orange-500 hover:text-red-500 transition-colors"
+                  title="Rimuovi dalla formazione"
+                >
+                  <Minus className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Compatible players (not yet in formation) */}
       {compatiblePlayers.filter((p) => !ordered.includes(p.id)).length > 0 && (
         <div className="space-y-1">
           <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">
@@ -189,7 +270,7 @@ export function RolePlayerList({
               <button
                 type="button"
                 onClick={() => onAddPlayer(player)}
-                className="p-1 rounded-emerald-500/10 text-muted-foreground hover:text-emerald-500 transition-colors"
+                className="p-1 rounded-lg hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-500 transition-colors"
                 title="Aggiungi comunque"
               >
                 <Plus className="h-3.5 w-3.5" />
@@ -214,13 +295,6 @@ export function RolePlayerList({
    ObservedPlayersList — shows players in "osservazione".
    These addable via "+" and shown in orange.
    ═══════════════════════════════════════════════════════ */
-
-interface ObservedPlayer {
-  id: string;
-  name: string;
-  role: PlayerRole;
-  note: string;
-}
 
 interface ObservedPlayersListProps {
   observedPlayers: ObservedPlayer[];

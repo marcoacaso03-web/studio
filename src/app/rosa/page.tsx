@@ -10,6 +10,7 @@ import {
   PlayerRole,
   Player,
   ScoutPlayer,
+  FORMATION_ROLES,
 } from '@/lib/types';
 import { calculateCoverage, getFirstCriticalSlot, FormationCoverage } from '@/lib/rosa-coverage';
 import { RosaPitch } from '@/components/squadra/rosa-pitch';
@@ -22,12 +23,17 @@ import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebas
 import { collection } from 'firebase/firestore';
 import { ScoutPlayerSchema } from '@/lib/schemas';
 
+// ── Formation state ──────────────────────────────────────
+// Each slot gets a unique key `__slotN` (N = index in FORMATION_ROLES[formation]).
+// Two slots with the same role (e.g. ATT+ATT in 4-4-2) are independent.
 interface FormationState {
-  orderedPlayerIds: Record<PlayerRole, string[]>;
+  slotPlayers: Record<string, string[]>;  // __slotN → playerId[]
 }
 
+const slotKey = (index: number) => `__slot${index}`;
+
 const createEmptyFormationState = (): FormationState => ({
-  orderedPlayerIds: {} as Record<PlayerRole, string[]>,
+  slotPlayers: {},
 });
 
 export default function RosaOverviewPage() {
@@ -37,7 +43,7 @@ export default function RosaOverviewPage() {
   const firestore = useFirestore();
 
   const [formation, setFormation] = useState<FormationModule>(DEFAULT_FORMATION);
-  const [selectedRole, setSelectedRole] = useState<PlayerRole | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
 
   const [formationStates, setFormationStates] = useState<Record<FormationModule, FormationState>>(() => {
     const init: Partial<Record<FormationModule, FormationState>> = {};
@@ -48,7 +54,7 @@ export default function RosaOverviewPage() {
   const prevFormationRef = useRef<FormationModule>(formation);
 
   const currentState = formationStates[formation];
-  const { orderedPlayerIds } = currentState;
+  const { slotPlayers } = currentState;
 
   const updateFormationState = useCallback((updater: (prev: FormationState) => FormationState) => {
     setFormationStates(prev => ({
@@ -62,6 +68,7 @@ export default function RosaOverviewPage() {
     [players, formation]
   );
 
+  // ── Scout / Observed players ──────────────────────────
   const scoutPlayersQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return collection(firestore, 'users', user.uid, 'scoutPlayers');
@@ -82,17 +89,29 @@ export default function RosaOverviewPage() {
     }));
   }, [scoutPlayers]);
 
+  // ── Auto-select first critical slot on formation change ─
   useEffect(() => {
     if (prevFormationRef.current !== formation) {
       prevFormationRef.current = formation;
-      const autoRole = getFirstCriticalSlot(formation, activeCoverage);
-      if (autoRole) setSelectedRole(autoRole);
+      // Find critical slot from coverage, or just first slot
+      const criticalRole = getFirstCriticalSlot(formation, activeCoverage);
+      const rolesInFormation = FORMATION_ROLES[formation];
+      if (criticalRole) {
+        const idx = rolesInFormation.findIndex(r => r === criticalRole);
+        setSelectedSlot(idx >= 0 ? idx : 0);
+      } else {
+        setSelectedSlot(0);
+      }
     }
   }, [formation, activeCoverage]);
 
-  const handleReorder = useCallback((role: PlayerRole, playerId: string, direction: 'up' | 'down') => {
+  // ── Handlers ──────────────────────────────────────────
+
+  /** Reorder a player within a slot's player list */
+  const handleReorder = useCallback((slotIdx: number, playerId: string, direction: 'up' | 'down') => {
+    const key = slotKey(slotIdx);
     updateFormationState(prev => {
-      const current = prev.orderedPlayerIds[role] ? [...prev.orderedPlayerIds[role]] : [];
+      const current = prev.slotPlayers[key] ? [...prev.slotPlayers[key]] : [];
       const idx = current.indexOf(playerId);
       if (idx === -1) return prev;
 
@@ -104,56 +123,59 @@ export default function RosaOverviewPage() {
 
       return {
         ...prev,
-        orderedPlayerIds: { ...prev.orderedPlayerIds, [role]: current },
+        slotPlayers: { ...prev.slotPlayers, [key]: current },
       };
     });
   }, [updateFormationState]);
 
+  /** Remove a player from the formation overview (all slots) */
   const handleRemove = useCallback((playerId: string) => {
     setFormationStates(prev => {
       const next: Record<FormationModule, FormationState> = { ...prev };
       for (const fm of FORMATIONS) {
-        const oids = { ...next[fm].orderedPlayerIds };
-        for (const role of Object.keys(oids) as PlayerRole[]) {
-          oids[role] = (oids[role] ?? []).filter(id => id !== playerId);
+        const slotPlayers = { ...next[fm].slotPlayers };
+        for (const key of Object.keys(slotPlayers)) {
+          slotPlayers[key] = (slotPlayers[key] ?? []).filter(id => id !== playerId);
         }
-        next[fm] = { ...next[fm], orderedPlayerIds: oids };
+        next[fm] = { ...next[fm], slotPlayers };
       }
       return next;
     });
   }, []);
 
-  const handleAddPlayer = useCallback((player: Player) => {
-    if (!selectedRole) return;
+  /** Add a Rosa player to the current selected slot */
+  const handleAddPlayerToSlot = useCallback((playerId: string) => {
+    if (selectedSlot === null) return;
+    const key = slotKey(selectedSlot);
     updateFormationState(prev => {
-      const current = prev.orderedPlayerIds[selectedRole] ? [...prev.orderedPlayerIds[selectedRole]] : [];
-      if (!current.includes(player.id)) {
-        current.push(player.id);
+      const current = prev.slotPlayers[key] ? [...prev.slotPlayers[key]] : [];
+      if (!current.includes(playerId)) {
+        current.push(playerId);
       }
       return {
         ...prev,
-        orderedPlayerIds: { ...prev.orderedPlayerIds, [selectedRole]: current },
+        slotPlayers: { ...prev.slotPlayers, [key]: current },
       };
     });
-  }, [selectedRole, updateFormationState]);
+  }, [selectedSlot, updateFormationState]);
 
+  /** Add an observed player to the overview formation (does NOT add to Rosa) */
   const handleAddObservedPlayer = useCallback((observedId: string, name: string, role: PlayerRole) => {
-    if (!selectedRole) return;
-    const nameParts = name.trim().split(/\s+/);
-    const firstName = nameParts[0] ?? '';
-    const lastName = nameParts.slice(1).join(' ');
-
-    usePlayersStore.getState().add({
-      name,
-      firstName,
-      lastName: lastName || firstName,
-      roles: [role] as PlayerRole[],
-    }).then((newPlayer) => {
-      if (newPlayer) {
-        handleAddPlayer(newPlayer);
+    if (selectedSlot === null) return;
+    const key = slotKey(selectedSlot);
+    // Use the scout player ID directly (prefixed to distinguish from Rosa players)
+    const tempId = `obs_${observedId}`;
+    updateFormationState(prev => {
+      const current = prev.slotPlayers[key] ? [...prev.slotPlayers[key]] : [];
+      if (!current.includes(tempId)) {
+        current.push(tempId);
       }
+      return {
+        ...prev,
+        slotPlayers: { ...prev.slotPlayers, [key]: current },
+      };
     });
-  }, [selectedRole, handleAddPlayer]);
+  }, [selectedSlot, updateFormationState]);
 
   const handleReset = useCallback(() => {
     setFormationStates(prev => ({
@@ -161,6 +183,20 @@ export default function RosaOverviewPage() {
       [formation]: createEmptyFormationState(),
     }));
   }, [formation]);
+
+  // ── Derived for render ────────────────────────────────
+
+  const rolesInFormation = FORMATION_ROLES[formation];
+  const selectedRole: PlayerRole | null = selectedSlot !== null ? rolesInFormation[selectedSlot] ?? null : null;
+  const selectedSlotKey = selectedSlot !== null ? slotKey(selectedSlot) : null;
+  const selectedSlotOrderedIds = selectedSlotKey ? (slotPlayers[selectedSlotKey] ?? []) : [];
+
+  // Map slot-indexed → role-indexed for child components that expect role-based records
+  // RolePlayerList expects Partial<Record<PlayerRole, string[]>> — we synthesize it
+  // by using the role of the selected slot as key
+  const roleOrderedForSidebar: Partial<Record<PlayerRole, string[]>> = selectedRole
+    ? { [selectedRole]: selectedSlotOrderedIds }
+    : {};
 
   if (!activeSeason) {
     return (
@@ -223,27 +259,31 @@ export default function RosaOverviewPage() {
           <RosaPitch
             formation={formation}
             coverage={activeCoverage}
-            selectedRole={selectedRole}
-            onSelectRole={setSelectedRole}
-            orderedPlayerIds={orderedPlayerIds}
+            selectedSlot={selectedSlot}
+            onSelectSlot={(slotIdx) => setSelectedSlot(slotIdx)}
+            slotPlayers={slotPlayers}
             players={players}
+            observedPlayers={observedPlayers}
           />
         </div>
 
         <div className="md:w-[60%] flex-1 min-w-0">
           <ScrollArea className="h-[500px] pr-2">
-            {selectedRole ? (
+            {selectedRole !== null ? (
               <div className="space-y-4">
                 <RolePlayerList
                   players={players}
                   selectedRole={selectedRole}
                   isNextSeason={false}
-                  orderedPlayerIds={{ [selectedRole]: orderedPlayerIds[selectedRole] ?? [] }}
+                  orderedPlayerIds={roleOrderedForSidebar}
                   excludedIds={[]}
-                  onReorder={handleReorder}
+                  onReorder={(role, playerId, dir) => {
+                    if (selectedSlot !== null) handleReorder(selectedSlot, playerId, dir);
+                  }}
                   onRemove={handleRemove}
-                  onAddPlayer={handleAddPlayer}
+                  onAddPlayer={(player) => handleAddPlayerToSlot(player.id)}
                   allPlayers={players}
+                  observedPlayers={observedPlayers}
                 />
 
                 <ObservedPlayersList
