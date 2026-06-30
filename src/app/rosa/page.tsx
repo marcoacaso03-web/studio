@@ -35,6 +35,7 @@ const createEmptyFormationState = (): FormationState => ({
 });
 
 const STORAGE_KEY = 'rosa-overview-state';
+const FORMATION_KEY = 'rosa-overview-formation';
 
 export default function RosaOverviewPage() {
   const { players } = usePlayersStore();
@@ -42,9 +43,22 @@ export default function RosaOverviewPage() {
   const { user } = useUser();
   const firestore = useFirestore();
 
-  const [formation, setFormation] = useState<FormationModule>(DEFAULT_FORMATION);
+  const [formation, setFormation] = useState<FormationModule>(() => {
+    try {
+      const stored = sessionStorage.getItem(FORMATION_KEY);
+      if (stored && (FORMATIONS as string[]).includes(stored)) {
+        return stored as FormationModule;
+      }
+    } catch { /* ignore */ }
+    return DEFAULT_FORMATION;
+  });
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  // Persist formation selection
+  useEffect(() => {
+    try { sessionStorage.setItem(FORMATION_KEY, formation); } catch { /* ignore */ }
+  }, [formation]);
 
   // sessionStorage-backed state: survives remount/reload
   const [formationStates, setFormationStates] = useState<Record<FormationModule, FormationState>>(() => {

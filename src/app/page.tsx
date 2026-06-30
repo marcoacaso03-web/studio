@@ -206,7 +206,7 @@ export default function HomePage() {
           className="h-auto flex-col items-center justify-center p-3 bg-card dark:bg-white/5 border border-border dark:border-white/10 hover:bg-muted dark:hover:bg-white/10 hover:border-primary dark:hover:border-brand-green/50 text-foreground dark:text-white rounded-2xl transition-all shadow-sm gap-2"
         >
           <PlusCircle className="h-5 w-5 text-primary dark:text-brand-green" />
-          <span className="text-xs font-black uppercase text-center leading-tight">Nuovo<br />Talento</span>
+          <span className="text-xs font-black uppercase text-center leading-tight">Nuovo<br />Osservato</span>
         </Button>
       </div>
 
