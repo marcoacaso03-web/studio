@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Search, User, Check, Star, Activity } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Player, Role, PlayerRole, getPrimaryRole, migrateRole } from '@/lib/types';
+import { Player, PlayerRole, getPrimaryRole, migrateRole, getRoleCategory, RoleCategory } from '@/lib/types';
 import { displayPlayerName, cn } from "@/lib/utils";
 import { getPositionAcronym } from "@/lib/lineup-mapping";
 
@@ -25,15 +25,6 @@ interface SmartPlayerSelectDialogProps {
   matchDate?: string;
 }
 
-const mapAcronymToRole = (acronym: string): Role => {
-  if (acronym === 'POR') return 'Portiere';
-  if (['TS', 'DC', 'TD', 'DCD', 'DCS'].includes(acronym)) return 'Difensore';
-  if (['ATT'].includes(acronym)) return 'Attaccante';
-  // Ala Sinistra/Destra (AS/AD) can be Centrocampista or Attaccante, but usually Centrocampista in 4-3-3 or Attaccante?
-  // Let's assume Centrocampista for all others.
-  return 'Centrocampista';
-};
-
 export function SmartPlayerSelectDialog({
   open,
   onOpenChange,
@@ -46,7 +37,10 @@ export function SmartPlayerSelectDialog({
 }: SmartPlayerSelectDialogProps) {
   const [search, setSearch] = React.useState("");
   const acronym = getPositionAcronym(formation, slotIndex);
-  const targetRole = mapAcronymToRole(acronym);
+  // The target player role for this slot (e.g. "DC", "ATT", "TRQ")
+  const targetSlotRole = migrateRole(acronym) as PlayerRole;
+  const targetCategory = getRoleCategory(targetSlotRole);
+
   const isInjured = React.useCallback((player: Player) => {
     if (!matchDate || !player.injuries || player.injuries.length === 0) return false;
     const target = new Date(matchDate);
@@ -62,33 +56,38 @@ export function SmartPlayerSelectDialog({
 
   const sortedPlayers = React.useMemo(() => {
     // Filter out players already selected in OTHER slots
-    // (Wait, the user might want to swap, but usually we filter out)
     const filtered = allPlayers.filter(p => !selectedPlayerIds.includes(p.id) || selectedPlayerIds[slotIndex] === p.id);
     
     const searchLower = search.toLowerCase();
     const searched = filtered.filter(p => 
       p.name.toLowerCase().includes(searchLower) || 
-      p.firstName.toLowerCase().includes(searchLower) || 
+      p.firstName.toLowerCase().includes(searchLower) ||
       p.lastName.toLowerCase().includes(searchLower)
     );
 
     return searched.sort((a, b) => {
-      const aPrimary = getPrimaryRole(a);
-      const bPrimary = getPrimaryRole(b);
-      const getScore = (p: Player, primary: string) => {
-        if (primary === targetRole) return 100;
-        if (p.secondaryRoles?.includes(targetRole as any)) return 80;
-        if (primary === 'POR') return 0;
-        return 50;
-      };
+      // Score: does the player match the exact slot role?
+      const aRoles = a.roles ?? [getPrimaryRole(a)];
+      const bRoles = b.roles ?? [getPrimaryRole(b)];
 
-      const scoreA = getScore(a, aPrimary);
-      const scoreB = getScore(b, bPrimary);
+      // Tier 1: exact slot role (primary or secondary)
+      const aHasExact = aRoles.includes(targetSlotRole);
+      const bHasExact = bRoles.includes(targetSlotRole);
+      if (aHasExact && !bHasExact) return -1;
+      if (!aHasExact && bHasExact) return 1;
 
-      if (scoreA !== scoreB) return scoreB - scoreA;
+      // Tier 2: same category (DIF, CEN, ATT)
+      const aCat = getRoleCategory(aRoles[0] as PlayerRole);
+      const bCat = getRoleCategory(bRoles[0] as PlayerRole);
+      const aSameCat = aCat === targetCategory;
+      const bSameCat = bCat === targetCategory;
+      if (aSameCat && !bSameCat) return -1;
+      if (!aSameCat && bSameCat) return 1;
+
+      // Tier 3: alphabetical by full name
       return a.name.localeCompare(b.name);
     });
-  }, [allPlayers, selectedPlayerIds, slotIndex, search, targetRole]);
+  }, [allPlayers, selectedPlayerIds, slotIndex, search, targetSlotRole, targetCategory]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -97,7 +96,7 @@ export function SmartPlayerSelectDialog({
           <DialogTitle className="text-lg font-black uppercase tracking-tight flex items-center gap-2">
             Seleziona {acronym}
             <span className="text-[10px] bg-primary/20 dark:bg-brand-green/20 text-primary dark:text-brand-green px-2 py-0.5 rounded-full font-bold">
-              {targetRole}
+              {targetSlotRole}
             </span>
           </DialogTitle>
           <div className="relative mt-4">
@@ -125,9 +124,8 @@ export function SmartPlayerSelectDialog({
           
           {sortedPlayers.map((player) => {
             const primary = getPrimaryRole(player);
-            const targetRoleCode = migrateRole(targetRole) as PlayerRole;
-            const isMatch = primary === targetRoleCode;
-            const isSecondary = player.roles?.some(r => migrateRole(r) === targetRoleCode);
+            const isMatch = (player.roles ?? [primary]).includes(targetSlotRole);
+            const isSecondary = !isMatch && getRoleCategory(primary) === targetCategory;
             const isSelected = selectedPlayerIds[slotIndex] === player.id;
             const injured = isInjured(player);
 
@@ -169,7 +167,7 @@ export function SmartPlayerSelectDialog({
                       {displayPlayerName(player)}
                     </p>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase">
-                      {injured ? "Infortunato" : `${primary} ${isSecondary ? `• ${targetRole}` : ""}`}
+                      {injured ? "Infortunato" : `${primary} ${isSecondary ? `• ${targetSlotRole}` : ""}`}
                     </p>
                   </div>
                 </div>
