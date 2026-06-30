@@ -80,7 +80,7 @@ export const DEFAULT_FORMATION: FormationModule = '4-3-3';
 // CS = Centrocampista Sinistro (sta a sinistra), CD = Centrocampista Destro (sta a destra)
 export const FORMATION_ROLES: Record<FormationModule, PlayerRole[]> = {
   '4-3-3':   ['POR', 'TS', 'DC', 'DC', 'TD', 'CS', 'CDC', 'CD', 'AS', 'ATT', 'AD'],
-  '4-2-3-1': ['POR', 'TS', 'DC', 'DC', 'TD', 'CS', 'CDC', 'AS', 'TRQ', 'AD', 'ATT'],
+  '4-2-3-1': ['POR', 'TS', 'DC', 'DC', 'TD', 'CS', 'CD', 'AS', 'TRQ', 'AD', 'ATT'],
   '4-4-2':   ['POR', 'TS', 'DC', 'DC', 'TD', 'AS', 'CS', 'CD', 'AD', 'ATT', 'ATT'],
   '3-5-2':   ['POR', 'DC', 'DC', 'DC', 'ASA', 'CD', 'CDC', 'CS', 'ADA', 'ATT', 'ATT'],
   '3-4-2-1': ['POR', 'DC', 'DC', 'DC', 'ASA', 'CS', 'CD', 'ADA', 'TRQ', 'TRQ', 'ATT'],
