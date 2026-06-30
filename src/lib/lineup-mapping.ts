@@ -13,13 +13,14 @@ export const FORMATION_NUMBERS: Record<string, number[]> = {
 };
 
 export const FORMATION_POSITIONS: Record<string, string[]> = {
-  "4-4-2": ["POR", "TS", "DC", "DC", "TD", "ES", "CC", "CC", "ED", "ATT", "ATT"],
-  "4-3-3": ["POR", "TS", "DC", "DC", "TD", "CC", "MED", "CC", "AS", "ATT", "AD"],
-  "3-5-2": ["POR", "DCS", "DC", "DCD", "ES", "CCS", "MED", "CCD", "ED", "ATT", "ATT"],
-  "4-2-3-1": ["POR", "TS", "DC", "DC", "TD", "CD", "CDC", "AS", "TRQ", "AD", "ATT"],
-  "3-4-2-1": ["POR", "DCS", "DC", "DCD", "ES", "CCS", "CCD", "ED", "TRQ", "TRQ", "ATT"],
-  "3-4-1-2": ["POR", "DCS", "DC", "DCD", "ES", "CCS", "CCD", "ED", "TRQ", "ATT", "ATT"],
-  "4-3-1-2": ["POR", "TS", "DC", "DC", "TD", "CC", "MED", "CC", "TRQ", "ATT", "ATT"]
+  "4-4-2": ["POR", "TS", "DC", "DC", "TD", "AS", "CS", "CD", "AD", "ATT", "ATT"],
+  "4-3-3": ["POR", "TS", "DC", "DC", "TD", "CS", "CDC", "CD", "AS", "ATT", "AD"],
+  "3-5-2": ["POR", "DC", "DC", "DC", "ASA", "CD", "CDC", "CS", "ADA", "ATT", "ATT"],
+  "4-2-3-1": ["POR", "TS", "DC", "DC", "TD", "CS", "CD", "AS", "TRQ", "AD", "ATT"],
+  "3-4-2-1": ["POR", "DC", "DC", "DC", "ASA", "CS", "CD", "ADA", "TRQ", "TRQ", "ATT"],
+  "3-4-3": ["POR", "DC", "DC", "DC", "ASA", "CS", "CD", "ADA", "AS", "ATT", "AD"],
+  "3-4-1-2": ["POR", "DC", "DC", "DC", "ASA", "CS", "CD", "ADA", "TRQ", "ATT", "ATT"],
+  "4-3-1-2": ["POR", "TS", "DC", "DC", "TD", "CS", "CD", "CS", "TRQ", "ATT", "ATT"]
 };
 
 export const FORMATION_COORDINATES: Record<string, { top: number, left: number }[]> = {
