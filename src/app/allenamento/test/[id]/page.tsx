@@ -9,7 +9,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { testRepository } from '@/lib/repositories/test-repository';
 import { sortResults, formatValue, formatDate } from '@/lib/test-utils';
 import { PhysicalTest, TestResult, Player } from '@/lib/types';
-import { ArrowLeft, Trophy, Edit3, Check, X, Loader2 } from 'lucide-react';
+import { ArrowLeft, Trophy, Edit3, Save, Loader2 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -107,16 +107,18 @@ function TestDetail({
               disabled={saving}
               onClick={handleCancel}
               className="h-9 w-9 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500/20"
+              title="Annulla"
             >
-              <X className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4" />
             </Button>
             <Button
               size="icon"
               disabled={saving}
               onClick={handleSave}
               className="h-9 w-9 rounded-full bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20"
+              title="Salva"
             >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             </Button>
           </div>
         ) : (
@@ -125,6 +127,7 @@ function TestDetail({
             size="icon"
             onClick={() => setEditing(true)}
             className="h-9 w-9 rounded-full bg-primary/10 dark:bg-brand-green/10 text-primary dark:text-brand-green hover:bg-primary/20 dark:hover:bg-brand-green/20"
+            title="Modifica"
           >
             <Edit3 className="h-4 w-4" />
           </Button>

@@ -8,6 +8,7 @@ import {
   doc,
   setDoc,
   updateDoc,
+  deleteDoc,
   query,
   where,
 } from 'firebase/firestore';
@@ -67,5 +68,11 @@ export const testRepository = {
     return tests
       .filter(t => t.results.some(r => r.playerId === playerId))
       .sort((a, b) => a.date.localeCompare(b.date));
+  },
+
+  async deleteTest(testId: string, userId: string): Promise<void> {
+    const db = getFirestore();
+    const docRef = doc(db, 'users', userId, 'physicalTests', testId);
+    await deleteDoc(docRef);
   },
 };

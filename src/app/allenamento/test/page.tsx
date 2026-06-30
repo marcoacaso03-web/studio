@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTestsStore } from '@/store/useTestsStore';
 import { usePlayersStore } from '@/store/usePlayersStore';
@@ -9,7 +8,8 @@ import { useSeasonsStore } from '@/store/useSeasonsStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import type { PhysicalTest } from '@/lib/types';
 import { sortResults, formatValue, formatDate } from '@/lib/test-utils';
-import { Plus, Activity, Zap, Clock, Users, ChevronRight, Trophy } from 'lucide-react';
+import { testRepository } from '@/lib/repositories/test-repository';
+import { Plus, Activity, Users, Trophy, Save, ArrowLeft, Trash2, Edit3 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
 import { PhysicalTestDialog } from '@/components/allenamento/physical-test-dialog';
@@ -25,6 +25,8 @@ export default function PhysicalTestsPage() {
 
   const [filter, setFilter] = useState<FilterType>('all');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const getPlayerName = useCallback((id: string): string => {
     const p = players.find(pl => pl.id === id);
@@ -37,58 +39,81 @@ export default function PhysicalTestsPage() {
       .sort((a, b) => b.date.localeCompare(a.date));
   }, [tests, filter]);
 
-  // Group standings by test NAME (not type)
-  const standingsGroups = useMemo(() => {
-    const byName = new Map<string, PhysicalTest[]>();
-    for (const t of tests) {
-      const arr = byName.get(t.name) ?? [];
-      arr.push(t);
-      byName.set(t.name, arr);
-    }
-
-    return Array.from(byName.entries()).map(([name, groupTests]) => {
-      const latestResults = new Map<string, { result: { playerId: string; value: number }; date: string; test: PhysicalTest }>();
-      const sorted = [...groupTests].sort((a, b) => b.date.localeCompare(a.date));
-      for (const t of sorted) {
-        for (const r of t.results) {
-          if (!latestResults.has(r.playerId)) {
-            latestResults.set(r.playerId, { result: r, date: t.date, test: t });
-          }
-        }
-      }
-
-      const firstTest = groupTests[0];
-      const unit = firstTest.unit;
-      const standings = Array.from(latestResults.entries())
-        .map(([playerId, { result, date }]) => ({
-          playerId,
-          playerName: getPlayerName(playerId),
-          value: result.value,
-          date,
-        }))
-        .sort((a, b) => unit === 'metri' ? b.value - a.value : a.value - b.value);
-
-      return { name, unit, standings };
-    });
-  }, [tests, getPlayerName]);
-
-  const totalPlayers = players.length;
+  // Best result per player for a test
+  const getTopResult = useCallback((test: PhysicalTest): { playerName: string; value: number } | null => {
+    if (test.results.length === 0) return null;
+    const sorted = sortResults(
+      test.results.map(r => ({ playerId: r.playerId, value: r.value })),
+      test.unit,
+      getPlayerName
+    );
+    if (sorted.length === 0) return null;
+    return { playerName: getPlayerName(sorted[0].playerId), value: sorted[0].value };
+  }, [getPlayerName]);
 
   const handleTestCreated = useCallback((id: string) => {
     setDialogOpen(false);
+    setEditMode(false);
     router.push(`/allenamento/test/${id}`);
   }, [router]);
+
+  const handleDelete = useCallback(async (testId: string) => {
+    if (!user) return;
+    setDeletingId(testId);
+    try {
+      await testRepository.deleteTest(testId, user.id);
+    } catch (err) {
+      console.error("Delete test error:", err);
+    } finally {
+      setDeletingId(null);
+    }
+  }, [user]);
 
   return (
     <div className="space-y-4 pb-24">
       <PageHeader title="Test Fisici">
-        <Button
-          onClick={() => setDialogOpen(true)}
-          className="h-9 text-[10px] font-black uppercase rounded-xl"
-        >
-          <Plus className="mr-1.5 h-3.5 w-3.5" />
-          Nuovo Test
-        </Button>
+        {editMode ? (
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setEditMode(false)}
+              className="h-9 w-9 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500/20"
+              title="Annulla"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              onClick={() => setEditMode(false)}
+              className="h-9 w-9 rounded-full bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20"
+              title="Salva"
+            >
+              <Save className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            {filteredTests.length > 0 && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setEditMode(true)}
+                className="h-9 w-9 rounded-full bg-primary/10 dark:bg-brand-green/10 text-primary dark:text-brand-green hover:bg-primary/20 dark:hover:bg-brand-green/20"
+                title="Modifica"
+              >
+                <Edit3 className="h-4 w-4" />
+              </Button>
+            )}
+            <Button
+              onClick={() => setDialogOpen(true)}
+              className="h-9 text-[10px] font-black uppercase rounded-xl"
+            >
+              <Plus className="mr-1.5 h-3.5 w-3.5" />
+              Nuovo Test
+            </Button>
+          </div>
+        )}
       </PageHeader>
 
       {filteredTests.length === 0 ? (
@@ -128,62 +153,81 @@ export default function PhysicalTestsPage() {
             ))}
           </div>
 
-          {/* Sessions list */}
-          <div className="space-y-2 mb-6">
-            {filteredTests.map(test => (
-              <Link
-                key={test.id}
-                href={`/allenamento/test/${test.id}`}
-                className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-border dark:border-brand-green/20 bg-muted/10 dark:bg-card/5 hover:bg-muted/20 dark:hover:bg-card/10 transition-all"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold truncate">{test.name}</p>
-                  <p className="text-[9px] text-muted-foreground/50 uppercase mt-0.5">
-                    {formatDate(test.date)} • {test.type}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1 text-[9px] font-black text-muted-foreground/50">
-                  <Users className="h-3 w-3" />
-                  {test.results.length}
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/30" />
-              </Link>
-            ))}
-          </div>
-
-          {/* Standings per test name */}
-          {standingsGroups.map(group => (
-            <div key={group.name} className="space-y-2">
-              <div className="flex items-center gap-2 px-1">
-                <Trophy className="h-3.5 w-3.5 text-yellow-500" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                  {group.name} — <span className="text-yellow-500">{group.unit}</span>
-                </span>
-              </div>
-
-              <div className="rounded-2xl border border-border dark:border-brand-green/20 overflow-hidden">
-                {group.standings.map((entry, idx) => (
-                  <div
-                    key={entry.playerId}
-                    className="flex items-center gap-3 px-4 py-2.5 border-b border-border dark:border-brand-green/10 last:border-b-0"
+          {/* Test cards */}
+          <div className="space-y-2.5">
+            {filteredTests.map(test => {
+              const topResult = getTopResult(test);
+              const isDeleting = deletingId === test.id;
+              return (
+                <div
+                  key={test.id}
+                  className="rounded-2xl border border-border dark:border-brand-green/20 bg-muted/10 dark:bg-card/5 overflow-hidden transition-all"
+                >
+                  {/* Main clickable area — navigates to detail (disabled in edit mode) */}
+                  <button
+                    type="button"
+                    onClick={() => { if (!editMode) router.push(`/allenamento/test/${test.id}`); }}
+                    disabled={editMode}
+                    className="w-full text-left disabled:cursor-default"
                   >
-                    <span className="w-5 text-center text-[11px] font-black text-muted-foreground/60">
-                      {idx + 1}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold truncate">{entry.playerName}</p>
+                    <div className="flex items-center gap-3 px-4 py-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold truncate">{test.name}</p>
+                        <p className="text-[9px] text-muted-foreground/50 uppercase mt-0.5">
+                          {formatDate(test.date)} • {test.type} • {test.unit}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[9px] font-black text-muted-foreground/50 shrink-0">
+                        <Users className="h-3 w-3" />
+                        {test.results.length}
+                      </div>
                     </div>
-                    <span className="text-[11px] font-black text-foreground">
-                      {formatValue(entry.value, group.unit)}
-                    </span>
-                    <span className="text-[9px] text-muted-foreground/40 w-12 text-right">
-                      {formatDate(entry.date)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+
+                    {/* Top result */}
+                    {topResult && (
+                      <div className="flex items-center gap-2 px-4 pb-3">
+                        <Trophy className="h-3 w-3 text-yellow-500 shrink-0" />
+                        <span className="text-[9px] font-bold text-muted-foreground/70 truncate">
+                          Migliore: <span className="text-yellow-500">{topResult.playerName}</span>
+                        </span>
+                        <span className="text-[10px] font-black text-foreground ml-auto shrink-0">
+                          {formatValue(topResult.value, test.unit)}
+                        </span>
+                      </div>
+                    )}
+                  </button>
+
+                  {/* Edit/Delete buttons — visible only in edit mode */}
+                  {editMode && (
+                    <div className="flex items-center gap-2 px-4 py-2.5 border-t border-border dark:border-brand-green/10 bg-muted/20 dark:bg-card/10">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setEditMode(false);
+                          router.push(`/allenamento/test/${test.id}`);
+                        }}
+                        className="h-8 text-[9px] font-black uppercase rounded-lg text-primary dark:text-brand-green hover:bg-primary/10 dark:hover:bg-brand-green/10"
+                      >
+                        <Edit3 className="mr-1.5 h-3 w-3" />
+                        Modifica
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={isDeleting}
+                        onClick={() => handleDelete(test.id)}
+                        className="h-8 text-[9px] font-black uppercase rounded-lg text-red-500 hover:bg-red-500/10 ml-auto"
+                      >
+                        <Trash2 className="mr-1.5 h-3 w-3" />
+                        {isDeleting ? 'Eliminando...' : 'Elimina'}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </>
       )}
 
