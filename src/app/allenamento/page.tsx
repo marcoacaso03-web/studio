@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, PlusCircle, Trash2, Loader2, Eraser, ClipboardCheck, Target, Users, Filter, CalendarRange, Archive } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, PlusCircle, Trash2, Loader2, Eraser, ClipboardCheck, Target, Users, Filter, CalendarRange, Archive } from "lucide-react";
 import { PiTrafficCone } from "react-icons/pi";
 import { useTrainingStore } from "@/store/useTrainingStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
@@ -144,62 +144,77 @@ export default function AllenamentoPage() {
     <div className="space-y-6 pb-20">
       <PageHeader title="" className="mb-2 md:mb-4">
         {!hasPageError && (
-          <div className="flex items-center gap-1 sm:gap-1.5 ml-auto">
-            <Button
-              variant="ghost"
-              className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 shrink-0"
-              onClick={() => router.push('/allenamento/libreria')}
-            >
-              <PiTrafficCone className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
-              <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Esercizi</span>
-            </Button>
+          <div className="flex flex-col gap-1.5 ml-auto w-full max-w-md">
+            {/* Riga 1 — Azioni principali */}
+            <div className="flex items-center gap-1.5 w-full">
+              <Button
+                variant="ghost"
+                className="rounded-xl px-2 h-9 flex-1 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 min-w-0"
+                onClick={() => setIsStatsOpen(true)}
+              >
+                <ClipboardCheck className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Report</span>
+              </Button>
 
-            <Button
-              variant="ghost"
-              className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 shrink-0"
-              onClick={() => setIsStatsOpen(true)}
-            >
-              <ClipboardCheck className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
-              <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Report</span>
-            </Button>
+              <Button
+                variant="ghost"
+                className="rounded-xl px-2 h-9 flex-1 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 min-w-0"
+                onClick={() => setIsGeneratorOpen(true)}
+              >
+                <PlusCircle className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Genera</span>
+              </Button>
 
-            <Button
-              variant="ghost"
-              className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 shrink-0"
-              onClick={() => setIsGeneratorOpen(true)}
-            >
-              <PlusCircle className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
-              <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Genera</span>
-            </Button>
+              <Button
+                variant="ghost"
+                className="rounded-xl px-2 h-9 flex-1 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 min-w-0"
+                onClick={() => setIsArchiveOpen(true)}
+              >
+                <Archive className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Archivio</span>
+              </Button>
 
-            <Button
-              variant="ghost"
-              className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 shrink-0"
-              onClick={() => setIsArchiveOpen(true)}
-            >
-              <Archive className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
-              <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Archivio</span>
-            </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="rounded-xl px-2 h-9 flex-1 bg-rose-500/5 border border-rose-500/20 hover:bg-rose-500/10 flex items-center gap-1 group transition-all active:scale-95 text-rose-500 min-w-0"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
+                    <span className="text-[9px] font-black uppercase tracking-tighter">Elimina</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="rounded-2xl bg-card dark:bg-black border-border dark:border-brand-green/30 backdrop-blur-xl text-foreground dark:text-white p-2">
+                  <DropdownMenuItem className="text-[10px] font-black uppercase rounded-xl mb-1 focus:bg-primary/20 hover:bg-primary/10 dark:focus:bg-brand-green/20 dark:hover:bg-brand-green/10 transition-colors" onClick={() => setTimeout(() => setIsClearWeekOpen(true), 100)}>
+                    <Eraser className="mr-2 h-4 w-4 text-primary dark:text-brand-green" /> Elimina Settimana
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-[10px] font-black uppercase rounded-xl text-rose-500 focus:bg-rose-500/20 hover:bg-rose-500/10 transition-colors cursor-pointer" onClick={() => setTimeout(() => setIsClearAllOpen(true), 100)}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Elimina Tutto
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="rounded-xl px-2 h-9 bg-rose-500/5 border border-rose-500/20 hover:bg-rose-500/10 flex items-center gap-1 group transition-all active:scale-95 text-rose-500 shrink-0"
-                >
-                  <Trash2 className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
-                  <span className="text-[9px] font-black uppercase tracking-tighter">Elimina</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="rounded-2xl bg-card dark:bg-black border-border dark:border-brand-green/30 backdrop-blur-xl text-foreground dark:text-white p-2">
-                <DropdownMenuItem className="text-[10px] font-black uppercase rounded-xl mb-1 focus:bg-primary/20 hover:bg-primary/10 dark:focus:bg-brand-green/20 dark:hover:bg-brand-green/10 transition-colors" onClick={() => setTimeout(() => setIsClearWeekOpen(true), 100)}>
-                  <Eraser className="mr-2 h-4 w-4 text-primary dark:text-brand-green" /> Elimina Settimana
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-[10px] font-black uppercase rounded-xl text-rose-500 focus:bg-rose-500/20 hover:bg-rose-500/10 transition-colors cursor-pointer" onClick={() => setTimeout(() => setIsClearAllOpen(true), 100)}>
-                  <Trash2 className="mr-2 h-4 w-4" /> Elimina Tutto
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Riga 2 — Esercizi + Test */}
+            <div className="flex items-center gap-1.5 w-full">
+              <Button
+                variant="ghost"
+                className="rounded-xl px-2 h-9 flex-1 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 min-w-0"
+                onClick={() => router.push('/allenamento/libreria')}
+              >
+                <PiTrafficCone className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Esercizi</span>
+              </Button>
+
+              <Button
+                variant="ghost"
+                className="rounded-xl px-2 h-9 flex-1 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 min-w-0"
+                onClick={() => router.push('/allenamento/test')}
+              >
+                <Plus className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Test</span>
+              </Button>
+            </div>
           </div>
         )}
       </PageHeader>
