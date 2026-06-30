@@ -140,7 +140,7 @@ export default function RosaPage() {
   const reverseRoleMap: Record<PlayerRole, string> = {
     POR: 'Portiere', DC: 'Difensore', TD: 'Difensore', TS: 'Difensore', ADA: 'Difensore', ASA: 'Difensore',
     CDC: 'Centrocampista', TRQ: 'Centrocampista', CD: 'Centrocampista', CS: 'Centrocampista',
-    AD: 'Attaccante', AS: 'Attaccante', ATT: 'Attaccante', CC: 'Centrocampista',
+    AD: 'Attaccante', AS: 'Attaccante', ATT: 'Attaccante',
   };
 
   const groupedPlayers = useMemo(() => {

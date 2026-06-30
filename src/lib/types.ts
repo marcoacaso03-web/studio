@@ -18,7 +18,7 @@ export type Role = typeof ROLES[number];
 export type PlayerRole =
   | 'POR'
   | 'DC' | 'TD' | 'TS' | 'ADA' | 'ASA'
-  | 'CDC' | 'CC' | 'TRQ' | 'CD' | 'CS'
+  | 'CDC' | 'TRQ' | 'CD' | 'CS'
   | 'AD' | 'AS' | 'ATT';
 
 export type RoleCategory = 'POR' | 'DIF' | 'CEN' | 'ATT';
@@ -26,14 +26,14 @@ export type RoleCategory = 'POR' | 'DIF' | 'CEN' | 'ATT';
 export const ALL_ROLES: PlayerRole[] = [
   'POR',
   'DC', 'TD', 'TS', 'ADA', 'ASA',
-  'CDC', 'CC', 'TRQ', 'CD', 'CS',
+  'CDC', 'TRQ', 'CD', 'CS',
   'AD', 'AS', 'ATT',
 ];
 
 export const ROLE_CATEGORIES: Record<RoleCategory, PlayerRole[]> = {
   POR: ['POR'],
   DIF: ['DC', 'TD', 'TS', 'ADA', 'ASA'],
-  CEN: ['CDC', 'CC', 'TRQ', 'CD', 'CS'],
+  CEN: ['CDC', 'TRQ', 'CD', 'CS'],
   ATT: ['AD', 'AS', 'ATT'],
 };
 
@@ -45,7 +45,6 @@ export const ROLE_LABELS: Record<PlayerRole, string> = {
   ADA: 'Ala Destra Arretrata',
   ASA: 'Ala Sinistra Arretrata',
   CDC: 'Centrocampista Centrale',
-  CC:  'Centrocampista Centrale',
   TRQ: 'Trequartista',
   CD:  'Centrocampista Destro',
   CS:  'Centrocampista Sinistro',

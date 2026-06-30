@@ -126,7 +126,7 @@ export default function RosaOverviewPage() {
     return scoutPlayers.map(sp => ({
       id: sp.id,
       name: sp.name,
-      role: (['POR','DC','TD','TS','ADA','ASA','CDC','CC','TRQ','CD','CS','AD','AS','ATT'].includes(sp.role) ? sp.role : 'ATT') as PlayerRole,
+      role: (['POR','DC','TD','TS','ADA','ASA','CDC','TRQ','CD','CS','AD','AS','ATT'].includes(sp.role) ? sp.role : 'ATT') as PlayerRole,
       note: sp.notes ?? sp.currentTeam ?? '',
     }));
   }, [scoutPlayers]);
