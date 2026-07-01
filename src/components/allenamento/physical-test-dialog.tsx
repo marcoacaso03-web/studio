@@ -109,13 +109,6 @@ export function PhysicalTestDialog({ open, onOpenChange, onCreated, players }: P
         testResults.push({ playerId, value: num });
       }
     }
-    if (testResults.length === 0) {
-      setSaving(false);
-      return;
-    }
-
-    console.log('📝 Creating test:', { userId: user.id, seasonId: activeSeason.id, name: testName.trim(), type: testType, unit, date: new Date(date).toISOString(), resultsCount: testResults.length });
-
     try {
       const id = await testRepository.create(user.id, activeSeason.id, {
         name: testName.trim(),

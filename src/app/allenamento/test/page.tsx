@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTestsStore } from '@/store/useTestsStore';
 import { usePlayersStore } from '@/store/usePlayersStore';
@@ -18,10 +18,16 @@ type FilterType = 'all' | 'velocita' | 'resistenza';
 
 export default function PhysicalTestsPage() {
   const router = useRouter();
-  const { tests } = useTestsStore();
+  const { tests, subscribe } = useTestsStore();
   const { players } = usePlayersStore();
   const { activeSeason } = useSeasonsStore();
   const { user } = useAuthStore();
+
+  useEffect(() => {
+    if (!user?.id || !activeSeason?.id) return;
+    const unsub = subscribe(user.id, activeSeason.id);
+    return () => unsub && unsub();
+  }, [user?.id, activeSeason?.id, subscribe]);
 
   const [filter, setFilter] = useState<FilterType>('all');
   const [dialogOpen, setDialogOpen] = useState(false);
