@@ -78,17 +78,25 @@ export default function RosaOverviewPage() {
   // ── Load from sessionStorage on mount ──────────────────
   useEffect(() => {
     try {
+      let stateLoaded = false;
       const stored = sessionStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored) as Record<FormationModule, FormationState>;
         if (parsed && typeof parsed === 'object') {
           setFormationStates(parsed);
+          stateLoaded = true;
         }
+      }
+
+      const formationStored = sessionStorage.getItem(FORMATION_KEY);
+      if (formationStored && (FORMATIONS as string[]).includes(formationStored)) {
+        setFormation(formationStored as FormationModule);
       }
     } catch {
       // ignore parse error
+    } finally {
+      setIsLoaded(true);
     }
-    setIsLoaded(true);
   }, []);
 
   // ── Save to sessionStorage whenever state changes ───────
