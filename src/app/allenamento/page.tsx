@@ -133,7 +133,7 @@ export default function AllenamentoPage() {
 
   if (!loading && !activeSeason && !seasonsError) {
     return (
-      <div className="pb-24 pt-4">
+      <div className="pb-24 pt-4 w-full">
         <PageHeader title="Allenamento" />
         <ErrorState error={missingSeasonError()} />
       </div>
@@ -141,47 +141,47 @@ export default function AllenamentoPage() {
   }
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="w-full space-y-6 pb-20">
       {!hasPageError && (
-        <div className="px-4 pt-4">
-          <div className="flex flex-col gap-1.5 w-full">
+        <div className="w-full px-1">
+          <div className="flex flex-col gap-2 w-full">
             {/* Riga 1 — Azioni principali */}
             <div className="grid grid-cols-4 gap-2 w-full">
               <Button
                 variant="ghost"
-                className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95"
+                className="w-full rounded-xl px-0 h-10 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex flex-col sm:flex-row items-center justify-center gap-1 group transition-all active:scale-95"
                 onClick={() => setIsStatsOpen(true)}
               >
-                <ClipboardCheck className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
-                <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Report</span>
+                <ClipboardCheck className="h-4 w-4 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
+                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Report</span>
               </Button>
 
               <Button
                 variant="ghost"
-                className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95"
+                className="w-full rounded-xl px-0 h-10 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex flex-col sm:flex-row items-center justify-center gap-1 group transition-all active:scale-95"
                 onClick={() => setIsGeneratorOpen(true)}
               >
-                <PlusCircle className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
-                <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Genera</span>
+                <PlusCircle className="h-4 w-4 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
+                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Genera</span>
               </Button>
 
               <Button
                 variant="ghost"
-                className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95"
+                className="w-full rounded-xl px-0 h-10 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex flex-col sm:flex-row items-center justify-center gap-1 group transition-all active:scale-95"
                 onClick={() => setIsArchiveOpen(true)}
               >
-                <Archive className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
-                <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Archivio</span>
+                <Archive className="h-4 w-4 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
+                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Archivio</span>
               </Button>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="rounded-xl px-2 h-9 bg-rose-500/5 border border-rose-500/20 hover:bg-rose-500/10 flex items-center gap-1 group transition-all active:scale-95 text-rose-500"
+                    className="w-full rounded-xl px-0 h-10 bg-rose-500/5 border border-rose-500/20 hover:bg-rose-500/10 flex flex-col sm:flex-row items-center justify-center gap-1 group transition-all active:scale-95 text-rose-500"
                   >
-                    <Trash2 className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
-                    <span className="text-[9px] font-black uppercase tracking-tighter">Elimina</span>
+                    <Trash2 className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                    <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-tighter">Elimina</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="rounded-2xl bg-card dark:bg-black border-border dark:border-brand-green/30 backdrop-blur-xl text-foreground dark:text-white p-2">
@@ -199,20 +199,20 @@ export default function AllenamentoPage() {
             <div className="grid grid-cols-2 gap-2 w-full">
               <Button
                 variant="ghost"
-                className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95"
+                className="w-full rounded-xl px-0 h-10 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center justify-center gap-2 group transition-all active:scale-95"
                 onClick={() => router.push('/allenamento/libreria')}
               >
-                <PiTrafficCone className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
-                <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Esercizi</span>
+                <PiTrafficCone className="h-4 w-4 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Esercizi</span>
               </Button>
 
               <Button
                 variant="ghost"
-                className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95"
+                className="w-full rounded-xl px-0 h-10 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center justify-center gap-2 group transition-all active:scale-95"
                 onClick={() => router.push('/allenamento/test')}
               >
-                <Plus className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
-                <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Test</span>
+                <Plus className="h-4 w-4 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-black uppercase tracking-tighter text-muted-foreground group-hover:text-primary dark:group-hover:text-brand-green transition-colors">Test</span>
               </Button>
             </div>
           </div>
@@ -220,7 +220,7 @@ export default function AllenamentoPage() {
       )}
 
       {hasPageError ? (
-        <div className="px-4">
+        <div className="w-full px-1">
           <ErrorState 
             error={parseError(seasonsError || trainingError)} 
             onRetry={() => {
@@ -231,7 +231,7 @@ export default function AllenamentoPage() {
           />
         </div>
       ) : (
-        <div className="px-4 space-y-6">
+        <div className="w-full px-1 space-y-6">
           <div className="flex items-center justify-between border-b border-white/5 pb-4">
             <Button
               variant="ghost"
@@ -293,7 +293,7 @@ export default function AllenamentoPage() {
             </Button>
           </div>
 
-          <div className="space-y-4">
+          <div className="w-full space-y-4">
             {weekSessions.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 px-4 text-center space-y-4 bg-muted/20 dark:bg-white/5 rounded-3xl border border-dashed border-border/50 dark:border-brand-green/10">
                 <div className="h-16 w-16 rounded-2xl bg-primary/10 dark:bg-brand-green/10 flex items-center justify-center">
