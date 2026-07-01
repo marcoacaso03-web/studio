@@ -89,20 +89,10 @@ export function PhysicalTestDialog({ open, onOpenChange, onCreated, players }: P
     return p ? `${p.lastName} ${p.firstName}` : '?';
   };
 
-  // For step 2 live standings
-  const liveResults: { playerId: string; value: number }[] = [];
-  for (const [playerId, val] of results) {
-    const num = parseFloat(val);
-    if (!isNaN(num) && val.trim() !== '') {
-      liveResults.push({ playerId, value: num });
-    }
-  }
-  const sortedLive = sortResults(liveResults, unit, getPlayerName);
-
   const handleSave = async () => {
     if (!testName.trim() || !user || !activeSeason) return;
     setSaving(true);
-    let testResults: TestResult[] = [];
+    const testResults: TestResult[] = [];
     for (const [playerId, val] of results) {
       const num = parseFloat(val);
       if (!isNaN(num) && val.trim() !== '') {
@@ -132,7 +122,7 @@ export function PhysicalTestDialog({ open, onOpenChange, onCreated, players }: P
   };
 
   const canAdvance = testName.trim().length > 0;
-  const hasResults = liveResults.length > 0;
+  const hasResults = Array.from(results.values()).some(v => v.trim() !== '');
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -238,21 +228,6 @@ export function PhysicalTestDialog({ open, onOpenChange, onCreated, players }: P
               ))}
             </div>
 
-            {/* Live standings */}
-            {sortedLive.length > 0 && (
-              <div className="space-y-1 mt-4 pt-4 border-t border-border dark:border-brand-green/20">
-                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-yellow-500/80 flex items-center gap-1">
-                  Classifica sessione
-                </span>
-                {sortedLive.map((entry, idx) => (
-                  <div key={entry.playerId} className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-muted/5 dark:bg-card/5">
-                    <span className="w-4 text-center text-[10px] font-black text-muted-foreground/60">{idx + 1}</span>
-                    <span className="flex-1 text-[10px] font-bold truncate">{getPlayerName(entry.playerId)}</span>
-                    <span className="text-[10px] font-black">{formatValue(entry.value, unit)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         )}
 
