@@ -387,7 +387,7 @@ export default function TrainingDetailPage() {
               
               return (
                 <Card key={player.id} className="rounded-2xl border border-border dark:border-brand-green/20 overflow-hidden bg-card dark:bg-card/40 backdrop-blur-sm shadow-sm dark:shadow-[0_0_10px_rgba(172,229,4,0.05)]">
-                  <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
                     <div className="flex flex-col justify-center sm:pl-2 flex-1">
                       <span className="text-[15px] font-black uppercase tracking-tight text-foreground">{displayPlayerName(player)}</span>
                       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">{getPrimaryRole(player)}</span>
