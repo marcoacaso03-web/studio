@@ -137,7 +137,7 @@ export function RosaPitch({ formation, coverage, selectedSlot, onSelectSlot, slo
               key={`name-${idx}`}
               className="absolute flex flex-col items-center -translate-x-1/2 pointer-events-none"
               style={{
-                top: `${posTop + 3}%`,
+                top: `${posTop + 5}%`,
                 left: `${posLeft}%`,
               }}
             >
