@@ -30,6 +30,10 @@ export const useTestsStore = create<TestsStore>()(
             id: doc.id,
           })) as PhysicalTest[];
           set({ tests });
+        }, (error) => {
+          console.error('❌ Tests onSnapshot error:', error);
+          console.error('  userId:', userId, 'seasonId:', seasonId);
+          console.error('  code:', error.code, 'message:', error.message);
         });
         return unsubscribe;
       },

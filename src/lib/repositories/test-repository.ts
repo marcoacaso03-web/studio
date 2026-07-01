@@ -25,7 +25,9 @@ export const testRepository = {
     const newDocRef = doc(this.ref(userId));
     const data = { ...test, id: newDocRef.id, userId, seasonId };
     const parsed = PhysicalTestSchema.parse(data);
+    console.log('📝 testRepository.create:', { userId, seasonId, docId: newDocRef.id, data: parsed });
     await setDoc(newDocRef, parsed);
+    console.log('✅ testRepository.create done:', newDocRef.id);
     return newDocRef.id;
   },
 

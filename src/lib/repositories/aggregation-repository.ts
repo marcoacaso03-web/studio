@@ -1,7 +1,7 @@
-import { 
-    getFirestore, 
-    doc, 
-    setDoc, 
+import {
+    getFirestore,
+    doc,
+    setDoc,
     getDoc,
     collection,
     query,
@@ -14,17 +14,17 @@ import { playerRepository } from './player-repository';
 import { eventRepository } from './event-repository';
 import { statsRepository } from './stats-repository';
 import { lineupRepository } from './lineup-repository';
-import type { 
-    Match, 
-    Player, 
-    MatchEvent, 
-    PlayerMatchStats, 
+import type {
+    Match,
+    Player,
+    MatchEvent,
+    PlayerMatchStats,
     MatchLineup,
     AdvancedStatsLeaderboard
 } from '../types';
-import { 
-    computeAdvancedStatsBundle, 
-    AdvancedStatsOptions 
+import {
+    computeAdvancedStatsBundle,
+    AdvancedStatsOptions
 } from '../services/stats-advanced-service';
 import { AdvancedStatsLeaderboardSchema } from '../schemas';
 
@@ -73,6 +73,69 @@ export const aggregationRepository = {
     },
 
     /**
+     * Carica i dati dettagliati SOLO per le partite dove ha giocato un giocatore specifico.
+     * Molto più veloce perché filtra lato server/DB prima di scaricare eventi/lineup/stats.
+     */
+    async getPlayerDetailedContext(userId: string, seasonId: string, playerId: string): Promise<SeasonDataContext> {
+        const [matches, players] = await Promise.all([
+            matchRepository.getAll(userId, seasonId),
+            playerRepository.getAll(userId, seasonId)
+        ]);
+
+        const completedMatches = matches.filter(m => m.status === 'completed');
+
+        // Prima scarica solo le lineup per trovare le partite dove ha giocato
+        const lineups = await Promise.all(completedMatches.map(async (match) => {
+            try {
+                return await lineupRepository.getForMatch(match.id, seasonId, userId);
+            } catch {
+                return undefined;
+            }
+        }));
+
+        // Filtra le partite dove il giocatore era titolare o in panchina
+        const relevantMatchIds = completedMatches
+            .filter((match, idx) => {
+                const lineup = lineups[idx];
+                if (!lineup) return false;
+                const inStarters = lineup.starters.some(pid =>
+                    (typeof pid === 'string' ? pid : pid.playerId) === playerId
+                );
+                const inSubs = lineup.substitutes.some(pid =>
+                    (typeof pid === 'string' ? pid : pid.playerId) === playerId
+                );
+                return inStarters || inSubs;
+            })
+            .map(m => m.id);
+
+        // Ora scarica dettagli COMPLETI solo per le partite rilevanti
+        const detailsResults = await Promise.all(relevantMatchIds.map(async (matchId) => {
+            try {
+                const [events, lineup, stats] = await Promise.all([
+                    eventRepository.getForMatch(matchId, seasonId, userId).catch(() => []),
+                    lineupRepository.getForMatch(matchId, seasonId, userId).catch(() => undefined),
+                    statsRepository.getForMatch(matchId, seasonId, userId).catch(() => [])
+                ]);
+                return { matchId, events, lineup, stats };
+            } catch (e) {
+                console.warn(`Could not fetch details for match ${matchId}`, e);
+                return { matchId, events: [], lineup: undefined, stats: [] };
+            }
+        }));
+
+        const matchesDetails: SeasonDataContext['matchesDetails'] = {};
+        detailsResults.forEach(res => {
+            matchesDetails[res.matchId] = {
+                events: res.events,
+                lineup: res.lineup,
+                stats: res.stats
+            };
+        });
+
+        return { matches, players, matchesDetails };
+    },
+
+    /**
      * Carica tutti i dati, inclusi eventi, formazioni e statistiche di ogni partita.
      * Usato per i grafici e le leaderboard.
      */
@@ -83,7 +146,7 @@ export const aggregationRepository = {
         ]);
 
         const completedMatches = matches.filter(m => m.status === 'completed');
-        
+
         const detailsResults = await Promise.all(completedMatches.map(async (match) => {
             try {
                 const [events, lineup, stats] = await Promise.all([
@@ -125,7 +188,7 @@ export const aggregationRepository = {
 
         for (const match of completedMatches) {
             const result = match.result || { home: 0, away: 0 };
-            
+
             const target = match.isHome ? record.home : record.away;
             record.overall.matchesPlayed++;
             target.matchesPlayed++;
@@ -138,7 +201,7 @@ export const aggregationRepository = {
                 record.overall.goalsAgainst += awayGoals;
                 target.goalsFor += homeGoals;
                 target.goalsAgainst += awayGoals;
-                
+
                 if (homeGoals > awayGoals) { record.overall.wins++; target.wins++; }
                 else if (homeGoals < awayGoals) { record.overall.losses++; target.losses++; }
                 else { record.overall.draws++; target.draws++; }
@@ -147,7 +210,7 @@ export const aggregationRepository = {
                 record.overall.goalsAgainst += homeGoals;
                 target.goalsFor += awayGoals;
                 target.goalsAgainst += homeGoals;
-                
+
                 if (awayGoals > homeGoals) { record.overall.wins++; target.wins++; }
                 else if (awayGoals < homeGoals) { record.overall.losses++; target.losses++; }
                 else { record.overall.draws++; target.draws++; }
@@ -179,7 +242,7 @@ export const aggregationRepository = {
 
     getGoalsByIntervalFromContext(context: SeasonDataContext) {
         const completedMatches = context.matches.filter(m => m.status === 'completed');
-        
+
         let duration = 90;
         if (context.matches.length > 0) {
             const lastMatch = completedMatches[completedMatches.length - 1] || context.matches[context.matches.length - 1];
@@ -210,7 +273,7 @@ export const aggregationRepository = {
 
             const isPitchManTeam = match.isHome ? 'home' : 'away';
             const goals = details.events.filter(e => e.type === 'goal' && e.team === isPitchManTeam);
-            
+
             goals.forEach(event => {
                 if (event.minute === null) {
                     intervals[int3Key]++;
@@ -219,7 +282,7 @@ export const aggregationRepository = {
 
                 const min = event.minute;
                 let absMin = 0;
-                
+
                 if (event.period === '1T') {
                     absMin = Math.min(min, halfTime);
                 } else if (event.period === '2T') {
@@ -268,7 +331,7 @@ export const aggregationRepository = {
                         yellowCards += playerStats.yellowCards || 0;
                         redCards += playerStats.redCards || 0;
                     }
-                    
+
                     const isPitchManSide = match.isHome ? 'home' : 'away';
                     // Nota: own_goal NON viene conteggiato come gol personale del giocatore
                     goals += details.events.filter(e => e.type === 'goal' && e.playerId === player.id && e.team === isPitchManSide).length;
@@ -333,7 +396,7 @@ export const aggregationRepository = {
     async rebuildAndPersistSeasonAggregates(userId: string, seasonId: string, options?: AdvancedStatsOptions) {
         const leaderboard = await this.getAdvancedStats(userId, seasonId, options);
         const db = getFirestore();
-        
+
         // 1. Salva leaderboard corrente
         const leaderboardRef = doc(db, 'teams', seasonId, 'aggregates', 'leaderboards', 'current', 'data');
         await setDoc(leaderboardRef, {
@@ -350,7 +413,7 @@ export const aggregationRepository = {
         });
 
         // 3. Opzionale: Aggiorna campi playerStats se necessario (ma già gestito da syncAllPlayersStats)
-        
+
         await batch.commit();
         return leaderboard;
     },
@@ -360,7 +423,7 @@ export const aggregationRepository = {
             const db = getFirestore();
             const leaderboardRef = doc(db, 'teams', seasonId, 'aggregates', 'leaderboards', 'current', 'data');
             const snap = await getDoc(leaderboardRef);
-            
+
             if (snap.exists()) {
                 const data = snap.data();
                 const parsed = AdvancedStatsLeaderboardSchema.safeParse(data);

@@ -102,16 +102,21 @@ export function PhysicalTestDialog({ open, onOpenChange, onCreated, players }: P
   const handleSave = async () => {
     if (!testName.trim() || !user || !activeSeason) return;
     setSaving(true);
-    try {
-      const testResults: TestResult[] = [];
-      for (const [playerId, val] of results) {
-        const num = parseFloat(val);
-        if (!isNaN(num) && val.trim() !== '') {
-          testResults.push({ playerId, value: num });
-        }
+    let testResults: TestResult[] = [];
+    for (const [playerId, val] of results) {
+      const num = parseFloat(val);
+      if (!isNaN(num) && val.trim() !== '') {
+        testResults.push({ playerId, value: num });
       }
-      if (testResults.length === 0) return;
+    }
+    if (testResults.length === 0) {
+      setSaving(false);
+      return;
+    }
 
+    console.log('📝 Creating test:', { userId: user.id, seasonId: activeSeason.id, name: testName.trim(), type: testType, unit, date: new Date(date).toISOString(), resultsCount: testResults.length });
+
+    try {
       const id = await testRepository.create(user.id, activeSeason.id, {
         name: testName.trim(),
         type: testType,
@@ -120,10 +125,14 @@ export function PhysicalTestDialog({ open, onOpenChange, onCreated, players }: P
         results: testResults,
       });
 
+      console.log('✅ Test created with id:', id);
       onCreated(id);
       resetForm();
     } catch (err) {
-      console.error("Save test error:", err);
+      console.error("❌ Save test error:", err);
+      console.error("  user:", user?.id, "season:", activeSeason?.id);
+      console.error("  testName:", testName, "type:", testType, "unit:", unit, "date:", date);
+      console.error("  results:", testResults);
     } finally {
       setSaving(false);
     }

@@ -379,8 +379,8 @@ export default function PlayerDetailPage() {
             return d >= s && d <= e;
           });
         };
-        // Aggregazione completa stagionale (già ottimizzata con Batch)
-        const context = await aggregationRepository.getDetailedContext(user.id, activeSeason.id);
+        // Aggregazione ottimizzata per SOLO questo giocatore
+        const context = await aggregationRepository.getPlayerDetailedContext(user.id, activeSeason.id, playerId);
         const allStats = aggregationRepository.getPlayersAggregatedStatsFromContext(context);
         const pStats = allStats.find((s) => s.playerId === playerId);
 
