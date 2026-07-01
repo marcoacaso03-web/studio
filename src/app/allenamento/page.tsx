@@ -144,12 +144,12 @@ export default function AllenamentoPage() {
     <div className="space-y-6 pb-20">
       <PageHeader title="" className="mb-2 md:mb-4">
         {!hasPageError && (
-          <div className="flex flex-col gap-1.5 ml-auto w-full">
+          <div className="flex flex-col gap-1.5 w-full">
             {/* Riga 1 — Azioni principali */}
-            <div className="flex items-center gap-1.5 w-full">
+            <div className="grid grid-cols-4 gap-2 w-full">
               <Button
                 variant="ghost"
-                className="rounded-xl px-2 h-9 flex-1 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 min-w-0"
+                className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95"
                 onClick={() => setIsStatsOpen(true)}
               >
                 <ClipboardCheck className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
@@ -158,7 +158,7 @@ export default function AllenamentoPage() {
 
               <Button
                 variant="ghost"
-                className="rounded-xl px-2 h-9 flex-1 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 min-w-0"
+                className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95"
                 onClick={() => setIsGeneratorOpen(true)}
               >
                 <PlusCircle className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
@@ -167,7 +167,7 @@ export default function AllenamentoPage() {
 
               <Button
                 variant="ghost"
-                className="rounded-xl px-2 h-9 flex-1 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 min-w-0"
+                className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95"
                 onClick={() => setIsArchiveOpen(true)}
               >
                 <Archive className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
@@ -178,7 +178,7 @@ export default function AllenamentoPage() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="rounded-xl px-2 h-9 flex-1 bg-rose-500/5 border border-rose-500/20 hover:bg-rose-500/10 flex items-center gap-1 group transition-all active:scale-95 text-rose-500 min-w-0"
+                    className="rounded-xl px-2 h-9 bg-rose-500/5 border border-rose-500/20 hover:bg-rose-500/10 flex items-center gap-1 group transition-all active:scale-95 text-rose-500"
                   >
                     <Trash2 className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
                     <span className="text-[9px] font-black uppercase tracking-tighter">Elimina</span>
@@ -196,10 +196,10 @@ export default function AllenamentoPage() {
             </div>
 
             {/* Riga 2 — Esercizi + Test */}
-            <div className="flex items-center gap-1.5 w-full">
+            <div className="grid grid-cols-2 gap-2 w-full">
               <Button
                 variant="ghost"
-                className="rounded-xl px-2 h-9 flex-1 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 min-w-0"
+                className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95"
                 onClick={() => router.push('/allenamento/libreria')}
               >
                 <PiTrafficCone className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
@@ -208,7 +208,7 @@ export default function AllenamentoPage() {
 
               <Button
                 variant="ghost"
-                className="rounded-xl px-2 h-9 flex-1 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95 min-w-0"
+                className="rounded-xl px-2 h-9 bg-muted/30 dark:bg-white/5 border border-border/50 dark:border-brand-green/10 hover:bg-muted dark:hover:bg-brand-green/10 flex items-center gap-1 group transition-all active:scale-95"
                 onClick={() => router.push('/allenamento/test')}
               >
                 <Plus className="h-3.5 w-3.5 text-primary dark:text-brand-green group-hover:scale-110 transition-transform" />
