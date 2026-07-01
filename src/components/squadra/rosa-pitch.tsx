@@ -117,7 +117,7 @@ export function RosaPitch({ formation, coverage, selectedSlot, onSelectSlot, slo
               }}
             >
               <span className="text-white drop-shadow-md leading-none">{role}</span>
-              <span className="text-[7px] text-white/70 leading-none mt-0.5">{count}</span>
+              <span className="text-[8px] text-white/70 leading-none mt-0.5">{count}</span>
             </button>
           );
         })}
@@ -137,17 +137,17 @@ export function RosaPitch({ formation, coverage, selectedSlot, onSelectSlot, slo
               key={`name-${idx}`}
               className="absolute flex flex-col items-center -translate-x-1/2 pointer-events-none"
               style={{
-                top: `${posTop + 8}%`,
+                top: `${posTop + 3}%`,
                 left: `${posLeft}%`,
               }}
             >
               {topName && (
-                <span className="text-[9px] sm:text-[10px] font-black text-white whitespace-nowrap drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] max-w-[85px] truncate leading-tight">
+                <span className="text-[11px] sm:text-xs font-black text-white whitespace-nowrap drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] max-w-[90px] truncate leading-tight">
                   {topName}
                 </span>
               )}
               {subName && (
-                <span className="text-[8px] sm:text-[9px] font-bold text-white/50 whitespace-nowrap drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] max-w-[80px] truncate leading-tight">
+                <span className="text-[10px] sm:text-[11px] font-bold text-white/50 whitespace-nowrap drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] max-w-[85px] truncate leading-tight">
                   {subName}
                 </span>
               )}
