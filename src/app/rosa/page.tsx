@@ -179,18 +179,18 @@ export default function RosaOverviewPage() {
   }, [updateFormationState]);
 
   const handleRemove = useCallback((playerId: string) => {
+    // Rimuovi SOLO dal modulo attivo, non da tutti
     setFormationStates(prev => {
-      const next: Record<FormationModule, FormationState> = { ...prev };
-      for (const fm of FORMATIONS) {
-        const slotPlayers = { ...next[fm].slotPlayers };
-        for (const key of Object.keys(slotPlayers)) {
-          slotPlayers[key] = (slotPlayers[key] ?? []).filter(id => id !== playerId);
-        }
-        next[fm] = { ...next[fm], slotPlayers };
+      const slotPlayers = { ...prev[formation].slotPlayers };
+      for (const key of Object.keys(slotPlayers)) {
+        slotPlayers[key] = (slotPlayers[key] ?? []).filter(id => id !== playerId);
       }
-      return next;
+      return {
+        ...prev,
+        [formation]: { ...prev[formation], slotPlayers },
+      };
     });
-  }, []);
+  }, [formation]);
 
   const handleAddPlayerToSlot = useCallback((playerId: string) => {
     if (selectedSlot === null) return;

@@ -100,7 +100,7 @@ export const FORMATION_POSITIONS: Record<FormationModule, SlotPosition[]> = {
     { top: '75%', left: '65%' },  // DC dx
     { top: '72%', left: '85%' },  // TD (destra)
     { top: '52%', left: '28%' },  // CD (sx)
-    { top: '50%', left: '50%' },  // CDC (centro)
+    { top: '55%', left: '50%' },  // CDC (centro) abbassato
     { top: '52%', left: '72%' },  // CS (dx)
     { top: '25%', left: '20%' },  // AS (sinistra)
     { top: '12%', left: '50%' },  // ATT (centro)
@@ -139,7 +139,7 @@ export const FORMATION_POSITIONS: Record<FormationModule, SlotPosition[]> = {
     { top: '75%', left: '72%' },  // DC dx
     { top: '55%', left: '12%' },  // ASA (sinistra)
     { top: '52%', left: '30%' },  // CS (sx)
-    { top: '48%', left: '50%' },  // CDC (centro)
+    { top: '52%', left: '50%' },  // CDC (centro) abbassato
     { top: '52%', left: '70%' },  // CD (dx)
     { top: '55%', left: '88%' },  // ADA (destra)
     { top: '18%', left: '38%' },  // ATT sx

@@ -103,8 +103,8 @@ export function RosaPitch({ formation, coverage, selectedSlot, onSelectSlot, slo
               type="button"
               onClick={() => onSelectSlot(idx)}
               className={cn(
-                'absolute -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all duration-150',
-                'border-2 text-[9px] font-black uppercase cursor-pointer',
+                'absolute -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex flex-col items-center justify-center transition-all duration-150',
+                'border-2 text-[11px] font-black uppercase cursor-pointer',
                 'hover:scale-110 active:scale-95',
                 isSelected && 'ring-2 ring-[#00e5a0] ring-offset-2 ring-offset-emerald-950'
               )}
@@ -113,7 +113,7 @@ export function RosaPitch({ formation, coverage, selectedSlot, onSelectSlot, slo
                 left: pos.left,
                 backgroundColor: colors.bg,
                 borderColor: isSelected ? '#00e5a0' : colors.border,
-                boxShadow: `0 0 14px ${colors.glow}`,
+                boxShadow: `0 0 10px ${colors.glow}`,
               }}
             >
               <span className="text-white drop-shadow-md leading-none">{role}</span>
