@@ -345,7 +345,7 @@ export default function AllenamentoPage() {
                         <div className="flex items-center gap-1.5">
                           <Users className="h-3.5 w-3.5 text-muted-foreground/50" />
                           <span className="text-[10px] font-black uppercase text-muted-foreground tracking-tighter">
-                            {session.attendance?.length || 0} Atleti
+                            {session.attendances?.length || 0} Atleti
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5">
