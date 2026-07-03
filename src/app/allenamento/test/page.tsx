@@ -45,7 +45,6 @@ export default function PhysicalTestsPage() {
       .sort((a, b) => b.date.localeCompare(a.date));
   }, [tests, filter]);
 
-  // Best result per player for a test
   const getTopResult = useCallback((test: PhysicalTest): { playerName: string; value: number } | null => {
     if (test.results.length === 0) return null;
     const sorted = sortResults(
@@ -57,11 +56,12 @@ export default function PhysicalTestsPage() {
     return { playerName: getPlayerName(sorted[0].playerId), value: sorted[0].value };
   }, [getPlayerName]);
 
-  const handleTestCreated = useCallback((id: string) => {
+  // Fix: dopo il salvataggio chiude il dialog e resta sulla lista,
+  // così la card appare immediatamente grazie all'onSnapshot dello store.
+  const handleTestCreated = useCallback((_id: string) => {
     setDialogOpen(false);
     setEditMode(false);
-    router.push(`/allenamento/test/${id}`);
-  }, [router]);
+  }, []);
 
   const handleDelete = useCallback(async (testId: string) => {
     if (!user) return;
@@ -69,7 +69,7 @@ export default function PhysicalTestsPage() {
     try {
       await testRepository.deleteTest(testId, user.id);
     } catch (err) {
-      console.error("Delete test error:", err);
+      console.error('Delete test error:', err);
     } finally {
       setDeletingId(null);
     }
@@ -169,7 +169,6 @@ export default function PhysicalTestsPage() {
                   key={test.id}
                   className="rounded-2xl border border-border dark:border-brand-green/20 bg-muted/10 dark:bg-card/5 overflow-hidden transition-all"
                 >
-                  {/* Main clickable area — navigates to detail (disabled in edit mode) */}
                   <button
                     type="button"
                     onClick={() => { if (!editMode) router.push(`/allenamento/test/${test.id}`); }}
@@ -189,7 +188,6 @@ export default function PhysicalTestsPage() {
                       </div>
                     </div>
 
-                    {/* Top result */}
                     {topResult && (
                       <div className="flex items-center gap-2 px-4 pb-3">
                         <Trophy className="h-3 w-3 text-yellow-500 shrink-0" />
@@ -203,7 +201,6 @@ export default function PhysicalTestsPage() {
                     )}
                   </button>
 
-                  {/* Edit/Delete buttons — visible only in edit mode */}
                   {editMode && (
                     <div className="flex items-center gap-2 px-4 py-2.5 border-t border-border dark:border-brand-green/10 bg-muted/20 dark:bg-card/10">
                       <Button

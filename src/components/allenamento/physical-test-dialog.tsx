@@ -11,7 +11,7 @@ import { testRepository } from '@/lib/repositories/test-repository';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSeasonsStore } from '@/store/useSeasonsStore';
 import { formatValue } from '@/lib/test-utils';
-import { Loader2, Plus, Minus } from 'lucide-react';
+import { Loader2, Plus, Minus, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { sortResults } from '@/lib/test-utils';
 
@@ -48,6 +48,7 @@ export function PhysicalTestDialog({ open, onOpenChange, onCreated, players }: P
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [results, setResults] = useState<Map<string, string>>(new Map());
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const resetForm = useCallback(() => {
     setStep(1);
@@ -57,6 +58,7 @@ export function PhysicalTestDialog({ open, onOpenChange, onCreated, players }: P
     setDate(new Date().toISOString().split('T')[0]);
     setResults(new Map());
     setSaving(false);
+    setSaveError(null);
   }, []);
 
   const handleTypeChange = (type: string) => {
@@ -92,6 +94,8 @@ export function PhysicalTestDialog({ open, onOpenChange, onCreated, players }: P
   const handleSave = async () => {
     if (!testName.trim() || !user || !activeSeason) return;
     setSaving(true);
+    setSaveError(null);
+
     const testResults: TestResult[] = [];
     for (const [playerId, val] of results) {
       const num = parseFloat(val);
@@ -99,30 +103,30 @@ export function PhysicalTestDialog({ open, onOpenChange, onCreated, players }: P
         testResults.push({ playerId, value: num });
       }
     }
+
     try {
+      // Fix: aggiunge T12:00:00 per evitare off-by-one UTC in fusi orari +02:00 (CEST)
+      const isoDate = new Date(date + 'T12:00:00').toISOString();
+
       const id = await testRepository.create(user.id, activeSeason.id, {
         name: testName.trim(),
         type: testType,
         unit,
-        date: new Date(date).toISOString(),
+        date: isoDate,
         results: testResults,
       });
 
-      console.log('✅ Test created with id:', id);
       onCreated(id);
       resetForm();
-    } catch (err) {
-      console.error("❌ Save test error:", err);
-      console.error("  user:", user?.id, "season:", activeSeason?.id);
-      console.error("  testName:", testName, "type:", testType, "unit:", unit, "date:", date);
-      console.error("  results:", testResults);
+    } catch (err: any) {
+      console.error('❌ Save test error:', err);
+      setSaveError(err?.message ?? 'Errore durante il salvataggio. Riprova.');
     } finally {
       setSaving(false);
     }
   };
 
   const canAdvance = testName.trim().length > 0;
-  const hasResults = Array.from(results.values()).some(v => v.trim() !== '');
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -204,7 +208,12 @@ export function PhysicalTestDialog({ open, onOpenChange, onCreated, players }: P
           </div>
         ) : (
           <div className="space-y-4 pt-2 max-h-[60vh] overflow-y-auto">
-            {/* Results input */}
+            {saveError && (
+              <div className="flex items-center gap-2 rounded-xl bg-rose-500/10 border border-rose-500/30 px-3 py-2.5">
+                <AlertCircle className="h-4 w-4 text-rose-500 shrink-0" />
+                <p className="text-[10px] font-bold text-rose-500 uppercase tracking-tight">{saveError}</p>
+              </div>
+            )}
             <div className="space-y-2">
               {players.map(player => (
                 <div key={player.id} className="flex items-center gap-2 px-2">
@@ -227,7 +236,6 @@ export function PhysicalTestDialog({ open, onOpenChange, onCreated, players }: P
                 </div>
               ))}
             </div>
-
           </div>
         )}
 
@@ -265,7 +273,7 @@ export function PhysicalTestDialog({ open, onOpenChange, onCreated, players }: P
               </Button>
               <Button
                 type="button"
-                disabled={saving || !hasResults}
+                disabled={saving}
                 className="flex-1 bg-primary dark:bg-black border-2 border-primary dark:border-brand-green text-white dark:text-brand-green font-black uppercase text-[10px] tracking-widest h-12 shadow-sm dark:shadow-[0_0_15px_rgba(172,229,4,0.2)] hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-40 disabled:hover:scale-100"
                 onClick={handleSave}
               >
