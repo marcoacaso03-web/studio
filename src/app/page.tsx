@@ -12,6 +12,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { ErrorState } from '@/components/ui/error-state';
 import { parseError } from '@/lib/error-utils';
 import { getPrimaryRole } from '@/lib/types';
+import type { MatchCreateData } from '@/lib/repositories/match-repository';
 
 import { SplashScreen } from '@/components/layout/splash-screen';
 import { PageHeader } from '@/components/layout/page-header';
@@ -32,6 +33,8 @@ const MatchFormDialog = dynamic(() => import("@/components/partite/match-form-di
   ssr: false
 });
 import { FloatingAssistant } from '@/components/ai/floating-assistant';
+
+type MatchFormInput = Omit<MatchCreateData, 'seasonId' | 'userId' | 'teamOwnerId' | 'teamId'>;
 
 export default function HomePage() {
   const { user } = useAuthStore();
@@ -98,7 +101,7 @@ export default function HomePage() {
     };
   }, [playerLeaderboard]);
 
-  const handleCreateMatch = async (data: any) => {
+  const handleCreateMatch = async (data: MatchFormInput) => {
     await addMatch(data);
   };
 

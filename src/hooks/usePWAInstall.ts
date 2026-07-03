@@ -11,6 +11,8 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
 }
 
+type NavigatorWithStandalone = Navigator & { standalone?: boolean };
+
 export function usePWAInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [canInstall, setCanInstall] = useState(false);
@@ -19,7 +21,7 @@ export function usePWAInstall() {
 
   useEffect(() => {
     // Check if app is already installed
-    if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
+    if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as NavigatorWithStandalone).standalone) {
       setIsInstalled(true);
     }
 
@@ -41,7 +43,7 @@ export function usePWAInstall() {
   const install = useCallback(async () => {
     if (!deferredPrompt) {
       // If no prompt is available, check if it's iOS
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream;
       const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
       
       if (isIOS && isSafari && !isInstalled) {
@@ -72,7 +74,7 @@ export function usePWAInstall() {
 
   // Effect to detect iOS Safari and show button if not installed
   useEffect(() => {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream;
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     
     if (isIOS && isSafari && !isInstalled) {
