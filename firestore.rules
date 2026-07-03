@@ -1,4 +1,3 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -33,8 +32,6 @@ service cloud.firestore {
       return isOwner(userId) && resource != null;
     }
 
-    // Checks that the incoming document data sets teamOwnerId to the caller's UID
-    // OR that the current user is in the sharedWith list of the parent season
     function incomingIsAuthorized(seasonId) {
       return isSignedIn() && (
         request.resource.data.teamOwnerId == request.auth.uid ||
@@ -43,7 +40,6 @@ service cloud.firestore {
       );
     }
 
-    // Checks that the existing document is authorized for the caller
     function existingIsAuthorized(seasonId) {
       return isSignedIn() && (
         resource.data.teamOwnerId == request.auth.uid ||
@@ -63,7 +59,6 @@ service cloud.firestore {
       allow get:    if isOwner(userId) || isDeveloper();
       allow list:   if isDeveloper();
       allow create: if isOwner(userId);
-      // Evita che gli utenti si auto-promuovano modificando il ruolo (solo API/admin possono)
       allow update: if isExistingOwner(userId) && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']) || isDeveloper());
       allow delete: if isExistingOwner(userId) || isDeveloper();
 
@@ -91,6 +86,14 @@ service cloud.firestore {
           allow write:     if isOwner(userId);
         }
       }
+
+      // ─── Physical Tests ───────────────────────────────────────────────────
+      match /physicalTests/{testId} {
+        allow get, list: if isOwner(userId);
+        allow create:    if isOwner(userId) && request.resource.data.userId == userId;
+        allow update:    if isExistingOwner(userId);
+        allow delete:    if isExistingOwner(userId);
+      }
     }
 
     // ─── /teams/{seasonId} ───────────────────────────────────────────────────
@@ -105,7 +108,6 @@ service cloud.firestore {
                     );
       allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
 
-      // ── Players ────────────────────────────────────────────────────────────
       match /players/{playerId} {
         allow get:    if isSignedIn() && (resource == null || isSeasonAuthorized(seasonId));
         allow list:   if isSignedIn() && isSeasonAuthorized(seasonId);
@@ -114,7 +116,6 @@ service cloud.firestore {
         allow delete: if isSignedIn() && isSeasonAuthorized(seasonId);
       }
 
-      // ── Matches ───────────────────────────────────────────────────────────
       match /matches/{matchId} {
         allow get:    if isSignedIn() && (resource == null || isSeasonAuthorized(seasonId));
         allow list:   if isSignedIn() && isSeasonAuthorized(seasonId);
@@ -147,7 +148,6 @@ service cloud.firestore {
         }
       }
 
-      // ── Sessions (subcollection of teams) ─────────────────────────────────
       match /sessions/{sessionId} {
         allow get:    if isSignedIn() && (resource == null || isSeasonAuthorized(seasonId));
         allow list:   if isSignedIn() && isSeasonAuthorized(seasonId);
@@ -156,7 +156,6 @@ service cloud.firestore {
         allow delete: if isSignedIn() && isSeasonAuthorized(seasonId);
       }
 
-      // ── Events (subcollection of teams) ───────────────────────────────────
       match /events/{eventId} {
         allow get:    if isSignedIn() && (resource == null || isSeasonAuthorized(seasonId));
         allow list:   if isSignedIn() && isSeasonAuthorized(seasonId);
@@ -165,7 +164,6 @@ service cloud.firestore {
         allow delete: if isSignedIn() && isSeasonAuthorized(seasonId);
       }
 
-      // ── Trainings (subcollection of teams) ────────────────────────────────
       match /trainings/{trainingId} {
         allow get:    if isSignedIn() && (resource == null || isSeasonAuthorized(seasonId));
         allow list:   if isSignedIn() && isSeasonAuthorized(seasonId);
@@ -174,7 +172,6 @@ service cloud.firestore {
         allow delete: if isSignedIn() && isSeasonAuthorized(seasonId);
       }
 
-      // ── Aggregates ────────────────────────────────────────────────────────
       match /aggregates/{aggregateId=**} {
         allow get, list: if isSignedIn() && isSeasonAuthorized(seasonId);
         allow write:    if isSignedIn() && isSeasonAuthorized(seasonId);
