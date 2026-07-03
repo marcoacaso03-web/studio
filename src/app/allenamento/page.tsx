@@ -364,12 +364,11 @@ export default function AllenamentoPage() {
         </div>
       )}
 
-      {/* Dialogs remain unchanged */}
+      {/* Dialogs */}
       <TrainingStatsDialog 
         open={isStatsOpen} 
         onOpenChange={setIsStatsOpen} 
-        sessions={sessions}
-        players={players}
+        currentWeekStart={currentWeekStart}
       />
 
       <TrainingListDialog
