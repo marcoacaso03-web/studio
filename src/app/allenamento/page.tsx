@@ -375,10 +375,6 @@ export default function AllenamentoPage() {
         open={isArchiveOpen}
         onOpenChange={setIsArchiveOpen}
         sessions={sessions}
-        onSelect={(id) => {
-          setIsArchiveOpen(false);
-          router.push(`/allenamento/${id}`);
-        }}
       />
 
       <Dialog open={isGeneratorOpen} onOpenChange={setIsGeneratorOpen}>
