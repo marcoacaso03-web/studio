@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTestsStore } from '@/store/useTestsStore';
 import { usePlayersStore } from '@/store/usePlayersStore';
@@ -23,11 +23,15 @@ export default function PhysicalTestsPage() {
   const { activeSeason } = useSeasonsStore();
   const { user } = useAuthStore();
 
+  // Usiamo una ref per subscribe così non è mai una dipendenza instabile del useEffect
+  const subscribeRef = useRef(subscribe);
+  subscribeRef.current = subscribe;
+
   useEffect(() => {
     if (!user?.id || !activeSeason?.id) return;
-    const unsub = subscribe(user.id, activeSeason.id);
-    return () => unsub && unsub();
-  }, [user?.id, activeSeason?.id, subscribe]);
+    const unsub = subscribeRef.current(user.id, activeSeason.id);
+    return () => { if (typeof unsub === 'function') unsub(); };
+  }, [user?.id, activeSeason?.id]);
 
   const [filter, setFilter] = useState<FilterType>('all');
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -56,8 +60,6 @@ export default function PhysicalTestsPage() {
     return { playerName: getPlayerName(sorted[0].playerId), value: sorted[0].value };
   }, [getPlayerName]);
 
-  // Fix: dopo il salvataggio chiude il dialog e resta sulla lista,
-  // così la card appare immediatamente grazie all'onSnapshot dello store.
   const handleTestCreated = useCallback((_id: string) => {
     setDialogOpen(false);
     setEditMode(false);

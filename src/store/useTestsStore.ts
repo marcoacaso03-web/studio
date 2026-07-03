@@ -1,13 +1,11 @@
 'use client';
 
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { testRepository } from '@/lib/repositories/test-repository';
 import type { PhysicalTest } from '@/lib/types';
 import { useAuthStore } from './useAuthStore';
 import { useSeasonsStore } from './useSeasonsStore';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { getFirestore } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, getFirestore } from 'firebase/firestore';
 
 interface TestsStore {
   tests: PhysicalTest[];
@@ -16,30 +14,31 @@ interface TestsStore {
 }
 
 export const useTestsStore = create<TestsStore>()(
-  persist(
-    (set, _get) => ({
-      tests: [],
-      setTests: (tests) => set({ tests }),
-      subscribe: (userId: string, seasonId: string) => {
-        const db = getFirestore();
-        const testsRef = collection(db, 'users', userId, 'physicalTests');
-        const q = query(testsRef, where('seasonId', '==', seasonId));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
+  (set) => ({
+    tests: [],
+    setTests: (tests) => set({ tests }),
+    subscribe: (userId: string, seasonId: string) => {
+      const db = getFirestore();
+      const testsRef = collection(db, 'users', userId, 'physicalTests');
+      const q = query(testsRef, where('seasonId', '==', seasonId));
+      const unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
           const tests = snapshot.docs.map(doc => ({
             ...doc.data(),
             id: doc.id,
           })) as PhysicalTest[];
           set({ tests });
-        }, (error) => {
-          console.error('❌ Tests onSnapshot error:', error);
+        },
+        (error) => {
+          console.error('\u274c Tests onSnapshot error:', error);
           console.error('  userId:', userId, 'seasonId:', seasonId);
           console.error('  code:', error.code, 'message:', error.message);
-        });
-        return unsubscribe;
-      },
-    }),
-    { name: 'tests-store' }
-  )
+        }
+      );
+      return unsubscribe;
+    },
+  })
 );
 
 /**
