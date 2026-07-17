@@ -2,6 +2,17 @@
 import Dexie, { type EntityTable, type Table } from 'dexie';
 import type { Player, Match, MatchAttendance, PlayerMatchStats, MatchLineup, MatchEvent, Season } from './types';
 
+export type SyncMutation = {
+  id?: number;
+  collection: 'players' | 'matches' | 'matchAttendances' | 'playerMatchStats' | 'matchLineups' | 'matchEvents' | 'seasons';
+  docId: string;
+  action: 'add' | 'update' | 'delete';
+  payload: unknown;
+  userId: string;
+  seasonId?: string;
+  createdAt: number;
+};
+
 class PitchManDB extends Dexie {
     players!: EntityTable<Player, 'id'>;
     matches!: EntityTable<Match, 'id'>;
@@ -10,6 +21,7 @@ class PitchManDB extends Dexie {
     matchLineups!: EntityTable<MatchLineup, 'matchId'>;
     matchEvents!: EntityTable<MatchEvent, 'id'>;
     seasons!: EntityTable<Season, 'id'>;
+    syncQueue!: EntityTable<SyncMutation, 'id'>;
 
     constructor() {
         super('PitchManDB');
@@ -22,6 +34,10 @@ class PitchManDB extends Dexie {
             matchLineups: 'matchId',
             matchEvents: 'id, matchId, playerId, type',
             seasons: 'id, userId, isActive'
+        });
+        // Versione 10: Coda di sincronizzazione offline
+        this.version(10).stores({
+            syncQueue: '++id, collection, docId, createdAt'
         });
     }
 }

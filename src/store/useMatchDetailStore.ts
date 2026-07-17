@@ -9,6 +9,7 @@ import { aggregationRepository } from '@/lib/repositories/aggregation-repository
 import { lineupRepository } from '@/lib/repositories/lineup-repository';
 import { eventRepository } from '@/lib/repositories/event-repository';
 import { statsRepository } from '@/lib/repositories/stats-repository';
+import { enqueueMutation, isOffline } from '@/lib/sync-queue';
 import { useStatsStore } from './useStatsStore';
 import { useSeasonsStore } from './useSeasonsStore';
 import { useAuthStore } from './useAuthStore';
@@ -329,7 +330,21 @@ export const useMatchDetailStore = create<MatchDetailState>()(
         const user = useAuthStore.getState().user;
         if (!matchId || !match || !user) return;
 
+        // Optimistic local update (works online and offline)
         set({ lineup: { ...lineupData, matchId } });
+
+        if (isOffline()) {
+          // Queue the mutation; it will be flushed when connectivity returns
+          await enqueueMutation({
+            collection: 'matchLineups',
+            docId: matchId,
+            action: 'update',
+            payload: { ...lineupData, matchId },
+            userId: user.id,
+            seasonId: match.seasonId,
+          });
+          return;
+        }
 
         lineupRepository.save({ ...lineupData, matchId }, match.seasonId, user.id);
         get().syncAndPersistMinutes();

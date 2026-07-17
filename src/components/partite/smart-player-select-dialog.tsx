@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Search, User, Check, Star, Activity } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Player, PlayerRole, getPrimaryRole, migrateRole, getRoleCategory, RoleCategory } from '@/lib/types';
+import { isPlayerInjured } from '@/lib/player-utils';
 import { displayPlayerName, cn } from "@/lib/utils";
 import { getPositionAcronym } from "@/lib/lineup-mapping";
 
@@ -41,18 +42,9 @@ export function SmartPlayerSelectDialog({
   const targetSlotRole = migrateRole(acronym) as PlayerRole;
   const targetCategory = getRoleCategory(targetSlotRole);
 
-  const isInjured = React.useCallback((player: Player) => {
-    if (!matchDate || !player.injuries || player.injuries.length === 0) return false;
-    const target = new Date(matchDate);
-    target.setHours(0, 0, 0, 0);
-    return player.injuries.some((inj: any) => {
-      const start = new Date(inj.startDate);
-      const end = new Date(inj.endDate);
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-      return target >= start && target <= end;
-    });
-  }, [matchDate]);
+  const isInjured = React.useCallback((player: Player) =>
+    matchDate ? isPlayerInjured(player, new Date(matchDate)) : false
+  , [matchDate]);
 
   const sortedPlayers = React.useMemo(() => {
     // Filter out players already selected in OTHER slots

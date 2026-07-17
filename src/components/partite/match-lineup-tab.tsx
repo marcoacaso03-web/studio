@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useMatchDetailStore } from "@/store/useMatchDetailStore";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +16,8 @@ import {
   UserCheck,
   AlertCircle,
   Activity,
-  Ban
+  Ban,
+  Share2
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { TacticalPitchEditor } from "./tactical-pitch-editor";
@@ -30,6 +31,8 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { isPlayerInjured, activeInjury, formatInjuryDate } from "@/lib/player-utils";
+import { shareLineupAsImage } from "@/lib/lineup-share";
 import { displayPlayerName, cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useSettingsStore } from "@/store/useSettingsStore";
@@ -48,6 +51,7 @@ export function MatchLineupTab() {
   const [editingSlot, setEditingSlot] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
+  const pitchRef = useRef<HTMLDivElement>(null);
 
   // Inizializza lo stato locale dal lineup dello store
   useEffect(() => {
@@ -148,22 +152,9 @@ export function MatchLineupTab() {
     return [...starters, ...substitutes].filter(id => id !== "" && id !== "none");
   }, [starters, substitutes]);
 
-  const isPlayerInjured = (player: any, dateStr: string) => {
-    if (!player.injuries || player.injuries.length === 0) return false;
-    const target = new Date(dateStr);
-    target.setHours(0, 0, 0, 0);
-    return player.injuries.some((inj: any) => {
-      const start = new Date(inj.startDate);
-      const end = new Date(inj.endDate);
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-      return target >= start && target <= end;
-    });
-  };
-
   const unavailablePlayers = useMemo(() => {
     if (!match?.date) return [];
-    return allPlayers.filter(p => isPlayerInjured(p, match.date));
+    return allPlayers.filter(p => isPlayerInjured(p, new Date(match.date)));
   }, [allPlayers, match?.date]);
 
   const handlePlayerChange = (idx: number, isStarter: boolean, playerId: string) => {
@@ -216,6 +207,21 @@ export function MatchLineupTab() {
           )}
         </div>
 
+        <Button
+          onClick={async () => {
+            if (!pitchRef.current) return;
+            try {
+              await shareLineupAsImage(pitchRef.current);
+            } catch (e) {
+              toast({ title: "Errore", description: "Impossibile generare l'immagine.", variant: "destructive" });
+            }
+          }}
+          variant="outline"
+          className="h-10 px-4 rounded-2xl font-black uppercase text-[10px] border-border hover:bg-muted dark:hover:bg-white/5 transition-all"
+        >
+          <Share2 className="mr-2 h-4 w-4" /> Condividi
+        </Button>
+
         {isEditing && (
           <div className="flex flex-wrap items-center gap-2 animate-in fade-in slide-in-from-top-2">
             <div className="flex items-center gap-2 bg-muted/50 dark:bg-black/40 p-1.5 rounded-2xl border border-border dark:border-white/5">
@@ -253,7 +259,7 @@ export function MatchLineupTab() {
             <LayoutGrid className="w-4 h-4 text-primary dark:text-brand-green" />
             <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Titolari in Campo</h4>
           </div>
-          <div className="animate-in fade-in zoom-in-95 duration-500">
+          <div className="animate-in fade-in zoom-in-95 duration-500" ref={pitchRef}>
             <TacticalPitchEditor
               formation={modulo}
               starters={starters}
@@ -294,7 +300,7 @@ export function MatchLineupTab() {
                         type="sub"
                         isEditing={isEditing}
                         onSwap={handleSwap}
-                        isInjured={player ? isPlayerInjured(player, match?.date || "") : false}
+                        isInjured={player ? isPlayerInjured(player, match?.date ? new Date(match.date) : undefined) : false}
                         onClick={() => {}} // Non necessario qui perché c'è la Select
                       />
                       <div className="flex-1 min-w-0">
@@ -334,7 +340,9 @@ export function MatchLineupTab() {
             </div>
             <Card className="bg-card dark:bg-black/40 border-border dark:border-white/5 rounded-3xl overflow-hidden shadow-sm">
               <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                {unavailablePlayers.map(p => (
+                {unavailablePlayers.map(p => {
+                  const injury = activeInjury(p);
+                  return (
                   <div key={p.id} className="flex items-center justify-between p-2 rounded-xl bg-muted/20 dark:bg-white/5 border border-transparent">
                     <div className="flex items-center gap-2 min-w-0">
                       <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
@@ -344,10 +352,13 @@ export function MatchLineupTab() {
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <Activity className="w-3 h-3 text-red-500/70" />
-                      <span className="text-[8px] font-black uppercase text-muted-foreground">Infortunio</span>
+                      <span className="text-[8px] font-black uppercase text-muted-foreground">
+                        {injury ? `fino al ${formatInjuryDate(injury.endDate)}` : 'Infortunio'}
+                      </span>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </CardContent>
               <div className="px-4 py-2 bg-muted/10 dark:bg-black/40 border-t border-border dark:border-white/5">
                 <p className="text-[8px] font-bold text-muted-foreground/40 uppercase text-center italic">
