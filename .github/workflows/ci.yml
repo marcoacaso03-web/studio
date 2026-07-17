@@ -8,12 +8,12 @@ on:
 
 # Type checking is intentionally NOT run here: Vercel already runs `next build`
 # (which type-checks) on every deploy and shows errors in its console/logs.
-# This workflow adds ONLY what Vercel does NOT cover: lint + unit tests,
+# This workflow adds ONLY what Vercel does NOT cover: lint + unit tests + E2E,
 # acting as a pre-merge gate so broken code is caught before it reaches Vercel.
 
 jobs:
   quality:
-    name: Lint & Test
+    name: Lint & Unit Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,3 +33,25 @@ jobs:
 
       - name: Unit tests
         run: npm test
+
+  e2e:
+    name: E2E Smoke (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E smoke tests
+        run: npm run test:e2e
