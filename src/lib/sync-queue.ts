@@ -1,5 +1,6 @@
 import { db, type SyncMutation } from './db';
 import { lineupRepository } from './repositories/lineup-repository';
+import { eventRepository } from './repositories/event-repository';
 /**
  * Queue a mutation when the device is offline. The mutation is persisted in
  * Dexie and flushed to Firestore when connectivity returns.
@@ -28,6 +29,19 @@ export async function flushQueue(userId: string): Promise<number> {
       if (mutation.collection === 'matchLineups') {
         // payload already includes matchId; repository signature: save(data, seasonId, userId)
         await lineupRepository.save(mutation.payload as any, mutation.seasonId!, userId);
+      } else if (mutation.collection === 'matchEvents') {
+        // eventRepository signatures:
+        //   add(event, seasonId, userId)        -> event.matchId required
+        //   update(id, matchId, seasonId, data)
+        //   delete(id, matchId, seasonId)
+        const payload = mutation.payload as any;
+        if (mutation.action === 'add') {
+          await eventRepository.add(payload, mutation.seasonId!, userId);
+        } else if (mutation.action === 'update') {
+          await eventRepository.update(mutation.docId, mutation.matchId!, mutation.seasonId!, payload);
+        } else if (mutation.action === 'delete') {
+          await eventRepository.delete(mutation.docId, mutation.matchId!, mutation.seasonId!);
+        }
       } else {
         // Not yet wired for offline — drop to avoid applying with wrong signature
         console.warn(`[sync] dropping unhandled offline mutation for ${mutation.collection}`);

@@ -219,6 +219,19 @@ export const useMatchDetailStore = create<MatchDetailState>()(
 
         set({ events: updatedEvents, match: updatedMatch });
 
+        if (isOffline()) {
+          await enqueueMutation({
+            collection: 'matchEvents',
+            docId: tempId,
+            action: 'add',
+            payload: { ...eventData, matchId, teamOwnerId: user.id },
+            userId: user.id,
+            seasonId: match.seasonId,
+            matchId,
+          });
+          return;
+        }
+
         eventRepository.add({ ...eventData, matchId }, match.seasonId, user.id).then((savedEvent) => {
             set(state => ({
                 events: state.events.map(e => e.id === tempId ? savedEvent : e)
@@ -283,6 +296,19 @@ export const useMatchDetailStore = create<MatchDetailState>()(
 
         set({ events: updatedEvents, match: updatedMatch });
 
+        if (isOffline()) {
+          await enqueueMutation({
+            collection: 'matchEvents',
+            docId: eventId,
+            action: 'update',
+            payload: eventData,
+            userId: user.id,
+            seasonId: match.seasonId,
+            matchId,
+          });
+          return;
+        }
+
         eventRepository.update(eventId, matchId, match.seasonId, eventData);
         matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
         get().syncAndPersistMinutes();
@@ -298,6 +324,19 @@ export const useMatchDetailStore = create<MatchDetailState>()(
         const updatedMatch = { ...match, result: { home: homeGoals, away: awayGoals } };
 
         set({ events: updatedEvents, match: updatedMatch });
+
+        if (isOffline()) {
+          await enqueueMutation({
+            collection: 'matchEvents',
+            docId: eventId,
+            action: 'delete',
+            payload: {},
+            userId: user.id,
+            seasonId: match.seasonId,
+            matchId,
+          });
+          return;
+        }
 
         eventRepository.delete(eventId, matchId, match.seasonId);
         matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });

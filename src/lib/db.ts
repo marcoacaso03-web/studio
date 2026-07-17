@@ -10,6 +10,8 @@ export type SyncMutation = {
   payload: unknown;
   userId: string;
   seasonId?: string;
+  matchId?: string;
+  playerId?: string;
   createdAt: number;
 };
 
