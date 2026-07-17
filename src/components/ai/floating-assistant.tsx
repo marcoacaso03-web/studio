@@ -12,6 +12,8 @@ import * as AIService from '@/services/ai.service';
 import { useMatchesStore } from "@/store/useMatchesStore";
 import { usePlayersStore } from "@/store/usePlayersStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
+import { useAsyncAction } from "@/lib/hooks/useAsyncAction";
+import { AsyncFeedback } from "@/components/ui/async-feedback";
 
 interface Message {
   role: "user" | "assistant";
@@ -24,13 +26,17 @@ export function FloatingAssistant() {
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: "Ciao coach! Sono il tuo assistente PitchMan. Come posso aiutarti con le statistiche della squadra oggi?" }
   ]);
-  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Dati dal client Firebase SDK (già autenticato)
   const matches = useMatchesStore(state => state.matches);
   const players = usePlayersStore(state => state.players);
   const activeSeason = useSeasonsStore(state => state.activeSeason);
+
+  const { run: runChat, loading: isLoading, error } = useAsyncAction(
+    (input: { message: string; teamContext: unknown }) =>
+      AIService.chatbot(input),
+  );
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -46,46 +52,37 @@ export function FloatingAssistant() {
     const userMessage = input.trim();
     setInput("");
     setMessages(prev => [...prev, { role: "user", content: userMessage }]);
-    setIsLoading(true);
 
-    try {
-      // Prepara il contesto dati dal client (dati che l'utente vede già nella UI)
-      const teamContext = {
-        seasonName: activeSeason?.name,
-        matches: matches.map(m => ({
-          opponent: m.opponent,
-          date: m.date,
-          isHome: m.isHome,
-          status: m.status,
-          result: m.result ? { home: m.result.home, away: m.result.away } : undefined,
-        })),
-        players: players.map(p => ({
-          name: p.name,
-          role: getPrimaryRole(p),
-          stats: p.stats ? {
-            appearances: p.stats.appearances || 0,
-            goals: p.stats.goals || 0,
-            assists: p.stats.assists || 0,
-            avgMinutes: p.stats.avgMinutes || 0,
-            yellowCards: p.stats.yellowCards || 0,
-            redCards: p.stats.redCards || 0,
-          } : undefined,
-        })),
-      };
+    const teamContext = {
+      seasonName: activeSeason?.name,
+      matches: matches.map(m => ({
+        opponent: m.opponent,
+        date: m.date,
+        isHome: m.isHome,
+        status: m.status,
+        result: m.result ? { home: m.result.home, away: m.result.away } : undefined,
+      })),
+      players: players.map(p => ({
+        name: p.name,
+        role: getPrimaryRole(p),
+        stats: p.stats ? {
+          appearances: p.stats.appearances || 0,
+          goals: p.stats.goals || 0,
+          assists: p.stats.assists || 0,
+          avgMinutes: p.stats.avgMinutes || 0,
+          yellowCards: p.stats.yellowCards || 0,
+          redCards: p.stats.redCards || 0,
+        } : undefined,
+      })),
+    };
 
-      // Chiamata alla Server Action: messaggio + dati → Gemini 2.5 Flash
-      const response = await AIService.chatbot({
-        message: userMessage,
-        teamContext,
-      });
-
-      setMessages(prev => [...prev, { role: "assistant", content: response.text }]);
-    } catch (error) {
-      console.error("Chat error:", error);
+    const response = await runChat({ message: userMessage, teamContext });
+    if (!response) {
+      // Uniform error message instead of a raw console.error
       setMessages(prev => [...prev, { role: "assistant", content: "Scusa coach, ho avuto un problema tecnico nell'analizzare i dati. Riprova tra un momento." }]);
-    } finally {
-      setIsLoading(false);
+      return;
     }
+    setMessages(prev => [...prev, { role: "assistant", content: response.text }]);
   };
 
   return (
@@ -164,6 +161,11 @@ export function FloatingAssistant() {
 
             {/* Input Area */}
             <div className="p-5 border-t border-divider dark:border-brand-green/20">
+              <AsyncFeedback
+                loading={false}
+                error={error}
+                className="mb-2"
+              />
               <div className="relative group">
                 <Input 
                   placeholder="Chiedimi della rosa o dei gol..."

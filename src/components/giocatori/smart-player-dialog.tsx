@@ -17,6 +17,8 @@ import { useToast } from '@/hooks/use-toast';
 import { PlayerRole, Role } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useAsyncAction } from '@/lib/hooks/useAsyncAction';
+import { AsyncFeedback } from '@/components/ui/async-feedback';
 
 interface SmartPlayerDialogProps {
   open: boolean;
@@ -26,41 +28,38 @@ interface SmartPlayerDialogProps {
 
 export function SmartPlayerDialog({ open, onOpenChange, onSave }: SmartPlayerDialogProps) {
   const [rawText, setRawText] = useState('');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { toast } = useToast();
+  const { run: runImport, loading: isAnalyzing, error } = useAsyncAction(
+    (text: string) => AIService.importPlayers({ rawText: text }),
+  );
 
   const handleSmartImport = async () => {
     if (!rawText.trim() || rawText.trim().length < 5) return;
 
-    setIsAnalyzing(true);
-    try {
-      const result = await AIService.importPlayers({ rawText: rawText.trim() });
-      
-      if (result.players.length === 0) {
-        throw new Error("Nessun giocatore individuato. Controlla il formato del testo.");
-      }
+    const result = await runImport(rawText.trim());
+    if (!result) return; // error already captured in `error` state
 
-      const players = result.players.map(p => ({
-        name: p.name,
-        roles: p.roles as unknown as PlayerRole[],
-      }));
-      await onSave(players);
-
+    if (result.players.length === 0) {
       toast({
-        title: "Rosa Aggiornata",
-        description: `Importati con successo ${result.players.length} giocatori.`,
+        variant: 'destructive',
+        title: 'Errore Importazione Smart',
+        description: 'Nessun giocatore individuato. Controlla il formato del testo.',
       });
-      onOpenChange(false);
-      setRawText('');
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Errore Importazione Smart",
-        description: error.message,
-      });
-    } finally {
-      setIsAnalyzing(false);
+      return;
     }
+
+    const players = result.players.map(p => ({
+      name: p.name,
+      roles: p.roles as unknown as PlayerRole[],
+    }));
+    await onSave(players);
+
+    toast({
+      title: 'Rosa Aggiornata',
+      description: `Importati con successo ${result.players.length} giocatori.`,
+    });
+    onOpenChange(false);
+    setRawText('');
   };
 
   return (
@@ -110,17 +109,13 @@ export function SmartPlayerDialog({ open, onOpenChange, onSave }: SmartPlayerDia
                 disabled={isAnalyzing}
                 className="min-h-[280px] text-xs font-black uppercase rounded-[24px] bg-muted/30 dark:bg-black border-border dark:border-brand-green/20 focus-visible:ring-1 focus-visible:ring-primary dark:focus-visible:ring-brand-green focus-visible:border-primary dark:focus-visible:border-brand-green transition-all p-5 placeholder:text-muted-foreground/30"
               />
+            <div className="px-8 pb-4 pt-2">
+              <AsyncFeedback
+                loading={isAnalyzing}
+                error={error}
+                loadingText="Analisi AI in corso… organizzazione rosa e categorizzazione ruoli"
+              />
             </div>
-
-            {isAnalyzing && (
-              <div className="flex flex-col items-center justify-center p-10 bg-muted/20 dark:bg-brand-green/5 rounded-[28px] border border-dashed border-primary/20 dark:border-brand-green/30 space-y-4 animate-in fade-in zoom-in duration-500">
-                <Loader2 className="h-12 w-12 text-primary dark:text-brand-green animate-spin" />
-                <div className="text-center space-y-1">
-                  <p className="text-[11px] font-black uppercase text-primary dark:text-brand-green animate-pulse tracking-[0.3em]">Analisi AI in Corso...</p>
-                  <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest">Organizzazione rosa e categorizzazione ruoli</p>
-                </div>
-              </div>
-            )}
           </div>
         </ScrollArea>
 

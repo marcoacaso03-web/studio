@@ -13,12 +13,14 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Loader2, FileText, AlertCircle, RefreshCw, ClipboardCopy, Info, Upload } from 'lucide-react';
+import { FileText, AlertCircle, RefreshCw, ClipboardCopy, Info, Upload } from 'lucide-react';
 import * as AIService from '@/services/ai.service';
 import { useToast } from '@/hooks/use-toast';
 import { useMatchesStore } from '@/store/useMatchesStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useAsyncAction } from '@/lib/hooks/useAsyncAction';
+import { AsyncFeedback } from '@/components/ui/async-feedback';
 
 interface ImportTuttocampoDialogProps {
   open: boolean;
@@ -31,11 +33,17 @@ export function ImportTuttocampoDialog({ open, onOpenChange }: ImportTuttocampoD
   const [teamName, setTeamName] = useState('');
   const [fileDataUrl, setFileDataUrl] = useState<string | undefined>();
   const [fileName, setFileName] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
   
   const { toast } = useToast();
   const { bulkAdd } = useMatchesStore();
   const { defaultDuration, teamName: savedTeamName } = useSettingsStore();
+  const { run: runImport, loading: isLoading, error } = useAsyncAction(
+    (payload: {
+      teamName?: string;
+      rawContent?: string;
+      fileDataUrl?: string;
+    }) => AIService.importMatches(payload),
+  );
 
   useEffect(() => {
     if (open) {
@@ -87,44 +95,32 @@ export function ImportTuttocampoDialog({ open, onOpenChange }: ImportTuttocampoD
       return;
     }
 
-    setIsLoading(true);
-    try {
-      const inputPayload = {
-        teamName: teamName.trim() || undefined,
-        rawContent: activeTab === 'text' ? rawText.trim() : undefined,
-        fileDataUrl: activeTab === 'file' ? fileDataUrl : undefined,
-      };
+    const result = await runImport({
+      teamName: teamName.trim() || undefined,
+      rawContent: activeTab === 'text' ? rawText.trim() : undefined,
+      fileDataUrl: activeTab === 'file' ? fileDataUrl : undefined,
+    });
+    if (!result) return; // error captured in `error` state
 
-      const result = await AIService.importMatches(inputPayload);
+    const matchesToSave = result.matches.map(match => ({
+      opponent: match.opponent,
+      date: match.date,
+      isHome: match.isHome,
+      type: match.type as any,
+      duration: defaultDuration,
+      status: (new Date(match.date) < new Date() ? 'completed' : 'scheduled') as any,
+    }));
 
-      const matchesToSave = result.matches.map(match => ({
-        opponent: match.opponent,
-        date: match.date,
-        isHome: match.isHome,
-        type: match.type as any,
-        duration: defaultDuration,
-        status: (new Date(match.date) < new Date() ? 'completed' : 'scheduled') as any,
-      }));
+    await bulkAdd(matchesToSave);
 
-      await bulkAdd(matchesToSave);
-
-      toast({
-        title: "Importazione completata",
-        description: `Individuata squadra: ${result.teamName}. Aggiunte ${result.matches.length} partite.`,
-      });
-      onOpenChange(false);
-      setRawText('');
-      setFileDataUrl(undefined);
-      setFileName('');
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Importazione fallita",
-        description: error.message,
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    toast({
+      title: "Importazione completata",
+      description: `Individuata squadra: ${result.teamName}. Aggiunte ${result.matches.length} partite.`,
+    });
+    onOpenChange(false);
+    setRawText('');
+    setFileDataUrl(undefined);
+    setFileName('');
   };
 
   const isImportDisabled = isLoading || (activeTab === 'file' && !teamName.trim()) || (activeTab === 'text' && !rawText.trim()) || (activeTab === 'file' && !fileDataUrl);
@@ -226,15 +222,11 @@ export function ImportTuttocampoDialog({ open, onOpenChange }: ImportTuttocampoD
                 </Tabs>
               </div>
 
-              {isLoading && (
-                <div className="flex flex-col items-center justify-center p-8 bg-primary/5 dark:bg-primary/5 rounded-2xl border border-dashed border-primary/20 space-y-3 animate-in fade-in zoom-in">
-                  <Loader2 className="h-10 w-10 text-primary dark:text-foreground animate-spin" />
-                  <div className="text-center">
-                    <p className="text-[10px] font-black uppercase text-primary dark:text-foreground animate-pulse tracking-widest">L'AI sta analizzando i dati...</p>
-                    <p className="text-[9px] text-muted-foreground uppercase font-bold mt-1">Filtraggio partite per {teamName || 'la tua squadra'}</p>
-                  </div>
-                </div>
-              )}
+              <AsyncFeedback
+                loading={isLoading}
+                error={error}
+                loadingText={`L'AI sta analizzando i dati… filtraggio partite per ${teamName || 'la tua squadra'}`}
+              />
             </div>
           </div>
         </ScrollArea>

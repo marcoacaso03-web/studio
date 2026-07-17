@@ -24,6 +24,8 @@ import * as AIService from '@/services/ai.service';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useAsyncAction } from '@/lib/hooks/useAsyncAction';
+import { AsyncFeedback } from '@/components/ui/async-feedback';
 
 interface SmartLineupDialogProps {
   open: boolean;
@@ -32,10 +34,17 @@ interface SmartLineupDialogProps {
 
 export function SmartLineupDialog({ open, onOpenChange }: SmartLineupDialogProps) {
   const [rawList, setRawList] = useState('');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { allPlayers, saveLineup, lineup } = useMatchDetailStore();
   const [modulo, setModulo] = useState('4-4-2');
   const { toast } = useToast();
+  const { run: runSuggest, loading: isAnalyzing, error } = useAsyncAction(
+    (args: { rawList: string; formation: string }) =>
+      AIService.suggestLineup({
+        rawList: args.rawList,
+        availablePlayers: allPlayers.map(p => ({ id: p.id, name: p.name })),
+        formation: args.formation,
+      }),
+  );
 
   useEffect(() => {
     if (open && lineup?.formation) {
@@ -46,34 +55,22 @@ export function SmartLineupDialog({ open, onOpenChange }: SmartLineupDialogProps
   const handleSmartAnalyze = async () => {
     if (!rawList.trim()) return;
 
-    setIsAnalyzing(true);
-    try {
-      const availablePlayers = allPlayers.map(p => ({ id: p.id, name: p.name }));
-      const result = await AIService.suggestLineup({ rawList, availablePlayers, formation: modulo });
+    const result = await runSuggest({ rawList: rawList.trim(), formation: modulo });
+    if (!result) return; // error captured in `error` state
 
-      // Salviamo la formazione suggerita
-      await saveLineup({
-        matchId: "", // Gestito dallo store
-        starters: result.starters,
-        substitutes: result.substitutes,
-        formation: modulo,
-      });
+    await saveLineup({
+      matchId: "", // Gestito dallo store
+      starters: result.starters,
+      substitutes: result.substitutes,
+      formation: modulo,
+    });
 
-      toast({
-        title: "Formazione Elaborata",
-        description: "L'AI ha associato i giocatori. Controlla le posizioni prima di confermare.",
-      });
-      onOpenChange(false);
-      setRawList('');
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Errore Smart Mode",
-        description: error.message,
-      });
-    } finally {
-      setIsAnalyzing(false);
-    }
+    toast({
+      title: "Formazione Elaborata",
+      description: "L'AI ha associato i giocatori. Controlla le posizioni prima di confermare.",
+    });
+    onOpenChange(false);
+    setRawList('');
   };
 
   return (
@@ -137,15 +134,11 @@ export function SmartLineupDialog({ open, onOpenChange }: SmartLineupDialogProps
               />
             </div>
 
-            {isAnalyzing && (
-              <div className="flex flex-col items-center justify-center p-8 bg-primary/5 dark:bg-accent/5 rounded-2xl border border-dashed border-primary/20 dark:border-accent/20 space-y-3 animate-in fade-in zoom-in">
-                <Loader2 className="h-10 w-10 text-primary dark:text-accent animate-spin" />
-                <div className="text-center">
-                  <p className="text-[10px] font-black uppercase text-primary dark:text-accent animate-pulse tracking-widest">L'AI sta leggendo la lista...</p>
-                  <p className="text-[9px] text-muted-foreground uppercase font-bold mt-1">Mappatura nomi in corso</p>
-                </div>
-              </div>
-            )}
+            <AsyncFeedback
+              loading={isAnalyzing}
+              error={error}
+              loadingText="L'AI sta leggendo la lista… mappatura nomi in corso"
+            />
           </div>
         </ScrollArea>
 
