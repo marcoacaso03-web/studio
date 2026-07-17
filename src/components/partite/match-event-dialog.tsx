@@ -137,7 +137,7 @@ export function MatchEventDialog({ open, onOpenChange, eventToEdit }: MatchEvent
       onBench: allPlayers.filter(p => currentBench.has(p.id)),
       allInLineup
     };
-  }, [allPlayers, allEvents, lineup, minute, period, team, isPitchManSide, match]);
+  }, [allPlayers, allEvents, lineup, minute, period, isPitchManSide, match]);
 
   React.useEffect(() => {
     if (minute !== null && minute > maxMinutes) setMinute(maxMinutes);
