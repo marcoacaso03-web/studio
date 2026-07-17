@@ -82,9 +82,26 @@ src/
 - Firestore Security Rules (`firestore.rules`) validano il `role` dai Firebase
   Auth custom claims (`getRole()`).
 - Gating UI: `RoleGuard` + `useUserRole`/`usePermissions`.
-- Manca ancora `middleware.ts` per proteggere le API Routes admin prima del
-  handler (le Rules coprono Firestore, non le route server).
+- `middleware.ts` (preventivo): rifiuta le richieste a `/api/admin/*` prive di
+  header `Authorization`. La verifica vera del token/ruolo resta nelle route
+  handler (es. `set-role` controlla `role === 'developer'`). Le page autenticate
+  non sono protette lato server perché l'auth è client-side (onAuthStateChanged,
+  nessun session cookie): per farlo serve adottare Firebase session cookies.
 
 ## Test
-- Unitari: Jest su repository + `stats-advanced-service` (`*.test.ts`).
-- `npm test` nella CI GitHub Actions. Type-check affidato a Vercel (`next build`).
+- Unitari (Jest): repository, `stats-advanced-service`, hook `useAsyncAction`,
+  componente `AsyncFeedback`, service layer `ai.service` (flussi mockati).
+- E2E (Playwright): `e2e/smoke.spec.ts` verifica lo shell dell'app + floating
+  assistant; gira su CI (`test:e2e`, richiede `npx playwright install`).
+- `npm test` + `npm run test:e2e` nella CI GitHub Actions. Type-check affidato a
+  Vercel (`next build`).
+
+## Note di manutenzione
+- `next-pwa` è deprecato su Next 15: valutare migrazione a `@serwist/next`
+  (verificare la build PWA prima di tagliare). Non ancora fatto.
+- `next lint` è deprecato in Next 16: pianificare migrazione a ESLint CLI
+  (`@next/codemod next-lint-to-eslint-cli`) prima dell'upgrade.
+- `packageManager` è dichiarato in package.json per rendere `npm ci`
+  deterministico tra macchine/CI.
+- Vulnerabilità residue (npm audit): transitive in Genkit/OpenTelemetry/Firebase
+  Admin; richiedono un major upgrade breaking di Genkit → non auto-fixate.
