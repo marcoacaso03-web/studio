@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { ArrowLeft, User, Shield, Sword, Zap, Clock, AlertTriangle, Target, Calendar, TrendingUp, ArrowRightLeft } from "lucide-react";
+import { ArrowLeft, User, Shield, Sword, Zap, Clock, AlertTriangle, Target, Calendar, TrendingUp, ArrowRightLeft, CalendarCheck } from "lucide-react";
 import { GiSoccerBall, GiSoccerKick } from "react-icons/gi";
 import { IoSquare } from "react-icons/io5";
 
@@ -133,6 +133,10 @@ interface PlayerDetailStats {
   goalsScoredOnPitch: number;
   starts: number;
   subs: number;
+  goalsPer90: number;
+  assistsPer90: number;
+  gaPer90: number;
+  trainingAttendanceRate: number | null;
 }
 
 interface TrainingRecord {
@@ -453,6 +457,7 @@ export default function PlayerDetailPage() {
           }
         }
 
+        const ninety = totalMinutes > 0 ? totalMinutes / 90 : 0;
         setPlayerStats(
           pStats
             ? {
@@ -470,9 +475,13 @@ export default function PlayerDetailPage() {
               goalsConcededOnPitch,
               goalsScoredOnPitch,
               starts,
-              subs
+              subs,
+              goalsPer90: ninety > 0 ? Math.round((pStats.stats.goals / ninety) * 100) / 100 : 0,
+              assistsPer90: ninety > 0 ? Math.round((pStats.stats.assists / ninety) * 100) / 100 : 0,
+              gaPer90: ninety > 0 ? Math.round(((pStats.stats.goals + pStats.stats.assists) / ninety) * 100) / 100 : 0,
+              trainingAttendanceRate: null,
             }
-            : { appearances: 0, goals: 0, assists: 0, avgMinutes: 0, yellowCards: 0, redCards: 0, totalMinutes: 0, wins: 0, losses: 0, draws: 0, cleanSheets: 0, goalsConcededOnPitch: 0, goalsScoredOnPitch: 0, starts: 0, subs: 0 }
+            : { appearances: 0, goals: 0, assists: 0, avgMinutes: 0, yellowCards: 0, redCards: 0, totalMinutes: 0, wins: 0, losses: 0, draws: 0, cleanSheets: 0, goalsConcededOnPitch: 0, goalsScoredOnPitch: 0, starts: 0, subs: 0, goalsPer90: 0, assistsPer90: 0, gaPer90: 0, trainingAttendanceRate: null }
         );
 
         // Storico presenze partite
@@ -553,6 +562,25 @@ export default function PlayerDetailPage() {
       { name: "Sconfitte", value: playerStats.losses, color: "#ef4444" },
     ];
   }, [playerStats, chartColors]);
+
+  // Presenze allenamento %: (presente + ritardo) / sessioni valutate (esclusi infortunati)
+  const trainingRate = useMemo(() => {
+    if (!trainingRecords.length) return null;
+    let evaluated = 0, present = 0;
+    for (const r of trainingRecords) {
+      const status = r.status as string | null;
+      if (status === 'infortunato' || status === null) continue;
+      evaluated++;
+      if (status === 'presente' || status === 'ritardo') present++;
+    }
+    return evaluated > 0 ? Math.round((present / evaluated) * 100) : null;
+  }, [trainingRecords]);
+
+  // Inject computed training rate into playerStats without mutating the source
+  const displayStats = useMemo(() => {
+    if (!playerStats) return null;
+    return { ...playerStats, trainingAttendanceRate: trainingRate };
+  }, [playerStats, trainingRate]);
 
   const splitName = (fullName: string) => {
     const parts = fullName.split(" ");
@@ -651,38 +679,55 @@ export default function PlayerDetailPage() {
           <div className="grid grid-cols-3 gap-2">
             {[...Array(9)].map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-xl" />)}
           </div>
-        ) : playerStats ? (
+        ) : displayStats ? (
           <>
             {/* 1^ riga: Presenze totali, da titolare e da subentrato */}
             <div className="grid grid-cols-3 gap-2">
-              <StatCard icon={Calendar} label="Presenze Totali" value={playerStats.appearances} />
-              <StatCard icon={User} label="Da Titolare" value={playerStats.starts} />
-              <StatCard icon={Zap} label="Da Subentrato" value={playerStats.subs} />
+              <StatCard icon={Calendar} label="Presenze Totali" value={displayStats.appearances} />
+              <StatCard icon={User} label="Da Titolare" value={displayStats.starts} />
+              <StatCard icon={Zap} label="Da Subentrato" value={displayStats.subs} />
             </div>
 
             {/* 2^ riga: Gol, Assist, Gol ogni xx minuti */}
             <div className="grid grid-cols-3 gap-2">
-              <StatCard icon={GiSoccerBall} label="Gol" value={playerStats.goals} />
-              <StatCard icon={GiSoccerKick} label="Assist" value={playerStats.assists} />
+              <StatCard icon={GiSoccerBall} label="Gol" value={displayStats.goals} />
+              <StatCard icon={GiSoccerKick} label="Assist" value={displayStats.assists} />
               <StatCard 
                 icon={Clock} 
                 label="Un Gol Ogni..." 
-                value={playerStats.goals > 0 ? Math.round(playerStats.totalMinutes / playerStats.goals) : "---"} 
+                value={displayStats.goals > 0 ? Math.round(displayStats.totalMinutes / displayStats.goals) : "---"} 
                 sub="minuti" 
               />
             </div>
 
             {/* 3^ riga: minuti giocati totali, ammonizioni, espulsioni */}
             <div className="grid grid-cols-3 gap-2">
-              <StatCard icon={Clock} label="Minuti Totali" value={playerStats.totalMinutes} sub="minuti" />
-              <StatCard icon={IoSquare} label="Ammonizioni" value={playerStats.yellowCards} color="text-yellow-400" />
-              <StatCard icon={IoSquare} label="Espulsioni" value={playerStats.redCards} color="text-red-600" />
+              <StatCard icon={Clock} label="Minuti Totali" value={displayStats.totalMinutes} sub="minuti" />
+              <StatCard icon={IoSquare} label="Ammonizioni" value={displayStats.yellowCards} color="text-yellow-400" />
+              <StatCard icon={IoSquare} label="Espulsioni" value={displayStats.redCards} color="text-red-600" />
             </div>
 
-            {/* 4^ riga: gol fatti mentre è in campo, gol subiti mentre è in campo */}
+            {/* 4^ riga: gol fatti/subiti mentre è in campo */}
             <div className="grid grid-cols-2 gap-2">
-              <StatCard icon={GiSoccerBall} label="Gol Fatti" value={playerStats.goalsScoredOnPitch} sub="in campo" color="text-primary dark:text-brand-green" />
-              <StatCard icon={GiSoccerBall} label="Gol Subiti" value={playerStats.goalsConcededOnPitch} sub="in campo" color="text-rose-500" />
+              <StatCard icon={GiSoccerBall} label="Gol Fatti" value={displayStats.goalsScoredOnPitch} sub="in campo" color="text-primary dark:text-brand-green" />
+              <StatCard icon={GiSoccerBall} label="Gol Subiti" value={displayStats.goalsConcededOnPitch} sub="in campo" color="text-rose-500" />
+            </div>
+
+            {/* 5^ riga: efficienza per 90' (NON ridondante con i totali) */}
+            <div className="grid grid-cols-3 gap-2">
+              <StatCard icon={GiSoccerBall} label="Gol / 90'" value={displayStats.goalsPer90} sub="media" color="text-primary dark:text-brand-green" />
+              <StatCard icon={GiSoccerKick} label="Assist / 90'" value={displayStats.assistsPer90} sub="media" />
+              <StatCard icon={Target} label="G+A / 90'" value={displayStats.gaPer90} sub="media" color="text-primary dark:text-brand-green" />
+            </div>
+
+            {/* 6^ riga: presenze allenamento (da trainingRecords già caricati) */}
+            <div className="grid grid-cols-1 gap-2">
+              <StatCard
+                icon={CalendarCheck}
+                label="Presenze Allenamento"
+                value={displayStats.trainingAttendanceRate != null ? `${displayStats.trainingAttendanceRate}%` : "---"}
+                sub="su sessioni valutate"
+              />
             </div>
           </>
         ) : null}

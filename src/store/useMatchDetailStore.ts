@@ -188,9 +188,24 @@ export const useMatchDetailStore = create<MatchDetailState>()(
         const { matchId, match } = get();
         const user = useAuthStore.getState().user;
         if (!matchId || !match || !user) return;
-        
+
         set({ stats: newStats });
-        
+
+        if (isOffline()) {
+          for (const stat of newStats) {
+            await enqueueMutation({
+              collection: 'playerMatchStats',
+              docId: stat.playerId,
+              action: 'upsert',
+              seasonId: match.seasonId,
+              matchId,
+              playerId: stat.playerId,
+              payload: stat,
+            });
+          }
+          return;
+        }
+
         newStats.forEach(stat => {
             statsRepository.upsert(matchId, match.seasonId, stat.playerId, stat, user.id);
         });

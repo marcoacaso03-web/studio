@@ -1,6 +1,9 @@
 import { db, type SyncMutation } from './db';
 import { lineupRepository } from './repositories/lineup-repository';
 import { eventRepository } from './repositories/event-repository';
+import { playerRepository } from './repositories/player-repository';
+import { matchRepository } from './repositories/match-repository';
+import { statsRepository } from './repositories/stats-repository';
 /**
  * Queue a mutation when the device is offline. The mutation is persisted in
  * Dexie and flushed to Firestore when connectivity returns.
@@ -41,6 +44,19 @@ export async function flushQueue(userId: string): Promise<number> {
           await eventRepository.update(mutation.docId, mutation.matchId!, mutation.seasonId!, payload);
         } else if (mutation.action === 'delete') {
           await eventRepository.delete(mutation.docId, mutation.matchId!, mutation.seasonId!);
+        }
+      } else if (mutation.collection === 'players') {
+        // playerRepository.update(id, seasonId, updates)
+        await playerRepository.update(mutation.docId, mutation.seasonId!, mutation.payload as any);
+      } else if (mutation.collection === 'matches') {
+        // matchRepository.update(id, seasonId, updates)
+        await matchRepository.update(mutation.docId, mutation.seasonId!, mutation.payload as any);
+      } else if (mutation.collection === 'playerMatchStats') {
+        // statsRepository.upsert(matchId, seasonId, playerId, stats, userId)
+        if (!mutation.matchId || !mutation.playerId) {
+          console.warn('[sync] dropping playerMatchStats mutation missing matchId/playerId');
+        } else {
+          await statsRepository.upsert(mutation.matchId, mutation.seasonId!, mutation.playerId, mutation.payload as any, userId);
         }
       } else {
         // Not yet wired for offline — drop to avoid applying with wrong signature

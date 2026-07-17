@@ -12,6 +12,7 @@ import { useSeasonsStore } from './useSeasonsStore';
 import { useAuthStore } from './useAuthStore';
 import { mutate } from 'swr';
 import { getErrorMessage } from '@/lib/error-utils';
+import { enqueueMutation, isOffline } from '@/lib/sync-queue';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
 
@@ -99,6 +100,12 @@ export const usePlayersStore = create<PlayerState>()(
           const user = useAuthStore.getState().user;
           const activeSeason = useSeasonsStore.getState().activeSeason;
           if (!activeSeason || !user) return;
+
+          if (isOffline()) {
+            await enqueueMutation({ collection: 'players', docId: id, action: 'update', seasonId: activeSeason.id, payload: updates });
+            set(s => ({ players: s.players.map(p => p.id === id ? { ...p, ...updates } : p) }));
+            return;
+          }
 
           const updatedPlayer = await playerRepository.update(id, activeSeason.id, updates);
           if (updatedPlayer) {

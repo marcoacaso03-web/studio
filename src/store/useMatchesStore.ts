@@ -7,6 +7,7 @@ import type { MatchCreateData } from '@/lib/repositories/match-repository';
 import { useSeasonsStore } from './useSeasonsStore';
 import { useAuthStore } from './useAuthStore';
 import { getErrorMessage } from '@/lib/error-utils';
+import { enqueueMutation, isOffline } from '@/lib/sync-queue';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
 import { MatchSchema } from '@/lib/schemas';
@@ -75,6 +76,12 @@ export const useMatchesStore = create<MatchState>((set, get) => ({
     update: async (id, updates) => {
         const activeSeason = useSeasonsStore.getState().activeSeason;
         if (!activeSeason) return;
+
+        if (isOffline()) {
+          await enqueueMutation({ collection: 'matches', docId: id, action: 'update', seasonId: activeSeason.id, payload: updates });
+          set(s => ({ matches: s.matches.map(m => m.id === id ? { ...m, ...updates } : m) }));
+          return;
+        }
 
         const updatedMatch = await matchRepository.update(id, activeSeason.id, updates);
         if (updatedMatch) {

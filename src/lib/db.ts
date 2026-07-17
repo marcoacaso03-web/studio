@@ -6,9 +6,9 @@ export type SyncMutation = {
   id?: number;
   collection: 'players' | 'matches' | 'matchAttendances' | 'playerMatchStats' | 'matchLineups' | 'matchEvents' | 'seasons';
   docId: string;
-  action: 'add' | 'update' | 'delete';
+  action: 'add' | 'update' | 'delete' | 'upsert';
   payload: unknown;
-  userId: string;
+  userId?: string;
   seasonId?: string;
   matchId?: string;
   playerId?: string;
