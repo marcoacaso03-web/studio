@@ -25,7 +25,7 @@ import type {
 import {
     computeAdvancedStatsBundle,
     AdvancedStatsOptions
-} from '../services/stats-advanced-service';
+} from '../../services/stats-advanced-service';
 import { AdvancedStatsLeaderboardSchema } from '../schemas';
 
 export interface TeamStatsRecord {

@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { getPrimaryRole } from "@/lib/types";
 import * as AIService from '@/services/ai.service';
+import type { ChatInput } from '@/ai/flows/chatbot-flow';
 import { useMatchesStore } from "@/store/useMatchesStore";
 import { usePlayersStore } from "@/store/usePlayersStore";
 import { useSeasonsStore } from "@/store/useSeasonsStore";
@@ -34,8 +35,7 @@ export function FloatingAssistant() {
   const activeSeason = useSeasonsStore(state => state.activeSeason);
 
   const { run: runChat, loading: isLoading, error } = useAsyncAction(
-    (input: { message: string; teamContext: unknown }) =>
-      AIService.chatbot(input),
+    (input: ChatInput) => AIService.chatbot(input),
   );
 
   const scrollToBottom = () => {

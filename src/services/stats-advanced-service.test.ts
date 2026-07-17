@@ -1,5 +1,5 @@
 import { computeAdvancedStatsBundle, normalizeMatch } from './stats-advanced-service';
-import { Match, Player, MatchLineup, MatchEvent } from '../types';
+import { Player, Match, MatchEvent, MatchLineup } from '../lib/types';
 
 describe('Advanced Stats Service', () => {
     const mockPlayers: Player[] = [

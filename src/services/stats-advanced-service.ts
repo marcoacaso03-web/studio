@@ -6,7 +6,7 @@ import {
     AdvancedStatsLeaderboard,
     StarterPlayer,
     getPrimaryRole
-} from '../types';
+} from '../lib/types';
 
 export interface AdvancedStatsOptions {
     minStarterApps: number;
