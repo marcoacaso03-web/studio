@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/components/layout/theme-provider';
 import { AuthGuard } from '@/components/layout/auth-guard';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { PrefetchProvider } from '@/hooks/PrefetchProvider';
+import { OfflineSyncProvider } from '@/components/layout/offline-sync-provider';
 import { PT_Sans } from 'next/font/google';
 
 const ptSans = PT_Sans({ 
@@ -70,6 +71,7 @@ export default function RootLayout({
               </PrefetchProvider>
             </AuthGuard>
             <Toaster />
+            <OfflineSyncProvider />
           </ThemeProvider>
         </FirebaseClientProvider>
         <SpeedInsights />

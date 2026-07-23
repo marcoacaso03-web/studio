@@ -9,6 +9,7 @@ import { aggregationRepository } from '@/lib/repositories/aggregation-repository
 import { lineupRepository } from '@/lib/repositories/lineup-repository';
 import { eventRepository } from '@/lib/repositories/event-repository';
 import { statsRepository } from '@/lib/repositories/stats-repository';
+import { enqueueMutation, isOffline } from '@/lib/sync-queue';
 import { useStatsStore } from './useStatsStore';
 import { useSeasonsStore } from './useSeasonsStore';
 import { useAuthStore } from './useAuthStore';
@@ -187,9 +188,24 @@ export const useMatchDetailStore = create<MatchDetailState>()(
         const { matchId, match } = get();
         const user = useAuthStore.getState().user;
         if (!matchId || !match || !user) return;
-        
+
         set({ stats: newStats });
-        
+
+        if (isOffline()) {
+          for (const stat of newStats) {
+            await enqueueMutation({
+              collection: 'playerMatchStats',
+              docId: stat.playerId,
+              action: 'upsert',
+              seasonId: match.seasonId,
+              matchId,
+              playerId: stat.playerId,
+              payload: stat,
+            });
+          }
+          return;
+        }
+
         newStats.forEach(stat => {
             statsRepository.upsert(matchId, match.seasonId, stat.playerId, stat, user.id);
         });
@@ -217,6 +233,19 @@ export const useMatchDetailStore = create<MatchDetailState>()(
         const updatedMatch = { ...match, result: { home: homeGoals, away: awayGoals } };
 
         set({ events: updatedEvents, match: updatedMatch });
+
+        if (isOffline()) {
+          await enqueueMutation({
+            collection: 'matchEvents',
+            docId: tempId,
+            action: 'add',
+            payload: { ...eventData, matchId, teamOwnerId: user.id },
+            userId: user.id,
+            seasonId: match.seasonId,
+            matchId,
+          });
+          return;
+        }
 
         eventRepository.add({ ...eventData, matchId }, match.seasonId, user.id).then((savedEvent) => {
             set(state => ({
@@ -282,6 +311,19 @@ export const useMatchDetailStore = create<MatchDetailState>()(
 
         set({ events: updatedEvents, match: updatedMatch });
 
+        if (isOffline()) {
+          await enqueueMutation({
+            collection: 'matchEvents',
+            docId: eventId,
+            action: 'update',
+            payload: eventData,
+            userId: user.id,
+            seasonId: match.seasonId,
+            matchId,
+          });
+          return;
+        }
+
         eventRepository.update(eventId, matchId, match.seasonId, eventData);
         matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
         get().syncAndPersistMinutes();
@@ -297,6 +339,19 @@ export const useMatchDetailStore = create<MatchDetailState>()(
         const updatedMatch = { ...match, result: { home: homeGoals, away: awayGoals } };
 
         set({ events: updatedEvents, match: updatedMatch });
+
+        if (isOffline()) {
+          await enqueueMutation({
+            collection: 'matchEvents',
+            docId: eventId,
+            action: 'delete',
+            payload: {},
+            userId: user.id,
+            seasonId: match.seasonId,
+            matchId,
+          });
+          return;
+        }
 
         eventRepository.delete(eventId, matchId, match.seasonId);
         matchRepository.update(matchId, match.seasonId, { result: { home: homeGoals, away: awayGoals } });
@@ -329,7 +384,21 @@ export const useMatchDetailStore = create<MatchDetailState>()(
         const user = useAuthStore.getState().user;
         if (!matchId || !match || !user) return;
 
+        // Optimistic local update (works online and offline)
         set({ lineup: { ...lineupData, matchId } });
+
+        if (isOffline()) {
+          // Queue the mutation; it will be flushed when connectivity returns
+          await enqueueMutation({
+            collection: 'matchLineups',
+            docId: matchId,
+            action: 'update',
+            payload: { ...lineupData, matchId },
+            userId: user.id,
+            seasonId: match.seasonId,
+          });
+          return;
+        }
 
         lineupRepository.save({ ...lineupData, matchId }, match.seasonId, user.id);
         get().syncAndPersistMinutes();
