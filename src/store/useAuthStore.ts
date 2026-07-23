@@ -3,7 +3,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { 
-  getAuth, 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
   signOut, 
@@ -17,6 +16,17 @@ import {
 import { initializeFirebase } from '@/firebase';
 import { useSettingsStore } from './useSettingsStore';
 import { AccountRole } from '@/lib/types';
+
+/**
+ * Returns a Firebase Auth instance, ensuring the Firebase app is initialized
+ * first. Calling the bare getAuth() requires a default app to already exist;
+ * that is not guaranteed here because this store module can load before the
+ * React FirebaseClientProvider mounts. initializeFirebase() is idempotent
+ * (guarded by getApps()), so this is safe to call on every access.
+ */
+function ensureAuth() {
+  return initializeFirebase().auth;
+}
 
 interface User {
   id: string;
@@ -49,7 +59,7 @@ export const useAuthStore = create<AuthState>()(
       login: async (usernameOrEmail, password) => {
         try {
           const email = usernameOrEmail.includes('@') ? usernameOrEmail : `${usernameOrEmail.toLowerCase()}@pitchman.app`;
-          const auth = getAuth();
+          const auth = ensureAuth();
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
           
           if (!userCredential.user.emailVerified && !email.endsWith('@pitchman.app')) {
@@ -70,7 +80,7 @@ export const useAuthStore = create<AuthState>()(
       signUp: async (email, password, username) => {
         try {
           const finalEmail = email.includes('@') ? email : `${email.toLowerCase()}@pitchman.app`;
-          const auth = getAuth();
+          const auth = ensureAuth();
           const userCredential = await createUserWithEmailAndPassword(auth, finalEmail, password);
           if (username) {
             await updateProfile(userCredential.user, { displayName: username });
@@ -96,7 +106,7 @@ export const useAuthStore = create<AuthState>()(
       },
       loginWithGoogle: async () => {
         try {
-          const auth = getAuth();
+          const auth = ensureAuth();
           const provider = new GoogleAuthProvider();
           provider.setCustomParameters({ prompt: 'select_account' });
           
@@ -124,7 +134,7 @@ export const useAuthStore = create<AuthState>()(
       },
       logout: async () => {
         try {
-          const auth = getAuth();
+          const auth = ensureAuth();
           await signOut(auth);
           set({ isAuthenticated: false, user: null });
           // Clear settings to prevent data leaking to the next user
@@ -166,7 +176,7 @@ export const useAuthStore = create<AuthState>()(
 );
 
 if (typeof window !== 'undefined') {
-  const auth = getAuth();
+  const auth = ensureAuth();
   onAuthStateChanged(auth, (user) => {
     useAuthStore.getState().setAuth(user);
   });
