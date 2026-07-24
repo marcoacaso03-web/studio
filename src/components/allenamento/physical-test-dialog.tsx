@@ -10,6 +10,8 @@ import { TestResult, Player, PhysicalTest } from '@/lib/types';
 import { testRepository } from '@/lib/repositories/test-repository';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSeasonsStore } from '@/store/useSeasonsStore';
+import { useTestsStore } from '@/store/useTestsStore';
+import { useMemo } from 'react';
 import { formatValue } from '@/lib/test-utils';
 import { Loader2, Plus, Minus, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -40,6 +42,20 @@ const TYPE_PRESETS: Record<string, { name: string; suggestions: string[]; defaul
 export function PhysicalTestDialog({ open, onOpenChange, onCreated, players }: PhysicalTestDialogProps) {
   const { user } = useAuthStore();
   const { activeSeason } = useSeasonsStore();
+  const { tests } = useTestsStore();
+
+  // Nomi dei test già esistenti (distinti), con la loro unità/tipo più recente.
+  // Servono a riusare lo stesso nome ed evitare typo che spezzano lo storico.
+  const nomiEsistenti = useMemo(() => {
+    const map = new Map<string, { name: string; unit: string; type: string; date: string }>();
+    for (const t of tests) {
+      const cur = map.get(t.name);
+      if (!cur || t.date > cur.date) {
+        map.set(t.name, { name: t.name, unit: t.unit, type: t.type, date: t.date });
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name, 'it'));
+  }, [tests]);
 
   const [step, setStep] = useState<Step>(1);
   const [testType, setTestType] = useState<string>('velocita');
@@ -71,6 +87,14 @@ export function PhysicalTestDialog({ open, onOpenChange, onCreated, players }: P
 
   const handleSuggestionClick = (name: string) => {
     setTestName(name);
+  };
+
+  // Click su un tag di test esistente: riusa nome, unità e tipo così il nuovo
+  // test si aggancia allo stesso grafico/confronto del vecchio.
+  const handleExistingClick = (t: { name: string; unit: string; type: string }) => {
+    setTestName(t.name);
+    setUnit(t.unit);
+    setTestType(t.type);
   };
 
   const handleResultChange = (playerId: string, value: string) => {
@@ -165,6 +189,34 @@ export function PhysicalTestDialog({ open, onOpenChange, onCreated, players }: P
                 disabled={saving}
                 className="h-11 text-xs font-bold uppercase rounded-xl bg-background dark:bg-black border border-border dark:border-brand-green/20"
               />
+              {nomiEsistenti.length > 0 && (
+                <div className="mt-1.5">
+                  <p className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 ml-1 mb-1">
+                    Test esistenti (tocca per riusare)
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {nomiEsistenti.map(t => {
+                      const active = testName === t.name;
+                      return (
+                        <button
+                          key={t.name}
+                          type="button"
+                          disabled={saving}
+                          onClick={() => handleExistingClick(t)}
+                          className={cn(
+                            'px-2.5 py-1 rounded-full text-[9px] font-black uppercase border transition-all',
+                            active
+                              ? 'bg-primary text-white border-primary dark:bg-brand-green/20 dark:text-brand-green dark:border-brand-green'
+                              : 'border-border dark:border-brand-green/20 text-muted-foreground hover:border-primary dark:hover:border-brand-green'
+                          )}
+                        >
+                          {t.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
               {testType !== 'personalizzato' && TYPE_PRESETS[testType] && (
                 <div className="flex flex-wrap gap-1 mt-1">
                   {TYPE_PRESETS[testType].suggestions.map(s => (
